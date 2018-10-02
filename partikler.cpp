@@ -10,6 +10,7 @@
 #include <functional>
 #include <boost/iterator/transform_iterator.hpp>
 
+#include "git.h"
 using namespace CGAL;
 typedef Simple_cartesian<double>          K;
 typedef CGAL::Polyhedron_3<K>             Polyhedron;
@@ -23,21 +24,29 @@ std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
 template <class PolyhedronTraits_3>
 std::ifstream& operator>>( std::ifstream& in, Polyhedron& P);
 
-// TODO Replace unary by non deprecated C++11/14 code
-struct Compute_area:
-  public std::unary_function<const Polyhedron::Facet, double>
+struct Compute_area
 {
-  double operator()(const Polyhedron::Facet& f) const{
+    double operator()(const Polyhedron::Facet& f) const {
     return K::Compute_area_3()(
       f.halfedge()->vertex()->point(),
       f.halfedge()->next()->vertex()->point(),
       f.halfedge()->opposite()->vertex()->point() );
-  }
+    }
 };
+
 
 int main(int argc, char* argv[])
 {
- // Generated points are in that vector
+    if(GIT_RETRIEVED_STATE) {
+        std::cout << "INFO: " << GIT_HEAD_SHA1 << std::endl;
+        if(GIT_IS_DIRTY) std::cerr << "WARN: there were uncommitted changes." << std::endl;
+    }
+    else {
+        std::cerr << "WARN: failed to get the current git state. Is this a git repo?" << std::endl;
+        return 0;
+    }
+
+    // Generated points are in that vector
     std::vector<Point> points;
     // Create input polyhedron
     Polyhedron polyhedron;
@@ -71,8 +80,7 @@ int main(int argc, char* argv[])
     std::cout << " Number of particles " << n_points << std::endl;
 
     // Create the generator, input is the Polyhedron polyhedron
-    Random_points_in_triangle_mesh_3<Polyhedron>
-        g(polyhedron);
+    Random_points_in_triangle_mesh_3<Polyhedron> g(polyhedron);
 
     // Get 100 random points in cdt
     CGAL::cpp11::copy_n(g, n_points, std::back_inserter(points));
