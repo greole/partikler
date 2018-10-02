@@ -6,6 +6,8 @@ project( Generator_Examples )
 
 cmake_minimum_required(VERSION 2.8.10)
 
+include(git_watcher.cmake)
+
 find_package(CGAL QUIET)
 
 if ( CGAL_FOUND )
@@ -16,21 +18,9 @@ if ( CGAL_FOUND )
 
   include_directories (BEFORE "../../include")
 
-  # Use Eigen
-  find_package(Eigen3 3.1.0 QUIET) #(3.1.0 or greater)
-  if (EIGEN3_FOUND)
-    include( ${EIGEN3_USE_FILE} )
-  endif()
+  add_executable(partikler  git.h partikler.cpp)
 
-  # create a target per cppfile
-  file(GLOB cppfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-  foreach(cppfile ${cppfiles})
-    if(NOT (${cppfile} STREQUAL "random_points_in_tetrahedral_mesh_3.cpp")
-        OR NOT (${cppfile} STREQUAL "random_points_on_tetrahedral_mesh_3.cpp")
-        OR EIGEN3_FOUND)
-      create_single_source_cgal_program( "${cppfile}" )
-    endif()
-  endforeach()
+  add_dependencies(partikler AlwaysCheckGit)
 
 else()
 
