@@ -7,5 +7,5 @@
 
 # Usage
 
-    ./partikler input.off output.off dx
+    ./partikler input.stl output.off dx
 

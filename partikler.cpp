@@ -1,8 +1,10 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/point_generators_3.h>
-#include <CGAL/IO/Polyhedron_iostream.h>
+// #include <CGAL/IO/Polyhedron_iostream.h>
+#include <CGAL/IO/Polyhedron_builder_from_STL.h>
 #include <CGAL/IO/write_off_points.h>
+#include <CGAL/IO/STL_reader.h>
 
 #include <iostream>
 #include <fstream>
@@ -17,6 +19,7 @@ typedef CGAL::Polyhedron_3<K>             Polyhedron;
 typedef K::Point_3                        Point;
 typedef K::FT                             FT;
 typedef Polyhedron::Facet_iterator        Facet_iterator;
+typedef Polyhedron::HalfedgeDS            HalfedgeDS;
 
 template <class PolyhedronTraits_3>
 std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
@@ -48,8 +51,6 @@ int main(int argc, char* argv[])
 
     // Generated points are in that vector
     std::vector<Point> points;
-    // Create input polyhedron
-    Polyhedron polyhedron;
 
     float dx = atof(argv[3]);
 
@@ -59,15 +60,22 @@ int main(int argc, char* argv[])
     float dx2 = dx*dx;
 
     // TODO Flush cout buffer
-    std::cout << "Reading input file: " <<  argv[1];
+    std::cout << "Reading input file: " <<  argv[1] << std::flush;
+
     std::ifstream istream(argv[1]);
+    // std::vector<cpp11::array<double,3> > points,
+    // std::vector<cpp11::array<int,3> > facets,
+    // read_STL(istream, points, facets, false);
+    Polyhedron_builder_from_STL<HalfedgeDS> builder(istream);
     std::cout << " [done]" << std::endl;
 
-    std::cout << "Constructing polyhedron";
-    istream >> polyhedron;
+    std::cout << "Constructing polyhedron" << std::flush;
+    // Create input polyhedron
+    Polyhedron polyhedron;
+    polyhedron.delegate(builder);
     std::cout << " [done]" << std::endl;
 
-    std::cout << "Computing total surface area";
+    std::cout << "Computing total surface area" << std::flush;
     Compute_area ca;
     float total_surface_area =
         std::accumulate(
