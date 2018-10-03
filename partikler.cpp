@@ -11,15 +11,20 @@
 #include <numeric>
 #include <functional>
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/range.hpp>
 
 #include "git.h"
+
 using namespace CGAL;
 typedef Simple_cartesian<double>          K;
 typedef CGAL::Polyhedron_3<K>             Polyhedron;
 typedef K::Point_3                        Point;
+typedef Polyhedron::Traits::Vector_3      Vector;
 typedef K::FT                             FT;
 typedef Polyhedron::Facet_iterator        Facet_iterator;
 typedef Polyhedron::HalfedgeDS            HalfedgeDS;
+typedef Polyhedron::Facet                 Facet;
+typedef Polyhedron::Halfedge_const_handle HalfedgeConstHandle;
 
 template <class PolyhedronTraits_3>
 std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
@@ -29,11 +34,27 @@ std::ifstream& operator>>( std::ifstream& in, Polyhedron& P);
 
 struct Compute_area
 {
-    double operator()(const Polyhedron::Facet& f) const {
+    double operator()(const Facet& f) const {
     return K::Compute_area_3()(
       f.halfedge()->vertex()->point(),
       f.halfedge()->next()->vertex()->point(),
       f.halfedge()->opposite()->vertex()->point() );
+    }
+};
+
+struct ComputeFacetNormal
+{
+    // Compute normal of the given facet.
+    // Facet can be triangle, quadrilateral or a polygon as long as its planar.
+    // Use first three vertices to compute the normal.
+    inline Vector operator() (const Facet& f) const
+    {
+        HalfedgeConstHandle h  = f.halfedge();
+        Point              p1 = h->vertex()->point();
+        Point              p2 = h->next()->vertex()->point();
+        Point              p3 = h->next()->next()->vertex()->point();
+        Vector             n  = CGAL::cross_product(p2-p1, p3-p1);
+        return n / std::sqrt(n*n);
     }
 };
 
@@ -84,21 +105,41 @@ int main(int argc, char* argv[])
                   0.);
     std::cout << " [done] " << total_surface_area << std::endl;
 
+    std::cout << "Computing face normals" << std::flush;
+    ComputeFacetNormal cn;
+    std::vector<Vector> normals;
+    std::transform(
+            polyhedron.facets_begin(),
+            polyhedron.facets_end(),
+            std::back_inserter(normals),
+            cn);
+    std::cout << " [done] " << std::endl;
+
     int n_points {total_surface_area/dx2};
-    std::cout << " Number of particles " << n_points << std::endl;
+    std::cout << "Generating initial set of "
+        << n_points
+        << " Particles"
+        << std::flush;
 
     // Create the generator, input is the Polyhedron polyhedron
     Random_points_in_triangle_mesh_3<Polyhedron> g(polyhedron);
 
+
     // Get 100 random points in cdt
+    // this calls the ++ operator of the Generic_random_point_generator class
+    // which creates the random point
     CGAL::cpp11::copy_n(g, n_points, std::back_inserter(points));
 
     // Check that we have really created 100 points.
     assert( points.size() == n_points);
+    std::cout << " [done] " << std::endl;
 
     // print the first point that was generated
+    std::cout << "Writing output" << std::flush;
     std::ofstream ostream(argv[2]);
-    write_off_points( ostream, points);
+    write_off_points(ostream, points);
+    std::cout << " [done] " << total_surface_area << std::endl;
+
     return 0;
 }
 
