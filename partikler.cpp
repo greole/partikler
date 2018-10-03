@@ -104,49 +104,47 @@ int main(int argc, char* argv[]) {
     polyhedron.delegate(builder);
     std::cout << " [done]" << std::endl;
 
-    std::cout << "Computing total surface area" << std::flush;
     Compute_area ca;
-    float total_surface_area =
-        std::accumulate(
-                  boost::make_transform_iterator(polyhedron.facets_begin(), ca),
-                  boost::make_transform_iterator(polyhedron.facets_end(), ca),
-                  0.);
-    std::cout << " [done] " << total_surface_area << std::endl;
-
-    std::cout << "Computing face normals" << std::flush;
     ComputeFacetNormal cn;
-    std::vector<Vector> normals;
-    std::transform(
-            polyhedron.facets_begin(),
-            polyhedron.facets_end(),
-            std::back_inserter(normals),
-            cn);
-    std::cout << " [done] " << std::endl;
+    // std::vector<double> facet_areas;
+    // std::vector<Vector> facet_normals;
+    // std::cout << "Computing facet areas" << std::flush;
+    // std::transform(
+    //         polyhedron.facets_begin(),
+    //         polyhedron.facets_end(),
+    //         std::back_inserter(facet_areas),
+    //         ca);
+    // std::cout << " [done] " << std::endl;
+    //
+    // std::cout << "Computing facet normals" << std::flush;
+    // std::transform(
+    //         polyhedron.facets_begin(),
+    //         polyhedron.facets_end(),
+    //         std::back_inserter(facet_normals),
+    //         cn);
+    // std::cout << " [done] " << std::endl;
 
-    int n_points {total_surface_area/dx2};
-    std::cout << "Generating initial set of "
-        << n_points
-        << " Particles"
-        << std::flush;
+     for ( Facet_iterator facet_ptr = polyhedron.facets_begin();
+             facet_ptr != polyhedron.facets_end();
+             ++facet_ptr) {
 
-    // Create the generator, input is the Polyhedron polyhedron
-    Random_points_in_triangle_mesh_3<Polyhedron> g(polyhedron);
+        float facet_area = ca(*facet_ptr);
+        Vector facet_normal =  cn(*facet_ptr);
+        int n_points {facet_area/dx2};
 
+        // Create the generator, input is the Polyhedron polyhedron
+        Random_points_in_triangle_3<Point> g(*facet_ptr);
 
-    // Get 100 random points in cdt
-    // this calls the ++ operator of the Generic_random_point_generator class
-    // which creates the random point
-    CGAL::cpp11::copy_n(g, n_points, std::back_inserter(points));
+        CGAL::cpp11::copy_n(g, n_points, std::back_inserter(points));
 
-    // Check that we have really created 100 points.
-    assert( points.size() == n_points);
-    std::cout << " [done] " << std::endl;
+        // Check that we have really created 100 points.
+        assert( points.size() == n_points);
+    }
 
     // print the first point that was generated
     std::cout << "Writing output" << std::flush;
     std::ofstream ostream(argv[2]);
     write_off_points(ostream, points);
-    std::cout << " [done] " << total_surface_area << std::endl;
 
     return 0;
 }
