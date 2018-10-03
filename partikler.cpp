@@ -47,8 +47,7 @@ struct ComputeFacetNormal
     // Compute normal of the given facet.
     // Facet can be triangle, quadrilateral or a polygon as long as its planar.
     // Use first three vertices to compute the normal.
-    inline Vector operator() (const Facet& f) const
-    {
+    inline Vector operator() (const Facet& f) const {
         HalfedgeConstHandle h  = f.halfedge();
         Point              p1 = h->vertex()->point();
         Point              p2 = h->next()->vertex()->point();
