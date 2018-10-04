@@ -57,6 +57,22 @@ struct ComputeFacetNormal
     }
 };
 
+struct movePoint
+{
+    Vector n;
+    float x;
+
+    movePoint (Vector normal, float dx) {
+        n = normal;
+        x = dx;
+    }
+
+    inline Point operator() (const Point& p) const {
+        // TODO make it elegant
+        return Point(p.x() + x*n.x(), p.y() + x*n.y(), p.z() + x*n.z());
+    }
+};
+
 
 int main(int argc, char* argv[]) {
     if(GIT_RETRIEVED_STATE) {
@@ -88,12 +104,10 @@ int main(int argc, char* argv[]) {
     // of n_points
     float dx2 = dx*dx;
 
-    // TODO Flush cout buffer
     std::cout << "Reading input file: " <<  argv[1] << std::flush;
 
     std::ifstream istream(argv[1]);
-    // std::vector<cpp11::array<double,3> > points,
-    // std::vector<cpp11::array<int,3> > facets,
+
     // read_STL(istream, points, facets, false);
     Polyhedron_builder_from_STL<HalfedgeDS> builder(istream);
     std::cout << " [done]" << std::endl;
@@ -106,37 +120,33 @@ int main(int argc, char* argv[]) {
 
     Compute_area ca;
     ComputeFacetNormal cn;
-    // std::vector<double> facet_areas;
-    // std::vector<Vector> facet_normals;
-    // std::cout << "Computing facet areas" << std::flush;
-    // std::transform(
-    //         polyhedron.facets_begin(),
-    //         polyhedron.facets_end(),
-    //         std::back_inserter(facet_areas),
-    //         ca);
-    // std::cout << " [done] " << std::endl;
-    //
-    // std::cout << "Computing facet normals" << std::flush;
-    // std::transform(
-    //         polyhedron.facets_begin(),
-    //         polyhedron.facets_end(),
-    //         std::back_inserter(facet_normals),
-    //         cn);
-    // std::cout << " [done] " << std::endl;
 
      for ( Facet_iterator facet_ptr = polyhedron.facets_begin();
              facet_ptr != polyhedron.facets_end();
              ++facet_ptr) {
 
-        float facet_area = ca(*facet_ptr);
-        Vector facet_normal =  cn(*facet_ptr);
+        const Facet facet = Facet(*facet_ptr);
+        float facet_area = ca(facet);
+        Vector facet_normal =  cn(facet);
         int n_points {facet_area/dx2};
 
         // Create the generator, input is the Polyhedron polyhedron
-        Random_points_in_triangle_3<Point> g(*facet_ptr);
+        // TODO: get the facet constructor to work
+        // Random_points_in_triangle_3<Point> g(facet);
 
-        CGAL::cpp11::copy_n(g, n_points, std::back_inserter(points));
+        for (int i=0; i <3; i++) {
+            std::vector<Point> tmp_points;
+            Random_points_in_triangle_3<Point> g(
+                    facet.halfedge()->vertex()->point(),
+                    facet.halfedge()->next()->vertex()->point(),
+                    facet.halfedge()->opposite()->vertex()->point()
+                    );
+            CGAL::cpp11::copy_n(g, n_points, std::back_inserter(tmp_points));
+            movePoint mp(facet_normal, dx*i);
+            std::transform(tmp_points.begin(), tmp_points.end(), tmp_points.begin(), mp);
 
+            for(auto const& point: tmp_points) {points.push_back(Point(point));}
+        }
         // Check that we have really created 100 points.
         assert( points.size() == n_points);
     }
