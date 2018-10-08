@@ -5,6 +5,10 @@
 #include <CGAL/IO/Polyhedron_builder_from_STL.h>
 #include <CGAL/IO/write_off_points.h>
 #include <CGAL/IO/STL_reader.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+// #include <CGAL/AABB_halfedge_graph_segment_primitive.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
 
 #include <iostream>
 #include <fstream>
@@ -24,6 +28,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <string>
+#include <pthread.h>
 
 using namespace CGAL;
 typedef Simple_cartesian<double>          K;
@@ -34,7 +39,13 @@ typedef K::FT                             FT;
 typedef Polyhedron::Facet_iterator        Facet_iterator;
 typedef Polyhedron::HalfedgeDS            HalfedgeDS;
 typedef Polyhedron::Facet                 Facet;
+typedef Polyhedron::Vertex                Vertex;
 typedef Polyhedron::Halfedge_const_handle HalfedgeConstHandle;
+// typedef CGAL::AABB_halfedge_graph_segment_primitive<Polyhedron> Primitive;
+typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron> Primitive;
+typedef CGAL::AABB_traits<K, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> Tree;
+typedef Tree::Point_and_primitive_id Point_and_primitive_id;
 
 template <class PolyhedronTraits_3>
 std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
@@ -153,23 +164,33 @@ int main(int argc, char* argv[]) {
         // Create the generator, input is the Polyhedron polyhedron
         // TODO: get the facet constructor to work
         // Random_points_in_triangle_3<Point> g(facet);
+        std::vector<Point> tmp_points;
+        Random_points_in_triangle_3<Point> g(
+                facet.halfedge()->vertex()->point(),
+                facet.halfedge()->next()->vertex()->point(),
+                facet.halfedge()->opposite()->vertex()->point()
+                );
+        CGAL::cpp11::copy_n(g, n_points, std::back_inserter(tmp_points));
+        // movePoint mp(facet_normal, dx*i);
+        // std::transform(tmp_points.begin(), tmp_points.end(), tmp_points.begin(), mp);
 
-        for (int i=0; i <3; i++) {
-            std::vector<Point> tmp_points;
-            Random_points_in_triangle_3<Point> g(
-                    facet.halfedge()->vertex()->point(),
-                    facet.halfedge()->next()->vertex()->point(),
-                    facet.halfedge()->opposite()->vertex()->point()
-                    );
-            CGAL::cpp11::copy_n(g, n_points, std::back_inserter(tmp_points));
-            movePoint mp(facet_normal, dx*i);
-            std::transform(tmp_points.begin(), tmp_points.end(), tmp_points.begin(), mp);
+        for(auto const& point: tmp_points) {points.push_back(Point(point));}
+        Tree tree(
+            CGAL::faces(polyhedron).first,
+            CGAL::faces(polyhedron).second,
+            polyhedron);
+        // TODO check what it does?
+        // tree.accelerate_distance_queries()
 
-            for(auto const& point: tmp_points) {points.push_back(Point(point));}
+        // closest points
+        std::vector<Point> closest_points;
+        for(auto const& point: points) {
+            Point_and_primitive_id pp = tree.closest_point_and_primitive(point);
+            Polyhedron::Face_handle f = pp.second; // closest primitive id
+
+            points.push_back(
+                    tree.closest_point(point));
         }
-        // Check that we have really created 100 points.
-        //assert( points.size() == n_points);
-        //std::cout<<"points.size():" << points.size()<<", n_points: "<<n_points<<std::endl;
     }
 
     // print the first point that was generated
@@ -180,8 +201,6 @@ int main(int argc, char* argv[]) {
     for (int i =0; i<10; i++){
         writeData_SPH("daten", i, points);
     }
-        
-
     return 0;
 }
 
@@ -194,11 +213,11 @@ void writeData_SPH(std::string foldername, int step, std::vector<Point> data){
     /** main result folder */
     //std::cout<<"foldername: "<< foldername<<std::endl;
     createFolder(foldername);
-    
+
     /** step folders: #0, #1, #2, ... */
     std::string stepname = foldername + "/step#" + convertInt(step);
     createFolder(stepname);
-    
+
     /** times.txt: Time in ascii format*/
     std::ofstream ftimes;
     std::string nametimes = stepname + "/times.txt";
@@ -211,9 +230,9 @@ void writeData_SPH(std::string foldername, int step, std::vector<Point> data){
     std::string dotName = foldername + ".sph";
     fdotfile.open(dotName.c_str(), std::fstream::out);
     fdotfile.close();
-   
+
     std::cout<<"data.size(): "<<data.size()<<std::endl;
-    
+
     /** fill buffer + write */
     std::vector<float>buffer(data.size());
     for (size_t i =0; i<data.size(); i++){
