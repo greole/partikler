@@ -85,7 +85,7 @@ struct movePoint
 
 void writeData_SPH(std::string foldername, int step, std::vector<Point> data);
 void createFolder(std::string dirname);
-void swrite(const std::vector<float>& data, std::string foldername, std::string dataname);
+void swrite(std::vector<float>& data, std::string foldername, std::string dataname);
 
 std::string convertInt(int number) {
 	std::stringstream ss;	//create a stringstream
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
         // TODO: get the facet constructor to work
         // Random_points_in_triangle_3<Point> g(facet);
 
-        for (int i=0; i <1; i++) {
+        for (int i=0; i <3; i++) {
             std::vector<Point> tmp_points;
             Random_points_in_triangle_3<Point> g(
                     facet.halfedge()->vertex()->point(),
@@ -246,7 +246,7 @@ void createFolder(std::string dirname) {
 #endif
 }
 
-void swrite(const std::vector<float>& data, std::string foldername, std::string dataname) {
+void swrite(std::vector<float>& data, std::string foldername, std::string dataname) {
     long long buf_size = data.size();
 	std::string filename = foldername + "/" + dataname + ".float32";
     std::cout<<"writing to filename: "<<filename<<std::endl;
