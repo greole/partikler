@@ -99,9 +99,9 @@ void createFolder(std::string dirname);
 void swrite(std::vector<float>& data, std::string foldername, std::string dataname);
 
 std::string convertInt(int number) {
-	std::stringstream ss;	//create a stringstream
-	ss << number;	//add number to the stream
-	return ss.str();	//return a string with the contents of the stream
+    std::stringstream ss;    //create a stringstream
+    ss << number;    //add number to the stream
+    return ss.str();    //return a string with the contents of the stream
 }
 
 
@@ -254,20 +254,20 @@ void writeData_SPH(std::string foldername, int step, std::vector<Point> data){
 void createFolder(std::string dirname) {
     std::string str_processor= dirname;
 #ifdef  _WIN32
-	int stat = _mkdir((char*)str_processor.c_str());
+    int stat = _mkdir((char*)str_processor.c_str());
 #else  /* Annahme: Unix */
-	int stat = mkdir((char*) str_processor.c_str(), 0777);
-	if (stat == 0) {
-		//cout<<"\n\ncreated directory "<<str_processor <<endl;
-	}else{
-		//cout<<"\n\nnot created directory "<<str_processor <<endl;
-	}
+    int stat = mkdir((char*) str_processor.c_str(), 0777);
+    if (stat == 0) {
+        //cout<<"\n\ncreated directory "<<str_processor <<endl;
+    }else{
+        //cout<<"\n\nnot created directory "<<str_processor <<endl;
+    }
 #endif
 }
 
 void swrite(std::vector<float>& data, std::string foldername, std::string dataname) {
     long long buf_size = data.size();
-	std::string filename = foldername + "/" + dataname + ".float32";
+    std::string filename = foldername + "/" + dataname + ".float32";
     std::cout<<"writing to filename: "<<filename<<std::endl;
     std::ofstream fh;
     fh.open(filename.c_str());
