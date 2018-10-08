@@ -13,6 +13,10 @@ find_package(CGAL QUIET)
 if ( CGAL_FOUND )
 
   include( ${CGAL_USE_FILE} )
+  find_package(TBB QUIET)
+
+  include(${TBB_USE_FILE})
+  list(APPEND CGAL_3RD_PARTY_LIBRARIES ${TBB_LIBRARIES})
 
   include( CGAL_CreateSingleSourceCGALProgram )
 
