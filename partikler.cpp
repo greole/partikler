@@ -19,6 +19,7 @@
 
 #include "git.h"
 #include "io.h"
+#include "particle_helper.h"
 
 /* file IO */
 #include <sys/stat.h>
@@ -47,47 +48,6 @@ std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
 template <class PolyhedronTraits_3>
 std::ifstream& operator>>( std::ifstream& in, Polyhedron& P);
 
-struct Compute_area
-{
-    double operator()(const Facet& f) const {
-    return K::Compute_area_3()(
-      f.halfedge()->vertex()->point(),
-      f.halfedge()->next()->vertex()->point(),
-      f.halfedge()->opposite()->vertex()->point() );
-    }
-};
-
-struct ComputeFacetNormal
-{
-    // Compute normal of the given facet.
-    // Facet can be triangle, quadrilateral or a polygon as long as its planar.
-    // Use first three vertices to compute the normal.
-    inline Vector operator() (const Facet& f) const {
-        HalfedgeConstHandle h  = f.halfedge();
-        Point              p1 = h->vertex()->point();
-        Point              p2 = h->next()->vertex()->point();
-        Point              p3 = h->next()->next()->vertex()->point();
-        Vector             n  = CGAL::cross_product(p2-p1, p3-p1);
-        return n / std::sqrt(n*n);
-    }
-};
-
-struct movePoint
-{
-    Vector n;
-    float x;
-
-    movePoint (Vector normal, float dx) {
-        n = normal;
-        x = dx;
-    }
-
-    inline Point operator() (const Point& p) const {
-        // TODO make it elegant
-        return Point(p.x() + x*n.x(), p.y() + x*n.y(), p.z() + x*n.z());
-    }
-};
-
 int main(int argc, char* argv[]) {
     if(GIT_RETRIEVED_STATE) {
         std::cout
@@ -110,6 +70,7 @@ int main(int argc, char* argv[]) {
 
     // Generated points are in that vector
     std::vector<Point> points;
+    std::vector<Polyhedron::Face_handle> initial_facet;
 
     float dx = atof(argv[3]);
 
@@ -139,6 +100,7 @@ int main(int argc, char* argv[]) {
              facet_ptr != polyhedron.facets_end();
              ++facet_ptr) {
 
+        initial_facet.push_back(facet_ptr);
         const Facet facet = Facet(*facet_ptr);
         float facet_area = ca(facet);
         Vector facet_normal =  cn(facet);
@@ -148,43 +110,45 @@ int main(int argc, char* argv[]) {
         // TODO: get the facet constructor to work
         // Random_points_in_triangle_3<Point> g(facet);
         std::vector<Point> tmp_points;
-        Random_points_in_triangle_3<Point> g(
-                facet.halfedge()->vertex()->point(),
-                facet.halfedge()->next()->vertex()->point(),
-                facet.halfedge()->opposite()->vertex()->point()
-                );
+        Random_points_in_triangle_3<Point> g(facetToTriangle(facet_ptr));
 
-        CGAL::cpp11::copy_n(g, n_points, std::back_inserter(tmp_points));
-        // movePoint mp(facet_normal, dx*i);
-        // std::transform(tmp_points.begin(), tmp_points.end(), tmp_points.begin(), mp);
+        std::copy_n(g, n_points, std::back_inserter(tmp_points));
 
         for(auto const& point: tmp_points) {points.push_back(Point(point));}
-        Tree tree(
-            CGAL::faces(polyhedron).first,
-            CGAL::faces(polyhedron).second,
-            polyhedron);
-
-        // TODO check what it does?
-        // tree.accelerate_distance_queries()
-
-        // closest points
-        std::vector<Point> closest_points;
-        for(auto const& point: points) {
-            Point_and_primitive_id pp = tree.closest_point_and_primitive(point);
-            Polyhedron::Face_handle f = pp.second; // closest primitive id
-
-            points.push_back(
-                    tree.closest_point(point));
-        }
     }
 
     // print the first point that was generated
     std::cout << "Writing output" << std::endl;
-    std::ofstream ostream(argv[2]);
-    write_off_points(ostream, points);
 
-    /** write .sph Format */
+    Tree tree(
+        CGAL::faces(polyhedron).first,
+        CGAL::faces(polyhedron).second,
+        polyhedron);
+
+    // TODO check what it does?
+    tree.accelerate_distance_queries();
+
     for (int i =0; i<10; i++){
+
+        // closest points
+
+        std::vector<Point> transformed_points {};
+
+        std::cout << "Timestep " << i << std::endl;
+        for(auto const& point: points) {
+            Point_and_primitive_id pp = tree.closest_point_and_primitive(point);
+            Polyhedron::Face_handle f = pp.second; // closest primitive id
+            ComputeFacetVector cm;
+            Vector normal = cm(*f);
+            movePoint mp(normal, dx);
+
+            transformed_points.push_back(mp(point));
+            std::ofstream ostream(argv[2] + intToStr(i) + ".off");
+            write_off_points(ostream, transformed_points);
+        }
+
+        points = transformed_points;
+        /** write .sph Format */
         writeData_SPH("daten", i, points);
     }
     return 0;
