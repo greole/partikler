@@ -17,6 +17,12 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range.hpp>
 
+// #include <future>
+// #include <execution>
+#include <parallel/algorithm>
+#include <parallel/settings.h>
+#include <omp.h>
+
 #include "git.h"
 #include "io.h"
 #include "particle_helper.h"
@@ -67,20 +73,11 @@ int main(int argc, char* argv[]) {
             << std::endl;
         return 0;
     }
-
-    // Generated points are in that vector
-    std::vector<Point> points;
-    std::vector<Polyhedron::Face_handle> initial_facet;
-
-    float dx = atof(argv[3]);
-
-    // Assume that a particle covers
-    // a square area. Needed for calculation
-    // of n_points
-    float dx2 = dx*dx;
+    __gnu_parallel::_Settings s;
+    s.algorithm_strategy = __gnu_parallel::force_sequential;
+    __gnu_parallel::_Settings::set(s);
 
     std::cout << "Reading input file: " <<  argv[1] << std::flush;
-
     std::ifstream istream(argv[1]);
 
     // read_STL(istream, points, facets, false);
@@ -93,63 +90,119 @@ int main(int argc, char* argv[]) {
     polyhedron.delegate(builder);
     std::cout << " [done]" << std::endl;
 
-    Compute_area ca;
-    ComputeFacetNormal cn;
+    // Part 1:
+    // Distribute points randomly over cell facets/triangles
+    // Returns a vector of initial point packets per facet
+    const float dx = atof(argv[3]);
 
-     for ( Facet_iterator facet_ptr = polyhedron.facets_begin();
-             facet_ptr != polyhedron.facets_end();
-             ++facet_ptr) {
+    // Explicitly set number of threads.
+    // const int threads_wanted = 4;
+    // omp_set_dynamic(false);
+    // omp_set_num_threads(threads_wanted);
 
-        initial_facet.push_back(facet_ptr);
-        const Facet facet = Facet(*facet_ptr);
-        float facet_area = ca(facet);
-        Vector facet_normal =  cn(facet);
-        int n_points {facet_area/dx2};
 
-        // Create the generator, input is the Polyhedron polyhedron
-        // TODO: get the facet constructor to work
-        // Random_points_in_triangle_3<Point> g(facet);
-        std::vector<Point> tmp_points;
-        Random_points_in_triangle_3<Point> g(facetToTriangle(facet_ptr));
+    // s.algorithm_strategy = __gnu_parallel::force_parallel;
+    // __gnu_parallel::_Settings::set(s);
 
-        std::copy_n(g, n_points, std::back_inserter(tmp_points));
+    const size_t number_of_facets = std::distance(
+            polyhedron.facets_begin(),
+            polyhedron.facets_end());
 
-        for(auto const& point: tmp_points) {points.push_back(Point(point));}
-    }
+    std::cout << "number_of_facets" << number_of_facets << std::endl;
+    std::vector<Point>   points;
+    std::vector<size_t>  number_points_facet(number_of_facets);
+    std::vector<Facet>   initial_facets(number_of_facets);
+    std::vector<Vector>  facet_vectors(number_of_facets);
 
-    // print the first point that was generated
-    std::cout << "Writing output" << std::endl;
+    Generate_Points_at_Facets gpf(
+            dx, points,
+            number_points_facet,
+            initial_facets,
+            facet_vectors
+    );
 
-    Tree tree(
-        CGAL::faces(polyhedron).first,
-        CGAL::faces(polyhedron).second,
-        polyhedron);
+    std::for_each(
+        polyhedron.facets_begin(),
+        polyhedron.facets_end(),
+        gpf
+    );
 
-    // TODO check what it does?
-    tree.accelerate_distance_queries();
+    const size_t n_points = points.size();
 
-    for (int i =0; i<10; i++){
+    std::cout << "number_of_points:" <<  n_points << std::endl;
 
-        // closest points
+    // TODO reimplement layer extrusion
 
-        std::vector<Point> transformed_points {};
+    // SPH steps
+    // compute distance to nearest neighbour points
+    // generates 2d array distances [npoints][default_neigbours]
 
-        std::cout << "Timestep " << i << std::endl;
-        for(auto const& point: points) {
-            Point_and_primitive_id pp = tree.closest_point_and_primitive(point);
-            Polyhedron::Face_handle f = pp.second; // closest primitive id
-            ComputeFacetVector cm;
-            Vector normal = cm(*f);
-            movePoint mp(normal, dx);
+    // initialise search cubes
+    // an array of particle ids and cgal circulator like iterator
+    // search_cube[id][particle_id]
+    // supports search_cube.cube(id).begin();
+    // search_cubes
+    //
+    SearchCubeTree search_cube_tree (points, 20*dx);
 
-            transformed_points.push_back(mp(point));
-            std::ofstream ostream(argv[2] + intToStr(i) + ".off");
-            write_off_points(ostream, transformed_points);
-        }
+    // ParticleNeigbourMatrix particle_neighbours (search_cube_tree, points, 5*dx);
 
-        points = transformed_points;
-        /** write .sph Format */
-        writeData_SPH("daten", i, points);
-    }
+    const size_t default_neigbours = 40;
+
+    // intializes to 0
+
+    // create_neighbours(n_points, dx, default_neigbours, search_cubes, neighbours);
+
+    // // print the first point that was generated
+    // std::cout << "Writing output" << std::endl;
+    //
+    // Tree tree(
+    //     CGAL::faces(polyhedron).first,
+    //     CGAL::faces(polyhedron).second,
+    //     polyhedron);
+    //
+    // // TODO check what it does?
+    // tree.accelerate_distance_queries();
+    //
+    // for (int i =0; i<10; i++){
+    //
+    //     // closest points
+    //     std::vector<Point> transformed_points {};
+    //
+    //     std::cout << "Timestep " << i << std::endl;
+    //     // for(auto const& point: points) {
+    //     for(int id=0; id < points.size(); id++){
+    //         Point point = points[id];
+    //         Facet initial_facet = initial_facets[i];
+    //         const Vector facet_vector = facet_vectors[i];
+    //         // std::cout << "id" << id << std::endl;
+    //
+    //
+    //         // Test if point is still in initial triangle
+    //         // if not find new Triangle
+    //         // TODO replace closest_point_and_primitive by
+    //         // search over neighbour triangles
+    //         if (! isInsideTriangle(initial_facets[id])(point)) {
+    //             // std::cout
+    //             //     << "Point moved out of initial facet"
+    //             //     << std::endl;
+    //             Point_and_primitive_id pp =
+    //                 tree.closest_point_and_primitive(point);
+    //             initial_facets[i] = Facet(*pp.second); // closest primitive id
+    //             initial_facet = Facet(*pp.second);
+    //         }
+    //
+    //         // TODO dont recompute normal vector
+    //         // use normal vector by face_id
+    //         movePoint mp(facet_vector, dx);
+    //         transformed_points.push_back(mp(point));
+    //     }
+    //
+    //     std::ofstream ostream(argv[2] + intToStr(i) + ".off");
+    //     write_off_points(ostream, transformed_points);
+    //     points = transformed_points;
+    //     #<{(|* write .sph Format |)}>#
+    //     writeData_SPH("daten", i, points);
+    // }
     return 0;
 }
