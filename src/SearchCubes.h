@@ -42,9 +42,9 @@ class SearchCubeTree {
             bound_box_(bounding_box(points.begin(), points.end())),
             dx_(dx),
             n_cubes_({
-               (size_t)ceil((bound_box_.max().x() - bound_box_.min().x())/dx),
-               (size_t)ceil((bound_box_.max().y() - bound_box_.min().y())/dx),
-               (size_t)ceil((bound_box_.max().z() - bound_box_.min().z())/dx)
+                std::max((size_t) 1, (size_t)ceil((bound_box_.max().x() - bound_box_.min().x())/dx)),
+                std::max((size_t) 1, (size_t)ceil((bound_box_.max().y() - bound_box_.min().y())/dx)),
+                std::max((size_t) 1, (size_t)ceil((bound_box_.max().z() - bound_box_.min().z())/dx))
                 }),
             tot_n_cubes_(n_cubes_[0] * n_cubes_[1] * n_cubes_[2])
     {
