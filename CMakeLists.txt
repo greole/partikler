@@ -1,15 +1,19 @@
 # Created by the script cgal_create_cmake_script
 # This is the CMake script for compiling a CGAL application.
-project( Partikler )
+project( PARTIKLER )
 
 include(CTest)
+find_package(GTest REQUIRED)
+
+set(PROJECT_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+
+include_directories (BEFORE "${PROJECT_SRC_DIR}")
+
+add_subdirectory(tests)
 
 cmake_minimum_required(VERSION 2.8.10)
 
-include(git_watcher.cmake)
-
 find_package(CGAL QUIET)
-
 
 set(CMAKE_CXX_FLAGS "-Wall -O3 -fopenmp  -march=native -static-libstdc++ -D_GLIBCXX_PARALLEL") #-stdlib=libc++ -std=c++1z")
 # set(CMAKE_CXX_FLAGS "-Wall -O3  -march=native ") #-stdlib=libc++ -std=c++1z")
@@ -24,15 +28,19 @@ if ( CGAL_FOUND )
 
   include( CGAL_CreateSingleSourceCGALProgram )
 
-  include_directories (BEFORE "../../include")
+  include(src/git_watcher.cmake)
 
-  add_executable(partikler particle_helper.h io.h git.h partikler.cpp)
+  FILE(GLOB src src/*.h)
 
+  add_executable(partikler partikler.cpp ${SRC})
 
   add_dependencies(partikler AlwaysCheckGit)
 
-  add_test(BuildBunny1   time ./partikler ../example/bunny.stl bunny 1.0)
+  # Unit tests
+
+  # Integeration tests
   add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
+  add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
   add_test(BuildBunny0.1 time ./partikler ../example/bunny.stl bunny 0.1)
 
 else()

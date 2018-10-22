@@ -21,7 +21,7 @@
 #     consider that it can run in one of two scopes.
 
 if(NOT DEFINED post_configure_file)
-    set(post_configure_file "${CMAKE_CURRENT_SOURCE_DIR}/git.h")
+    set(post_configure_file "${CMAKE_CURRENT_SOURCE_DIR}/src/git.h")
 endif()
 if(NOT DEFINED pre_configure_file)
     set(pre_configure_file "${post_configure_file}.in")
