@@ -4,7 +4,6 @@ project( PARTIKLER LANGUAGES CXX)
 find_package(CGAL  REQUIRED)
 include( ${CGAL_USE_FILE} )  # needed for the linker
 
-find_package(GTest REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -42,7 +41,6 @@ ENDIF()
 #
 # include_directories (BEFORE "${PROJECT_SRC_DIR}")
 #
-# add_subdirectory(tests)
 #
 #
 #

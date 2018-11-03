@@ -224,7 +224,7 @@ class SearchCubeTree {
                 // move particles to sorted list
                 for (size_t i=0; i < n_particles_in_cube; i++) {
                     Point point {points[particles_kartesian_cube_id[tmp_searchCube.id][i]]};
-                    const size_t tmp_ptr_ctr = particle_ctr + i;
+                    // const size_t tmp_ptr_ctr = particle_ctr + i;
                     // runTime_.verbose(99)
                     //     << " searchCubeCtr " << searchCubeCtr
                     //     << " particle_ctr " << tmp_ptr_ctr
@@ -362,7 +362,7 @@ class SearchCubeTree {
         std::vector<size_t> neighbourIds;
 
         // compute lower neighbour ids first
-        for (int i = 0; i<neighbourId_stencil_.size(); i++)
+        for (size_t i = 0; i<neighbourId_stencil_.size(); i++)
         {
             if (neighbour_mask[12-i]) {
                 // TODO remove this check once neighbour_mask works properly
@@ -379,7 +379,7 @@ class SearchCubeTree {
 
         // std::cout << " [DEBUG] computing upper neighbours for cube " << id << std::endl;
         // compute lower neighbour ids first
-        for (int i = 0; i<neighbourId_stencil_.size(); i++)
+        for (size_t i = 0; i<neighbourId_stencil_.size(); i++)
         {
             if (neighbour_mask[i+13]) {
                 const size_t nid {neighbourId_stencil_[i] + id};

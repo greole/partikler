@@ -1,8 +1,7 @@
-#include "CGAL_TYPEDEFS.h"
+#include "CGALTYPEDEFS.h"
 #include "gtest/gtest.h"
-#include "SearchCubes.h"
-#include "computes.h"
-#include "io.h"
+#include "SPHio.h"
+#include "SPHCore.h"
 #include <vector>
 
 // TODO check if global setup and tear down
@@ -74,7 +73,7 @@ TEST_F(KartesianPointGrid, ParticleInSearchCubes) {
     size_t cube_ctr = 0;
 
     for (auto np: n_particles_searchcube) {
-        for (int i=0; i<np; i++) {
+        for (size_t i=0; i<np; i++) {
                 size_t searchCubeId = search_cubes->get_sorted_points_search_cubes()[particle_ctr];
                 ASSERT_EQ (cube_ctr, searchCubeId)
                     << " particle_ctr: " << particle_ctr
@@ -94,8 +93,8 @@ TEST_F(KartesianPointGrid, ParticleNeighbours) {
 
     size_t ctr = 0;
     for (auto & src_particle_id: particle_neighbours.origId) {
-        const size_t neigbour_particle_id {particle_neighbours.neighId[ctr]};
-        const float distance {particle_neighbours.squared_length[ctr]};
+        // const size_t neigbour_particle_id {particle_neighbours.neighId[ctr]};
+        // const float distance {particle_neighbours.squared_length[ctr]};
         // std::cout
         //     << "src_particle_id: " << src_particle_id
         //     << " neigbour_particle_id " << neigbour_particle_id

@@ -143,7 +143,7 @@ void compute_kernel(
     }
 
     runTime.info_end();
-};
+}
 
 void compute_nu(
         RunTime& runTime,
@@ -213,12 +213,3 @@ void compute_u(
 {
   velocities = add(velocities, multiply(dt,du));
 }
-
-
-
-// def du(vel, dist, press, dens, kern, g, nb, h):
-//     # monaghan eq 3.3 (P_b(rho_b)^2 + P_a(rho_a)^2
-//     pdd = cp.op_ab(press/(dens**2), nb, "sub")
-//     t = cp.add(pdd, nu(dist, vel, dens, nb, h))
-//     return cp.sum(cp.mult_scalar_vec(t, kern), nb)
-

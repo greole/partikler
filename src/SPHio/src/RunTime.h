@@ -20,7 +20,7 @@ class RunTime {
 
         public:
 
-            MSG(int verbosity_treshold, char* label, int message_threshold):
+            MSG(int verbosity_treshold, const char* label, int message_threshold):
                 message_threshold_(message_threshold),
                 verbosity_treshold_(verbosity_treshold),
                 label_(label)
@@ -41,7 +41,7 @@ class RunTime {
             MSG &operator<<(T &in) {
                 state << in;
                 return *this;
-            };
+            }
 
             ~MSG() {
                 if (message_threshold_ > verbosity_treshold_ ) {
