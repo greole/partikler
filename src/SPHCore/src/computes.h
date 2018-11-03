@@ -1,9 +1,102 @@
-struct Kernel {
+#include "SPHDatastructures.h"
 
-    std::vector<float> W;
+std::vector<Vector> add(
+    const std::vector<Vector> &a,
+    const std::vector<Vector> &b) {
 
-    std::vector<Vector> dWdx;
-};
+    // TODO test performance against std::transform with lambdas
+    std::vector<Vector> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] + b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<float> sum(
+    const std::vector<float> &a,
+    const std::vector<float> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<float> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] + b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<float> multiply(
+    const std::vector<Vector> &a,
+    const std::vector<Vector> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<float> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] * b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<Vector> multiply(
+    const std::vector<float> &a,
+    const std::vector<Vector> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<Vector> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] * b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<float> multiply(
+    const std::vector<float> &a,
+    const std::vector<float> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<float> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] * b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<Vector> multiply(
+    const float &a,
+    const std::vector<Vector> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<Vector> ret(b.size());
+    for (size_t ctr = 0; ctr < b.size(); ctr++) {
+       ret[ctr] = a * b[ctr];
+    }
+
+    return ret;
+}
+
+std::vector<float> sqr(
+    const std::vector<float> &a
+    ) {
+    return multiply(a, a);
+}
+
+
+std::vector<float> divides(
+    const std::vector<float> &a,
+    const std::vector<float> &b) {
+
+    // TODO test performance against std::transform with lambdas
+    std::vector<float> ret(a.size());
+    for (size_t ctr = 0; ctr < a.size(); ctr++) {
+       ret[ctr] = a[ctr] / b[ctr];
+    }
+
+    return ret;
+}
 
 void compute_kernel(
         RunTime runTime,

@@ -28,7 +28,7 @@ class RunTime {
             };
 
 
-            //void register_field(std::vector<float> f); 
+            //void register_field(std::vector<float> f);
 
             MSG(const RunTime::MSG& msg):
                 message_threshold_(msg.message_threshold_),

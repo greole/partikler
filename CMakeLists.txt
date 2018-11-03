@@ -16,12 +16,13 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wpedantic -O3 -ma
 enable_testing()
 include_directories(include)
 
+add_subdirectory(src/SPHDatastructures)
 add_subdirectory(src/SPHio)
 add_subdirectory(src/SPHCore)
 
 add_executable(partikler src/partikler.cpp)
 
-target_link_libraries(partikler SPHIO SPHCore)
+target_link_libraries(partikler SPHDatastructures SPHIO SPHCore)
 
 add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)

@@ -1,4 +1,4 @@
-#include <CGAL_TYPEDEFS.h>
+#include <CGALTYPEDEFS.h>
 #include <math.h>
 
 Triangle facetToTriangle(const Facet& facet) {

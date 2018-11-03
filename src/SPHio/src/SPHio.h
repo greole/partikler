@@ -1,7 +1,9 @@
-#include <CGAL/Simple_cartesian.h>
-#include "CGALTYPEDEFS.h"
-#include "RunTime.h"
+#ifndef SPHIO_H
+#define SPHIO_H
 
+#include "CGALTYPEDEFS.h"
+#include "SPHDatastructures.h"
+#include "RunTime.h"
 
 #include <iostream>
 #include <fstream>
@@ -13,11 +15,6 @@
 #include <string>
 #include <sstream>
 #include <sys/stat.h>
-
-typedef CGAL::Simple_cartesian<double>    K;
-typedef K::Point_3                        Point;
-
-
 
 std::string intToStr(int number) {
     std::stringstream ss;    //create a stringstream
@@ -148,3 +145,4 @@ void writeData_SPH(
     swrite(buffer, stepname, "uz");
 }
 
+#endif

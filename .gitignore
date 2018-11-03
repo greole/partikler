@@ -1,4 +1,5 @@
 .vscode
 build
 *.patch
-*.sph
+*.sphgit.h
+git.h

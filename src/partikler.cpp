@@ -13,14 +13,12 @@
 
 #include "SPHio.h"
 #include "SPHCore.h"
-// #include "includes.h"
+#include "include/particle_helper.h"
 
 /* file IO */
 #include <sys/stat.h>
 #include <pthread.h>
-
 #include <math.h>
-
 #include <x86intrin.h>
 
 
@@ -119,56 +117,56 @@ int main(int argc, char* argv[]) {
         polyhedron.facets_end(),
         gpf
     );
+
+    const size_t n_points = points.size();
+
+    runTime.info() << "Number of particles: " <<  n_points;
+
+    // TODO reimplement layer extrusion
+
+    // SPH steps
+    // compute distance to nearest neighbour points
+    // generates 2d array distances [npoints][default_neigbours]
+
+    // initialise search cubes
+    // an array of particle ids and cgal circulator like iterator
+    // search_cube[id][particle_id]
+    // supports search_cube.cube(id).begin();
+    // search_cubes
     //
-    // const size_t n_points = points.size();
-    //
-    // runTime.info() << "Number of particles: " <<  n_points;
-    //
-    // // TODO reimplement layer extrusion
-    //
-    // // SPH steps
-    // // compute distance to nearest neighbour points
-    // // generates 2d array distances [npoints][default_neigbours]
-    //
-    // // initialise search cubes
-    // // an array of particle ids and cgal circulator like iterator
-    // // search_cube[id][particle_id]
-    // // supports search_cube.cube(id).begin();
-    // // search_cubes
-    // //
-    // SearchCubeTree search_cubes (points, 3*dx, RunTime(1));
-    //
-    // const ParticleNeighbours& particle_neighbours =
-    //     search_cubes.get_particle_distances();
-    //
-    // // compute and store the kernel
-    //
-    // runTime.info_begin() << "Initialising Kernel";
-    // Kernel kernel;
-    // kernel.W    = std::move(std::vector<float>  (particle_neighbours.origId.size(), 0));
-    // kernel.dWdx = std::move(std::vector<Vector> (particle_neighbours.origId.size(), {0, 0, 0}));
-    // runTime.info_end();
-    //
-    // compute_kernel(runTime, 3*dx, particle_neighbours, kernel);
-    //
-    // runTime.info_begin() << "Initialising particle densities";
-    // std::vector<float> densities (n_points, 0.0);
-    // runTime.info_end();
-    //
-    //
-    //
-    // runTime.info_begin() << "Initialising particle velocities";
-    // std::vector<float>  nu (particle_neighbours.origId.size(), 0);
-    // std::vector<Vector> velocities (n_points, {0, 0, 0});
-    // std::vector<Vector> du (n_points, {0, 0, 0});
-    // runTime.info_end();
-    //
-    // for (int i=0; i<20; i++) {
-    //     compute_density(runTime, particle_neighbours, kernel, densities);
-    //     compute_nu(runTime, particle_neighbours, velocities, densities, nu, dx);
-    //     compute_du(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx);
-    //     compute_u(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx, 1000000);
-    //     writeData_SPH("daten", i, points, densities, nu, du, velocities);
-    // }
-    // return 0;
+    SearchCubeTree search_cubes (points, 3*dx, RunTime(1));
+
+    const ParticleNeighbours& particle_neighbours =
+        search_cubes.get_particle_distances();
+
+    // compute and store the kernel
+
+    runTime.info_begin() << "Initialising Kernel";
+    Kernel kernel;
+    kernel.W    = std::move(std::vector<float>  (particle_neighbours.origId.size(), 0));
+    kernel.dWdx = std::move(std::vector<Vector> (particle_neighbours.origId.size(), {0, 0, 0}));
+    runTime.info_end();
+
+    compute_kernel(runTime, 3*dx, particle_neighbours, kernel);
+
+    runTime.info_begin() << "Initialising particle densities";
+    std::vector<float> densities (n_points, 0.0);
+    runTime.info_end();
+
+
+
+    runTime.info_begin() << "Initialising particle velocities";
+    std::vector<float>  nu (particle_neighbours.origId.size(), 0);
+    std::vector<Vector> velocities (n_points, {0, 0, 0});
+    std::vector<Vector> du (n_points, {0, 0, 0});
+    runTime.info_end();
+
+    for (int i=0; i<20; i++) {
+        compute_density(runTime, particle_neighbours, kernel, densities);
+        compute_nu(runTime, particle_neighbours, velocities, densities, nu, dx);
+        compute_du(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx);
+        compute_u(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx, 1000000);
+        writeData_SPH("daten", i, points, densities, nu, du, velocities);
+    }
+    return 0;
 }
