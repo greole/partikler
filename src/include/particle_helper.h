@@ -132,6 +132,9 @@ struct Generate_Points_at_Facets
         // initial_facets.push_back(facet);
         const float facet_area = Compute_Facet_Area()(facet);
         const Vector facet_normal =  Compute_Facet_Normal()(facet);
+
+        // TODO make it a multiple of 4
+        // for loop unrolling
         const size_t n_points {(size_t) (facet_area/dx2_)};
         // std::vector<Point> points(n_points);
 

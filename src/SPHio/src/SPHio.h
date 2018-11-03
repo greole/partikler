@@ -1,4 +1,7 @@
 #include <CGAL/Simple_cartesian.h>
+#include "CGALTYPEDEFS.h"
+#include "RunTime.h"
+
 
 #include <iostream>
 #include <fstream>
@@ -13,6 +16,8 @@
 
 typedef CGAL::Simple_cartesian<double>    K;
 typedef K::Point_3                        Point;
+
+
 
 std::string intToStr(int number) {
     std::stringstream ss;    //create a stringstream
@@ -49,30 +54,15 @@ void swrite(
 }
 
 
-void print_git_state() {
-    if(GIT_RETRIEVED_STATE) {
-        std::cout
-            << "INFO: Git commit "
-            << GIT_HEAD_SHA1
-            << std::endl;
-        if(GIT_IS_DIRTY) {
-            std::cerr
-                << "WARN: there were uncommitted changes."
-                << std::endl;
-        }
-    }
-    else {
-        std::cerr
-            << "WARN: failed to get the current git state."
-            << "Is this a git repo?"
-            << std::endl;
-    }
-};
-
 void writeData_SPH(
     std::string foldername,
     int step,
-    std::vector<Point> data)
+    std::vector<Point> data,
+    std::vector<float> rho,
+    std::vector<float> nu,
+    std::vector<Vector> du,
+    std::vector<Vector> velocities
+    )
 {
     /** pseudo time, needed for Paraview plugin*/
     float realtime = (float) step;
@@ -116,5 +106,45 @@ void writeData_SPH(
         buffer[i]= data[i].z();
     }
     swrite(buffer, stepname, "Z");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= rho[i];
+    }
+    swrite(buffer, stepname, "rho");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= nu[i];
+    }
+    swrite(buffer, stepname, "nu");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= du[i].x();
+    }
+    swrite(buffer, stepname, "dux");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= du[i].y();
+    }
+    swrite(buffer, stepname, "duy");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= du[i].z();
+    }
+    swrite(buffer, stepname, "duz");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= velocities[i].x();
+    }
+    swrite(buffer, stepname, "ux");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= velocities[i].y();
+    }
+    swrite(buffer, stepname, "uy");
+
+    for (size_t i =0; i<rho.size(); i++){
+        buffer[i]= velocities[i].z();
+    }
+    swrite(buffer, stepname, "uz");
 }
 
