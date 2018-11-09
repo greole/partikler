@@ -2,6 +2,9 @@
 #define SPHDATASTRUCTURES_H
 
 #include "CGALTYPEDEFS.h"
+#include "Logger.h"
+#include "ParticleNeighbours.h"
+#include "SearchCubes.h"
 
 struct Kernel {
 
@@ -10,89 +13,118 @@ struct Kernel {
     std::vector<Vector> dWdx;
 };
 
-struct ParticleNeighbours {
+class SPHFieldBase {
 
-    // TODO This should be sorted hence replace by number of entries per
-    // particle
-    std::vector<size_t> origId;
 
-    std::vector<size_t> neighId;
+    private:
 
-    std::vector<Vector> distances;
+        std::string name_;
 
-    std::vector<Vector> normalised_distances;
+        std::string type_;
 
-    std::vector<float> squared_length;
+    public:
 
-    std::vector<Vector> subtract (const std::vector<Vector> vals) const {
+        SPHFieldBase(std::string name, std::string type):
+            name_(name),
+            type_(type)
+            {};
 
-        const size_t res_size = neighId.size();
-        std::vector<Vector> res (res_size);
+        virtual ~SPHFieldBase() = default;
 
-        for (size_t ctr = 0; ctr < res_size; ctr++) {
+        std::string get_name() const {return name_;};
 
-            const size_t nid = neighId[ctr];
-            const size_t oid =  origId[ctr];
+        std::string get_type() const {return type_;};
 
-            res[ctr] = {vals[oid] - vals[nid]};
-        }
-        return res;
-    }
-
-    std::vector<float> subtract (const std::vector<float> vals) const {
-
-        const size_t res_size = neighId.size();
-        std::vector<float> res (res_size);
-
-        for (size_t ctr = 0; ctr < res_size; ctr++) {
-
-            const size_t nid = neighId[ctr];
-            const size_t oid =  origId[ctr];
-
-            res[ctr] = {vals[oid] - vals[nid]};
-        }
-        return res;
-    }
-
-    void sum (const std::vector<float>& vals, std::vector<float>& ret) const {
-
-        const size_t res_size = neighId.size();
-
-        for (size_t ctr = 0; ctr < res_size; ctr++) {
-
-            const size_t oid =  origId[ctr];
-            const size_t nid = neighId[ctr];
-
-            // std::cout
-            //     << "[DEBUG] nid " << nid
-            //     << " oid " << oid
-            //     << " vals[oid] " << vals[oid]
-            //     << " ret[oid] " << ret[oid]
-            //     << std::endl;
-
-            ret[oid] += vals[nid];
-        }
-    }
-
-    void sum (const std::vector<Vector>& vals, std::vector<Vector>& ret) const {
-
-        const size_t res_size = neighId.size();
-
-        for (size_t ctr = 0; ctr < res_size; ctr++) {
-
-            const size_t oid =  origId[ctr];
-            const size_t nid = neighId[ctr];
-
-            // std::cout
-            //     << "[DEBUG] nid " << nid
-            //     << " oid " << oid
-            //     << " vals[oid] " << vals[oid]
-            //     << " ret[oid] " << ret[oid]
-            //     << std::endl;
-
-            ret[oid] += vals[nid];
-        }
-    }
 };
+
+template<class T>
+class SPHField: public SPHFieldBase {
+
+        private:
+
+            std::vector<T> f_;
+
+        public:
+
+            SPHField(
+                const std::string name,
+                const std::string type,
+                std::vector<T> field
+            ) :
+                SPHFieldBase(name, type),
+                f_(field) {};
+
+            std::vector<T>& get_field() {return f_;};
+};
+
+class SPHIntField:public SPHField<int> {
+
+    public:
+
+        SPHIntField(
+                 std::vector<int>& field,
+                const std::string name=""):
+                SPHField<int>(name, "Int", field) {};
+};
+
+
+class SPHScalarField:public SPHField<float> {
+
+    public:
+
+        SPHScalarField(
+            std::vector<float>& field,
+            const std::string name = ""
+            ) :
+            SPHField<float>(name, "Scalar", field) {};
+
+
+        // Serial operations
+
+        SPHScalarField& operator+=(SPHScalarField& b) {
+            std::vector<float> & a = get_field();
+            for(size_t ctr=0; ctr< a.size(); ctr++) {
+                a[ctr] += b.get_field()[ctr];
+            }
+            return *this;
+        }
+
+        SPHScalarField operator+(SPHScalarField& b) {
+            std::vector<float>& af =   get_field();
+            std::vector<float>& bf = b.get_field();
+            std::vector<float> ret (af);
+
+            for(size_t ctr=0; ctr < af.size(); ctr++) {
+                ret[ctr] += bf[ctr];
+            }
+            return SPHScalarField {ret};
+        }
+
+
+};
+
+class SPHVectorField:public SPHField<Vector> {
+
+    public:
+
+        SPHVectorField(
+                std::vector<Vector>& field,
+                const std::string name=""
+                ):
+                SPHField<Vector>(name, "Vector", field) {};
+};
+
+class SPHPointField:public SPHField<Point> {
+
+    public:
+
+        SPHPointField(
+                std::vector<Point>& field,
+                const std::string name=""
+                ):
+                SPHField<Point>(name, "Point", field) {};
+};
+
+
 
 #endif

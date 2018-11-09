@@ -1,5 +1,6 @@
 #include "CGALTYPEDEFS.h"
 #include "gtest/gtest.h"
+#include "SPHDatastructures.h"
 #include "SPHio.h"
 #include "SPHCore.h"
 #include <vector>
@@ -20,7 +21,7 @@ class KartesianPointGrid :
                     points.push_back(Point((float) i, (float) j, 0.0));
                 }
             }
-            search_cubes = new SearchCubeTree(points, 3.33, RunTime(4));
+            search_cubes = new SearchCubeTree(points, 3.33, Logger(4));
         }
 
         ~KartesianPointGrid( ) {
@@ -102,6 +103,13 @@ TEST_F(KartesianPointGrid, ParticleNeighbours) {
         //     << std::endl;
         ctr++;
     }
+
+    ASSERT_EQ (particle_neighbours.origId[0] , 0);
+    ASSERT_EQ (particle_neighbours.neighId[0], 1);
+    ASSERT_EQ (particle_neighbours.neighId[1], 2);
+    ASSERT_EQ (particle_neighbours.neighId[2], 3);
+
+
 }
 
 TEST_F(KartesianPointGrid, SearchCubeNeighbours) {
@@ -178,30 +186,6 @@ TEST_F(KartesianPointGrid, StencilMaskTopBackRight) {
         ASSERT_EQ (mask[i],  target[i]) << i;
     }
 }
-
-TEST_F(KartesianPointGrid, Computes) {
-
-    Kernel kernel;
-    const auto particle_neighbours {search_cubes->get_particle_distances()};
-    kernel.W    = std::move(std::vector<float>  (particle_neighbours.origId.size(), 0));
-    kernel.dWdx = std::move(std::vector<Vector> (particle_neighbours.origId.size(), {0, 0, 0}));
-
-    RunTime runTime(99);
-    compute_kernel(runTime, 2.0, particle_neighbours, kernel);
-
-    const std::vector<Point> points = search_cubes->get_sorted_points();
-    const size_t n_points = points.size();
-    std::vector<float> densities (n_points, 0.0);
-
-    compute_density(runTime, particle_neighbours, kernel, densities);
-
-    for(auto dens: densities) {
-        std::cout << "[DEBUG] dens "  << dens << std::endl;
-    }
-
-    // writeData_SPH("grid_test", 0, points, densities);
-}
-
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

@@ -1,2 +1,2 @@
-add_subdirectory (SearchCubes)
+# add_subdirectory (SearchCubes)
 

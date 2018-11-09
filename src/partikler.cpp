@@ -69,33 +69,40 @@
 
 int main(int argc, char* argv[]) {
 
-    RunTime runTime {1};
+    Logger logger {1};
+    RunTime runTime {logger, false};
+
+    // runTime.setSolverDict();
 
     // TODO move this to a separate lib
-    runTime.info_begin() << "Reading input file: " <<  argv[1];
+    logger.info_begin() << "Reading input file: " <<  argv[1];
 
     std::ifstream istream(argv[1]);
 
     // read_STL(istream, points, facets, false);
     Polyhedron_builder_from_STL<HalfedgeDS> builder(istream);
-    runTime.info_end();
+    logger.info_end();
 
-    runTime.info_begin() << "Constructing polyhedron";
+    logger.info_begin() << "Constructing polyhedron";
     // Create input polyhedron
     Polyhedron polyhedron;
     polyhedron.delegate(builder);
-    runTime.info_end();
+    logger.info_end();
 
     // Part 1:
     // Distribute points randomly over cell facets/triangles
     // Returns a vector of initial point packets per facet
     const float dx = atof(argv[3]);
+    const float dt = atof(argv[4]);
+    const size_t n_timesteps = atof(argv[5]);
+    runTime.set_dict("dx", dx);
+    runTime.set_dict("n_timesteps", n_timesteps);
 
     const size_t number_of_facets = std::distance(
             polyhedron.facets_begin(),
             polyhedron.facets_end());
 
-    runTime.info() << "Number of facets: " << number_of_facets;
+    logger.info() << "Number of facets: " << number_of_facets;
 
     //TODO std::vector:reserve
     std::vector<Point>   points;
@@ -118,53 +125,35 @@ int main(int argc, char* argv[]) {
 
     const size_t n_points = points.size();
 
-    runTime.info() << "Number of particles: " <<  n_points;
+    logger.info() << "Number of particles: " <<  n_points;
 
-    // TODO reimplement layer extrusion
+    SPHPointField positions = runTime.set_particle_positions(points);
 
-    // SPH steps
-    // compute distance to nearest neighbour points
-    // generates 2d array distances [npoints][default_neigbours]
+    ParticleNeighbours& particle_neighbours = runTime.initialize_particle_neighbours();
 
-    // initialise search cubes
-    // an array of particle ids and cgal circulator like iterator
-    // search_cube[id][particle_id]
-    // supports search_cube.cube(id).begin();
-    // search_cubes
-    //
-    SearchCubeTree search_cubes (points, 3*dx, RunTime(1));
+    Kernel& kernel = runTime.initialize_kernel();
 
-    const ParticleNeighbours& particle_neighbours =
-        search_cubes.get_particle_distances();
+    compute_kernel(logger, 3*dx, particle_neighbours, kernel);
 
-    // compute and store the kernel
-
-    runTime.info_begin() << "Initialising Kernel";
-    Kernel kernel;
-    kernel.W    = std::move(std::vector<float>  (particle_neighbours.origId.size(), 0));
-    kernel.dWdx = std::move(std::vector<Vector> (particle_neighbours.origId.size(), {0, 0, 0}));
-    runTime.info_end();
-
-    compute_kernel(runTime, 3*dx, particle_neighbours, kernel);
-
-    runTime.info_begin() << "Initialising particle densities";
-    std::vector<float> densities (n_points, 0.0);
-    runTime.info_end();
+    std::vector<float>  & rho = runTime.create_uniform_field(1.0      ,"rho").get_field();
+    std::vector<float>  &   p = runTime.create_uniform_field(1.01e5   ,  "p").get_field();
+    std::vector<Vector> & dp  = runTime.create_uniform_field({0, 0, 0}, "dp").get_field();
+    std::vector<Vector> & dnu = runTime.create_uniform_field({0, 0, 0},"dnu").get_field();
+    std::vector<Vector> &  du = runTime.create_uniform_field({0, 0, 0}, "du").get_field();
+    std::vector<Vector> &   u = runTime.create_uniform_field({0, 0, 0},  "u").get_field();
 
 
-
-    runTime.info_begin() << "Initialising particle velocities";
-    std::vector<float>  nu (particle_neighbours.origId.size(), 0);
-    std::vector<Vector> velocities (n_points, {0, 0, 0});
-    std::vector<Vector> du (n_points, {0, 0, 0});
-    runTime.info_end();
-
-    for (int i=0; i<20; i++) {
-        compute_density(runTime, particle_neighbours, kernel, densities);
-        compute_nu(runTime, particle_neighbours, velocities, densities, nu, dx);
-        compute_du(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx);
-        compute_u(runTime, particle_neighbours, kernel, du, velocities, densities, nu, dx, 1000000);
-        writeData_SPH("daten", i, points, densities, nu, du, velocities);
+    for (;!runTime.end(); runTime++) {
+        // const float dt = 3e-20;
+        runTime.write_to_disk();
+        compute_density(logger, particle_neighbours, kernel, rho);
+        compute_pressure(logger, particle_neighbours, rho,  p);
+        compute_pressure_gradient(logger, particle_neighbours, kernel, rho, p, dp);
+        compute_dnu(logger, particle_neighbours, kernel, u, rho, dnu, dx);
+        compute_du(logger, particle_neighbours, kernel, du, u, rho, dnu, dp, dx);
+        // compute_u(logger, du, u, dt);
+        update_pos(logger, points, u, dt);
+        particle_neighbours = runTime.update_particle_neighbours(points);
     }
     return 0;
 }
