@@ -8,10 +8,10 @@ include( ${CGAL_USE_FILE} )
 
 set(test_sources particle_neighbours.cpp)
 
-include_directories (BEFORE "${SPHCore_SOURCE_DIR}")
+# include_directories (BEFORE "${SPHCore_SOURCE_DIR}")
 
 add_executable(particle_neighbours ${test_sources})
 
-target_link_libraries(particle_neighbours ${GTEST_LIBRARIES} pthread SPHDatastructures SPHCore SPHIO)
+target_link_libraries(particle_neighbours ${GTEST_LIBRARIES} pthread SPHDatastructures)
 
 gtest_discover_tests(particle_neighbours)

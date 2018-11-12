@@ -8,7 +8,7 @@ include( ${CGAL_USE_FILE} )
 
 set(test_sources SPHDatastructures.cpp)
 
-include_directories (BEFORE "${SPHDatastructures_SOURCE_DIR}")
+# include_directories (BEFORE "${SPHDatastructures_SOURCE_DIR}")
 
 add_executable(sphdatastructures ${test_sources})
 

@@ -19,19 +19,19 @@ add_custom_command ( OUTPUT tags
 enable_testing()
 
 add_subdirectory(src/SPHDatastructures)
-add_subdirectory(src/SPHio)
-add_subdirectory(src/SPHCore)
+# add_subdirectory(src/SPHio)
+# add_subdirectory(src/SPHCore)
 
 add_executable(partikler src/partikler.cpp tags)
 
-target_link_libraries(partikler SPHDatastructures SPHIO SPHCore)
+target_link_libraries(partikler SPHDatastructures) # SPHIO SPHCore)
 
-add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
-add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
-
-# Integeration tests
-IF (${CMAKE_BUILD_TYPE} STREQUAL "DEBUG")
-  add_test(valgrind valgrind --tool=callgrind --include=.. ./partikler ../example/bunny.stl bunny 0.5)
-ELSE()
-  add_test(BuildBunny0.1 time ./partikler ../example/bunny.stl bunny 0.1)
-ENDIF()
+# add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
+# add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
+#
+# # Integeration tests
+# IF (${CMAKE_BUILD_TYPE} STREQUAL "DEBUG")
+#   add_test(valgrind valgrind --tool=callgrind --include=.. ./partikler ../example/bunny.stl bunny 0.5)
+# ELSE()
+#   add_test(BuildBunny0.1 time ./partikler ../example/bunny.stl bunny 0.1)
+# ENDIF()

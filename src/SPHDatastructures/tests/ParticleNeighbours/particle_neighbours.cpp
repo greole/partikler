@@ -1,8 +1,6 @@
 #include "CGALTYPEDEFS.h"
 #include "gtest/gtest.h"
 #include "SPHDatastructures.h"
-#include "SPHio.h"
-#include "SPHCore.h"
 #include <vector>
 
 class SimpleParticleNeighbour :
