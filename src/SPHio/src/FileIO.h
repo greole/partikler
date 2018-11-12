@@ -31,40 +31,28 @@ void createFolder(std::string dirname) {
     }
 #endif
 }
-void swrite(
-    std::vector<int>& data,
-    std::string foldername,
-    std::string dataname)
-{
-    long long buf_size = data.size();
-    std::string filename = foldername + "/" + dataname + ".int32";
-    // std::cout<<"writing to filename: "<<filename<<std::endl;
-    std::ofstream fh;
-    fh.open(filename.c_str());
-    fh.write(reinterpret_cast<char*>(&data[0]), buf_size*sizeof(int));
-    fh.close();
-}
 
-
-void swrite(
-    std::vector<float>& data,
-    std::string foldername,
-    std::string dataname)
-{
-    long long buf_size = data.size();
-    std::string filename = foldername + "/" + dataname + ".float32";
-    // std::cout<<"writing to filename: "<<filename<<std::endl;
-    std::ofstream fh;
-    fh.open(filename.c_str());
-    fh.write(reinterpret_cast<char*>(&data[0]), buf_size*sizeof(float));
-    fh.close();
-}
+// template<class T>
+// void swrite(
+//     const std::vector<T>& data,
+//     const std::string foldername,
+//     const std::string dataname,
+//     const std::string type,
+//     const std::string size)
+// {
+//     long long buf_size = data.size();
+//     std::string filename = foldername + "/" + dataname + "." + type + size;
+//     // std::cout<<"writing to filename: "<<filename<<std::endl;
+//     std::ofstream fh;
+//     fh.open(filename.c_str());
+//     fh.write(reinterpret_cast<char*>(&data[0]), buf_size*sizeof(T));
+//     fh.close();
+// }
 
 void prepare_data_folder (
     std::string foldername,
     int step
     ) {
-
 
     // #<{(|* pseudo time, needed for Paraview plugin|)}>#
     float realtime = (float) step;
@@ -91,94 +79,87 @@ void prepare_data_folder (
     fdotfile.close();
 }
 
-void write_field(
-    std::string foldername,
-    int step,
-    std::string f_name,
-    std::vector<Vector>& data
+
+
+template <class T>
+void write_field (
+    const std::string foldername,
+    const int step,
+    const std::string fieldname,
+    const std::vector<T>& data,
+    const std::string type,
+    const std::string size
+    )
+{
+    prepare_data_folder(foldername, step);
+    std::string stepname = foldername + "/step#" + intToStr(step);
+
+    long long buf_size = data.size();
+    std::string filename = foldername + "/" + fieldname + "." + type + size;
+
+    std::ofstream fh;
+    fh.open(filename.c_str());
+    // fh.write(reinterpret_cast<const char*>(&data[0]), buf_size*sizeof(T));
+    fh.close();
+}
+
+template <class T>
+void write_vector_field(
+    const std::string foldername,
+    const int step,
+    const std::string fieldname,
+    const std::vector<T> data,
+    const std::string type,
+    const std::string size
     )
 {
     prepare_data_folder(foldername, step);
     std::vector<float>buffer(data.size());
     std::string stepname = foldername + "/step#" + intToStr(step);
 
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].x();
-    }
-    swrite(buffer, stepname, f_name + "_X");
+    size_t j = 0;
+    for (std::string component: {"X", "Y", "Z"}) {
+        std::vector<float>buffer (data.size());
+        for (size_t i=0; i<data.size(); i++) {
+            buffer[i] = data[i][j];
+        }
 
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].y();
-    }
-    swrite(buffer, stepname, f_name + "_Y");
+        std::string filename = foldername + "/"
+            + fieldname + "_" + component + "." + type + size;
 
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].z();
+        std::ofstream fh;
+        fh.open(filename.c_str());
+        fh.write(reinterpret_cast<const char*>(&data[0]), data.size()*sizeof(float));
+        fh.close();
+        j++;
     }
-    swrite(buffer, stepname, f_name + "_Z");
 }
 
-void write_field(
-    std::string foldername,
-    int step,
-    std::string f_name,
-    std::vector<Point>& data
-    )
-{
-    prepare_data_folder(foldername, step);
-    std::vector<float>buffer(data.size());
-    std::string stepname = foldername + "/step#" + intToStr(step);
-
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].x();
-    }
-    swrite(buffer, stepname, "X");
-
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].y();
-    }
-    swrite(buffer, stepname, "Y");
-
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i].z();
-    }
-    swrite(buffer, stepname, "Z");
-}
-
-
-void write_field(
-    std::string foldername,
-    int step,
-    std::string f_name,
-    std::vector<int> data
-    )
-{
-    prepare_data_folder(foldername, step);
-    std::string stepname = foldername + "/step#" + intToStr(step);
-
-    std::vector<int>buffer(data.size());
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i] = data[i];
-    }
-    swrite(buffer, stepname, f_name);
-}
-
-
-void write_field(
-    std::string foldername,
-    int step,
-    std::string f_name,
-    std::vector<float> data
-    )
-{
-    prepare_data_folder(foldername, step);
-    std::string stepname = foldername + "/step#" + intToStr(step);
-
-    std::vector<float>buffer(data.size());
-    for (size_t i =0; i<data.size(); i++){
-        buffer[i]= data[i];
-    }
-    swrite(buffer, stepname, f_name);
-}
+// void write_field(
+//     std::string foldername,
+//     int step,
+//     std::string f_name,
+//     std::vector<Point>& data
+//     )
+// {
+//     prepare_data_folder(foldername, step);
+//     std::vector<float>buffer(data.size());
+//     std::string stepname = foldername + "/step#" + intToStr(step);
+//
+//     for (size_t i =0; i<data.size(); i++){
+//         buffer[i]= data[i].x();
+//     }
+//     swrite(buffer, stepname, "X");
+//
+//     for (size_t i =0; i<data.size(); i++){
+//         buffer[i]= data[i].y();
+//     }
+//     swrite(buffer, stepname, "Y");
+//
+//     for (size_t i =0; i<data.size(); i++){
+//         buffer[i]= data[i].z();
+//     }
+//     swrite(buffer, stepname, "Z");
+// }
 
 #endif

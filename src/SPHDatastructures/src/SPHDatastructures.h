@@ -16,7 +16,7 @@ struct Kernel {
 class SPHFieldBase {
 
 
-    private:
+    protected:
 
         std::string name_;
 
@@ -40,7 +40,7 @@ class SPHFieldBase {
 template<class T>
 class SPHField: public SPHFieldBase {
 
-        private:
+        protected:
 
             std::vector<T> f_;
 
@@ -55,6 +55,8 @@ class SPHField: public SPHFieldBase {
                 f_(field) {};
 
             std::vector<T>& get_field() {return f_;};
+
+            const std::vector<T>& get_field() const {return f_;};
 };
 
 class SPHIntField:public SPHField<int> {
@@ -64,7 +66,7 @@ class SPHIntField:public SPHField<int> {
         SPHIntField(
                  std::vector<int>& field,
                 const std::string name=""):
-                SPHField<int>(name, "Int", field) {};
+                SPHField<int>(name, "int", field) {};
 };
 
 
@@ -76,7 +78,7 @@ class SPHScalarField:public SPHField<float> {
             std::vector<float>& field,
             const std::string name = ""
             ) :
-            SPHField<float>(name, "Scalar", field) {};
+            SPHField<float>(name, "float", field) {};
 
 
         // Serial operations
@@ -90,12 +92,11 @@ class SPHScalarField:public SPHField<float> {
         }
 
         SPHScalarField operator+(SPHScalarField& b) {
-            std::vector<float>& af =   get_field();
-            std::vector<float>& bf = b.get_field();
-            std::vector<float> ret (af);
 
-            for(size_t ctr=0; ctr < af.size(); ctr++) {
-                ret[ctr] += bf[ctr];
+            std::vector<float> ret {f_};
+
+            for(size_t ctr=0; ctr < f_.size(); ctr++) {
+                ret[ctr] += b.f_[ctr];
             }
             return SPHScalarField {ret};
         }
@@ -111,7 +112,7 @@ class SPHVectorField:public SPHField<Vector> {
                 std::vector<Vector>& field,
                 const std::string name=""
                 ):
-                SPHField<Vector>(name, "Vector", field) {};
+                SPHField<Vector>(name, "float", field) {};
 };
 
 class SPHPointField:public SPHField<Point> {

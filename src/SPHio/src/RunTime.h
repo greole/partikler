@@ -187,39 +187,61 @@ class RunTime {
         }
 
         void write_to_disk() const {
-            for (SPHFieldBase* f: fields_) {
-                if (f->get_type() == "Int") {
-                    const SPHIntField& field = static_cast<SPHIntField&> (*f);
-                    write_field(
+            for (const SPHFieldBase* f: scalar_fields_) {
+                std::string data_type = f->get_type();
+
+                auto write_field_wrapper = [&] (auto& field) {
+                    write_field (
                        "Data",
                        timestep_,
-                       f->get_name(),
-                       field.get_field());
+                       field.get_name(),
+                       field.get_field(),
+                       field.get_type(),
+                       "32"
+                       );
                 };
-                if (f->get_type() == "Point") {
-                    const SPHPointField& field = static_cast<SPHPointField&> (*f);
-                    write_field(
-                       "Data",
-                       timestep_,
-                       f->get_name(),
-                       field.get_field());
+
+                if (data_type == "int") {
+                    const SPHIntField& field = static_cast<const SPHIntField&> (*f);
+                        write_field_wrapper(field);
                 };
-                if (f->get_type() == "Vector") {
-                    const SPHVectorField& field = static_cast<SPHVectorField&> (*f);
-                    write_field(
-                       "Data",
-                       timestep_,
-                       f->get_name(),
-                       field.get_field());
+
+                if (data_type == "float") {
+                    const SPHScalarField& field = static_cast<const SPHScalarField&> (*f);
+                        write_field_wrapper(field);
                 };
-                if (f->get_type() == "Scalar") {
-                    const SPHScalarField& field = static_cast<SPHScalarField&> (*f);
-                    write_field(
-                       "Data",
-                       timestep_,
-                       f->get_name(),
-                       field.get_field());
-                };
+        }
+
+                // if (data_type == "Point") {
+                //     const SPHScalarField& field = static_cast<const SPHScalarField&> (*f);
+                //         write_field_wrapper(field);
+                // };
+
+                // if (f->get_type() == "Point") {
+                //     const SPHPointField& field = static_cast<SPHPointField&> (*f);
+                //     write_field(
+                //        "Data",
+                //        timestep_,
+                //        f->get_name(),
+                //        field.get_field());
+                // };
+                //
+                // if (f->get_type() == "Vector") {
+                //     const SPHVectorField& field = static_cast<SPHVectorField&> (*f);
+                //     write_vector_field(
+                //        "Data",
+                //        timestep_,
+                //        f->get_name(),
+                //        field.get_field());
+                // };
+                // if (f->get_type() == "Scalar") {
+                //     const SPHScalarField& field = static_cast<SPHScalarField&> (*f);
+                //     write_field(
+                //        "Data",
+                //        timestep_,
+                //        f->get_name(),
+                //        field.get_field());
+                // };
             }
         }
 

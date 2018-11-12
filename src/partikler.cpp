@@ -9,9 +9,10 @@
 // #include <parallel/settings.h>
 #include <omp.h>
 
-#include "SPHio.h"
-#include "SPHCore.h"
-#include "include/particle_helper.h"
+#include "SPHDatastructures.h"
+// #include "SPHio.h"
+// #include "SPHCore.h"
+// #include "include/particle_helper.h"
 
 /* file IO */
 #include <sys/stat.h>
@@ -69,6 +70,7 @@
 
 int main(int argc, char* argv[]) {
 
+    /*
     Logger logger {1};
     RunTime runTime {logger, false};
 
@@ -156,4 +158,5 @@ int main(int argc, char* argv[]) {
         particle_neighbours = runTime.update_particle_neighbours(points);
     }
     return 0;
+    */
 }
