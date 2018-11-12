@@ -11,13 +11,18 @@ set(CMAKE_BUILD_TYPE "DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wpedantic -O3 -march=native")
 
+add_custom_command ( OUTPUT tags
+    COMMAND ctags -R ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 enable_testing()
 
 add_subdirectory(src/SPHDatastructures)
 add_subdirectory(src/SPHio)
 add_subdirectory(src/SPHCore)
 
-add_executable(partikler src/partikler.cpp)
+add_executable(partikler src/partikler.cpp tags)
 
 target_link_libraries(partikler SPHDatastructures SPHIO SPHCore)
 
