@@ -9,10 +9,12 @@
 // #include <parallel/settings.h>
 #include <omp.h>
 
-#include "SPHDatastructures.h"
-// #include "SPHio.h"
-// #include "SPHCore.h"
-// #include "include/particle_helper.h"
+#include "SPHDatastructures.hpp"
+#include "SPHio.hpp"
+#include "SPHCore.hpp"
+#include "computes.cpp"
+
+#include "include/particle_helper.hpp"
 
 /* file IO */
 #include <sys/stat.h>
@@ -21,65 +23,23 @@
 #include <x86intrin.h>
 
 
-// void compute_kernel_sse(
-//         RunTime runTime,
-//         const float h,
-//         const ParticleNeighbours& particle_neighbours,
-//         Kernel& kernel
-//         )
-// {
-//     runTime.info_begin() << "Computing Kernel";
-//     const size_t size {particle_neighbours.origId.size()};
-//     const float invh = 1/h;
-//     const float W_fak2  = 21. / (256. * M_PI * h * h * h);
-//     const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
-//
-//     for (size_t pid = 0; pid < size; pid+=4) {
-//
-//         // float : 32bit = 4 bytes
-//         // load 4 floats into 128 sse register
-//         __m128 foo {1.2, 1.0, 2.1, 2.0};
-//         //
-//         const float len = particle_neighbours.squared_length[pid];
-//         const float q {len * invh};
-//
-//         // if (q > 2.) {
-//         //     std::cout << "[DEBUG] outside kernel radius" << std::endl;
-//         //     kernel.W[pid] = 0.0;
-//         //     kernel.dWdx[pid] = Vector {0.0, 0.0, 0.0};
-//         //     continue;
-//         // }
-//
-//         const float q3 = (q - 2.);
-//         const float qfac2 = q3*q3;
-//         const float qfac4 = qfac2*qfac2;
-//
-//         float q2 = 2.*q;
-//         q2 += 1.;
-//
-//         kernel.W[pid] = qfac4*q2*W_fak2;
-//
-//         const float prefact = 10. * qfac2 * q * dW_fak2;
-//         kernel.dWdx[pid] = particle_neighbours.normalised_distances[pid]*prefact;
-//     }
-//
-//     runTime.info_end();
-// };
 
-
-
-int main(int argc, char* argv[]) {
-
-    /*
+void generate_boundary_particles(
+        bool verbose,
+        bool write_substeps,
+        std::string stl_filename,
+        float dx,
+        float dt,
+        size_t nts,
+        int n_extrusion_layer
+){
     Logger logger {1};
     RunTime runTime {logger, false};
 
-    // runTime.setSolverDict();
-
     // TODO move this to a separate lib
-    logger.info_begin() << "Reading input file: " <<  argv[1];
+    logger.info_begin() << "Reading input file: " <<  stl_filename;
 
-    std::ifstream istream(argv[1]);
+    std::ifstream istream(stl_filename);
 
     // read_STL(istream, points, facets, false);
     Polyhedron_builder_from_STL<HalfedgeDS> builder(istream);
@@ -94,11 +54,8 @@ int main(int argc, char* argv[]) {
     // Part 1:
     // Distribute points randomly over cell facets/triangles
     // Returns a vector of initial point packets per facet
-    const float dx = atof(argv[3]);
-    const float dt = atof(argv[4]);
-    const size_t n_timesteps = atof(argv[5]);
     runTime.set_dict("dx", dx);
-    runTime.set_dict("n_timesteps", n_timesteps);
+    runTime.set_dict("n_timesteps", nts);
 
     const size_t number_of_facets = std::distance(
             polyhedron.facets_begin(),
@@ -109,8 +66,8 @@ int main(int argc, char* argv[]) {
     //TODO std::vector:reserve
     std::vector<Point>   points;
     std::vector<size_t>  number_points_facet(number_of_facets);
-    std::vector<Facet>   initial_facets(number_of_facets);
-    std::vector<Vector>  facet_vectors(number_of_facets);
+    std::vector<Facet_handle>   initial_facets(number_of_facets);
+    std::vector<CGALVector>  facet_vectors(number_of_facets);
 
     Generate_Points_at_Facets gpf(
             dx, points,
@@ -129,34 +86,117 @@ int main(int argc, char* argv[]) {
 
     logger.info() << "Number of particles: " <<  n_points;
 
-    SPHPointField positions = runTime.set_particle_positions(points);
+    // Generate "Free" Particles by cloning original particles 
+    // and shifting slightly outwards each layer has max distances
+    // to original particle
 
-    ParticleNeighbours& particle_neighbours = runTime.initialize_particle_neighbours();
+    // Make a copy of original sorted particles to restore
 
-    Kernel& kernel = runTime.initialize_kernel();
+    // SPHPointField positions = runTime.set_particle_positions(points);
 
-    compute_kernel(logger, 3*dx, particle_neighbours, kernel);
+    FixedDistanceParticles extruded_points =
+        create_extruded_points(points, n_extrusion_layer, 0.5*dx, gpf);
 
-    std::vector<float>  & rho = runTime.create_uniform_field(1.0      ,"rho").get_field();
-    std::vector<float>  &   p = runTime.create_uniform_field(1.01e5   ,  "p").get_field();
-    std::vector<Vector> & dp  = runTime.create_uniform_field({0, 0, 0}, "dp").get_field();
-    std::vector<Vector> & dnu = runTime.create_uniform_field({0, 0, 0},"dnu").get_field();
-    std::vector<Vector> &  du = runTime.create_uniform_field({0, 0, 0}, "du").get_field();
-    std::vector<Vector> &   u = runTime.create_uniform_field({0, 0, 0},  "u").get_field();
+    // Generate_Points_at_Edges  pae(dx, extruded_points);
 
+    // std::for_each(
+    //               polyhedron.facets_begin(),
+    //               polyhedron.facets_end(),
+    //               pae
+    //               );
 
-    for (;!runTime.end(); runTime++) {
-        // const float dt = 3e-20;
-        runTime.write_to_disk();
+    Vector zeroVec = {0, 0, 0};
+
+    SortedNeighbours &particle_neighbours =
+      runTime.initialize_particle_neighbours(extruded_points.points);
+
+    SPHPointField &pos = runTime.get_particle_positions();
+
+    Kernel &kernel = runTime.initialize_kernel();
+
+    SPHFloatField &rho = runTime.create_uniform_field(0.0, "rho");
+    SPHFloatField &p = runTime.create_uniform_field(1.0e5,  "p");
+    SPHVectorField &dp =
+      runTime.create_uniform_field(zeroVec, "dp", {"dpx", "dpy", "dpz"});
+    SPHVectorField &u =
+      runTime.create_uniform_field(zeroVec, "Vel", {"U", "V", "W"});
+
+    SPHVectorField &du =
+      runTime.create_uniform_field(zeroVec, "dVel", {"dU", "dV", "dW"});
+
+    SPHSizeTField &idx = runTime.create_idx_field();
+
+    compute_kernel(
+        logger,
+        2.8 * dx,
+        runTime.get_particle_positions(),
+        particle_neighbours,
+        kernel);
+
+    // compute "rubber band" forces
+    // regular sph step but distance to original particle is limited
+    auto sIdxs = runTime.get_sorting_idxs();
+
+    // TODO reorder(sIdxs, extruded_points) via olverload
+    reorder_vector(sIdxs, extruded_points.fixId);//
+    reorder_vector(sIdxs, extruded_points.maxDx);//
+    reorder_vector(sIdxs, extruded_points.dir);//
+    reorder_vector(sIdxs, extruded_points.mType);//
+    reorder_vector(sIdxs, extruded_points.facets);//
+
+    // timestep loop
+    while (!runTime.end()) {
+
+        logger.info() << "Timestep: ";
+        std::cout << runTime.get_timestep() << std::endl;
+
         compute_density(logger, particle_neighbours, kernel, rho);
-        compute_pressure(logger, particle_neighbours, rho,  p);
-        compute_pressure_gradient(logger, particle_neighbours, kernel, rho, p, dp);
-        compute_dnu(logger, particle_neighbours, kernel, u, rho, dnu, dx);
-        compute_du(logger, particle_neighbours, kernel, du, u, rho, dnu, dp, dx);
-        // compute_u(logger, du, u, dt);
-        update_pos(logger, points, u, dt);
-        particle_neighbours = runTime.update_particle_neighbours(points);
+
+        compute_pressure(logger, particle_neighbours, rho, p);
+
+        compute_pressure_gradient(
+            logger, particle_neighbours, kernel, rho, p, dp);
+
+        compute_du(logger, particle_neighbours, kernel, u, rho, p, dp, du);
+
+        compute_u(logger, du, dt, u);
+
+        update_pos(logger, u, dt, points, extruded_points, initial_facets, idx, pos);
+
+        runTime.write_to_disk();
+
+        runTime.update_neighbours();
+
+        compute_kernel(
+                       logger,
+                       2.8 * dx,
+                       runTime.get_particle_positions(),
+                       particle_neighbours,
+                       kernel);
+
+        // du.reorder_field(runTime.get_sorting_idxs());
+        u.reorder_field(runTime.get_sorting_idxs());
+        idx.reorder_field(runTime.get_sorting_idxs());
+
+        logger.info_begin() << "reordering particle info";
+        auto sIdxs = runTime.get_sorting_idxs();
+
+        reorder_vector(sIdxs, extruded_points.fixId);//
+        reorder_vector(sIdxs, extruded_points.maxDx);//
+        reorder_vector(sIdxs, extruded_points.dir);//
+        reorder_vector(sIdxs, extruded_points.mType);//
+        reorder_vector(sIdxs, extruded_points.facets);//
+        logger.info_end();
+
+        runTime++;
     }
-    return 0;
-    */
+}
+
+int main(int argc, char* argv[]) {
+
+    const float dx = atof(argv[2]);
+    const float dt = atof(argv[3]);
+    const size_t n_timesteps = atof(argv[4]);
+    const int layer = atof(argv[5]);
+    generate_boundary_particles(true, true, argv[1], dx, dt, n_timesteps, layer);
 }

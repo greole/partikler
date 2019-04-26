@@ -11,15 +11,21 @@
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/bounding_box.h>
 
+#include <array>
+
 using namespace CGAL;
 typedef Simple_cartesian<double>          K;
 typedef CGAL::Polyhedron_3<K>             Polyhedron;
 typedef CGAL::Triangle_3<K>               Triangle;
 typedef K::Point_3                        Point;
-typedef Polyhedron::Traits::Vector_3      Vector;
+typedef K::Segment_3                      Line;
+typedef Polyhedron::Traits::Vector_3      CGALVector;
+typedef std::array<float, 3>              Vector;
+
 typedef K::FT                             FT;
 
 typedef Polyhedron::Facet_iterator        Facet_iterator;
+typedef Polyhedron::Facet_handle          Facet_handle;
 typedef Polyhedron::HalfedgeDS            HalfedgeDS;
 typedef Polyhedron::Facet                 Facet;
 typedef Polyhedron::Vertex                Vertex;

@@ -1,10 +1,10 @@
 #ifndef SPHIO_H
 #define SPHIO_H
 
-#include "CGALTYPEDEFS.h"
-#include "SPHDatastructures.h"
-#include "FileIO.h"
-#include "RunTime.h"
+#include "CGALTYPEDEFS.hpp"
+#include "SPHDatastructures.hpp"
+// #include "FileIO.h"
+#include "RunTime.hpp"
 
     // for (size_t i =0; i<rho.size(); i++){
     //     buffer[i]= rho[i];

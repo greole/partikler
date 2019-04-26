@@ -4,9 +4,9 @@
 #include <iostream>
 #include <fstream>
 #ifdef _WIN32
-#include<direct.h>
+  #include<direct.h>
 #else
-#include <dirent.h>
+  #include <dirent.h>
 #endif
 #include <string>
 #include <sstream>
@@ -94,12 +94,16 @@ void write_field (
     prepare_data_folder(foldername, step);
     std::string stepname = foldername + "/step#" + intToStr(step);
 
-    long long buf_size = data.size();
-    std::string filename = foldername + "/" + fieldname + "." + type + size;
+    std::vector<float> buffer(data.size());
+    for (size_t i = 0; i < data.size(); i++) {
+      buffer[i] = data[i];
+    }
+
+    std::string filename = stepname + "/" + fieldname + "." + type + size;
 
     std::ofstream fh;
     fh.open(filename.c_str());
-    // fh.write(reinterpret_cast<const char*>(&data[0]), buf_size*sizeof(T));
+    fh.write(reinterpret_cast<const char*>(&buffer[0]), data.size()*sizeof(T));
     fh.close();
 }
 
@@ -110,7 +114,8 @@ void write_vector_field(
     const std::string fieldname,
     const std::vector<T> data,
     const std::string type,
-    const std::string size
+    const std::string size,
+    const std::vector<std::string> comp_names
     )
 {
     prepare_data_folder(foldername, step);
@@ -118,18 +123,51 @@ void write_vector_field(
     std::string stepname = foldername + "/step#" + intToStr(step);
 
     size_t j = 0;
-    for (std::string component: {"X", "Y", "Z"}) {
-        std::vector<float>buffer (data.size());
+    std::cout << "writing vector field"  << std::endl;
+    for (std::string component: comp_names) {
+        std::vector<float> buffer (data.size());
         for (size_t i=0; i<data.size(); i++) {
             buffer[i] = data[i][j];
         }
 
-        std::string filename = foldername + "/"
-            + fieldname + "_" + component + "." + type + size;
+        std::string filename = stepname + "/" + component + ".float" + size;
 
         std::ofstream fh;
         fh.open(filename.c_str());
-        fh.write(reinterpret_cast<const char*>(&data[0]), data.size()*sizeof(float));
+        fh.write(reinterpret_cast<const char*>(&buffer[0]), data.size()*sizeof(float));
+        fh.close();
+        j++;
+    }
+}
+
+template <class T>
+void write_point_field(
+    const std::string foldername,
+    const int step,
+    const std::string fieldname,
+    const std::vector<T> data,
+    const std::string type,
+    const std::string size,
+    const std::vector<std::string> comp_names) {
+    prepare_data_folder(foldername, step);
+    std::vector<float> buffer(data.size());
+    std::string stepname = foldername + "/step#" + intToStr(step);
+
+    std::cout << "writing point field" << std::endl;
+    size_t j = 0;
+    for (std::string component : comp_names) {
+        std::vector<float> buffer(data.size());
+        for (size_t i = 0; i < data.size(); i++) {
+            buffer[i] = data[i].cartesian(j);
+        }
+
+        std::string filename = stepname + "/" + component + ".float" + size;
+
+        std::ofstream fh;
+        fh.open(filename.c_str());
+        fh.write(
+            reinterpret_cast<const char *>(&buffer[0]),
+            data.size() * sizeof(float));
         fh.close();
         j++;
     }

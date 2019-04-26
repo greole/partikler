@@ -3,7 +3,7 @@ project( SPHDatastructuresTests LANGUAGES CXX)
 include_directories(${GTEST_SOURCE_DIR}/include)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-find_package(CGAL QUIET)
+find_package(CGAL REQUIRED)
 include( ${CGAL_USE_FILE} )
 
 set(test_sources SPHDatastructures.cpp)

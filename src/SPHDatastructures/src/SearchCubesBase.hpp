@@ -17,50 +17,53 @@ struct SearchCube {
     size_t last;
 };
 
-class SearchCubeTree {
+template<class T>
+class SearchCubesBase {
 
-    private:
+
+    protected:
+
+        Logger              logger_;
 
         // domain geometry
         K::Iso_cuboid_3     bound_box_;
+
         float               dx_;
+
+        float               inv_dx_;
+
         std::vector<size_t> n_cubes_;
+
         size_t              tot_n_cubes_;
+
+        const size_t        n_points_;
 
         // search cubes in kartesian order without empty search cubes
         // also contains the kartesian id of neighbouring search cube
-        std::vector<SearchCube>         searchCubes_;
+        std::vector<T> searchCubes_;
 
-        std::vector<size_t> neighbourId_stencil_;
-
-        Logger logger_;
-
-        bool keep_empty_cubes_;
-
-        std::vector<Point> sorted_points_;
-
-        std::vector<size_t> sorted_points_search_cubes_;
-
-        ParticleNeighbours particle_neighbours_;
-
-        std::vector<size_t> sorted_search_cubes_ids_;
 
     public:
 
-        SearchCubeTree():
+        SearchCubesBase():
+            logger_(Logger()),
             bound_box_(),
             dx_(0),
+            inv_dx_(0),
             n_cubes_({0, 0, 0}),
-            tot_n_cubes_(n_cubes_[0] * n_cubes_[1] * n_cubes_[2])
+            tot_n_cubes_(n_cubes_[0] * n_cubes_[1] * n_cubes_[2]),
+            n_points_(0)
         {};
 
-        SearchCubeTree(
-                const std::vector<Point>& points,
-                const float dx,
+        SearchCubesBase(
                 Logger logger,
-                bool keep_empty_cubes=true):
-            bound_box_(bounding_box(points.begin(), points.end()))  ,
+                const std::vector<Point>& points,
+                const float dx
+                ):
+            logger_(logger),
+            bound_box_(bounding_box(points.begin(), points.end())),
             dx_(dx),
+            inv_dx_(1.0/dx),
             n_cubes_({
                 std::max(
                     (size_t) 1,
@@ -76,22 +79,88 @@ class SearchCubeTree {
                     )
                 }),
             tot_n_cubes_(n_cubes_[0] * n_cubes_[1] * n_cubes_[2]),
+            n_points_(points.size())
+            {};
+
+
+    // Getter
+
+    const std::vector<SearchCube> &get_searchCubes() const {
+        return searchCubes_;
+    };
+
+    // virtual ParticleNeighbours& compute_particle_neighbours(
+    //         const std::vector<Point>  points,
+    //         const std::vector<size_t> searchcube_of_points,
+    //         ParticleNeighbours&       particle_neighbours
+    //         );
+
+
+};
+
+class SearchCubes: public SearchCubesBase<SearchCube> {
+
+
+    // Naive Implementation
+    // 2D:
+    // =====
+    // Number neighbourhood particles nbp = 40
+    // Number particles per Searchcube = npb*A_cube/A_circ = nbp * 4/Pi = 1.3*npb
+    // Number of particles per Mega search cube = nbp*1.3*9 = 11.7
+    // 3D
+    // =====
+    // Number particles per Searchcube = npb*V_cube/V_sphere = nbp * 6/Pi = 1.9*npb
+    // Number of particles per Mega search cube = nbp*1.9*27 = 51.3
+    //
+    // ULLR
+    // 2D:
+    // Misses = 4/9*9*1.3 = 5.2
+    // 3D:
+    // Misses = 8/27*27*1.9 = 15.2
+
+    private:
+
+        std::vector<size_t>         neighbourId_stencil_;
+
+        bool keep_empty_cubes_;
+
+        // move to ParticleNeighbours
+        std::vector<Point>          sorted_points_;
+
+        // maps sorted point id to corresponding sorted search cube id;
+        std::vector<size_t>         sorted_points_search_cubes_;
+
+        ParticleNeighbours          particle_neighbours_;
+
+        std::vector<size_t>         sorted_search_cubes_ids_;
+
+        size_t kartesian_cube_id_stop_;
+
+    public:
+
+        SearchCubes(): SearchCubesBase() {};
+
+        SearchCubes(
+                Logger logger,
+                const std::vector<Point>& points,
+                const float dx,
+                bool keep_empty_cubes=true):
+            SearchCubesBase(logger, points, dx),
             neighbourId_stencil_(compute_neighbourId_stencil()),
-            logger_(logger),
             keep_empty_cubes_(keep_empty_cubes)
     {
 
         const size_t n_points {points.size()};
 
         logger_.info()
-            << "Initialising the SearchCubeTree of "
+            << "Initialising the SearchCubes of "
             << n_cubes_[0] << "x" << n_cubes_[1] << "x" << n_cubes_[2]
             << "=" << tot_n_cubes_
             << " search cubes for "
             << n_points << " particles";
         //
         // kartesian id to signal a non existing search cube
-        const size_t kartesian_cube_id_stop = tot_n_cubes_ + 1;
+        kartesian_cube_id_stop_ = tot_n_cubes_ + 1;
 
         // for every particle corresponding kartesian cube id
         // without physical locality
@@ -99,63 +168,93 @@ class SearchCubeTree {
                 tot_n_cubes_
                 );
 
-        // temporary vector of all search cubes
-        std::vector<SearchCube> tmp_searchCubes(
-            tot_n_cubes_,
-            {
-                kartesian_cube_id_stop,
-                true,
-                std::vector<size_t> {},
-                0, 0
-            }
-        );
-
-        std::vector<bool> computed_neighbour_ids (
-                tot_n_cubes_,
-                false
-                );
 
         // TODO avoid copying
+        // an array mapping kartesian natural ids to the
+        // reduced set of search cubes
+        // empty search cubes are indicated by its stop id
         sorted_search_cubes_ids_ = std::vector<size_t> (
                 tot_n_cubes_,
-                kartesian_cube_id_stop
+                kartesian_cube_id_stop_
                 );
 
         // get for every particle its corresponding search
         // cube, in particle order
-        construct_particle_search_cube_relation(
-            n_points,
-            points,
+        {
+            std::vector<SearchCube> tmp_searchCubes =
+                construct_particle_search_cube_relation(
+                    points,
+                    particles_kartesian_cube_id
+                );
+
+            if (!keep_empty_cubes) {
+                logger_.info_begin()
+                    << "Removing empty search cubes: ";
+
+                size_t cubeCtr = 0;
+                size_t nonEmptyCubeCtr = 0;
+
+                for (auto tmp_searchCube: tmp_searchCubes)
+                {
+                    if (tmp_searchCube.empty == false) {
+                        searchCubes_.push_back(tmp_searchCube);
+                        sorted_search_cubes_ids_[cubeCtr] = nonEmptyCubeCtr;
+                        nonEmptyCubeCtr++;
+                    }
+                    cubeCtr++;
+                }
+                const size_t tot_reduced_searchcubes = searchCubes_.size();
+
+                logger_.info_end()
+                    << "Remaining search cubes: " <<  tot_reduced_searchcubes;
+            } else {
+                searchCubes_ = tmp_searchCubes;
+            }
+        }
+
+
+        // So far the searchCubes_ are not fully initialised
+        // since the .first and .last entries are not valid
+        // hence particles are resorted in memory and .first and
+        // .last are set
+        sorted_points_ = sortParticles(
+            searchCubes_,
             particles_kartesian_cube_id,
-            tmp_searchCubes,
-            computed_neighbour_ids
+            points,
+            sorted_points_search_cubes_,
+            sorted_search_cubes_ids_
         );
 
-        removeEmptySearchCubes(
-            n_points,
-            tmp_searchCubes,
-            particles_kartesian_cube_id,
-            points,
-            sorted_points_,
-            sorted_points_search_cubes_,
-            sorted_search_cubes_ids_,
-            searchCubes_, // use = operator
-            keep_empty_cubes_
-        );
+        // size_t ctr = 0;
+        // for ( auto p: sorted_points_) {
+        //
+        //
+        //     std::cout
+        //         << ctr
+        //         // << " c " << cube_id
+        //         // << " s " << sub_id
+        //         << " x " << p.x()
+        //         << " y " << p.y()
+        //         << " z " << p.z()
+        //         << std::endl;
+        //
+        //     ctr++;
+        //
+        // }
 
         // std::tuple<std::vector<size_t>, std::vector<size_t>, std::vector<float>> distances;
-        compute_particle_distances(sorted_points_, particle_neighbours_);
+        // compute_particle_distances(sorted_points_, particle_neighbours_);
+        compute_particle_neighbours(
+                points,
+                sorted_points_search_cubes_,
+                particle_neighbours_
+                );
     };
-
 
     // Getter
 
     const std::vector<size_t> &get_sorted_points_search_cubes() const {
         return sorted_points_search_cubes_;
-    };
-
-    const std::vector<SearchCube> &get_searchCubes() const {
-        return searchCubes_;
     };
 
     const std::vector<Point> &get_sorted_points() const {
@@ -174,19 +273,37 @@ class SearchCubeTree {
         return particle_neighbours_;
     };
 
-    void compute_particle_distances(
-        const std::vector<Point> &sorted_points,
-        ParticleNeighbours& particle_neighbours
-        )
-    {
+    ParticleNeighbours & get_particle_neighbours() {
+        return particle_neighbours_;
+    };
+
+
+    ParticleNeighbours& compute_particle_neighbours(
+            const std::vector<Point>  points,
+            const std::vector<size_t> searchcube_of_points,
+            ParticleNeighbours&       particle_neighbours
+            ) {
         logger_.info_begin() << "Computing particle pair distances ";
 
+        // NOTE here space for the particle neighbours is reserved
+        // otherwise the stack might be smashed
+        // TODO dont hardcode the upper particle neighbour number
+        logger_.info() << "Reserving memory";
+        particle_neighbours.origId.reserve(points.size()*40);
+        particle_neighbours.neighId.reserve(points.size()*40);
+        particle_neighbours.distances.reserve(points.size()*40);
+        particle_neighbours.normalised_distances.reserve(points.size()*40);
+        particle_neighbours.squared_length.reserve(points.size()*40);
 
-        for (size_t pointID=0; pointID<sorted_points.size(); pointID++) {
-            compute_particle_neighbours(
-                    sorted_points,
-                    pointID,
-                    sorted_points_search_cubes_[pointID],
+        logger_.info() << "Looping";
+        for (size_t oid=0; oid < n_points_; oid++) {
+
+            const size_t searchcube_of_point = searchcube_of_points[oid];
+
+            set_particle_neighbours(
+                    points,
+                    oid,
+                    searchcube_of_point,
                     dx_,
                     particle_neighbours);
         }
@@ -194,36 +311,68 @@ class SearchCubeTree {
         size_t number_pairs = particle_neighbours.origId.size();
         logger_.info_end() << "Found " << number_pairs << " particle pairs";
 
-    };
+        return particle_neighbours;
+    }
 
-    void construct_particle_search_cube_relation(
-            const size_t n_points,
-            const std::vector<Point> & points,
-            std::vector<std::vector<size_t>>  & particles_kartesian_cube_id,
-            std::vector<SearchCube> & tmp_searchCubes,
-            std::vector<bool> &computed_neighbour_ids
+    std::vector<SearchCube> construct_particle_search_cube_relation(
+            const std::vector<Point>& points,
+            std::vector<std::vector<size_t>>& particles_kartesian_cube_id
             )
         {
             logger_.info_begin() << "Constructing particle search cube relationship";
-            for (size_t i=0; i<n_points; i++) {
+
+            // Store if neighbours ids are already computed for given cube
+            std::vector<bool> computed_neighbour_ids (
+                    tot_n_cubes_,
+                    false
+                    );
+
+            const size_t particle_stop_id = n_points_;
+
+            // temporary vector of all search cubes
+            // contiguous by natural kartesian id
+            // containing empty search cubes
+            std::vector<SearchCube> searchCubes(
+                tot_n_cubes_,
+                {
+                    kartesian_cube_id_stop_,
+                    true,
+                    std::vector<size_t> {},
+                    particle_stop_id, 0
+                }
+            );
+
+            for (size_t i=0; i<n_points_; i++) {
+
                 const size_t cube_id = position_to_cube_id(points[i]);
+                particles_kartesian_cube_id[cube_id].push_back(i);
+
                 // std::cout << "[DEBUG] Particle position " << i
                 //     << " x " << points[i][0]
                 //     << " y " << points[i][1]
                 //     << " cube_id " << cube_id
                 //     << std::endl;
 
-                particles_kartesian_cube_id[cube_id].push_back(i);
+                if (searchCubes[cube_id].empty) {
+                    searchCubes[cube_id].id = cube_id;
+                    searchCubes[cube_id].empty = false;
 
-                if (tmp_searchCubes[cube_id].empty) {
-                    tmp_searchCubes[cube_id].id = cube_id;
-                    tmp_searchCubes[cube_id].empty = false;
+
+                    // if (i < tmp_searchCubes[cube_id].first) {
+                    //     tmp_searchCubes[cube_id].first = i;
+                    // }
+                    //
+                    // if (i > tmp_searchCubes[cube_id].last) {
+                    //     tmp_searchCubes[cube_id].last = i;
+                    // }
 
                     // Set neighbour ids
                     if (!computed_neighbour_ids[cube_id]) {
                         for (const auto nid: computeNeighbourIds(cube_id)) {
-                            // std::cout << "[DEBUG] setting neighbour " << nid << std::endl;
-                            tmp_searchCubes[nid].neighCubes.push_back(cube_id);
+                            // std::cout
+                            //      << "[DEBUG] setting neighbour " << nid
+                            //      << std::endl;
+                            searchCubes[nid].neighCubes.push_back(cube_id);
                         }
                         computed_neighbour_ids[cube_id] = true;
                     }
@@ -232,64 +381,49 @@ class SearchCubeTree {
                 // std::cout << "[DEBUG] done particle " << std::endl;
             }
             logger_.info_end();
+
+            return searchCubes;
         }
 
-    void removeEmptySearchCubes(
-        const size_t n_points,
-        const std::vector<SearchCube>& tmp_searchCubes,
-        const std::vector<std::vector<size_t>>& particles_kartesian_cube_id,
-        const std::vector<Point>& points,
-        std::vector<Point>& sorted_points,
-        std::vector<size_t>& sorted_points_search_cubes,
-        std::vector<size_t>& sorted_search_cubes_ids,
+    std::vector<Point> sortParticles(
         std::vector<SearchCube>& searchCubes,
-        bool keep_empty_cubes
+        const std::vector<std::vector<size_t>>& particles_in_cubes,
+        const std::vector<Point>& unsorted_points,
+        std::vector<size_t>& sorted_points_search_cubes,
+        std::vector<size_t>& sorted_search_cubes_ids
     ) {
         logger_.info_begin()
-            << "Removing empty search cubes and restructuring particles";
+            << "Restructuring particles";
+
+        std::vector<Point> sorted_points;
+        sorted_points.reserve(n_points_);
+        sorted_points_search_cubes = std::vector<size_t> (n_points_, kartesian_cube_id_stop_);
 
         size_t particle_ctr=0;
-        sorted_points.reserve(n_points);
-        sorted_points_search_cubes.reserve(n_points);
-
         size_t searchCubeCtr = 0;
-        for (auto tmp_searchCube: tmp_searchCubes)
+        for (auto& searchCube: searchCubes)
         {
+                const auto& particles_in_cube = particles_in_cubes[searchCube.id];
+                const size_t n_particles_in_cube = particles_in_cube.size();
 
-            if (tmp_searchCube.empty == false) {
-
-                const size_t n_particles_in_cube =
-                    particles_kartesian_cube_id[tmp_searchCube.id].size();
-
-                tmp_searchCube.first = particle_ctr;
-                tmp_searchCube.last  = particle_ctr+n_particles_in_cube-1;
+                searchCube.first = particle_ctr;
+                searchCube.last  = particle_ctr + n_particles_in_cube - 1;
 
                 // move particles to sorted list
                 for (size_t i=0; i < n_particles_in_cube; i++) {
-                    Point point {points[particles_kartesian_cube_id[tmp_searchCube.id][i]]};
                     // const size_t tmp_ptr_ctr = particle_ctr + i;
                     // logger_.verbose(99)
                     //     << " searchCubeCtr " << searchCubeCtr
                     //     << " particle_ctr " << tmp_ptr_ctr
-                    //     << " particlePos " << point.x() << " y " << point.y() << " z " << point.z();
-                    sorted_points.push_back(point);
+                    //     << " particlePos " << point.x()
+                    //     << " y " << point.y() << " z " << point.z();
+                    sorted_points.emplace_back(unsorted_points[particles_in_cube[i]]);
                     sorted_points_search_cubes[particle_ctr + i] = searchCubeCtr;
                 }
                 particle_ctr += n_particles_in_cube;
-                sorted_search_cubes_ids[tmp_searchCube.id] = searchCubeCtr;
-                searchCubes.push_back(std::move(tmp_searchCube));
                 searchCubeCtr++;
-            }
-            // if (keep_empty_cubes && tmp_searchCube.empty == true)  {
-            //     sorted_search_cubes_ids[tmp_searchCube.id] = searchCubeCtr;
-            //     searchCubes.push_back(std::move(tmp_searchCube));
-            //     searchCubeCtr++;
-            // }
         }
-        const size_t tot_reduced_searchcubes = searchCubes.size();
-
-        logger_.info_end()
-            << "Remaining search cubes: " <<  tot_reduced_searchcubes;
+        return sorted_points;
     };
 
     ParticleNeighbours& update_particle_neighbours(std::vector<Point>& sorted_points) {
@@ -304,8 +438,9 @@ class SearchCubeTree {
             particle_neighbours_.squared_length.clear();
         }
 
-         compute_particle_distances(
+         compute_particle_neighbours(
             sorted_points,
+            sorted_points_search_cubes_,
             particle_neighbours_
             );
 
@@ -472,42 +607,30 @@ class SearchCubeTree {
         return *it;
     }
 
-    void  compute_particle_neighbours(
+    // Update Particle Neighbours as side effect
+    void  set_particle_neighbours(
             const std::vector<Point>& sorted_points,
-            const size_t pointID,
+            const size_t oid,
             const size_t searchCubeId,
             const float maxDistance,
             ParticleNeighbours & particle_neighbours
         ) {
-            const Point& point {sorted_points[pointID]};
+            const Point& point {sorted_points[oid]};
 
             const SearchCube& parent_search_cube {searchCubes_[searchCubeId]};
 
-            // NOTE here space for the particle neighbours is reserved
-            // otherwise the stack might be smashed
-            // TODO dont hardcode the upper particle neighbour number
-            //
-            particle_neighbours.origId.reserve(sorted_points.size()*40);
-            particle_neighbours.neighId.reserve(sorted_points.size()*40);
-            particle_neighbours.distances.reserve(sorted_points.size()*40);
-            particle_neighbours.normalised_distances.reserve(sorted_points.size()*40);
-            particle_neighbours.squared_length.reserve(sorted_points.size()*40);
-
             // std::cout << "[DEBUG] search parent cube " << std::endl;
             // TODO search all pairs in in parent cube first
-
-
             for (
-                size_t particle_id = parent_search_cube.first;
-                particle_id <= parent_search_cube.last;
-                particle_id++) {
+                size_t nid = parent_search_cube.first;
+                nid <= parent_search_cube.last;
+                nid++) {
 
-
-                // if (!bloom[neighId])     continue;
-                if (pointID == particle_id) continue;
+                // do nothing if neighbour is original particle
+                if (oid == nid) continue;
 
                 const float squared_distance_ = squared_distance(
-                        point, sorted_points[particle_id]);
+                        point, sorted_points[nid]);
 
                 // std::cout
                 //     << "[DEBUG] "
@@ -518,15 +641,16 @@ class SearchCubeTree {
                 //     << std::endl;
                 //
 
+
                 if (squared_distance_ < maxDistance*maxDistance) {
                     // TODO use move semantics here, eg. emplace back
                     // this probably needs a move operator for the CGAL Vector
                     const float distance = sqrt(squared_distance_);
 
                     const Vector distance_vect {
-                       sorted_points[particle_id].x() - point.x(),
-                       sorted_points[particle_id].y() - point.y(),
-                       sorted_points[particle_id].z() - point.z()
+                       sorted_points[nid].x() - point.x(),
+                       sorted_points[nid].y() - point.y(),
+                       sorted_points[nid].z() - point.z()
                     };
 
                     const Vector normalised_distance_vect {
@@ -536,8 +660,8 @@ class SearchCubeTree {
                     };
 
                     // std::cout << "[DEBUG] push_back" << std::endl;
-                    particle_neighbours.origId.push_back(pointID);
-                    particle_neighbours.neighId.push_back(particle_id);
+                    particle_neighbours.origId.push_back(oid);
+                    particle_neighbours.neighId.push_back(nid);
                     particle_neighbours.distances.push_back(distance_vect);
                     particle_neighbours.normalised_distances.push_back(normalised_distance_vect);
                     particle_neighbours.squared_length.push_back(distance);
@@ -554,20 +678,19 @@ class SearchCubeTree {
                 const size_t sorted_nid {sorted_search_cubes_ids_[nid]};
                 // std::cout << "[DEBUG] sorted_nid " << sorted_nid << std::endl;
                 for (
-                    size_t particle_id = searchCubes_[sorted_nid].first;
-                    particle_id <= searchCubes_[sorted_nid].last;
-                    particle_id++) {
-
+                    size_t nid = searchCubes_[sorted_nid].first;
+                    nid <= searchCubes_[sorted_nid].last;
+                    nid++) {
 
                     const float squared_distance_ = squared_distance(
-                            point, sorted_points[particle_id]);
+                            point, sorted_points[nid]);
 
                     if ( squared_distance_ < maxDistance*maxDistance) {
                         const float distance = sqrt(squared_distance_);
                         const Vector distance_vect {
-                             sorted_points[particle_id].x() - point.x(),
-                             sorted_points[particle_id].y() - point.y(),
-                             sorted_points[particle_id].z() - point.z()
+                             sorted_points[nid].x() - point.x(),
+                             sorted_points[nid].y() - point.y(),
+                             sorted_points[nid].z() - point.z()
                         };
 
                         const Vector normalised_distance_vect {
@@ -576,8 +699,8 @@ class SearchCubeTree {
                             distance_vect.z()/distance
                         };
 
-                        particle_neighbours.origId.push_back(pointID);
-                        particle_neighbours.neighId.push_back(particle_id);
+                        particle_neighbours.origId.push_back(oid);
+                        particle_neighbours.neighId.push_back(nid);
                         particle_neighbours.distances.push_back(distance_vect);
                         particle_neighbours.normalised_distances.push_back(normalised_distance_vect);
                         particle_neighbours.squared_length.push_back(distance);
