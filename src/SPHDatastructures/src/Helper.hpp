@@ -1,6 +1,8 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+// #include <stdlib.h>     /* abort, NULL */
+
 std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
     std::vector<Point> points;
     points.reserve(n_particles);
@@ -50,7 +52,6 @@ struct FixedDistanceParticles {
   // Facet to which particle belongs to
   std::vector<Facet_handle>         facets;
 };
-
 
 float rand01() { return ((float)rand() / (RAND_MAX)); }
 

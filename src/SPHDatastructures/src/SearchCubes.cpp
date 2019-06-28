@@ -5,31 +5,34 @@
 
 // inplace functions
 void owner_cube_search(
-    std::vector<Point> &pos,
-    size_t first,
-    size_t last,
-    float maxDistanceSqr,
+    const std::vector<Point> &pos,
+    const size_t first,
+    const size_t last,
+    const float maxDistanceSqr,
+    const std::vector<Facet_handle> & facets,
     SortedNeighbours &ret) {
-    for (size_t oid = first; oid < last; oid++) {
-        // local oid counter
-        size_t oidctr = oid - first;
 
+    for (size_t oid = first; oid < last; oid++) {
         const Point &opos = pos[oid];
 
         // starts from first+oidctr since oidctr are already
         // tested against this nid (distance pairs)
         // +1 to avoid testing oid==nid
         for (size_t nid = oid + 1; nid < last; nid++) {
-
             const Point &npos = pos[nid];
 
-            const float distanceSqr = squared_distance(opos, npos);
+            if (opos == npos) {
+                continue;
+            }
 
-            if(distanceSqr == 0) {continue;}
+            STLSurfaceDist sd =
+                compute_STLSurface_dist(opos, npos, facets[oid], facets[nid]);
+
+                const float distanceSqr = sd.len*sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
-                ret.ownId.push_back(oid);
-                ret.neighId.push_back(nid);
+                ret.ids.push_back({oid, nid});
+                ret.dist.push_back(sd);
             };
         }
     }
@@ -60,46 +63,14 @@ std::array<bool, 27> vector_inner_owner_cube_search(
     return mask;
 }
 
-void vector_owner_cube_search(
-    std::vector<Point> &pos,
-    size_t first,
-    size_t last,
-    float maxDistanceSqr,
-    SortedNeighbours &ret) {
-    for (size_t oid = first; oid < last; oid++) {
-        // local oid counter
-
-        const Point &opos = pos[oid];
-
-        // starts from first+oidctr since oidctr are already
-        // tested against this nid (distance pairs)
-        // +1 to avoid testing oid==nid
-
-        auto mask = vector_inner_owner_cube_search(
-            opos, pos, oid + 1, last, maxDistanceSqr);
-
-        size_t nid = first;
-        for (size_t i = 0; i < last - oid + 1; i++) {
-            nid++;
-            if (mask[i]) {
-                ret.ownId.push_back(oid);
-                ret.neighId.push_back(nid);
-            };
-        }
-    }
-    // std::cout << "vector_owner_cube_search "
-    //           << "ret.ownId.size()" << ret.ownId.size()
-    //           << "ret.neighId.size()" << ret.neighId.size()
-    //           << std::endl;
-};
-
 void neighbour_cube_search(
-    std::vector<Point> &pos,
-    size_t first,
-    size_t last,
-    size_t first_nc,
-    size_t last_nc,
-    float maxDistanceSqr,
+    const std::vector<Point> &pos,
+    const size_t first,
+    const size_t last,
+    const size_t first_nc,
+    const size_t last_nc,
+    const float maxDistanceSqr,
+    const std::vector<Facet_handle> & facets,
     SortedNeighbours &ret) {
 
     // Step 3.1. set pivot particle
@@ -110,11 +81,14 @@ void neighbour_cube_search(
         for (size_t nid = first_nc; nid < last_nc; nid++) {
             const Point &npos = pos[nid];
 
-            const float distanceSqr = squared_distance(opos, npos);
+            STLSurfaceDist sd =
+                compute_STLSurface_dist(opos, npos, facets[oid], facets[nid]);
+
+            const float distanceSqr = sd.len*sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
-                ret.ownId.push_back(oid);
-                ret.neighId.push_back(nid);
+                ret.ids.push_back({oid, nid});
+                ret.dist.push_back(sd);
             };
         }
     }
@@ -199,6 +173,9 @@ upper_searchCubes_neighbour_mask(const size_t id, const SubDivision sub) {
     //           << " i " << ijk.nx
     //           << " j " << ijk.ny
     //           << " k " << ijk.nz
+    //           << " sub.nx " << sub.nx
+    //           << " sub.ny " << sub.ny
+    //           << " sub.nz " << sub.nz
     //           << std::endl;
 
     // mask right
@@ -231,15 +208,6 @@ std::vector<size_t> lower_neighbour_cubes(
     // compute lower cube neighbour ids first
     for (size_t i = 0; i < lower_neighbourId_stencil.stencil.size(); i++) {
 
-        // std::cout <<  "lower_neighbour_cubes"
-        //           << " sub.nx " << sub.nx
-        //           << " sub.ny " << sub.ny
-        //           << " sub.nz " << sub.nz
-        //           << " mask[i] " << mask[i]
-        //           << " stencil[i] " <<
-        //           lower_neighbourId_stencil.stencil[12-i]
-        //           << std::endl;
-
         if (mask[i]) {
             const size_t nid {
                 id - (size_t)lower_neighbourId_stencil.stencil[12 - i]};
@@ -260,7 +228,7 @@ std::vector<size_t> upper_neighbour_cubes(
 
     for (size_t i = 0; i < upper_neighbourId_stencil.stencil.size(); i++) {
         if (mask[i]) {
-            const size_t nid {(size_t)upper_neighbourId_stencil.stencil[i] +
+            const size_t nid {(size_t) upper_neighbourId_stencil.stencil[i] +
                               id};
             neighbourIds.push_back(nid);
         }
@@ -271,9 +239,6 @@ std::vector<size_t> upper_neighbour_cubes(
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles) {
 
-  std::cout
-    << "[DEBUG] SearchCubes.cpp 0 " << scd.nt
-    << std::endl;
     std::vector<size_t> count(scd.nt, 0);
 
     const size_t n_particles = unsorted_particles.size();
@@ -333,132 +298,129 @@ SortedNeighbours mergedCountingSortAndNeighbourSearch(
       const SearchCubeDomain scd,
       const std::vector<Point>& unsorted_particles) {
 
-  std::vector<int> count (scd.nt, 0);
-  const size_t n_particles = unsorted_particles.size();
+ //  std::vector<int> count (scd.nt, 0);
+ //  const size_t n_particles = unsorted_particles.size();
 
-  // get search cube id from particle position
-  // the search cube id serves as integer for sorting
+ //  // get search cube id from particle position
+ //  // the search cube id serves as integer for sorting
 
-  // Step 1. setting counts
-  for(size_t i=0; i<n_particles; i++) {
-    count[position_to_cube_id(scd, unsorted_particles[i])]++;
-  }
+ //  // Step 1. setting counts
+ //  for(size_t i=0; i<n_particles; i++) {
+ //    count[position_to_cube_id(scd, unsorted_particles[i])]++;
+ //  }
 
-  // Step 2. setting start index
-  // this reuses the count array by summing up to a
-  // continuous count
-  std::vector<SearchCube> retc;
-  retc.reserve(scd.nt);
+ //  // Step 2. setting start index
+ //  // this reuses the count array by summing up to a
+ //  // continuous count
+  // std::vector<SearchCube> retc;
+ //  retc.reserve(scd.nt);
 
-  size_t first = 0;
-  size_t last = 0;
-  for(size_t i=0; i<scd.nt; i++) {
-    last = count[i];
-    count[i] = first;
+ //  size_t first = 0;
+ //  size_t last = 0;
+ //  for(size_t i=0; i<scd.nt; i++) {
+ //    last = count[i];
+ //    count[i] = first;
 
-    retc.push_back({first, first+last});
+ //    retc.push_back({first, first+last});
 
-    first += last;
-  }
+ //    first += last;
+ //  }
 
   SortedNeighbours ret {};
-  ret.ownId.reserve(unsorted_particles.size());
-  ret.neighId.reserve(40*unsorted_particles.size());
+ //  ret.ids.reserve(unsorted_particles.size());
 
- // Iterate search cubes
-  const float maxDistanceSqr = scd.dx*scd.dx;
-  std::vector<Point> retp(n_particles);
-  NeighbourIdHalfStencil ncidsten(scd.n.nx, scd.n.ny);
-  SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
+ // // Iterate search cubes
+ //  const float maxDistanceSqr = scd.dx*scd.dx;
+ //  std::vector<Point> retp(n_particles);
+ //  NeighbourIdHalfStencil ncidsten(scd.n.nx, scd.n.ny);
+ //  SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
 
-  size_t last_sid = 0;
-  for(size_t uid=0; uid<n_particles; uid++) {
-    // copy particle to new position in sorted array
-    const size_t sid = position_to_cube_id(scd, unsorted_particles[uid]);
-    size_t oid = count[sid]; // next
-    retp[oid] = Point(unsorted_particles[uid]);
-    const Point& opos = retp[oid];
+ //  size_t last_sid = 0;
+ //  for(size_t uid=0; uid<n_particles; uid++) {
+ //    // copy particle to new position in sorted array
+ //    const size_t sid = position_to_cube_id(scd, unsorted_particles[uid]);
+ //    size_t oid = count[sid]; // next
+ //    retp[oid] = Point(unsorted_particles[uid]);
+ //    const Point& opos = retp[oid];
 
-    const auto ncids = lower_neighbour_cubes(sub, ncidsten, sid);
+ //    const auto ncids = lower_neighbour_cubes(sub, ncidsten, sid);
 
-    // search for neighbours in lower search cube neighbours
-    for (size_t ncid: ncids) {
+ //    // search for neighbours in lower search cube neighbours
+ //    for (size_t ncid: ncids) {
 
-      const size_t first_nc = retc[ncid].first;
-      // search only up to count
-      const size_t last_nc = count[ncid];
+ //      const size_t first_nc = retc[ncid].first;
+ //      // search only up to count
+ //      const size_t last_nc = count[ncid];
 
-      // Step 3.3. set iterate neighbour cube particle
-      for (size_t nid=first_nc; nid<last_nc; nid++) {
+ //      // Step 3.3. set iterate neighbour cube particle
+ //      for (size_t nid=first_nc; nid<last_nc; nid++) {
 
-        const Point &npos = retp[nid];
+ //        const Point &npos = retp[nid];
 
-        const float distanceSqr =
-          squared_distance(opos, npos);
+ //        const float distanceSqr =
+ //          squared_distance(opos, npos);
 
-        if (distanceSqr < maxDistanceSqr) {
-          ret.ownId.push_back(oid);
-          ret.neighId.push_back(nid);
-        };
-      }
-    }
+ //        if (distanceSqr < maxDistanceSqr) {
+ //          ret.ids.push_back({oid, nid});
+ //        };
+ //      }
+ //    }
 
-    // Wenn sid sid < last sid particle backfill neighbour cube forward search
-    if (sid < last_sid) {
-      // TODO stimmen die uncids bei backfill ??
-      const auto uncids = upper_neighbour_cubes(sub, ncidsten, sid);
+ //    // Wenn sid sid < last sid particle backfill neighbour cube forward search
+ //    if (sid < last_sid) {
+ //      // TODO stimmen die uncids bei backfill ??
+ //      const auto uncids = upper_neighbour_cubes(sub, ncidsten, sid);
 
-      // search for neighbours in lower search cube neighbours
-      for (size_t uncid: ncids) {
+ //      // search for neighbours in lower search cube neighbours
+ //      for (size_t uncid: ncids) {
 
-        const size_t first_unc = retc[uncid].first;
-        // search only up to count
-        const size_t last_unc = count[uncid];
+ //        const size_t first_unc = retc[uncid].first;
+ //        // search only up to count
+ //        const size_t last_unc = count[uncid];
 
-        // Step 3.3. set iterate neighbour cube particle
-        for (size_t nid=first_unc; nid<last_unc; nid++) {
+ //        // Step 3.3. set iterate neighbour cube particle
+ //        for (size_t nid=first_unc; nid<last_unc; nid++) {
 
-          const Point &npos = retp[nid];
+ //          const Point &npos = retp[nid];
 
-          const float distanceSqr =
-            squared_distance(opos, npos);
+ //          const float distanceSqr =
+ //            squared_distance(opos, npos);
 
-          if (distanceSqr < maxDistanceSqr) {
-            ret.ownId.push_back(oid);
-            ret.neighId.push_back(nid);
-          };
-        }
-      }
-    }
+ //          if (distanceSqr < maxDistanceSqr) {
+ //            ret.ids.push_back({oid, nid});
+ //          };
+ //        }
+ //      }
+ //    }
 
-    last_sid = sid;
+ //    last_sid = sid;
 
-    // Wenn sid voll dann owner cube search
-    if (count[sid]==retc[sid].last) {
-      owner_cube_search(retp, first, last, maxDistanceSqr, ret);
-    };
+ //    // Wenn sid voll dann owner cube search
+ //    if (count[sid]==retc[sid].last) {
+ //      owner_cube_search(retp, first, last, maxDistanceSqr, ret);
+ //    };
 
-    count[sid]++;
+ //    count[sid]++;
 
 
-    // if oid was last particle in current sid search all neighbour
-    // pairs in sid
+ //    // if oid was last particle in current sid search all neighbour
+ //    // pairs in sid
 
-    // find pairs in current sid
-    // iterate over particles in sid with lower oid
-    // size_t first = retc[sid].first;
-    // for (size_t nid=oid; nid>first; nid--) {
-    //   const Point &npos = retp[nid];
+ //    // find pairs in current sid
+ //    // iterate over particles in sid with lower oid
+ //    // size_t first = retc[sid].first;
+ //    // for (size_t nid=oid; nid>first; nid--) {
+ //    //   const Point &npos = retp[nid];
 
-    //   const float distanceSqr =
-    //     squared_distance(opos, npos);
+ //    //   const float distanceSqr =
+ //    //     squared_distance(opos, npos);
 
-    //   if (distanceSqr < maxDistanceSqr) {
-    //     ret.ownId.push_back(oid);
-    //     ret.neighId.push_back(nid);
-    //   };
-    // }
-  }
+ //    //   if (distanceSqr < maxDistanceSqr) {
+ //    //     ret.ownId.push_back(oid);
+ //    //     ret.neighId.push_back(nid);
+ //    //   };
+ //    // }
+ //  }
 
   return ret;
 };
@@ -466,16 +428,24 @@ SortedNeighbours mergedCountingSortAndNeighbourSearch(
 // void owner_cube_search(first, last, ret,) {};
 
 SortedNeighbours
-createNeighbours(SearchCubeDomain scd, SortedParticles &particles) {
+createNeighbours(
+    const SearchCubeDomain scd,
+    const SortedParticles &particles,
+    const std::vector<Facet_handle> & facets
+    ) {
     // Step 0 initialise return values
 
-    SortedNeighbours ret {};
+    SortedNeighbours ret {
+                          std::vector<NeighbourPair>(0),
+                          std::vector<STLSurfaceDist>(0)};
     /* ret.firstLast.reserve(particles.particles.size()); */
-    ret.neighId.reserve(40 * particles.particles.size());
-    ret.ownId.reserve(40 * particles.particles.size());
+    ret.ids.reserve(40 * particles.particles.size());
+    ret.dist.reserve(40 * particles.particles.size());
 
-    std::vector<SearchCube> &searchCubes {particles.searchCubes};
-    std::vector<Point> &pos {particles.particles};
+#pragma omp parallel
+    {
+    const std::vector<SearchCube> &searchCubes {particles.searchCubes};
+    const std::vector<Point> &pos {particles.particles};
 
     const float maxDistanceSqr = scd.dx * scd.dx;
     const size_t particle_stop_id = pos.size();
@@ -484,6 +454,14 @@ createNeighbours(SearchCubeDomain scd, SortedParticles &particles) {
     SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
 
     // Step 1. get parent search cube
+    SortedNeighbours ret_tmp {
+        std::vector<NeighbourPair>(0),
+        std::vector<STLSurfaceDist>(0)};
+    /* ret.firstLast.reserve(particles.particles.size()); */
+    ret_tmp.ids.reserve(40 * particles.particles.size()/omp_get_num_threads());
+    ret_tmp.dist.reserve(40 * particles.particles.size()/omp_get_num_threads());
+
+    #pragma omp for nowait
     for (size_t sid = 0; sid < scd.nt; sid++) {
 
         // Step 2. test all particle in parent search cube
@@ -491,46 +469,32 @@ createNeighbours(SearchCubeDomain scd, SortedParticles &particles) {
         const size_t first = searchCubes[sid].first;
         const size_t last = searchCubes[sid].last;
 
-        owner_cube_search(pos, first, last, maxDistanceSqr, ret);
+        owner_cube_search(pos, first, last, maxDistanceSqr, facets, ret_tmp);
 
         const auto ncids = upper_neighbour_cubes(sub, ncidsten, sid);
 
         // Step 3. test all particles in neighbour search_cubes
         // Step 3.1. set neighbour search cube
-        for (size_t ncid : ncids) {
 
+        for (size_t ncid : ncids) {
             const size_t first_nc = searchCubes[ncid].first;
             const size_t last_nc = searchCubes[ncid].last;
 
             neighbour_cube_search(
-                pos, first, last, first_nc, last_nc, maxDistanceSqr, ret);
+                pos, first, last, first_nc, last_nc, maxDistanceSqr, facets, ret_tmp);
         }
+    }
+
+#pragma omp critical
+    {
+        ret.ids.insert(
+            ret.ids.end(), ret_tmp.ids.begin(), ret_tmp.ids.end());
+        ret.dist.insert(
+            ret.dist.end(), ret_tmp.dist.begin(), ret_tmp.dist.end());
+    }
     }
 
     return ret;
 };
-
-    // Wrapper Class
-
-    // class SearchCubes5 {
-
-    // public:
-    //   SearchCubes5(
-    //                Logger logger,
-    //                const std::vector<Point> &points,
-    //                const float dx,
-    //                bool keep_empty_cubes = true) {
-    //     size_t n_points = std::cbrt(points.size());
-    //     SearchCubeDomain scd = initSearchCubeDomain(n_points);
-    //     SortedNeighbours sp = countingSortParticles(scd, points);
-    //     // createNeighbours(scd, sp);
-    //   };
-
-    //   void sortParticles(const std::vector<Point> & unsorted_points) {
-    //     size_t n_points = std::cbrt(unsorted_points.size());
-    //     SearchCubeDomain scd = initSearchCubeDomain(n_points);
-    //     SortedNeighbours sp = countingSortParticles(scd, unsorted_points);
-    //   };
-    // };
 
 #endif

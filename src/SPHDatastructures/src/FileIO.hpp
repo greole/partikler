@@ -99,6 +99,7 @@ void write_field (
       buffer[i] = data[i];
     }
 
+    std::cout << "writing scalar field "  << fieldname  << std::endl;
     std::string filename = stepname + "/" + fieldname + "." + type + size;
 
     std::ofstream fh;
@@ -123,7 +124,7 @@ void write_vector_field(
     std::string stepname = foldername + "/step#" + intToStr(step);
 
     size_t j = 0;
-    std::cout << "writing vector field"  << std::endl;
+    std::cout << "writing vector field " << fieldname  << std::endl;
     for (std::string component: comp_names) {
         std::vector<float> buffer (data.size());
         for (size_t i=0; i<data.size(); i++) {
@@ -153,7 +154,7 @@ void write_point_field(
     std::vector<float> buffer(data.size());
     std::string stepname = foldername + "/step#" + intToStr(step);
 
-    std::cout << "writing point field" << std::endl;
+    std::cout << "writing point field "  << fieldname  << std::endl;
     size_t j = 0;
     for (std::string component : comp_names) {
         std::vector<float> buffer(data.size());

@@ -9,9 +9,11 @@ Kernel &RunTime::initialize_kernel() {
 
     kernel_ = Kernel {};
     kernel_.W = std::vector<float>(); // (n_pairs, 0);
-    kernel_.W.reserve(particle_neighbours_.ownId.size());
-    kernel_.dWdx = std::vector<Vector>();
-    kernel_.dWdx.reserve(particle_neighbours_.ownId.size());
+    kernel_.W.reserve(particle_neighbours_.ids.size());
+    kernel_.dWdxo = std::vector<Vector>();
+    kernel_.dWdxn = std::vector<Vector>();
+    kernel_.dWdxo.reserve(particle_neighbours_.ids.size());
+    kernel_.dWdxn.reserve(particle_neighbours_.ids.size());
     logger_.info_end();
 
     return kernel_;
@@ -24,7 +26,7 @@ SPHPointField &RunTime::set_particle_positions(std::vector<Point> &positions) {
 
     SPHPointField *pointField =
       new SPHPointField(sorted_particles_.particles, "Pos");
-    register_field(*pointField);
+    root_object_.register_object(*pointField);
 
     n_particles_ = sorted_particles_.particles.size();
 
@@ -32,19 +34,23 @@ SPHPointField &RunTime::set_particle_positions(std::vector<Point> &positions) {
 }
 
 SortedNeighbours &
-RunTime::initialize_particle_neighbours(std::vector<Point> &positions) {
+RunTime::initialize_particle_neighbours(
+    std::vector<Point> &positions
+    ) {
     // TODO call set_particle_positions first
     logger_.info_begin() << "Sorting particles";
     float dx = std::any_cast<float>(dict_["dx"]);
-    search_cube_domain_ = initSearchCubeDomain(positions, 2.8*dx);
+    search_cube_domain_ = initSearchCubeDomain(positions, search_cube_size_*dx);
     sorted_particles_ = countingSortParticles(search_cube_domain_, positions);
 
     logger_.info_end();
     set_particle_positions(sorted_particles_.particles);
 
+    reorder_vector(get_sorting_idxs(), facets_);
+
     logger_.info_begin() << "Initialising particle neighbours";
     particle_neighbours_ =
-        createNeighbours(search_cube_domain_, sorted_particles_);
+        createNeighbours(search_cube_domain_, sorted_particles_, facets_);
     logger_.info_end();
 
     return particle_neighbours_;
@@ -58,19 +64,19 @@ RunTime::update_neighbours() {
 
   SPHPointField &pos = get_particle_positions();
 
-  search_cube_domain_ = initSearchCubeDomain(pos.get_field(), 2.8 * dx);
+  search_cube_domain_ =
+      initSearchCubeDomain(pos.get_field(), search_cube_size_ * dx);
 
-  logger_.info() << "Start counting sort";
+  logger_.info_begin() << "Start counting sort";
   sorted_particles_ = countingSortParticles(search_cube_domain_, pos.get_field());
-  logger_.info() << "end counting sort";
-
   logger_.info_end();
 
   get_particle_positions().set_field(sorted_particles_.particles);
+  reorder_vector(get_sorting_idxs(), facets_);
 
   logger_.info_begin() << "Updating particle neighbours";
   particle_neighbours_ =
-    createNeighbours(search_cube_domain_, sorted_particles_);
+      createNeighbours(search_cube_domain_, sorted_particles_, facets_);
   logger_.info_end();
 
 }

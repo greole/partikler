@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <chrono>
+#include <stdlib.h>     /* exit, EXIT_FAILURE */
 
 class MSG {
 
@@ -40,6 +41,13 @@ class MSG {
             return *this;
         }
 
+        // template<int>
+        // MSG &operator<<(int &in) {
+        //   state << "int";
+        //   return *this;
+        // }
+
+
         ~MSG() {
             if (message_threshold_ > verbosity_treshold_ ) {
                 std::cout
@@ -47,6 +55,8 @@ class MSG {
                     << state.str()
                     << std::endl;
             }
+
+            if (label_ == "CRITICAL")  exit(EXIT_FAILURE);
         };
 };
 
@@ -107,6 +117,12 @@ class Logger {
 
         MSG critical() {
             return MSG(verbosity_treshold_, "CRITICAL", 5, scope_);
+        };
+
+  // TODO implement an assert statement
+        MSG check(bool b) {
+          if (b) {return MSG(verbosity_treshold_, "INFO", 0, scope_);}
+          else {return MSG(verbosity_treshold_, "CRITICAL", 5, scope_);}
         };
 };
 

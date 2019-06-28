@@ -2,21 +2,148 @@
 #define SPHDATASTRUCTURES_H
 
 #include "CGALTYPEDEFS.hpp"
+#include "CGALHelper.hpp"
 #include "FileIO.hpp"
 #include "Logger.hpp"
 #include <iostream>
 #include <vector>
 #include <omp.h>
 #include <stdio.h>
-// #include "ParticleNeighbours.hpp"
-// #include "SearchCubes.h"
-// #include "SearchCubes2.h"
-// #include "SearchCubes3.h"
-// #include "SearchCubes4.h"
 #include "Helper.hpp"
 
 #include <x86intrin.h>
 #include <math.h>
+
+
+static Vector zeroVec {0.,0.,0,};
+
+// do operation op over fields f_ and b
+// b must provide a size() method
+// f_ and b must be active
+#define OP_FIELD_LOOP(op)                                                      \
+    const size_t size = this->f_.size();                                       \
+    /* use logger_ instance */                                                 \
+     if (this->active_ && b.active()) {                                        \
+        Logger(3).check(size == b.size()) << " fields lengths not equal";      \
+        _Pragma("omp parallel for")                                            \
+        for (size_t ctr = 0; ctr < size; ctr++) {                              \
+            op                                                                 \
+        }                                                                      \
+     }
+
+// do operation op over field f_ and scalar b
+// f_ must be active
+#define OP_LOOP(op)                                                            \
+    const size_t size = this->f_.size();                                       \
+    if (this->active_) {                                                       \
+    _Pragma("omp parallel for")                                                \
+    for (size_t ctr = 0; ctr < size; ctr++) {                                  \
+        op                                                                     \
+    }                                                                          \
+}
+
+#define FOR_ALL(field, ctr)                        \
+  for (size_t ctr = 0; ctr < field.size(); ctr++)  \
+
+
+// like OP_LOOP but instantiates ret vector
+#define OP_LOOP_RET(rettype, op)                                               \
+    const size_t ret_size = this->f_.size();                                   \
+    rettype ret(ret_size);                                                     \
+    OP_LOOP(op)
+
+// like OP_LOOP but instantiates ret vector
+#define OP_FIELD_LOOP_RET(rettype, op)                                         \
+    const size_t ret_size = this->f_.size();                                   \
+    rettype ret(ret_size);                                                     \
+    OP_FIELD_LOOP(op)
+
+// do operation op over field f_ and neighbours pn
+// provides ctr - counter
+// oid, nid owner and neighbour ids
+// size number of neighbour pairs
+#define OP_NEIGHBOUR_LOOP(op)                                                  \
+    const size_t size = pn.ids.size();                                       \
+    /*_Pragma("omp parallel for")*/                                            \
+    for (size_t ctr = 0; ctr < size; ctr++) {                                  \
+        const size_t oid = pn.ids[ctr].ownId;                                      \
+        const size_t nid = pn.ids[ctr].neighId;                                    \
+        /* Logger(3).check(oid <= size) << " particle oid out of bounds "; */  \
+        /* Logger(3).check(nid <= size) << " particle nid out of bounds "; */  \
+        op                                                                     \
+    }
+
+#define DECL_INPL_OP_SCALAR(op)                                                \
+    void operator op(const SPHScalarField<T> &b) {                             \
+        OP_FIELD_LOOP(this->f_[ctr] op b[ctr];)                                \
+    }
+
+#define DECL_INPL_OP_SCALAR_SCALAR(op)                                         \
+    void operator op(const T b) { OP_LOOP(this->f_[ctr] op b;) }
+
+#define DECL_INPL_OP_VECTOR_VECTOR(op)                          \
+  void operator op(const SPHVectorField& b) { \
+    OP_FIELD_LOOP(for (int i=0;i<3;i++){this->f_[ctr][i] op b[ctr][i];} ) \
+}
+
+#define DECL_OP_SCALAR(op)                                                     \
+    SPHScalarField<T> operator op(const SPHScalarField<T> &b) const {          \
+        std::vector<T> ret(this->f_.size(), 0);                                \
+        OP_FIELD_LOOP(ret[ctr] = this->f_[ctr] op b[ctr];)                     \
+          return SPHScalarField<T>(ret, "tmp", this->type_, true);     \
+    }
+
+#define DECL_OP_VECTOR_SCALAR(op)                                              \
+    SPHVectorField operator op(const float b) const {                          \
+        std::vector<Vector> ret(this->f_.size());                              \
+        OP_LOOP(for (int i = 0; i < 3;                                         \
+                     i++) { ret[ctr][i] = this->f_[ctr][i] op b; })            \
+        return SPHVectorField(                                                 \
+            ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);                 \
+    }
+
+// TODO add assert here
+#define DECL_OP_VECTOR_VECTOR(op)                                              \
+    SPHVectorField operator op(const SPHVectorField &b) const {                \
+        std::vector<Vector> ret(this->f_.size());                              \
+        OP_LOOP(for (int i = 0; i < 3;                                         \
+                     i++) { ret[ctr][i] = this->f_[ctr][i] op b[ctr][i]; })    \
+        return SPHVectorField(                                                 \
+            ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);                 \
+    }
+
+#define DECL_OP_SCALAR_SCALAR(op)                                              \
+    SPHScalarField<T> operator op(const T b) const {                           \
+        std::vector<T> ret(this->f_.size(), 0);                                \
+        OP_LOOP(ret[ctr] = this->f_[ctr] op b;)                                \
+        return SPHScalarField<T>(ret, "tmp", this->type_, true);         \
+    }
+
+#define SCALAR_OPS(op)                                                         \
+    DECL_INPL_OP_SCALAR(op## =)                                                \
+    DECL_INPL_OP_SCALAR_SCALAR(op## =)                                         \
+    DECL_OP_SCALAR_SCALAR(op)                                                  \
+    DECL_OP_SCALAR(op)
+
+// AB operations
+#define OP_SCALAR_AB(name, op)                                                 \
+    SPHScalarField<T> name##_ab(const SortedNeighbours &pn) const {            \
+        const size_t res_size = pn.ids.size();                               \
+        std::vector<T> ret(res_size);                                          \
+        OP_NEIGHBOUR_LOOP(ret[ctr] = {this->f_[oid] op this->f_[nid]};)        \
+          return SPHScalarField<T>(ret, "tmp", this->type_, true);           \
+    }
+
+#define OP_VECTOR_AB(name, op)                                                 \
+    SPHVectorField name##_ab(const SortedNeighbours &pn) const {               \
+        const size_t ret_size = pn.ids.size();                               \
+        std::vector<Vector> ret(ret_size);                                     \
+        OP_NEIGHBOUR_LOOP(                                                     \
+            ret[ctr] = (Vector {this->f_[oid][0] op this->f_[nid][0],          \
+                                this->f_[oid][1] op this->f_[nid][1],          \
+                                this->f_[oid][2] op this->f_[nid][2]});)       \
+          return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true); \
+    }
 
 struct Point3D {
   // 3*4bytes = 12bytes
@@ -48,12 +175,61 @@ struct SortedParticles {
   std::vector<Point> particles;
 };
 
+struct NeighbourPair {
+    size_t ownId;
+    size_t neighId;
+};
+
+struct STLSurfaceDist {
+    // Stores the distance of particles on different
+    // STL surfaces
+
+    float len;
+    CGALVector on;
+    CGALVector no;
+};
+
+STLSurfaceDist compute_STLSurface_dist(
+    Point opos, Point npos,
+    Facet_handle start, Facet_handle end) {
+
+    if (start == end) {
+        // if particles on same facet return Cartesian distance
+        CGALVector lenVo = npos - opos;
+        CGALVector lenVn = opos - npos;
+        return {(float) length(lenVo), lenVo, lenVn};
+    }
+
+    std::pair<bool, Path> ret_path = searchPath({start, end});
+
+    if (!ret_path.first) {
+        // if path search failed use Cartesian distance 
+        CGALVector lenVo = npos - opos;
+        CGALVector lenVn = opos - npos;
+        return {(float) length(lenVo), lenVo, lenVn};
+    }
+
+    Path path = ret_path.second;
+
+    Point nposp, oposp;
+    nposp = projectedPoint(path, npos);
+    reverse(path.begin(), path.end());
+    oposp = projectedPoint(path, opos);
+
+    CGALVector lenVo = nposp - opos;
+    CGALVector lenVn = oposp - npos;
+
+    return {(float) length(lenVo), lenVo, lenVn};
+}
+
+
 struct SortedNeighbours {
-  // Each particle id has a first and last neighbour
-  // stored in firstLast, here SearchCube5 is reused
-  /* std::vector<packed> ownId; */
-  std::vector<size_t> ownId;
-  std::vector<size_t> neighId;
+  std::vector<NeighbourPair> ids;
+
+  // since computation of neighbouring particles
+  // on different STL is expensive a vector holding
+  // the STLSurfaceDist is stored here
+  std::vector<STLSurfaceDist> dist;
 };
 
 struct SearchCubeDomain {
@@ -74,6 +250,7 @@ struct SearchCubeDomain {
   /* size_t padding; */
 
 };
+
 
 struct NeighbourIdHalfStencil {
   // Stores the stride of a domain, ie the difference of search cubes ids
@@ -131,12 +308,13 @@ initSearchCubeDomain(const std::vector<Point> particles, float dx) {
     auto bound_box = bounding_box(particles.begin(), particles.end());
 
     // bounds are scaled a bit to avoid particles on exact boundary 
-    float min_x = bound_box.min().x() - 0.01*dx;
-    float min_y = bound_box.min().y() - 0.01*dx;
-    float min_z = bound_box.min().z() - 0.01*dx;
-    float max_x = bound_box.max().x() + 0.01*dx;
-    float max_y = bound_box.max().y() + 0.01*dx;
-    float max_z = bound_box.max().z() + 0.01*dx;
+    const float domain_extrusion = 0.01*dx; // in dx
+    float min_x = bound_box.min().x() - domain_extrusion;
+    float min_y = bound_box.min().y() - domain_extrusion;
+    float min_z = bound_box.min().z() - domain_extrusion;
+    float max_x = bound_box.max().x() + domain_extrusion;
+    float max_y = bound_box.max().y() + domain_extrusion;
+    float max_z = bound_box.max().z() + domain_extrusion;
     // std::cout << "initSearchCubeDomain" << " min_z " << min_z << std::endl;
     // std::cout << "initSearchCubeDomain" << " max_z " << max_z << std::endl;
     // for (auto p: particles) std::cout << p << std::endl;
@@ -145,6 +323,15 @@ initSearchCubeDomain(const std::vector<Point> particles, float dx) {
     unsigned int n_cubes_x = (unsigned int)ceil(((max_x - min_x) / dx));
     unsigned int n_cubes_y = (unsigned int)ceil(((max_y - min_y) / dx));
     unsigned int n_cubes_z = (unsigned int)ceil(((max_z - min_z) / dx));
+
+    // Check if domain is not degenerated
+    // search cubes currently assume 26 neighbour cubes
+    Logger(3, "initSearchCubeDomain:255").check(n_cubes_x >= 3)
+        << " n_cubes_x less than 3";
+    Logger(3, "initSearchCubeDomain:255").check(n_cubes_y >= 3)
+        << " n_cubes_y less than 3";
+    Logger(3, "initSearchCubeDomain:255").check(n_cubes_z >= 3)
+        << " n_cubes_z less than 3";
 
     std::cout
       << " [DEBUG] SPHDatastructures.hpp::initSearchCubeDomain"
@@ -175,13 +362,16 @@ struct Kernel {
 
     std::vector<float> W;
 
-    std::vector<Vector> dWdx;
+    std::vector<Vector> dWdxo;
+    std::vector<Vector> dWdxn;
 };
 
 
+// TODO make it a member function of the fields
 template <class T>
 void reorder_vector(std::vector<size_t>& idxs, std::vector<T>& vec) {
-  std::cout << "[DEBUG] SPHDataStructures.hpp reorder_vector" << std::endl;
+  Logger logger {1};
+  logger.info_begin() <<  "reorder vector";
   std::vector<T> tmp(vec.size());
 
   for(size_t i=0; i<idxs.size(); i++) {
@@ -189,12 +379,12 @@ void reorder_vector(std::vector<size_t>& idxs, std::vector<T>& vec) {
   }
 
   vec=tmp;
-  std::cout << "[DEBUG] SPHDataStructures.hpp reorder_vector done" << std::endl;
+  logger.info_end();
 }
 
+class SPHObject {
 
-class SPHFieldBase {
-
+    // Base class for fields and models
 
     protected:
 
@@ -202,26 +392,74 @@ class SPHFieldBase {
 
         const std::string type_;
 
+        // marks an object as temporary and thus avoids
+        // registration
+        const bool tmp_;
+
+        bool active_;
+
+        //  use a copy or default here
+        Logger logger_ = Logger(1);
+
+        // TODO might need extra treatment for threads
+        static std::vector<SPHObject *> objects_;
+
     public:
 
-        SPHFieldBase(
+        SPHObject(
            const std::string name,
-           const std::string type
+           const std::string type,
+           const bool tmp=false,
+           const bool active=true
                 ):
             name_(name),
-            type_(type)
-            {};
+            type_(type),
+            tmp_(tmp),
+            active_(active)
+            {
+              // TODO dont register tmp objects
+              if (!tmp_) this->register_object(*this);
+            };
 
-        virtual ~SPHFieldBase() = default;
+        virtual ~SPHObject() = default;
+
+        // activate or deactivate object
+        void set_active(bool active) {active_=active;};
+
+        // get status
+        bool active() const {return active_;};
 
         std::string get_name() const {return name_;};
 
         std::string get_type() const {return type_;};
 
+        // register a SPHObject to object registry
+        void register_object(SPHObject &f) {
+          {
+            // auto msg = logger_.info();
+            std::cout << " Registering: "
+                << f.get_type()
+                << " "
+                << f.get_name()
+                << std::endl;
+          }
+          objects_.push_back(&f);
+        }
+
+        static std::vector<SPHObject *> get_objects() {
+            return objects_;
+        }
+
+  template< class T>
+  T& get_object(const std::string name) const {
+    for (SPHObject* f: objects_) {
+      if (f->get_name() == name) {return dynamic_cast<T&> (*f);};
+    }
+  }
 };
 
 template<class T>
-class SPHField: public SPHFieldBase {
+class SPHField: public SPHObject {
 
         protected:
 
@@ -232,16 +470,19 @@ class SPHField: public SPHFieldBase {
             SPHField(
                 const std::string name,
                 const std::string type,
-                std::vector<T>& field
+                std::vector<T>& field,
+                bool tmp=false,
+                bool active=true
             ) :
-                SPHFieldBase(name, type),
+              SPHObject(name, type, tmp, active),
                 f_(field) {};
 
             std::vector<T>& get_field() {return f_;};
 
             const std::vector<T>& get_field() const {return f_;};
 
-            void reorder_field(const std::vector<size_t> idx) {
+            void reorder_field(const std::vector<size_t> &idx) {
+              logger_.info_begin() << "reordering " << name_;
 
               std::vector<T> ordered(f_.size(), f_[0]);
 
@@ -250,9 +491,14 @@ class SPHField: public SPHFieldBase {
               }
 
               f_ = ordered;
+              logger_.info_end();
             }
 
             void set_field(std::vector<T> b) {f_ = b;};
+
+            void set_uniform(T b) {
+              OP_LOOP(f_[ctr] = b;)
+            };
 
             size_t size() const {return f_.size();};
 
@@ -268,318 +514,67 @@ class SPHField: public SPHFieldBase {
             }
 };
 
-
 // TODO make this an abstract class
-template <class T>
-class SPHScalarField: public SPHField<T> {
+template <class T> class SPHScalarField : public SPHField<T> {
 
+  public:
+    SPHScalarField(
+        std::vector<T> &field,
+        const std::string name,
+        const std::string type,
+        bool tmp = false,
+        bool active = true
+                   )
+      : SPHField<T>(name, type, field, tmp, active) {};
 
-    public:
+    void set(const SPHScalarField &b) { OP_FIELD_LOOP(this->f_[ctr] = b[ctr];) }
 
-        SPHScalarField(
-            std::vector<T>& field,
-            const std::string name,
-            const std::string type
-            ):
-            SPHField<T>(name, type, field) {};
+    // declare all arithmetic operators
+    SCALAR_OPS(+)
+    SCALAR_OPS(-)
+    SCALAR_OPS(*)
+    SCALAR_OPS(/)
 
-        void set(const SPHScalarField b) {
-            const std::vector<T> &bf = b.get_field();
-            const size_t size = this->f_.size();
-            for (size_t ctr = 0; ctr < size; ctr++) {
-                this->f_[ctr] = bf[ctr];
-            }
-        }
+    DECL_INPL_OP_SCALAR(=)
 
-        void operator+=(const SPHScalarField<T> b) {
-            const std::vector<T> & bf = b.get_field();
-            const size_t size = this->f_.size();
-            for(size_t ctr=0; ctr < size;  ctr++) {
-                this->f_[ctr] += bf[ctr];
-            }
-        }
+    T &operator[](const size_t idx) { return this->f_[idx]; }
+    T operator[](const size_t idx) const { return this->f_[idx]; }
 
-        void operator*=(const SPHScalarField<T> b) {
-            const std::vector<T> & bf = b.get_field();
-            const size_t size = this->f_.size();
+    // declare all _ab operator
+    OP_SCALAR_AB(add, +)
+    OP_SCALAR_AB(sub, -)
+    OP_SCALAR_AB(mult, *)
+    OP_SCALAR_AB(div, /)
 
-            for(size_t ctr=0; ctr < size; ctr++) {
-                this->f_[ctr+0] *= bf[ctr+0];
-            }
+    // void set_uniform(const T b) { OP_LOOP(this->f_[ctr] = b;) }
 
-        }
+    void lower_limit(const T b) {
+        OP_LOOP(this->f_[ctr] = max(b, this->f_[ctr]);)
+    }
 
-        void operator*=(const T b) {
-            const size_t size = this->f_.size();
-            for(size_t ctr=0; ctr < size; ctr++) {
-                this->f_[ctr] *= b;
-            }
-
-        }
-
-        void set_uniform(const T b) {
-          const size_t size = this->f_.size();
-          for(size_t ctr=0; ctr < size; ctr++) {
-            this->f_[ctr] = b;
-          }
-
-        }
-
-      void lower_limit(const T b) {
+    T get_max() {
         const size_t size = this->f_.size();
-        for(size_t ctr=0; ctr < size; ctr++) {
-          this->f_[ctr] = max(b, this->f_[ctr] );
+        // TODO implement data type dependent lower bound
+        T ret = std::numeric_limits<T>::min();
+        for (size_t ctr = 0; ctr < size; ctr++) {
+            ret = max(ret, this->f_[ctr]);
         }
-
-      }
-
-        // T operator[](const size_t idx) { return this->f_[idx]; }
-
-        T& operator[](const size_t idx) { return this->f_[idx]; }
-
-        SPHScalarField<T> operator/(const SPHScalarField<T> b) const {
-            std::vector<T> ret(this->f_.size(), 0);
-            const std::vector<T> &bf = b.get_field();
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = this->f_[i] / bf[i];
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-        SPHScalarField<T> operator/(const T b) const {
-            std::vector<T> ret(this->f_.size(), 0);
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = this->f_[i] / b;
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-        SPHScalarField<T> operator-(const T b) const {
-            std::vector<T> ret(this->f_.size(), 0);
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = this->f_[i] - b;
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-        SPHScalarField<T> operator+(const T b) const {
-            std::vector<T> ret(this->f_.size(), 0);
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = this->f_[i] + b;
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-        SPHScalarField<T> operator*(const T b) const {
-            std::vector<T> ret(this->f_.size(), 0);
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = this->f_[i] * b;
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-  SPHScalarField<T> operator*(const SPHScalarField<T> b) const {
-    std::vector<T> ret(this->f_.size(), 0);
-    const std::vector<T> &bf = b.get_field();
-
-    const size_t size = this->f_.size();
-
-    for (size_t i = 0; i < size; i++) {
-      ret[i] = this->f_[i] * bf[i];
+        return ret;
     }
 
-    return SPHScalarField<T>(ret, "tmp", this->type_);
-  }
-
-
-        SPHScalarField<T> pow(const float p) const {
-            std::vector<T> ret(this->f_.size(), 0);
-
-            const size_t size = this->f_.size();
-
-            for (size_t i = 0; i < size; i++) {
-                ret[i] = std::pow(this->f_[i], p);
-            }
-
-            return SPHScalarField<T>(ret, "tmp", this->type_);
-        }
-
-//         void simd_inplace_mult(const SPHScalarField<T> &b) {
-//             const std::vector<T> &bf = b.get_field();
-//             const size_t size = this->f_.size();
-//             for (size_t ctr = 0; ctr < size / 8 * 8; ctr += 8) {
-//             // __m256 as = _mm256_load_ps[&(this->f_[ctr])];
-//             // __m256 bs = _mm256_load_ps[&(bf[ctr])];
-//             #ifdef SIMD
-
-//             __m256 as = _mm256_setr_ps(2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0);
-//             __m256 bs = _mm256_setr_ps(3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0);
-//             __m256 result = _mm256_mul_ps(as, bs);
-
-//             float* res = (float*)&result;
-//             this->f_[ctr+0] = res[0];
-//             this->f_[ctr+1] = res[1];
-//             this->f_[ctr+2] = res[2];
-//             this->f_[ctr+3] = res[3];
-//             this->f_[ctr+4] = res[4];
-//             this->f_[ctr+5] = res[5];
-//             this->f_[ctr+6] = res[6];
-//             this->f_[ctr+7] = res[7];
-// #else
-// #endif
-//         }
-//     };
-
-    // SPHScalarField<T>
-    // op_ab(const SortedNeighbours &particle_neighbours, SPHScalarField<T> b,
-    // functor) const {};
-
-    SPHScalarField<T>
-    add_ab(const SortedNeighbours &particle_neighbours) const {
-
-        const size_t res_size = particle_neighbours.ownId.size();
-
-        std::vector<T> ret(res_size);
-
-        for (size_t ctr = 0; ctr < res_size; ctr++) {
-            const size_t oid = particle_neighbours.ownId[ctr];
-            const size_t nid = particle_neighbours.neighId[ctr];
-            ret[ctr] = {this->f_[oid] + this->f_[nid]};
-        }
-
-        return SPHScalarField<T>(ret, "tmp", this->type_);
+    SPHScalarField<T> pow(const float p) const {
+        OP_LOOP_RET(std::vector<float>, ret[ctr] = std::pow(this->f_[ctr], p);)
+          return SPHScalarField<T>(ret, "tmp", this->type_, true);
     }
-
-  SPHScalarField<T>
-  sub_ab(const SortedNeighbours particle_neighbours) const {
-
-    const size_t res_size = particle_neighbours.ownId.size();
-
-    std::vector<T> ret(res_size);
-
-    for (size_t ctr = 0; ctr < res_size; ctr++) {
-      const size_t oid = particle_neighbours.ownId[ctr];
-      const size_t nid = particle_neighbours.neighId[ctr];
-      ret[ctr] = {this->f_[oid] + this->f_[nid]};
-    }
-
-    return SPHScalarField<T>(ret, "tmp", this->type_);
-  }
-
-  SPHScalarField<T>
-  mult_ab(const SortedNeighbours &particle_neighbours) const {
-
-    const size_t res_size = particle_neighbours.ownId.size();
-
-    std::vector<T> ret(res_size);
-
-    for (size_t ctr = 0; ctr < res_size; ctr++) {
-      const size_t oid = particle_neighbours.ownId[ctr];
-      const size_t nid = particle_neighbours.neighId[ctr];
-      ret[ctr] = {this->f_[oid] * this->f_[nid]};
-    }
-
-    return SPHScalarField<T>(ret, "tmp", this->type_);
-  }
 
   // TODO specific class for val_ij
-  void weighted_sum(
-      const SortedNeighbours &neighbours, const std::vector<float> &val_ij) {
+    void
+    weighted_sum(const SortedNeighbours &pn, const std::vector<float> &val_ij) {
 
-      for (size_t i = 0; i < neighbours.ownId.size(); i++) {
-          size_t ownId = neighbours.ownId[i];
-          size_t neighId = neighbours.neighId[i];
-
-          const float val = val_ij[i];
-          // if (val == 0.0) {std::cout << "zero kernel " << ownId << " " <<
-          // neighId << std::endl;}
-          this->f_[ownId]   += val;
-          this->f_[neighId] += val;
-      }
-
-      //
-      size_t ctr = 0;
-      for (auto f : this->f_) {
-
-          if (f == 0) {
-              std::cout
-                << "SPHDataStructures:487  Particle Id: "
-                << ctr <<  " weigthed sum==0" << std::endl;
-          }
-          ctr++;
-      }
-  };
-
-    // void weighted_sum(
-    //     const SortedNeighbours &neighbours,
-    //     SPHScalarField<T> &val_ij,
-    //     Kernel &kernel);
-
-    // void weighted_sum(
-    //     const SortedNeighbours &neighbours,
-    //     SPHScalarField<T> &val_ij,
-    //     Kernel &kernel) {
-
-    //     for (size_t i = 0; i < neighbours.ownId.size(); i++) {
-    //         size_t ownId = neighbours.ownId[i];
-    //         size_t neighId = neighbours.neighId[i];
-
-    //         const float val = val_ij[i];
-    //         for (int j = 0; j < 3; j++) {
-    //             this->f_[ownId][j] += val * kernel.dWdx[i][j];
-    //             this->f_[neighId][j] -= val * kernel.dWdx[i][j];
-    //         }
-    //     }
-    // };
+        OP_NEIGHBOUR_LOOP(const float val = val_ij[ctr]; this->f_[oid] += val;
+                          this->f_[nid] += val;)
+    };
 };
-
-// NOTE Same as SPHScalarField but different length
-template <class T>
-class SPHScalarABField: public SPHField<T> {
-
-
-    public:
-
-        SPHScalarABField(
-            std::vector<T>& field,
-            const std::string name,
-            const std::string type
-            ):
-            SPHField<T>(name, type, field) {};
-
-    // for(int row = 0; row < 4; row++)
-    // {
-    //     //calculate_resultant_row(row);
-    //     const double* rowA = (const double*)&A[row];
-    //     __m256d* pr = (__m256d*)(&C[row]);
-    //
-    //     *pr = _mm256_mul_pd(_mm256_broadcast_sd(&rowA[0]), matB.row[0]);
-    //     for(int i = 1; i < 4; i++)
-    //         *pr = _mm256_add_pd(*pr, _mm256_mul_pd(_mm256_broadcast_sd(&rowA[i]),
-    //             matB.row[i]));
-    // }
-};
-
 
 class SPHIntField: public SPHScalarField<int> {
 
@@ -587,8 +582,11 @@ class SPHIntField: public SPHScalarField<int> {
 
         SPHIntField(
             std::vector<int>& field,
-            const std::string name=""):
-            SPHScalarField<int>(field, name, "int") {};
+            const std::string name="",
+            bool tmp=false,
+            bool active=true
+                    ):
+          SPHScalarField<int>(field, name, "int", tmp, active) {};
 
 };
 
@@ -598,8 +596,11 @@ class SPHSizeTField: public SPHScalarField<size_t> {
 
         SPHSizeTField(
                 std::vector<size_t>& field,
-                const std::string name=""):
-                SPHScalarField<size_t>(field, name, "long") {};
+                const std::string name="",
+                bool tmp=false,
+                bool active=true
+                      ):
+          SPHScalarField<size_t>(field, name, "long", tmp, active) {};
 };
 
 class SPHFloatField: public SPHScalarField<float> {
@@ -608,14 +609,14 @@ public:
 
   SPHFloatField(
                 std::vector<float>& field,
-                const std::string name = ""
+                const std::string name = "",
+                bool tmp=false,
+                bool active=true
                 ) :
-    SPHScalarField<float>(field, name, "float") {};
+    SPHScalarField<float>(field, name, "float", tmp, active) {};
 
   SPHFloatField(SPHScalarField<float> b)
-      : SPHScalarField<float>(b.get_field(), b.get_name(), "float") {};
-
-  // Serial operations
+    : SPHScalarField<float>(b.get_field(), b.get_name(), "float", true) {};
 
 };
 
@@ -629,8 +630,11 @@ template <class T> class SPHComponentField : public SPHField<T> {
         std::vector<T> &field,
         const std::string type_name,
         const std::string name,
-        std::vector<std::string> comp_names)
-      : SPHField<T>(name, type_name, field),
+        std::vector<std::string> comp_names,
+        bool tmp=false,
+        bool active=true
+                      )
+      : SPHField<T>(name, type_name, field, tmp, active),
         comp_names_(comp_names) {};
 
     const std::vector<std::string> get_comp_names() const { return comp_names_; };
@@ -648,73 +652,150 @@ class SPHVectorField : public SPHComponentField<Vector> {
     SPHVectorField(
         std::vector<Vector> &field,
         std::vector<std::string> comp_names,
-        const std::string name = "")
-      : SPHComponentField<Vector>(field, "vector", name,  comp_names) {};
+        const std::string name = "",
+        bool tmp=false,
+        bool active=true
+                   )
+      : SPHComponentField<Vector>(field, "vector", name,  comp_names, tmp, active) {};
 
-  void set(SPHVectorField b) {
-    const size_t size = this->f_.size();
-    for (size_t ctr = 0; ctr < size; ctr++) {
-      this->f_[ctr][0] = b[ctr][0];
-      this->f_[ctr][1] = b[ctr][1];
-      this->f_[ctr][2] = b[ctr][2];
-    }
+    // TODO remove it and replace by set for ABC
+    void set(Vector b) { OP_LOOP(f_[ctr] = b;) };
+
+  //   void set(const SPHVectorField &b) {
+  //     OP_FIELD_LOOP(
+  //           this->f_[ctr][0] = b[ctr][0];
+  //           this->f_[ctr][1] = b[ctr][1];
+  //           this->f_[ctr][2] = b[ctr][2];
+  //           )
+  // }
+
+  // vector scalar operations
+  DECL_OP_VECTOR_SCALAR(*)
+  DECL_OP_VECTOR_SCALAR(/)
+
+  // vector vector operations
+  DECL_OP_VECTOR_VECTOR(+)
+  DECL_OP_VECTOR_VECTOR(-)
+
+  DECL_INPL_OP_VECTOR_VECTOR(+=)
+  DECL_INPL_OP_VECTOR_VECTOR(-=)
+  DECL_INPL_OP_VECTOR_VECTOR(=)
+
+// declare assignment operator
+  // void operator=(const SPHVectorField &b) {
+  // std::vector<Vector> ret(this->f_.size());
+  // OP_LOOP(for (int i = 0; i < 3; i++) { this->f_[ctr][i] = b[ctr][i]; })
+  //   }
+
+
+  OP_VECTOR_AB(sub, -)
+  OP_VECTOR_AB(add, +)
+  OP_VECTOR_AB(mult, *)
+  OP_VECTOR_AB(div, /)
+
+  SPHFloatField operator*(const SPHVectorField b) const {
+    // dot product
+    OP_FIELD_LOOP_RET(
+      std::vector<float>,
+      ret[ctr] =
+        this->f_[ctr][0] * b[ctr][0] +
+        this->f_[ctr][1] * b[ctr][1] +
+        this->f_[ctr][2] * b[ctr][2];
+    )
+
+      return SPHFloatField(ret, "tmp", true);
   }
 
-  SPHVectorField operator*(const float b) const {
-    std::vector<Vector> ret(this->f_.size());
-
-    const size_t size = this->f_.size();
-
-    for (size_t i = 0; i < size; i++) {
-      ret[i][0] = this->f_[i][0] * b;
-      ret[i][1] = this->f_[i][1] * b;
-      ret[i][2] = this->f_[i][2] * b;
+    void operator*=(const SPHFloatField b) {
+        // dot product
+        OP_FIELD_LOOP(
+            this->f_[ctr][0] *= b[ctr];
+            this->f_[ctr][1] *= b[ctr];
+            this->f_[ctr][2] *= b[ctr];
+            )
     }
 
-    return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp");
+  SPHFloatField norm() const {
+      OP_LOOP_RET(std::vector<float>,
+                        ret[ctr] = std::sqrt(
+                            this->f_[ctr][0] * this->f_[ctr][0] +
+                            this->f_[ctr][1] * this->f_[ctr][1] +
+                            this->f_[ctr][2] * this->f_[ctr][2]);)
+
+        return SPHFloatField(ret, "tmp", true);
   }
-
-  SPHVectorField operator+(const SPHVectorField b) const {
-    std::vector<Vector> ret(this->f_.size());
-
-    const size_t size = this->f_.size();
-
-    for (size_t i = 0; i < size; i++) {
-      ret[i][0] = this->f_[i][0] + b.get_field()[i][0];
-      ret[i][1] = this->f_[i][1] + b.get_field()[i][1];
-      ret[i][2] = this->f_[i][2] + b.get_field()[i][2];
-    }
-
-    return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp");
-  }
-
 };
 
 class SPHPointField : public SPHComponentField<Point> {
 
   public:
-    SPHPointField(std::vector<Point> &field, const std::string name = "")
+    SPHPointField(
+        std::vector<Point> &field,
+        const std::string name = "",
+        bool tmp = false,
+        bool active = true
+                  )
         : SPHComponentField<Point>(
               field,
               "Point",
               name,
-              std::vector<std::string>({"X", "Y", "Z"})) {};
+              std::vector<std::string>({"X", "Y", "Z"}),
+              tmp,
+              active
+                                   ) {};
+
+    SPHPointField(SPHPointField &b)
+        : SPHComponentField<Point>(
+              b.get_field(),
+              "Point",
+              b.get_name(),
+              std::vector<std::string>({"X", "Y", "Z"}),
+              true) {};
 
     const Point &operator[](size_t id) const { return this->get_field()[id]; }
 
-  void operator+=(SPHVectorField b) {
-    const size_t size = this->f_.size();
+    Point &operator[](size_t id) { return this->get_field()[id]; }
 
-    for (size_t i = 0; i < size; i++) {
-      this->f_[i] = this->f_[i] + CGALVector(b[i][0], b[i][1], b[i][2]);
-    }
+    void operator+=(SPHVectorField b) {
+        const size_t size = this->f_.size();
+
+        for (size_t i = 0; i < size; i++) {
+            this->f_[i] = this->f_[i] + CGALVector(b[i][0], b[i][1], b[i][2]);
+        }
+  }
+
+  SPHPointField operator-(const SPHPointField b) const {
+    // dot product
+    OP_FIELD_LOOP_RET(
+                      std::vector<Point>,
+                      auto v = this->f_[ctr] - b[ctr];
+                      ret[ctr] = Point(v[0], v[1], v[2]);
+                      )
+
+      return SPHPointField(ret, "tmp", true);
+  }
+
+
+  SPHFloatField norm() const {
+    OP_LOOP_RET(std::vector<float>,
+                ret[ctr] = std::sqrt(
+                                     this->f_[ctr][0] * this->f_[ctr][0] +
+                                     this->f_[ctr][1] * this->f_[ctr][1] +
+                                     this->f_[ctr][2] * this->f_[ctr][2]);)
+
+      return SPHFloatField(ret, "tmp", true);
   }
 };
+
 
 std::ostream &operator<<(std::ostream &os, SPHFloatField const &m) {
 
     auto fs = m.get_field();
-    os << m.get_name() << std::endl;
+    os
+     << "\n"
+     << m.get_name() << " " << fs.size()
+     << std::endl;
+
     size_t id = 0;
     for (auto f : fs) {
       os << m.get_name() << "Particle " << id << " " << f << "\n" << std::flush;
@@ -727,10 +808,14 @@ std::ostream &operator<<(std::ostream &os, SPHFloatField const &m) {
 std::ostream &operator<<(std::ostream &os, SPHVectorField const &m) {
 
   auto fs = m.get_field();
-  os << m.get_name() << std::endl;
+  os 
+     << "\n"
+     << m.get_name() << " " << fs.size()
+     << std::endl;
   size_t id = 0;
   for (auto f : fs) {os
-      << m.get_name() << " Particle " << id << " ("
+      << m.get_name()
+      << " Particle " << id << " ("
       << f[0] << " "
       << f[1] << " "
       << f[2] << ")\n" << std::flush;
@@ -742,10 +827,15 @@ std::ostream &operator<<(std::ostream &os, SPHVectorField const &m) {
 std::ostream &operator<<(std::ostream &os, SPHPointField const &m) {
 
   auto fs = m.get_field();
-  os << m.get_name() << std::endl;
+  os 
+     << "\n"
+     << m.get_name() << " " << fs.size()
+     << std::endl;
   size_t id = 0;
+
+
   for (auto f : fs) {os
-                      << m.get_name() 
+                      << m.get_name()
                       << " Particle " << id << " ("
                       << f[0] << " "
                       << f[1] << " "
@@ -755,4 +845,47 @@ std::ostream &operator<<(std::ostream &os, SPHPointField const &m) {
   return os;
 }
 
+SPHVectorField
+particle_distance_vec(const SPHPointField &pos, const SortedNeighbours &pn) {
+
+    const size_t ret_size {pn.ids.size()};
+
+    std::vector<Vector> ret(ret_size);
+
+    OP_NEIGHBOUR_LOOP(const Point &opos = pos[oid];
+                      const Point &npos = pos[nid];
+                      const CGALVector lenV = npos - opos;
+
+                      ret[ctr][0] = lenV[0];
+                      ret[ctr][1] = lenV[1];
+                      ret[ctr][2] = lenV[2];)
+
+      return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);
+}
+
+
+
+template<class T>
+class SPHEquationBase:SPHObject  {
+  // Base class for equations
+
+  // TODO Separate object registry and runTime
+
+
+  private:
+
+    T &result_;
+
+  public:
+
+  SPHEquationBase(std::string name, bool active, T & result):
+    SPHObject(name, "SPHEquation", active),
+    result_(result) {
+
+    logger_.info() << " Created Equation: " << name_;
+  };
+
+    void compute();
+
+};
 #endif

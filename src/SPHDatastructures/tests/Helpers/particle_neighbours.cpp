@@ -1,3 +1,4 @@
+#include "CGALHelper.hpp"
 #include "CGALTYPEDEFS.hpp"
 #include "gtest/gtest.h"
 #include "SPHDatastructures.hpp"

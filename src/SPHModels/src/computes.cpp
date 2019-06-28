@@ -1,261 +1,55 @@
 #include "SPHDatastructures.hpp"
 #include <algorithm>    // std::min
-
-std::vector<float> add(
-    const float &a,
-    const std::vector<float> &b) {
-
-    // todo test performance against std::transform with lambdas
-    std::vector<float> ret(b.size());
-    for (size_t ctr = 0; ctr < b.size(); ctr++) {
-       ret[ctr] = a + b[ctr];
-    }
-
-    return ret;
-}
-
-
-std::vector<Vector> add(
-    const std::vector<Vector> &a,
-    const std::vector<Vector> &b) {
-
-    assert(a.size() == b.size());
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<Vector> ret(b.size());
-    for (size_t ctr = 0; ctr < b.size(); ctr++) {
-      for (size_t j = 0; j < 3; j++) {
-       ret[ctr][j] = a[ctr][j] + b[ctr][j];
-    }
-      }
-
-    return ret;
-}
-
-// std::vector<Point> add(
-//     const std::vector<Point> &a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<Point> ret(b.size());
-//     for (size_t ctr = 0; ctr < b.size(); ctr++) {
-//        ret[ctr] = a[ctr] + b[ctr];
-//     }
-
-//     return ret;
-// }
-
-
-
-std::vector<float> inverse(
-    const std::vector<float> &a
-    ) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = 1.0/a[ctr];
-    }
-
-    return ret;
-}
-
-std::vector<float> sum(
-    const float a,
-    const std::vector<float> &b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(b.size());
-    for (size_t ctr = 0; ctr < b.size(); ctr++) {
-       ret[ctr] = a + b[ctr];
-    }
-
-    return ret;
-}
-
-std::vector<float> sum(
-    const std::vector<float> &a,
-    const std::vector<float> &b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = a[ctr] + b[ctr];
-    }
-
-    return ret;
-}
-
-// std::vector<Vector> sum(
-//     const std::vector<Vector> &a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<Vector> ret(a.size());
-//     for (size_t ctr = 0; ctr < a.size(); ctr++) {
-//        ret[ctr] = a[ctr] + b[ctr];
-//     }
-
-//     return ret;
-// }
-
-// std::vector<Vector> multiplies(
-//     const std::vector<Vector> &a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<Vector> ret(a.size());
-//     for (size_t ctr = 0; ctr < a.size(); ctr++) {
-//        ret[ctr] = {
-//         a[ctr].x() * b[ctr].x(),
-//         a[ctr].y() * b[ctr].y(),
-//         a[ctr].z() * b[ctr].z()};
-
-//     }
-
-//     return ret;
-// }
-
-// std::vector<float> multiply(
-//     const std::vector<Vector> &a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<float> ret(a.size());
-//     for (size_t ctr = 0; ctr < a.size(); ctr++) {
-//        ret[ctr] = a[ctr] * b[ctr];
-//     }
-
-//     return ret;
-// }
-
-// std::vector<Vector> multiply(
-//     const std::vector<float> &a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<Vector> ret(a.size());
-//     for (size_t ctr = 0; ctr < a.size(); ctr++) {
-//        ret[ctr] = a[ctr] * b[ctr];
-//     }
-
-//     return ret;
-// }
-
-std::vector<float> multiply(
-    const std::vector<float> &a,
-    const std::vector<float> &b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = a[ctr] * b[ctr];
-    }
-
-    return ret;
-}
-
-std::vector<float> multiply(
-    const float &a,
-    const std::vector<float> &b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(b.size());
-    for (size_t ctr = 0; ctr < b.size(); ctr++) {
-       ret[ctr] = a * b[ctr];
-    }
-
-    return ret;
-}
-
-
-// std::vector<Vector> multiply(
-//     const float a,
-//     const std::vector<Vector> &b) {
-
-//     // TODO test performance against std::transform with lambdas
-//     std::vector<Vector> ret(b.size());
-//     for (size_t ctr = 0; ctr < b.size(); ctr++) {
-//        ret[ctr] = a * b[ctr];
-//     }
- 
-//     return ret;
-// }
-
-std::vector<float> sqr(
-    const std::vector<float> &a
-    ) {
-    return multiply(a, a);
-}
-
-std::vector<float> divides(
-    const std::vector<float> &a,
-    const float b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = a[ctr] / b;
-    }
-
-    return ret;
-}
-
-std::vector<float> divides(
-    const std::vector<float> &a,
-    const std::vector<float> &b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = a[ctr] / b[ctr];
-    }
-
-    return ret;
-}
-
-
-std::vector<float> power(
-    const std::vector<float> &a,
-    const float b) {
-
-    // TODO test performance against std::transform with lambdas
-    std::vector<float> ret(a.size());
-    for (size_t ctr = 0; ctr < a.size(); ctr++) {
-       ret[ctr] = std::pow(a[ctr], b);
-    }
-
-    return ret;
-}
+#include <math.h>    // std::min
+#include <time.h>    // std::min
+#include <stdlib.h>    // std::min
 
 void compute_kernel(
     Logger logger,
     const float h,
     const SPHPointField &particles,
     const SortedNeighbours &particle_neighbours,
+    const std::vector<Facet_handle> & facets,
     Kernel &kernel) {
     logger.set_scope("Kernel");
     logger.info_begin() << "Computing Kernel";
-    const size_t size {particle_neighbours.ownId.size()};
-    const float invh = 1 / h;
-    const float W_fak2 = 21. / (256. * M_PI * h * h * h);
-    const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
+
+    const size_t size {particle_neighbours.ids.size()};
+    const float invh = 1.0 / h;
+    // // 3d
+    // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
+    // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
+    // 2d
+    const float W_fak2 = 7. / (64. * M_PI * h * h);
+    const float dW_fak2 = 7. / (64. * M_PI * h * h * h);
+
+    // Resize kernel
+    kernel.W = std::vector<float> (size);
+    kernel.dWdxo = std::vector<Vector> (size);
+    kernel.dWdxn = std::vector<Vector> (size);
 
     for (size_t pid = 0; pid < size; pid++) {
 
-        // std::cout << "[DEBUG] pid" << std::endl;
-        const Point &opos = particles[particle_neighbours.ownId[pid]];
-        const Point &npos = particles[particle_neighbours.neighId[pid]];
-        const CGALVector lenV = npos - opos;
-        const float len = std::sqrt(squared_distance(opos, npos));
+        size_t oid = particle_neighbours.ids[pid].ownId;
+        size_t nid = particle_neighbours.ids[pid].neighId;
+
+        const Point &opos = particles[oid];
+        const Point &npos = particles[nid];
+
+        Facet F1 = Facet(*facets[oid]);
+        Facet F2 = Facet(*facets[nid]);
+
+        CGALVector lenVo = particle_neighbours.dist[pid].on;
+        CGALVector lenVn = particle_neighbours.dist[pid].no;
+        float len = particle_neighbours.dist[pid].len;
 
         const float q {len * invh};
 
         if (q > 2.) {
-            std::cout << "[DEBUG] outside kernel radius" << std::endl;
-
+            std::cout << "computes.cpp:49 outside kernel radius"  << std::endl;
             kernel.W[pid] = 0.0;
-            kernel.dWdx[pid] = Vector {0.0, 0.0, 0.0};
+            kernel.dWdxo[pid] = Vector {0.0, 0.0, 0.0};
+            kernel.dWdxn[pid] = Vector {0.0, 0.0, 0.0};
             continue;
         }
 
@@ -269,13 +63,15 @@ void compute_kernel(
         kernel.W[pid] = qfac4 * q2 * W_fak2;
 
         const float prefact = 10. * qfac2 * q * dW_fak2;
-        if(! len == 0) {
+        if( len != 0.0) {
           for(int j=0;j<3;j++) {
-            kernel.dWdx[pid][j] = lenV[j]/len * prefact;
+            kernel.dWdxo[pid][j] = lenVo[j]/len * prefact;
+            kernel.dWdxn[pid][j] = lenVn[j]/len * prefact;
           }
         } else {
           for(int j=0;j<3;j++) {
-            kernel.dWdx[pid][j] = 0.0;
+            kernel.dWdxo[pid][j] = 0.0;
+            kernel.dWdxn[pid][j] = 0.0;
           }
           std::cout << "computes.cpp:275 len == 0"  << std::endl;
         }
@@ -284,51 +80,100 @@ void compute_kernel(
     logger.info_end();
 }
 
+void compute_forces(
+    Logger logger,
+    const SortedNeighbours &particle_neighbours,
+    const SPHPointField &particles,
+    const std::vector<Facet_handle> & facets,
+    const float dx,
+    SPHVectorField &f)
+{
+  // TODO runtime.submodels("force").calculate()
+  // Lennard Jones Potential
+  logger.info_begin() << "Computing forces";
+  f.set(zeroVec);
+
+  const size_t size {particle_neighbours.ids.size()};
+  const float sigma = dx;
+  const float epsilon = 1e-06;
+
+  for (size_t pid = 0; pid < size; pid++) {
+
+    size_t oid = particle_neighbours.ids[pid].ownId;
+    size_t nid = particle_neighbours.ids[pid].neighId;
+    const Point &opos = particles[oid];
+    const Point &npos = particles[nid];
+
+    Facet F1 = Facet(*facets[oid]);
+    Facet F2 = Facet(*facets[nid]);
+
+    CGALVector lenVo = particle_neighbours.dist[pid].on;
+    CGALVector lenVn = particle_neighbours.dist[pid].no;
+
+    double len = (double) particle_neighbours.dist[pid].len;
+
+    double rat = min(4.0, max(0.01, sigma/len));
+    double fi = 4.*epsilon*(pow(rat, 12.) - pow(rat, 6.) );
+
+      for(int j=0;j<3;j++) {
+        if (lenVo[j] != 0.0) {
+          f[oid][j] -= (float) fi/lenVo[j];
+        }
+        if (lenVn[j] != 0.0) {
+          f[nid][j] -= (float) fi/lenVn[j];
+        }
+    }
+  }
+  logger.info_end();
+};
+
+void add_random_noise(Logger logger, SPHVectorField &u, const float dx) {
+    srand(time(NULL));
+    FOR_ALL(u, ctr) {
+      float x = ((float)(rand() % 100))/100.0 - 0.5;
+      float y = ((float)(rand() % 100))/100.0 - 0.5;
+      float z = ((float)(rand() % 100))/100.0 - 0.5;
+
+        Vector uv = u[ctr];
+
+        Vector rv {uv[0] + x * dx, uv[1] + y * dx, uv[2] + z * dx};
+        u[ctr] = rv;
+    }
+}
+
 void compute_pressure_gradient(
-        Logger logger,
-        const SortedNeighbours &particle_neighbours,
-        const Kernel             &kernel,
-        const SPHFloatField &rho,
-        const SPHFloatField &p,
-        SPHVectorField      &dp
-        ) {
+    Logger logger,
+    const SortedNeighbours &particle_neighbours,
+    const Kernel &kernel,
+    const SPHFloatField &rho,
+    const SPHFloatField &p,
+    SPHVectorField &dp) {
 
-    // TODO add particle mass
-    // std::vector<Vector> tmp(rho.size(), {0, 0, 0});
-
-    // SPHFloatField p_ab = p.add_ab(particle_neighbours);
-    // SPHFloatField rho_ab = rho.mult_ab(particle_neighbours);
-
-    SPHFloatField prho = p/rho;
+    logger.info_begin() << "Computing pressure gradient";
+    SPHFloatField prho = p/(rho*rho);
 
     SPHFloatField tmp_ab = prho.add_ab(particle_neighbours);
 
-    size_t size = particle_neighbours.ownId.size();
+    size_t size = particle_neighbours.ids.size();
+
+    // Reset
+    dp.set(Vector {0,0,0});
 
     // weighted sum
     for (size_t i = 0; i < size; i++) {
-        size_t ownId = particle_neighbours.ownId[i];
-        size_t neighId = particle_neighbours.neighId[i];
+        size_t ownId = particle_neighbours.ids[i].ownId;
+        size_t neighId = particle_neighbours.ids[i].neighId;
 
         const float val = tmp_ab[i];
         for (int j = 0; j < 3; j++) {
-          dp[ownId][j]   += val * kernel.dWdx[i][j];
-          dp[neighId][j] -= val * kernel.dWdx[i][j];
+          dp[ownId][j]   += val * kernel.dWdxo[i][j];
+          dp[neighId][j] += val * kernel.dWdxn[i][j];
         }
     }
+    // TODO Implement
+    // dp.weighted_sum(particle_neighbours, tmp_ab);
 
-    std::cout << "dp" << dp << std::endl;
-
-    // particle_neighbours.sum(
-
-    //             multiply(multiply(rrho_b, p_ab), kernel.dWdx)
-    //             , tmp);
-
-
-
-    // tmp.sum()
-
-    // dp = multiply(rrho, tmp);
+    logger.info_end();
 }
 
 void compute_pressure(
@@ -337,6 +182,7 @@ void compute_pressure(
         const SPHFloatField &rho,
         SPHFloatField &pressure
         ) {
+    logger.info_begin() << "Computing pressure";
 
     const float c = 10.0;
     const float rho_0 = 1.0;
@@ -348,55 +194,63 @@ void compute_pressure(
     const SPHScalarField tmp0 = (rho/rho_0).pow(gamma);
     const SPHScalarField tmp1 = ((tmp0 - 1.0)*prefac)+p_0;
 
-    pressure.set(tmp1);
+    pressure = tmp1;
+    logger.info_end();
 }
 
 void compute_dnu(
-        Logger logger,
-        const SortedNeighbours& particle_neighbours,
-        const Kernel & kernel,
-        const std::vector<Vector> &velocities,
-        const std::vector<float> &rho,
-        std::vector<Vector> &dnu,
-        const float h
-        ) {
-    // return cp.div(
-    //         cp.filter(cp.scalar_product(dist, vel_ab), h, 0.0000001),
-    //         cp.scalar_product(dist, dist))
+    Logger logger,
+    const SortedNeighbours &pn,
+    const Kernel &kernel,
+    const SPHVectorField &u,
+    const SPHFloatField &rho,
+    const SPHFloatField &nu,
+    const SPHPointField &pos,
+    SPHVectorField &dnu) {
+    logger.info_begin() << "Computing dnu";
 
-    // logger.info_begin() << "Computing viscous term gradient";
-    // std::vector<Vector> velocity_sub_ab = particle_neighbours.subtract(velocities);
-    // // std::vector<Vector> velocity_sum_ab = particle_neighbours.add(velocities);
-    // std::vector<float>  rho_sum_ab = particle_neighbours.add(rho);
+    // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
 
-    // std::vector<float>  v_scalar_r_ab = multiply(
-    //         velocity_sub_ab,
-    //         multiply(-1.0, particle_neighbours.distances));
+    const SPHVectorField dxp = particle_distance_vec(pos, pn);
 
-    // std::vector<float> tmp0 = divides(v_scalar_r_ab,
-    //        sum(0.001*h, particle_neighbours.squared_length));
+    // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
 
-    // std::vector<Vector> tmp1 = multiply(tmp0, kernel.dWdx);
-    // std::vector<Vector> tmp2 = multiply(1.0, tmp1);
-    // std::vector<Vector> tmp3 = multiply(inverse(rho_sum_ab), tmp2);
+    // const SPHFloatField tmp = tmp0*tmp1;
 
-    // particle_neighbours.sum(multiply(10.0, tmp3), dnu);
-    // logger.info_end();
+    const SPHFloatField tmp = (u.sub_ab(pn) * dxp)/dxp.norm();
+
+    // TODO Reset 
+    dnu.set(Vector {0,0,0});
+
+    // weighted sum
+    const size_t size = pn.ids.size();
+    for (size_t i = 0; i < size; i++) {
+        size_t ownId = pn.ids[i].ownId;
+        size_t neighId = pn.ids[i].neighId;
+
+        for (int j = 0; j < 3; j++) {
+            dnu[ownId][j]   -= tmp[i]  * kernel.dWdxo[i][j];
+            dnu[neighId][j] -= tmp[i]  * kernel.dWdxn[i][j];
+        }
+    }
+
+    dnu *= nu;
+
+    logger.info_end();
 }
 
 void compute_density(
-        Logger logger,
-        const SortedNeighbours& particle_neighbours,
-        const Kernel & kernel,
-        SPHFloatField& rho
-        ) {
+    Logger logger,
+    const SortedNeighbours &particle_neighbours,
+    const Kernel &kernel,
+    SPHFloatField &rho) {
     logger.info_begin() << "Computing density";
-    const float zero = 0.0;
-    rho.set_uniform(zero);
+
+    rho.set_uniform(0.0);
+
     rho.weighted_sum(particle_neighbours, kernel.W);
 
-    // TODO DIRTY FIX to handle holes
-    rho.lower_limit(0.001);
+    // rho.lower_limit(0.01);
 
     logger.info_end();
 }
@@ -406,46 +260,53 @@ void compute_du(
     const SortedNeighbours &particle_neighbours,
     const Kernel &kernel,
     const SPHVectorField &u,
+    const SPHVectorField &f,
     const SPHFloatField &rho,
     const SPHFloatField &p,
-    // std::vector<Vector>& dnu,
+    const SPHVectorField &dnu,
     const SPHVectorField &dp,
     SPHVectorField &du) {
+
     logger.info_begin() << "Computing du/dt";
-    // particle_neighbours.subtract(divides(pressure, sqr(densities)));
-    // SPHFloatField pdd = (p / rho.pow(2.0)).sub_ab(particle_neighbours);
-    // // std::vector<Vector> temp = sum(pdd, nu);
-
-    // weighted sum
-    // size_t size = particle_neighbours.ownId.size();
+    // size_t size = du.size();
     // for (size_t i = 0; i < size; i++) {
-    //     size_t ownId = particle_neighbours.ownId[i];
-    //     size_t neighId = particle_neighbours.neighId[i];
-
-    //     for (int j = 0; j < 3; j++) {
-    //         const float val = dp.get_field()[i][j];
-    //         du[ownId][j] -= val; // * kernel.dWdx[i][j];
-    //         // du[neighId][j] += val;// * kernel.dWdx[i][j];
+    //     for (size_t j = 0; j < 3; j++) {
+    //       // du[i][j] = -dp[i][j] + f[i][j];// + dnu[i][j];
+    //       du[i][j] = f[i][j];// + dnu[i][j];
     //     }
     // }
-  size_t size = du.size();
-  std::cout << "computes.cpp du size" << size << " dp size " << dp.size() << std::endl;
-  for (size_t i=0;i<size;i++) {
-    for (size_t j=0;j<3;j++) {
-      du[i][j] = -dp[i][j];
-    }
-  }
-  logger.info_end();
 
+    du = dnu - dp;
+    logger.info_end();
 }
+
+void limit_dt_du(
+         const SPHVectorField &du,
+         const float maxDx,
+         float & dt
+         ) {
+  const float maxCFL = 0.5; // DONT HARDCODE
+  float maxDu = du.norm().get_max();
+  std::cout << "maxDu " << maxDu << std::endl;
+  float CFL = maxDu*dt*dt/maxDx;
+  std::cout << "maxCFL " << CFL << std::endl;
+  // max double timestep
+  float two = 2.0;
+  float change = min(two, maxCFL/CFL);
+  dt = dt * change;
+}
+
 
 void compute_u(
     Logger logger,
     const SPHVectorField &du,
     const float dt,
     SPHVectorField &u) {
-  std::cout << "[DEBUG] u" << u << " du " << du << std::endl;
-    u.set(u + (du * dt));
+    logger.info_begin() << "Computing velocity";
+  // TODO implement +=
+    u += (du * dt);
+    // std::cout << "[DEBUG] u" << u << " du " << du << std::endl;
+    logger.info_end();
 }
 
 float limit_sphere_frac(CGALVector OP, CGALVector PN, float maxDx2) {
@@ -501,448 +362,377 @@ half_sphere(Point O, Point P, CGALVector PN, CGALVector D, float maxDx) {
     return PN * frac;
 }
 
-CGALVector facet_normal(Facet f)  {
-  HalfedgeConstHandle h  = f.halfedge();
-  Point              p1 = h->vertex()->point();
-  Point              p2 = h->next()->vertex()->point();
-  Point              p3 = h->next()->next()->vertex()->point();
-
-  std::cout
-    << "[DEBUG SLIDE]"
-    << " nA " << p1
-    << " nB " << p2
-    << " nC " << p3
-    << std::endl;
-  CGALVector             n  = CGAL::cross_product(p2-p1, p3-p1);
-  return n / std::sqrt(n*n);
-}
+struct SkipEdge {
+    bool skip;
+    Point A;
+    Point B;
+};
 
 struct SurfaceSlide {
 
-  float rem; // Fraction how much of the original vector distance remains
-  Point P;
-  CGALVector vec; // Slide vector on current facet
-  CGALVector dx; // Slide vector on current facet
-  Facet_handle new_facet; // new facet of particle
-  CGALVector new_facet_N;
+    float rem; // Fraction how much of the original vector distance remains
+    Point P;
+    CGALVector vec;         // Slide vector on current facet
+    CGALVector dx;          // Slide vector on current facet
+    Facet_handle new_facet; // new facet of particle
+    CGALVector new_facet_N;
+    Vector u;
+    SkipEdge ske;
 };
 
+
+
+bool isInsideEdge(
+                  Point P,
+                  Point A,
+                  Point B,
+                  Facet f
+                  ) {
+  // A point is inside a triangle if all shortest connections to edges
+  // have negative scalar product with inside pointing edge normal
+  EdgeNormal en = inwardPointingEdgeNormal(A, B, f);
+
+  CGALVector X = Line(A, B).projection(P) - P;
+
+  if (en.EN * X > 0)
+    {return false;}
+  else {
+    return true;
+  }
+};
+
+// Matrix facetCoordSys(Facet f, CGALVector S) {
+//   CGALVector norm = facet_normal(f);
+//   CGALVector surf = S/std::sqrt(S.squared_length());
+//   CGALVector third = cross_product(surf, norm);
+
+//   return {surf, norm, third};
+// }
+
 SurfaceSlide slide_surface(
-    // size_t facet_id,
-    Point O,
-    Point P,
+    Point SP,      // Start position of particle
     CGALVector PN, // original slide vector
-    CGALVector D,  // face normal
-    float maxDx,
-    Facet_handle f) {
+    Facet_handle f, // Handle to facet on which particle slides
+    SkipEdge ske, // Skip the edgeHit detection for given edge after edge has
+                  // been crossed
+    Vector u) {
+
+    Facet facet = Facet(*f);
+    CGALVector FN = facet_normal(facet);
+    auto h = facet.facet_begin();
+
+    // First check if particle is still on its surface
+    // otherwise edge hit detection fails
+    // ie all vectors to triangle vertex are in same direction
+
+    Plane p {
+        h->vertex()->point(),
+        h->next()->vertex()->point(),
+        h->next()->next()->vertex()->point(),
+    };
+
+    float d = p.d() / std::sqrt(p.orthogonal_vector().squared_length());
+
+    Point P;
+    CGALVector PSP;
+
+    P = p.projection(SP);
+    // Use surface projected point as particle position
+    // SP = P;
 
     // Projection of the motion vector on to the surface
-    CGALVector S = PN - (D * PN) * D;
+    CGALVector S = surfaceProject(FN, PN);
 
-    std::cout
-      << "[DEBUG SLIDE]"
-      << " S " << S
-      << " P " << P
-      << " PN " << PN
-      << std::endl;
+    // std::cout << "[DEBUG SLIDE]"
+    //           << " O " << O
+    //           << " SP " << SP
+    //           << " S " << S
+    //           << std::endl;
 
-    CGALVector OF {0, 0, 0};
-
-    // CGALVector OP = P - O;
-
-    // auto f = fs[facet_id];
-    float frac = 1;
-
-    // int edge_ctr = 0;
-
-    // check if particle is already on a edge and
-    // the direction of the slide vector S needs
-    // to be handled
-    // bool slides_on_edge = false;
+    // frac keeps track of the minimal fraction of S a particle can travel
+    // before hitting an edge
+    float frac = 1.0;
     float lambda = 1.0;
 
     // If particle slides to next facet the remainder of dx on
     // next facet is needed
-    float remainder = 0.0; 
-    // for (auto edge : edges) {
-    //   Point A = edge.first;
-    //   Point B = edge.second;
-    //   CGALVector PA = A - P;
-    //   CGALVector AB = B - A;
-    //   float a = AB.squared_length();
-    //   float lambda1 = -(PA*AB)/a;
-    //   Point X = A + lambda1*AB;
+    float remainder = 0.0;
 
+    Point upa;
+    SkipEdge ske_ {false, upa, upa};
 
-    //   // distance from intersection point X to N'
-    //   CGALVector PX = X-P;
-    //     //  particle is close to edge
-    //     if (PX.squared_length() < 0.001) {
-    //       std::cout << " SNAP to EDGE ";
-    //       // correct direction
-    //       float dir = AB*S;
-    //       S = ((dir)/AB.squared_length())*AB;
+    SurfaceSlide surface_slide {0.0, P, S, PN, f, FN, u, ske_};
 
-    //       // dont slide over beginning or end;
-    //       // slide direction is AB, hence towards B
-    //       float dist = 0.0;
-    //       if (dir >= 0) {
-    //         dist = (B - P).squared_length();
-    //         std::cout << " B is closest ";
-    //       } else {
-    //         dist = (A - P).squared_length();
-    //         std::cout << " A is closest ";
-    //       }
-    //       std::cout << " dist " << dist;
-
-    //       // TODO why cant maxDist be used directly?
-    //       float maxDist = 0.1;
-
-    //       if (dist < maxDist) {
-    //         std::cout << " freeze to vertex ";
-    //         lambda = 0.0;
-    //       } else {
-    //         const float oldLambda = lambda;
-    //         const float newLambda = dist*0.999/S.squared_length();
-    //         lambda = min(oldLambda, newLambda);
-    //         std::cout << " newLambda " << newLambda << " lambda " << lambda;
-    //       }
-
-    //       S = lambda*S;
-
-    //       slides_on_edge = true;
-
-    //     }
-
-    //     std::cout << " S " << S << " P+S " << P+S << std::endl;
-    //     edge_ctr++;
-    // }
-
-    // if (slides_on_edge) return S;
-
+    int skipCtr = 0;
     // check if particle crosses any edges
-
-    auto h = Facet(*f).facet_begin();
-
-    SurfaceSlide surface_slide {0.0, P, S, PN, f, D};
-
     do {
-      Point A = h->vertex()->point();
-      Point B = h->next()->vertex()->point();
+        Point A = h->vertex()->point();
+        Point B = h->next()->vertex()->point();
 
-      CGALVector PA = A - P;
-      CGALVector PB = B - P;
-      CGALVector AP = P - A;
-      CGALVector AB = B - A;
-      float a = AB.squared_length();
-      float b = 2.0*AB*PA;
-      float bb = b*b;
-      float c = (PA).squared_length();
-      float fac = 4.0*a*c;
+        // Skip current edge if particle has just crossed this edge and lies
+        // directly on it
+        if (ske.skip) {
+            bool skipEdge =
+                (A == ske.A && ske.B == B) || (A == ske.B && ske.A == B);
+            if (skipEdge) {
+                skipCtr++;
+                h++;
+                continue;
+            }
+        }
 
-      std::cout
-        << "[DEBUG SLIDE]"
-        << " A " << A
-        << " B " << B
-        << std::endl;
+        bool inside = isInsideEdge(P, A, B, facet);
 
-      // particle is on a vertex freeze
-      // if ((c < 1.0e-02) || ( PB.squared_length()  < 1.0e-02)) {
-      //   std::cout << "freeze particle on vertex" << std::endl;
-      //   return S*0.0;
-      // }
+        // std::cout
+        //   << "[DEBUG SLIDE]"
+        //   << " A " << A
+        //   << " B " << B
+        //   << std::endl;
 
-      // if (bb<=fac) {
-      //   // std::cout << "bb " << bb << " fac " << fac << std::endl; 
+        CGALVector PB = B - P;
+        CGALVector AP = P - A;
 
-      //   // std::cout << "freeze particle outside" << std::endl;
-      //   // return S*0;
-      //   continue;
+        if (!approachesEdge(A, B, P, S)) {
+            // std::cout
+            //   << "[DEBUG SLIDE] "
+            //   << "skipping edge, wrong direction"
+            //   << std::endl;
+            skipCtr++;
+            h++;
+            continue;
+        }
 
-      // };
+        HitPoint hit = approximateEdgeHit(A, B, P, S, 1e-16);
 
-      Point N = P + S;
+        if (!hit.hit) {
+            // std::cout
+            //   << "[DEBUG SLIDE]"
+            //   << " does not hit AB"
+            //   << std::endl;
+            h++;
+            continue;
+        }
 
-      // Shortest, normal vector to facet edge, PX
-      // to identify if particle move towards given
-      // edge
+        CGALVector PX;
+        PX = hit.X - P;
 
-      // intersection point X
-      // from projection of P normal to AB
-      // PX*AB = 0
-      float lambda1 = -(PA*AB)/a;
-      // Point XN is the normal intersection Point
-      Point XN = A + lambda1*AB;
+        float lambda = 1.0 / ((PX * S) / PX.squared_length());
 
-      // distance from intersection point X to N'
-      CGALVector PXN = XN-P;
+        // std::cout
+        //   << "[DEBUG SLIDE]"
+        //   << " hit.X " << hit.X
+        //   << " lambda " << lambda
+        //   << std::endl;
 
-      // intersection fraction should be 0 < lambda < 1
-      // float lambda1 = (-b + std::sqrt(b * b - 4 * a * c)) / (2.0 * a);
-      // float len_sqr_PX = PX.squared_length();
+        // if lambda > 1 at least the currently tested edge
+        // does not restrict the particle but other edge might
+        if (lambda > 1.0 || lambda < 0.0 || !inside) {
+            // std::cout
+            //   << "[DEBUG SLIDE]"
+            //   << " unlimited"
+            //   << " lambda " << lambda
+            //   << std::endl;
+            h++;
+            continue;
+        }
 
-      // // TODO this is not true for skewed triangles
-      // if (lambda1 >= 1.0)
-      //   {
-      //     std::cout << "\tout of bounds Pos" << lambda1;
-      //     // consider only motion along egde
-      //     CGALVector SPr = S-((AB*S)*1.0001/AB.squared_length())*AB;
-      //     float lambda2 = min(1.0, (P - B).squared_length()/SPr.squared_length());
+        if (lambda >= frac) {
+            // std::cout
+            //   << "[DEBUG SLIDE] skipping facet change"
+            //   << std::endl;
+            h++;
+            continue;
+        } else {
+            frac = lambda;
+        }
 
-      //     std::cout << " AB*S"<< AB*S
-      //               << "SPr " << SPr
-      //               << " N " <<  P + SPr
-      //               << " (P-B) " << (P-B)
-      //               << " |(P-B)| " << (P-B).squared_length()
-      //               << " |(P-A)| " << (P-A).squared_length()
-      //               << " |(A-B)| " << (A-B).squared_length()
-      //               << " |SPr| " << SPr.squared_length()
-      //               << " lambda2 " <<  lambda2
-      //               << " N2 " <<  P + lambda2*SPr
-      //               << std::endl;
-      //     return SPr*lambda2;
-      //   };
-      // if (lambda1 <= 0 )
-      //   {
-      //     std::cout << "\tout of bounds Neg" << lambda1;
-      //     // consider only motion along egde
-      //     CGALVector SPr = ((AB*S)*0.9999/AB.squared_length())*AB-S;
-      //     float lambda2 = min(1.0, (P - A).squared_length()/SPr.squared_length());
+        remainder = 1.0 - frac;
 
-      //     // std::cout << "AB*S"<< AB*S
-      //     //           << "SPr " << SPr
-      //     //           << " N " <<  P + SPr
-      //     //           << " (P-B) " << (P-B)
-      //     //           << " |(P-B)| " << (P-B).squared_length()
-      //     //           << " |(P-A)| " << (P-A).squared_length()
-      //     //           << " |(A-B)| " << (A-B).squared_length()
-      //     //           << " |SPr| " << SPr.squared_length()
-      //     //           << " lambda2 " <<  lambda2
-      //     //           << " N2 " <<  P + lambda2*SPr
-      //     //           << std::endl;
-      //     return SPr*lambda2;
-      //   };
-
-      // Check if negative slide vector and edge normal
-      // have same direction, ie particle move towards
-      // edge
-      if( PXN*PN < 0) {
-        std::cout
-          << "[DEBUG SLIDE]"
-          << "skipping edge, wrong direction"
-          << std::endl;
+        // When facet has been changed, make sure vector points
+        // inwards
+        // SET other slide vector
+        h--;
+        h--;
+        Facet_handle next_facet_handle = h->opposite()->facet();
+        Facet next_facet = Facet(*next_facet_handle);
         h++;
-        continue;
-      }
-
-      // TODO check if S hits AB with 0<lambda<1
-      auto res = intersection(Line(A, B), Line(P, P+S));
-      Point X;
-      CGALVector PX;
-      if (! assign(X, res)) {
-        std::cout
-          << "[DEBUG SLIDE]"
-          << " does not hit AB"
-          << std::endl;
         h++;
-        continue;
-      }
 
-      PX = X-P;
+        EdgeNormal en = inwardPointingEdgeNormal(A, B, next_facet);
 
-      float alpha = (PX*S)/PX.squared_length();
+        CGALVector ON = en.FN;  // new edge normal
+        CGALVector NAB = en.EN; // new edge inward pointing normal
 
-      float lambda2 = 1.0/alpha;
+        CGALVector Ss = S * frac;
+        CGALVector remVec = S - Ss;
 
-      std::cout
-        << "[DEBUG SLIDE]"
-        << " alpha " << alpha
-        << " lambda2 " << lambda2
-        << std::endl;
-      // Something is strange if < lambda2<0
-      if (lambda2<0.0) {
+        // Rotation angles around Cartesian coordinates
+        // Matrix R =  createRotationMatrix(D, ON);
+        Matrix R = createRotationMatrix(next_facet, facet);
+        Matrix R2 = createRotationMatrix(FN, ON);
+
+        // std::cout
+        //   << "[DEBUG SLIDE] Rotate before"
+        //   << " D " << D        // Current face normal
+        //   << " ON " << ON      // New face normal
+        //   << " R.x " << R.x    // Rotation matrix
+        //   << " R.y " << R.y
+        //   << " R.z " << R.z
+        //   << " R2.x " << R2.x    // Rotation matrix
+        //   << " R2.y " << R2.y
+        //   << " R2.z " << R2.z
+        //   << " remVec " << remVec // Slide vector remainder
+        //   << " u " << surface_slide.u[0]
+        //   << "  " << surface_slide.u[1]
+        //   << "  " << surface_slide.u[2]
+        //   << std::endl;
+
+        CGALVector remVecOrig = remVec;
+        if (ON != -FN) {
+            // std::cout
+            //   << "[DEBUG SLIDE] Rotate "
+            //   << std::endl;
+
+            remVec = rotate(R2, remVec);
+            surface_slide.u = rotate(R2, u);
+        }
+
+        // std::cout
+        //   << "[DEBUG SLIDE] Rotate after"
+        //   << " remVec " << remVec
+        //   << " remVec2 " << rotate(R, remVecOrig)
+        //   << " u " << surface_slide.u[0]
+        //   << "  " << surface_slide.u[1]
+        //   << "  " << surface_slide.u[2]
+        //   << std::endl;
+
+        Point N = P + Ss;
+
+        if (NAB * remVec < 0) {
+            // TODO dont project but mirror
+            remVec = -remVec;
+            surface_slide.u[0] = -surface_slide.u[0];
+            surface_slide.u[1] = -surface_slide.u[1];
+            surface_slide.u[2] = -surface_slide.u[2];
+
+            // std::cout
+            //   << "[DEBUG SLIDE] invert remVec\n"
+            //   << "[DEBUG SLIDE]"
+            //   << " remVec " << remVec
+            //   << "\n[DEBUG SLIDE]"
+            //   << " u " << surface_slide.u[0]
+            //   << "  " << surface_slide.u[1]
+            //   << "  " << surface_slide.u[2]
+            //   << std::endl;
+        }
+
+        // std::cout
+        //   << "[DEBUG SLIDE] Change facet"
+        //   << " N " << N
+        //   << "\n[DEBUG SLIDE]"
+        //   << " NAB " << NAB
+        //   << "\n[DEBUG SLIDE]"
+        //   << " u " << surface_slide.u[0]
+        //   << "  " << surface_slide.u[1]
+        //   << "  " << surface_slide.u[2]
+        //   << " remVec " << remVec
+        //   << " remainder " << remainder
+        //   << std::endl;
+
+        surface_slide.rem = remainder;
+        surface_slide.P = P + Ss;          // + 1e-09*NAB;
+        surface_slide.vec = Ss + (P - SP); // + 1e-09*NAB;
+        surface_slide.dx = remVec;
+        surface_slide.new_facet = next_facet_handle;
+        surface_slide.new_facet_N = ON;
+        surface_slide.ske = SkipEdge {true, A, B};
         h++;
-        continue;
-      }
-      // if lambda2 > 1 at least the currently tested edge
-      // does not restrict the particle but other edge might
-      if (lambda2>1.0) {
-        std::cout
-          << "[DEBUG SLIDE]"
-          << " unlimited "
-          << std::endl;
-        h++;
-        continue;
-      }
+    } while (h != Facet(*f).facet_begin());
 
-      // When facet has been changed, make sure vector points
-      // inwards
-      // SET other slide vector
-      h--;
-      h--;
-      Facet_handle next_facet_handle = h->opposite()->facet();
-      Facet next_facet = Facet(*next_facet_handle);
-      CGALVector ON =  facet_normal(next_facet);
-      h++;
-      h++;
-      OF = PN - (ON * PN) * ON;
+    // std::cout
+    //   << "[DEBUG SLIDE]"
+    //   << " final frac " << frac
+    //   << " final remainder " << remainder
+    //   << " N "  << P + S*frac
+    //   << std::endl;
 
-      Point NPr = P + lambda2*PN;
-      frac = min(frac,  lambda2);
-      remainder = 1.0 - frac;
-
-      // inwards pointing vector
-      // assume that other component points always outwards
-      Point nC;
-
-      // TODO refactor
-      nC = next_facet.halfedge()->opposite()->vertex()->point();
-      std::cout
-        << "[DEBUG SLIDE]"
-        << " nC " << nC
-        << std::endl;
-      if (nC == A || nC == B) {
-        nC = next_facet.halfedge()->next()->vertex()->point();
-        std::cout
-          << "[DEBUG SLIDE]"
-          << " nC2 " << nC
-          << std::endl;
-      }
-      if (nC == A || nC == B) {
-        nC = next_facet.halfedge()->vertex()->point();
-        std::cout
-          << "[DEBUG SLIDE]"
-          << " nC3 " << nC
-          << std::endl;
-      }
-
-      CGALVector scaledS = S*frac;
-      CGALVector remVec = scaledS - PN;
-
-      CGALVector NAB = CGAL::cross_product(AB, ON);
-      NAB = NAB/std::sqrt(NAB.squared_length());
-      Point nN = P + scaledS;
-      CGALVector NC = nC-N;
-
-      if (NAB * NC < 0) {
-        NAB = -NAB;
-      }
-
-      CGALVector PNin;
-      if (NAB * remVec < 0) {
-        remVec = remVec*NAB*NAB;
-      }
-
-      // TODO snap to new surface
-
-      std::cout
-        << "[DEBUG SLIDE]"
-        << " A " << A
-        << " B " << B
-        << " P " << P
-        << " S " << S
-        << " P+S " << P+S
-        << " P+S*frac " << nN
-        << " lambdaOld " << lambda
-        << " lambda2 " << lambda2
-        << " N' " << NPr 
-        << " ON " << ON
-        << " NAB " << NAB
-        << " nC " << nC
-        << " NC " << NC
-        << " OF " << OF
-        << " remVec " << remVec
-        << " remainder " << remainder
-        << std::endl;
-
-      surface_slide.rem = remainder;
-      surface_slide.P = P+scaledS;
-      surface_slide.vec = scaledS;
-      surface_slide.dx = remVec;
-      surface_slide.new_facet = next_facet_handle;
-      surface_slide.new_facet_N = ON;
-      h++;
-    } while ( h != Facet(*f).facet_begin());
-
-    std::cout
-      << "[DEBUG SLIDE]"
-      << " final frac " << frac
-      << " final remainder " << remainder
-      << " NPr"  << P + S*frac
-      << " r*OF"  << remainder*OF
-      << " newPoint "  << P + S*frac + remainder*OF
-      << std::endl;
-
-    return surface_slide;// + remainder*OF``;
+    return surface_slide;
 }
 
 SPHVectorField limit_dx(
     SPHVectorField &u,
-    const float dt,
+    float dt,
     const std::vector<Point> &opoints,
-    FixedDistanceParticles &fdp,
     std::vector<Facet_handle> &facets,
+    const SPHIntField &type,
     const SPHSizeTField &idx,
     const SPHPointField &pos
-                        ) {
+    ) {
+
     SPHVectorField dx = u*dt;
+    // TODO relax dt by CFL criterion
+
     std::vector<Vector> &ret = dx.get_field();
 
+#pragma omp for nowait
     for (size_t i = 0; i < pos.size(); i++) {
-        int mType = fdp.mType[i];
-        Point O = pos[fdp.fixId[i]];
+        int mType = type[i];
+        // Point O = pos[fdp.fixId[i]];
         Point P = pos[i];
         CGALVector PN = {dx[i][0], dx[i][1], dx[i][2]};
-        CGALVector D = fdp.dir[i];
-        float maxDx = fdp.maxDx[i];
-        // const Facet facet = facets[fdp.facets[i]];
+        // CGALVector D = fdp.dir[i];
+        // float maxDx = fdp.maxDx[i];
 
         CGALVector frac {0, 0, 0};
 
-        std::cout
-                  << "[DEBUG SLIDE]"
-                  << "Particle Id " << idx.get_field()[i]
-                  // // << " O (" << O << ")"
-                  // << " P (" << P << ")"
-                  // // << " maxDx " << maxDx
-                  // // << " OP (" << OP << ")"
-                  // // << " curDx " << std::sqrt(OP.squared_length())
-                  // << " dx (" << PN << ")"
-                  // << " |dx| " << std::sqrt(PN.squared_length())
-                  // << " P+dx (" << P+PN << ")"
-                  << std::endl;
+        // std::cout
+        //           << "[DEBUG SLIDE]"
+        //           << " Particle Id " << idx.get_field()[i]
+        //           << std::endl;
 
         if (mType == 0) {
             frac = CGALVector {0, 0, 0};
         }
 
         if (mType == 2) {
-          // std::cout << "point" << i << std::endl;
 
           float rem = 1.0;
+          int ctr=0;
+          Point upa;
+          SkipEdge ske {false, upa, upa};
           do {
-             // Facet f =  
               auto surf_slide =
-              slide_surface(O, P, PN, D, maxDx, fdp.facets[i]);
-              std::cout
-                << "[DEBUG SLIDE]"
-                << " remainder " << rem
-                << std::endl;
+                slide_surface(P, PN, facets[i], ske, u[i]);
               P = surf_slide.P;
               PN = surf_slide.dx;
               rem = surf_slide.rem;
-              fdp.facets[i] = surf_slide.new_facet;
+              // std::cout
+              //   << "[DEBUG SLIDE]"
+              //   << " remainder " << rem
+              //   << "\n[DEBUG SLIDE]"
+              //   << " u " << u[i][0]
+              //   << "  " <<  u[i][1]
+              //   << "  " <<  u[i][2]
+              //   << std::endl;
+              facets[i] = surf_slide.new_facet;
               frac += surf_slide.vec;
-              D = surf_slide.new_facet_N;
-              fdp.dir[i] = D;
+              // D = surf_slide.new_facet_N;
+              // fdp.dir[i] = D;
+              u[i] = surf_slide.u;
+              ske = surf_slide.ske;
+              ctr++;
+              // Hard break after 10 iterations
+              // TODO use a distance/fraction based check
+              if (ctr>100) break;
           } while (rem > 0.0);
-            // std::cout << "surface " << i << " " << frac << std::endl;
         };
 
-        if (mType == 3) {
-            frac = half_sphere(O, P, PN, D, maxDx);
-            // std::cout << "sphere " << i << " " << frac << std::endl;
-        }
+        // if (mType == 3) {
+        //     frac = half_sphere(O, P, PN, D, maxDx);
+        // }
+
+        // Set correct velocity for fixed particles
+        // TODO modify velocity for face modified particles
         if (frac[0]==0) {
           u[i][0] = 0.0;
         }
@@ -957,40 +747,96 @@ SPHVectorField limit_dx(
         ret[i][1] = frac.y();
         ret[i][2] = frac.z();
 
-        std::cout
-          << "[DEBUG SLIDE]"
-          << "Particle Id " << idx.get_field()[i]
-          << " DONE "
-          << std::endl;
+        // std::cout
+        //   << "[DEBUG SLIDE]"
+        //   << " Particle Id " << idx.get_field()[i]
+        //   << " DONE "
+        //   << std::endl;
     }
 
-    return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp");
+    return SPHVectorField (ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);
 }
 
-void update_pos(
+
+void snap_to_surface(
+  std::vector<Facet_handle>& facets,
+  SPHPointField& pos
+                     ){
+
+  std::vector<Vector> corrector(pos.size(), {0,0,0});
+
+  for (size_t i = 0; i < pos.size(); i++) {
+  // compute distance to facet
+    // Facet facet = Facet(*facets[i]);
+    // CGALVector N = facet_normal(facet);
+    // float d = facet.plane().d();
+    // CGALVector P = pos[i]-Point(0, 0, 0);
+    // float dist = (N*P+d)/std::sqrt(N.squared_length());
+
+    Facet facet = Facet(*facets[i]);
+    auto h = facet.facet_begin();
+
+    Plane p {
+             h->vertex()->point(),
+             h->next()->vertex()->point(),
+             h->next()->next()->vertex()->point(),
+    };
+
+    Point P = p.projection(pos[i]);
+    CGALVector dx = P - pos[i];
+
+    // if (dist != 0.0) {
+    //   std::cout
+    //     << "[DEBUG SLIDE] Snap to STL"
+    //     << " Particle Id " << i
+    //     << " Pos " << P
+    //     << " dist " << dist
+    //     << " N " << N
+    //     << " d*N" << d*N
+    //     << " p-d*N " << pos[i] - d*N
+    //     << " DONE "
+    //     << std::endl;
+        corrector[i] = Vector{(float)dx.x(), (float)dx.y(), (float)dx.z()};
+  }
+
+  SPHVectorField cor = SPHVectorField(corrector, {"tmpx", "tmpy", "tmpz"}, "tmp");
+}
+
+float update_pos(
         Logger logger,
         SPHVectorField &u,
-        const float dt,
+        float dt,
+        float dx_max,
         const std::vector<Point> opoints,
-        FixedDistanceParticles &fpd,
+        // FixedDistanceParticles &fpd,
+        const SPHIntField &type,
         std::vector<Facet_handle>& facets,
         const SPHSizeTField &idx,
         SPHPointField& pos
         )
 {
   logger.info_begin() << "Updating particle positions";
+  const float maxCFL = 0.5; // TODO DONT HARDCODE
 
-  std::cout << "u*dt" << u*dt << u << std::endl;
-  SPHVectorField dx = limit_dx(u, dt, opoints, fpd, facets, idx, pos) ;
-  // SPHVectorField dx = u*dt;
-  // TODO set u to zero if dx == 0
+  SPHPointField old_pos(pos);
 
+  SPHVectorField dx = limit_dx(u, dt, opoints, facets, type, idx, pos) ;
 
   pos += dx;
-  // TODO snap to stl surface
 
-  std::cout << pos << std::endl;
+  const float CFL = 0.01;
+  float current_max_dx = (pos - old_pos).norm().get_max();
+  float dx_ratio = CFL*dx_max/current_max_dx;
+  float two = 10.0;
+  float change = min(two, dx_ratio);
+  dt =  dt * change;
+
   logger.info_end();
-
-  // constrain position
+  return dt;
 }
+
+
+// SPHPointField cut(SPHPointField a, SPHPointField b, Surfaces) {
+//   // Deletes all Points from a that are outside of b
+  
+// }

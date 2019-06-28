@@ -32,6 +32,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
       -Rpass-analysis=loop-vectorize \
       -Rpass-missed=loop-vectorize \
       -ffast-math \
+      -fsanitize=address \
       "
       )
 

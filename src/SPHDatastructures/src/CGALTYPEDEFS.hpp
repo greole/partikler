@@ -1,3 +1,6 @@
+#ifndef CGALTYPEDEFS_H
+#define CGALTYPEDEFS_H
+
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/point_generators_3.h>
@@ -17,8 +20,10 @@ using namespace CGAL;
 typedef Simple_cartesian<double>          K;
 typedef CGAL::Polyhedron_3<K>             Polyhedron;
 typedef CGAL::Triangle_3<K>               Triangle;
+typedef CGAL::Aff_transformation_3<K>     Transformation;
 typedef K::Point_3                        Point;
-typedef K::Segment_3                      Line;
+typedef K::Plane_3                        Plane;
+typedef K::Line_3                         Line;
 typedef Polyhedron::Traits::Vector_3      CGALVector;
 typedef std::array<float, 3>              Vector;
 
@@ -41,3 +46,5 @@ std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
 
 template <class PolyhedronTraits_3>
 std::ifstream& operator>>( std::ifstream& in, Polyhedron& P);
+
+#endif

@@ -44,21 +44,21 @@ static void OwnerCubeSearch(benchmark::State& state) {
   // float cube_dx = 1.0/((float) n_points);
   for (auto _: state) {
     SortedNeighbours ret {};
-    ret.ownId.reserve(27*points.size()/2);
-    ret.neighId.reserve(27*points.size()/2);
-    owner_cube_search(points, 0, 27, 2.0, ret);
+    ret.ids.reserve(27*points.size()/2);
+    // owner_cube_search(points, 0, 27, 2.0, ret);
   }
 }
-static void OwnerCubeSearchVector(benchmark::State& state) {
-  std::vector<Point> points = create_uniform_particle_cube(3);
-  // float cube_dx = 1.0/((float) n_points);
-  for (auto _: state) {
-    SortedNeighbours ret {};
-    ret.ownId.reserve(27*points.size()/2);
-    ret.neighId.reserve(27*points.size()/2);
-    vector_owner_cube_search(points, 0, 27, 2.0, ret);
-  }
-}
+
+// static void OwnerCubeSearchVector(benchmark::State& state) {
+//   std::vector<Point> points = create_uniform_particle_cube(3);
+//   // float cube_dx = 1.0/((float) n_points);
+//   for (auto _: state) {
+//     SortedNeighbours ret {};
+//     ret.ownId.reserve(27*points.size()/2);
+//     ret.neighId.reserve(27*points.size()/2);
+//     vector_owner_cube_search(points, 0, 27, 2.0, ret);
+//   }
+// }
 
 static void SortingParticles(benchmark::State& state) {
     size_t n_points =  state.range(0);
@@ -99,7 +99,7 @@ static void SortAndCreateNeighbours(benchmark::State& state) {
   const SearchCubeDomain scd = initSearchCubeDomain(points, cube_dx);
   for (auto _: state) {
     SortedParticles sp = countingSortParticles(scd, points);
-    createNeighbours(scd, sp);
+    // createNeighbours(scd, sp);
   }
 }
 
@@ -110,12 +110,12 @@ static void CreateNeighbours(benchmark::State& state) {
   const SearchCubeDomain scd = initSearchCubeDomain(points, cube_dx);
   SortedParticles sp = countingSortParticles(scd, points);
   for (auto _: state) {
-    createNeighbours(scd, sp);
+    // createNeighbours(scd, sp);
   }
 }
 
 BENCHMARK(OwnerCubeSearch)->MinTime(2);
-BENCHMARK(OwnerCubeSearchVector)->MinTime(2);
+// BENCHMARK(OwnerCubeSearchVector)->MinTime(2);
 
 // Particle sorting functions
 BENCHMARK(SortingParticles)

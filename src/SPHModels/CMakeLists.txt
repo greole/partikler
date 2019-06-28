@@ -2,7 +2,7 @@ project(SPHCore LANGUAGES CXX)
 
 find_package(GTest REQUIRED)
 
-add_library(SPHCore SHARED src/SPHCore src/computes)
+add_library(SPHCore SHARED src/SPHCore src/SPHModels)
 
 add_dependencies(SPHIO SPHIO)
 
