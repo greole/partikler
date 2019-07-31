@@ -1,37 +1,13 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-// #include <stdlib.h>     /* abort, NULL */
+#include <vector>     /* abort, NULL */
+#include "CGALTYPEDEFS.hpp"
 
-std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
-    std::vector<Point> points;
-    points.reserve(n_particles);
-        for (size_t j = 0; j < n_particles; j++) {
-            for (size_t i = 0; i < n_particles; i++) {
-                float x = ((float)i) / ((float)n_particles);
-                float y = ((float)j) / ((float)n_particles);
-                float z = 0.0;
-                points.push_back(Point(x, y, z));
-            }
-        }
-    return points;
-}
 
-std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
-    std::vector<Point> points;
-    points.reserve(n_particles);
-    for (size_t k = 0; k < n_particles; k++) {
-        for (size_t j = 0; j < n_particles; j++) {
-            for (size_t i = 0; i < n_particles; i++) {
-                float x = ((float)i) / ((float)n_particles);
-                float y = ((float)j) / ((float)n_particles);
-                float z = ((float)k) / ((float)n_particles);
-                points.push_back(Point(x, y, z));
-            }
-        }
-    }
-    return points;
-}
+std::vector<Point> create_uniform_particle_plane(size_t n_particles);
+
+std::vector<Point> create_uniform_particle_cube(size_t n_particles);
 
 struct FixedDistanceParticles {
 
@@ -53,20 +29,10 @@ struct FixedDistanceParticles {
   std::vector<Facet_handle>         facets;
 };
 
-float rand01() { return ((float)rand() / (RAND_MAX)); }
+float rand01();
 
 std::vector<Point> disperse_particles(
         std::vector<Point>& points,
-        float dx)
-{
-    for (size_t piter=0; piter<points.size(); piter++) {
-
-        float x = points[piter].x() + rand01()*dx;
-        float y = points[piter].x() + rand01()*dx;
-        float z = points[piter].x() + rand01()*dx;
-        points[piter] = Point(x,y,z);
-    }
-    return points;
-}
+        float dx);
 
 #endif

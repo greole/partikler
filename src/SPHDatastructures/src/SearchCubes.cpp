@@ -1,7 +1,5 @@
-#ifndef SEARCHCUBES_H
-#define SEARCHCUBES_H
 
-#include "SPHDatastructures.hpp"
+#include "SearchCubes.hpp"
 
 // inplace functions
 void owner_cube_search(
@@ -426,29 +424,33 @@ SortedNeighbours mergedCountingSortAndNeighbourSearch(
 };
 
 // void owner_cube_search(first, last, ret,) {};
-
 SortedNeighbours
 createNeighbours(
     const SearchCubeDomain scd,
-    const SortedParticles &particles,
+    const std::vector<Point> & pos,
+    std::vector<SearchCube> & searchCubes
+    ) {};
+
+SortedNeighbours
+createSTLNeighbours(
+    const SearchCubeDomain scd,
+    const std::vector<Point> & pos,
+    std::vector<SearchCube> & searchCubes,
     const std::vector<Facet_handle> & facets
     ) {
     // Step 0 initialise return values
+    std::cout << "SEARCHCUBES.cpp " << std::endl;
 
     SortedNeighbours ret {
                           std::vector<NeighbourPair>(0),
                           std::vector<STLSurfaceDist>(0)};
-    /* ret.firstLast.reserve(particles.particles.size()); */
-    ret.ids.reserve(40 * particles.particles.size());
-    ret.dist.reserve(40 * particles.particles.size());
+
+    ret.ids.reserve(40 * pos.size());
+    ret.dist.reserve(40 * pos.size());
 
 #pragma omp parallel
     {
-    const std::vector<SearchCube> &searchCubes {particles.searchCubes};
-    const std::vector<Point> &pos {particles.particles};
-
     const float maxDistanceSqr = scd.dx * scd.dx;
-    const size_t particle_stop_id = pos.size();
 
     NeighbourIdHalfStencil ncidsten(scd.n.nx, scd.n.ny);
     SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
@@ -457,9 +459,12 @@ createNeighbours(
     SortedNeighbours ret_tmp {
         std::vector<NeighbourPair>(0),
         std::vector<STLSurfaceDist>(0)};
-    /* ret.firstLast.reserve(particles.particles.size()); */
-    ret_tmp.ids.reserve(40 * particles.particles.size()/omp_get_num_threads());
-    ret_tmp.dist.reserve(40 * particles.particles.size()/omp_get_num_threads());
+
+    ret_tmp.ids.reserve(40 * pos.size()/omp_get_num_threads());
+    ret_tmp.dist.reserve(40 * pos.size()/omp_get_num_threads());
+    // // serial
+    // ret_tmp.ids.reserve(40 * pos.size());
+    // ret_tmp.dist.reserve(40 * pos.size());
 
     #pragma omp for nowait
     for (size_t sid = 0; sid < scd.nt; sid++) {
@@ -497,4 +502,3 @@ createNeighbours(
     return ret;
 };
 
-#endif

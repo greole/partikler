@@ -3,6 +3,10 @@
 
 #include <chrono>
 #include <stdlib.h>     /* exit, EXIT_FAILURE */
+#include <iostream>
+#include <vector>
+#include <string>       // std::string
+#include <sstream>
 
 class MSG {
 

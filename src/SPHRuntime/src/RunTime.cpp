@@ -1,6 +1,16 @@
 #include "RunTime.hpp"
 #include "SearchCubes.cpp"
 
+RunTime::RunTime(Logger logger, const bool from_disk)
+    : logger_(logger),
+      from_disk_(from_disk),
+      obj_reg_({})
+{
+    logger_.set_scope("Runtime.h");
+    logger_.info() << "Starting SPH RunTime ";
+    print_git_state();
+};
+
 Kernel &RunTime::initialize_kernel() {
 
     logger_.info_begin() << "Initialising Kernel";
@@ -19,65 +29,76 @@ Kernel &RunTime::initialize_kernel() {
     return kernel_;
 }
 
-SPHPointField &RunTime::set_particle_positions(std::vector<Point> &positions) {
-    // creates the positions field from a vector of positions
-    // returns a reference to the newly created field
-    // TODO delete all registered fields when runTime destructor is called
+void RunTime::write_to_disk() {
+    std::cout << "write to disk" << std::endl;
+    int cur_timestep = get_timestep();
+    int write_freq = get_write_freq();
+    int index_on_dist = cur_timestep / write_freq;
+    std::cout << "TIMESTEP: " << cur_timestep << " " << write_freq << std::endl;
 
-    SPHPointField *pointField =
-      new SPHPointField(sorted_particles_.particles, "Pos");
-    root_object_.register_object(*pointField);
+    if (cur_timestep - index_on_dist * write_freq == 0) {
+        std::cout << obj_reg_.get_objects().size() << std::endl;
 
-    n_particles_ = sorted_particles_.particles.size();
+        prepare_data_folder("Data", index_on_dist);
 
-    return *pointField;
+        const std::string path = "Data/step#" + intToStr(index_on_dist);
+
+        for (auto &f : obj_reg_.get_objects()) f->write_to_disk(path);
+    }
 }
 
 SortedNeighbours &
-RunTime::initialize_particle_neighbours(
-    std::vector<Point> &positions
-    ) {
-    // TODO call set_particle_positions first
-    logger_.info_begin() << "Sorting particles";
-    float dx = std::any_cast<float>(dict_["dx"]);
-    search_cube_domain_ = initSearchCubeDomain(positions, search_cube_size_*dx);
-    sorted_particles_ = countingSortParticles(search_cube_domain_, positions);
+RunTime::initialize_particle_neighbours() {
+    // // TODO call set_particle_positions first
+    // logger_.info_begin() << "Sorting particles";
+    // float dx = std::any_cast<float>(dict_["dx"]);
 
-    logger_.info_end();
-    set_particle_positions(sorted_particles_.particles);
+    // SPHPointField &pos = get_particle_positions();
+    // auto & facets  = get_obj<SPHField<Facet_handle>>("facets").get_field();
 
-    reorder_vector(get_sorting_idxs(), facets_);
+    // search_cube_domain_ = initSearchCubeDomain(pos.get_field(), search_cube_size_*dx);
+    // sorted_particles_ = countingSortParticles(search_cube_domain_, pos.get_field());
 
-    logger_.info_begin() << "Initialising particle neighbours";
-    particle_neighbours_ =
-        createNeighbours(search_cube_domain_, sorted_particles_, facets_);
-    logger_.info_end();
+    // logger_.info_end();
+    // // set_particle_positions(sorted_particles_.particles);
 
-    return particle_neighbours_;
+    // reorder_vector(get_sorting_idxs(), facets);
+
+    // logger_.info_begin() << "Initialising particle neighbours";
+    // particle_neighbours_ =
+    //     createNeighbours(search_cube_domain_, sorted_particles_, facets);
+    // logger_.info_end();
+
+    // return particle_neighbours_;
 }
 
 void
 RunTime::update_neighbours() {
-  // TODO call set_particle_positions first
-  logger_.info_begin() << "Updating particles";
-  float dx = std::any_cast<float>(dict_["dx"]);
+  // // TODO call set_particle_positions first
+  // logger_.info_begin() << "Updating particles";
+  // float dx = std::any_cast<float>(dict_["dx"]);
 
-  SPHPointField &pos = get_particle_positions();
+  // SPHPointField &pos = get_particle_positions();
 
-  search_cube_domain_ =
-      initSearchCubeDomain(pos.get_field(), search_cube_size_ * dx);
+  // auto & facets  = get_obj<SPHField<Facet_handle>>("facets").get_field();
 
-  logger_.info_begin() << "Start counting sort";
-  sorted_particles_ = countingSortParticles(search_cube_domain_, pos.get_field());
-  logger_.info_end();
+  // search_cube_domain_ =
+  //     initSearchCubeDomain(pos.get_field(), search_cube_size_ * dx);
 
-  get_particle_positions().set_field(sorted_particles_.particles);
-  reorder_vector(get_sorting_idxs(), facets_);
+  // logger_.info_begin() << "Start counting sort";
+  // sorted_particles_ = countingSortParticles(search_cube_domain_, pos.get_field());
+  // logger_.info_end();
 
-  logger_.info_begin() << "Updating particle neighbours";
-  particle_neighbours_ =
-      createNeighbours(search_cube_domain_, sorted_particles_, facets_);
-  logger_.info_end();
+  // get_particle_positions().set_field(sorted_particles_.particles);
+
+  // logger_.info() << "reoder facets";
+  // reorder_vector(get_sorting_idxs(), facets);
+  // logger_.info() << "done";
+
+  // logger_.info_begin() << "Updating particle neighbours";
+  // particle_neighbours_ =
+  //     createNeighbours(search_cube_domain_, sorted_particles_, facets);
+  // logger_.info_end();
 
 }
 

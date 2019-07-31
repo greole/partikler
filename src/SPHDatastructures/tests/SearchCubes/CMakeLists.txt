@@ -21,5 +21,5 @@ target_compile_options(search_cubes_tests PRIVATE ${OpenMP_CXX_FLAGS})
 
 gtest_discover_tests(search_cubes_tests)
 
-add_executable(search_cubes_benchmark "search_cubes_benchmark.cpp")
-target_link_libraries(search_cubes_benchmark benchmark pthread CGAL SPHDatastructures OpenMP::OpenMP_CXX)
+# add_executable(search_cubes_benchmark "search_cubes_benchmark.cpp")
+# target_link_libraries(search_cubes_benchmark benchmark pthread CGAL SPHDatastructures OpenMP::OpenMP_CXX)

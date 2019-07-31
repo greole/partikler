@@ -6,7 +6,7 @@ find_package(GTest REQUIRED)
 
 include(git_watcher.cmake)
 
-add_library(SPHIO SHARED src/RunTime)
+add_library(SPHIO SHARED src/RunTime.cpp)
 
 add_dependencies(SPHIO SPHDatastructures)
 

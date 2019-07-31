@@ -5,12 +5,12 @@
 #include "gtest/gtest.h"
 #include <vector>
 
-Polyhedron createExampleTetrahedron() {
+CGALPolyhedron createExampleTetrahedron() {
   Point p( 1.0, 0.0, 0.0);
   Point q( 0.0, 1.0, 0.0);
   Point r( 0.0, 0.0, 1.0);
   Point s( 0.0, 0.0, 0.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_tetrahedron( p, q, r, s);
   return P;
 };
@@ -30,7 +30,7 @@ struct PushFacets {
 };
 
 TEST(CommonVerticesTest, CorrectNumberVertices) {
-    Polyhedron p = createExampleTetrahedron();
+    CGALPolyhedron p = createExampleTetrahedron();
 
     std::vector<Facet_handle> fhs;
 
@@ -45,7 +45,7 @@ TEST(FacetNormalTest, TrivialFacet) {
   Point p( 1.0, 0.0, 0.0);
   Point q( 0.0, 1.0, 0.0);
   Point r( 0.0, 0.0, 0.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
 
   std::vector<Facet_handle> fhs;
@@ -63,7 +63,7 @@ TEST(SearchPathTest, TwoFacets) {
   Point q( 0.0, 1.0, 0.0);
   Point r( 0.0, 0.0, 0.0);
   Point s( 1.0, 1.0, 0.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
   P.make_triangle(p, q, s);
 
@@ -89,7 +89,7 @@ TEST(ProjectedPoint, TwoFacetsEqualNormal) {
   Point q( 0.0, 1.0, 0.0);
   Point r( 0.0, 0.0, 0.0);
   Point s( 1.0, 1.0, 0.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
   P.make_triangle(p, q, s);
 
@@ -122,7 +122,7 @@ TEST(ProjectedPoint, TwoOrthogonalFacets) {
   Point q( 1.0, 1.0, 0.0);
   Point r( 0.0, 0.0, 0.0);
   Point s( 1.0, 0.0, 1.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
   P.make_triangle(p, s, q);
 
@@ -156,7 +156,7 @@ TEST(ProjectedPoint, ThreeFacetsTwoOrthogonal) {
   Point r( 0.0, 0.0, 0.0);
   Point s( 1.0, 0.0, 1.0);
   Point t( 1.0, 1.0, 1.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
   P.make_triangle(p, s, q);
   P.make_triangle(q, s, t);
@@ -192,7 +192,7 @@ TEST(SearchPathTest, ThreeFacets) {
   Point r( 0.0, 0.0, 0.0);
   Point s( 1.0, 1.0, 0.0);
   Point t( 2.0, 1.0, 0.0);
-  Polyhedron P;
+  CGALPolyhedron P;
   P.make_triangle(p, q, r);
   P.make_triangle(p, q, s);
   P.make_triangle(p, s, t);

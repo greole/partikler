@@ -18,33 +18,33 @@
 
 using namespace CGAL;
 typedef Simple_cartesian<double>          K;
-typedef CGAL::Polyhedron_3<K>             Polyhedron;
+typedef CGAL::Polyhedron_3<K>             CGALPolyhedron;
 typedef CGAL::Triangle_3<K>               Triangle;
 typedef CGAL::Aff_transformation_3<K>     Transformation;
 typedef K::Point_3                        Point;
 typedef K::Plane_3                        Plane;
 typedef K::Line_3                         Line;
-typedef Polyhedron::Traits::Vector_3      CGALVector;
+typedef CGALPolyhedron::Traits::Vector_3      CGALVector;
 typedef std::array<float, 3>              Vector;
 
 typedef K::FT                             FT;
 
-typedef Polyhedron::Facet_iterator        Facet_iterator;
-typedef Polyhedron::Facet_handle          Facet_handle;
-typedef Polyhedron::HalfedgeDS            HalfedgeDS;
-typedef Polyhedron::Facet                 Facet;
-typedef Polyhedron::Vertex                Vertex;
-typedef Polyhedron::Halfedge_const_handle HalfedgeConstHandle;
+typedef CGALPolyhedron::Facet_iterator        Facet_iterator;
+typedef CGALPolyhedron::Facet_handle          Facet_handle;
+typedef CGALPolyhedron::HalfedgeDS            HalfedgeDS;
+typedef CGALPolyhedron::Facet                 Facet;
+typedef CGALPolyhedron::Vertex                Vertex;
+typedef CGALPolyhedron::Halfedge_const_handle HalfedgeConstHandle;
 // typedef CGAL::AABB_halfedge_graph_segment_primitive<Polyhedron> Primitive;
-typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron> Primitive;
+typedef CGAL::AABB_face_graph_triangle_primitive<CGALPolyhedron> Primitive;
 typedef CGAL::AABB_traits<K, Primitive> Traits;
 typedef CGAL::AABB_tree<Traits> Tree;
 typedef Tree::Point_and_primitive_id Point_and_primitive_id;
 
 template <class PolyhedronTraits_3>
-std::ofstream& operator<<( std::ofstream& out, const Polyhedron& P);
+std::ofstream& operator<<( std::ofstream& out, const CGALPolyhedron& P);
 
 template <class PolyhedronTraits_3>
-std::ifstream& operator>>( std::ifstream& in, Polyhedron& P);
+std::ifstream& operator>>( std::ifstream& in, CGALPolyhedron& P);
 
 #endif
