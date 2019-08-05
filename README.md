@@ -1,4 +1,3 @@
-:x
 ![](https://api.travis-ci.org/greole/partikler.svg?branch=master)
 
 # Build Instructions
