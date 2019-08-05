@@ -26,7 +26,7 @@ Pressure::Pressure(
 
     : SPHModel(model_name, parameter, runTime),
       rho_(get_runTime().get_obj<SPHFloatField>("rho")),
-      np_(get_runTime().get_obj<SPHField<NeighbourPair>>("neighbour_pairs")),
+      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
       W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
       dW_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")),
       p_(get_runTime().get_obj<SPHFloatField>("p")),

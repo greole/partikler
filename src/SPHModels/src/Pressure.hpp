@@ -34,7 +34,7 @@ class Pressure : public SPHModel {
     // In
     // Density
     const SPHFloatField &rho_;
-    const SPHField<NeighbourPair> &np_;
+    const SPHField<searchcubes::NeighbourPair> &np_;
     const SPHFloatField &W_;
     const SPHField<VectorPair> &dW_;
 

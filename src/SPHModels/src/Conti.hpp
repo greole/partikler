@@ -32,7 +32,7 @@ private:
     const SPHPointField &pos_; // Particle positions
 
     // const SortedNeighbours &pn_; // Particle neighbours
-    const SPHField<NeighbourPair> &np_;
+    const SPHField<searchcubes::NeighbourPair> &np_;
     const SPHFloatField &W_;
 
     // Out

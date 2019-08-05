@@ -3,7 +3,7 @@
 #include "SearchCubes.cpp"
 #include <vector>
 
-bool found_particle_pair(size_t i, size_t j, size_t k, SortedNeighbours & ret ) {
+bool found_particle_pair(size_t i, size_t j, size_t k, searchcubes::SortedNeighbours & ret ) {
   bool found_i = (ret.ids[k].ownId == i);
   bool found_j = (ret.ids[k].neighId == j);
   return (found_i and found_j);
@@ -17,7 +17,7 @@ TEST (OwnerCubeSearch, FindsNeighbours) {
 
   const size_t tot_n_particles = n_particles*n_particles*n_particles;
 
-  SortedNeighbours ret {};
+  searchcubes::SortedNeighbours ret {};
   ret.ids.reserve(tot_n_particles*points.size()/2);
 
 
@@ -89,7 +89,7 @@ TEST (NeighbourCubeSearch, FindsNeighbours) {
 
   const size_t tot_n_particles = n_particles*n_particles*n_particles;
 
-  SortedNeighbours ret {};
+  searchcubes::SortedNeighbours ret {};
   ret.ids.reserve(tot_n_particles*points.size()/2);
 
   // neighbour_cube_search(
@@ -157,11 +157,11 @@ TEST (ParticleNeighbourSearch, createNeighbours) {
   const size_t tot_n_particles_search_cube=tot_n_particles/64;
   float cube_dx = 1.0/((float) n_particles);
 
-  const SearchCubeDomain scd = initSearchCubeDomain(points, 0.25);
+  const searchcubes::SearchCubeDomain scd = searchcubes::initSearchCubeDomain(points, 0.25);
 
-  SortedParticles sp = countingSortParticles(scd, points);
+  searchcubes::SortedParticles sp = countingSortParticles(scd, points);
 
-  SortedNeighbours ret {};
+  searchcubes::SortedNeighbours ret {};
   // SortedNeighbours ret = createNeighbours(scd, sp);
 
   // Should find at least some neighbours

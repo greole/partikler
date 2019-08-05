@@ -76,7 +76,7 @@ void SPHSTLParticleNeighbours::execute() {
 };
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {
-    scd_() = initSearchCubeDomain(
+    scd_() = searchcubes::initSearchCubeDomain(
         pos_.get_field(), search_cube_size_*dx_);
 }
 

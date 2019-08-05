@@ -24,7 +24,7 @@ Viscosity::Viscosity(
 
     : SPHModel(model_name, parameter, runTime),
       // rho_(get_runTime().get_obj<SPHFloatField>("rho")),
-      np_(get_runTime().get_obj<SPHField<NeighbourPair>>("neighbour_pairs")),
+      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
       dW_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")),
       u_(get_runTime().get_obj<SPHVectorField>("u")),
       pos_(get_runTime().get_obj<SPHPointField>("Pos")),

@@ -32,7 +32,7 @@ class Viscosity : public SPHModel {
 private:
 
     // In
-    const SPHField<NeighbourPair> &np_;
+    const SPHField<searchcubes::NeighbourPair> &np_;
     const SPHField<VectorPair> &dW_;
     const SPHVectorField &u_;
     const SPHPointField &pos_; // Particle positions

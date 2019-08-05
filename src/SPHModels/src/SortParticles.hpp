@@ -33,12 +33,12 @@ class CountingSortParticles : public SPHModel {
     // In
     SPHPointField &pos_;
 
-    SPHField<SearchCube> &sc_;
+    SPHField<searchcubes::SearchCube> &sc_;
 
     //  Sorting indexes
     SPHSizeTField &si_;
 
-    SPHGeneric<SearchCubeDomain> &scd_;
+    SPHGeneric<searchcubes::SearchCubeDomain> &scd_;
 
   public:
     CountingSortParticles(

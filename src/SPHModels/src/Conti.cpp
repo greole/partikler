@@ -23,7 +23,7 @@ Conti::Conti (
     const std::string &model_name, YAML::Node parameter, RunTime &runTime):
     SPHModel(model_name, parameter, runTime),
     pos_(get_runTime().get_particle_positions()),
-    np_(get_runTime().get_obj<SPHField<NeighbourPair>>("neighbour_pairs")),
+    np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
     W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
     rho_(get_runTime().get_obj<SPHFloatField>("rho")),
     lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))

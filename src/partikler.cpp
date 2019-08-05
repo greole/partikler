@@ -129,7 +129,7 @@ SPHPointField generate_boundary_particles(
     runTime.create_generic<SPHGeneric<TimeInfo>>(
         "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
-    runTime.create_generic<SPHGeneric<SearchCubeDomain>>("search_cube_domain");
+    runTime.create_generic<SPHGeneric<searchcubes::SearchCubeDomain>>("search_cube_domain");
 
     auto main = SPHModelFactory::createInstance(
         "CORE",
@@ -168,9 +168,9 @@ SPHPointField generate_boundary_particles(
     kernel_field.set_reorder(false);
 
     runTime.create_field<SPHField<VectorPair>>("KerneldWdx");
-    runTime.create_field<SPHField<NeighbourPair>>("neighbour_pairs");
+    runTime.create_field<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs");
     runTime.create_field<SPHField<STLSurfaceDist>>("surface_dist");
-    runTime.create_field<SPHField<SearchCube>>("search_cubes");
+    runTime.create_field<SPHField<searchcubes::SearchCube>>("search_cubes");
     runTime.create_field<SPHSizeTField>("sorting_idxs");
 
     auto kernel = SPHModelFactory::createInstance(

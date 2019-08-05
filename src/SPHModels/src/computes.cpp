@@ -25,7 +25,7 @@
 
 void compute_forces(
     Logger logger,
-    const SortedNeighbours &particle_neighbours,
+    const searchcubes::SortedNeighbours &particle_neighbours,
     const SPHPointField &particles,
     const std::vector<Facet_handle> & facets,
     const float dx,
