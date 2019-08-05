@@ -54,61 +54,20 @@
 
 void print_help() {
   std::cout <<
-    // "--dx <val>:           Average particle distance\n"
-    // "--os <val>:           Oversubscribe particles by val %\n"
-    // "--dt <val>:           Max timestep\n"
-    // "--ts <val>:           Number of timesteps\n"
-    // "--nl <val>:           Number of extrusion layer\n"
-    // "--nw <val>:           Writeout frequency\n"
-    // "--stl <val>:          STL filename\n"
     "--config <path/to/SPH.yaml>:             Location of config file\n";
     "--help:                                  Show help\n";
     exit(1);
 }
-
-// struct SimArgs {
-//   float dx;
-//   float dt;
-//   float os;
-//   int ts;
-//   int nl;
-//   int nw;
-//   std::string stl;
-// };
-
-// void print_sim_args(SimArgs s) {
-//   std::cout
-//     << "dx: " << s.dx
-//     << "\nos: " << s.os
-//     << "\ndt: " << s.dt
-//     << "\nts: " << s.ts
-//     << "\nnl: " << s.nl
-//     << "\nnw: " << s.nw
-//     << "\nstl: " << s.stl
-//     << std::endl;
-// }
 
 YAML::Node process_args (int argc, char** argv)
 {
     const char* const short_opts = "x:o:t:n:l:f:s:h";
     const option long_opts[] = {
             {"config", required_argument, nullptr, 'c'},
-            // {"os", required_argument, nullptr, 'o'},
-            // {"dt", required_argument, nullptr, 't'},
-            // {"ts", required_argument, nullptr, 'n'},
-            // {"nl", required_argument, nullptr, 'l'},
-            // {"nw", required_argument, nullptr, 'f'},
-            // {"stl", required_argument, nullptr, 's'},
             {nullptr, no_argument, nullptr, 0}
     };
 
     // Default args
-    // float dx = 1.0;
-    // float dt = 1.0;
-    // float os = 0.0;
-    // int ts = 100;
-    // int nl = 1;
-    // int nw = 1;
     std::string conf;
 
     while (true)
@@ -120,31 +79,6 @@ YAML::Node process_args (int argc, char** argv)
 
         switch (opt)
         {
-        // case 'x':
-        //     // num = std::stoi(optarg);
-        //     dx = std::stof(optarg);
-        //     break;
-
-        // case 'o':
-        //   os = std::stof(optarg);
-        //   break;
-
-
-        // case 't':
-        //     dt = std::stof(optarg);
-        //     break;
-
-        // case 'n':
-        //     ts = std::stoi(optarg);
-        //     break;
-
-        // case 'l':
-        //     nl = std::stoi(optarg);
-        //     break;
-
-        // case 'f':
-        //   nw = std::stoi(optarg);
-        //   break;
 
         case 'c':
           conf = std::string(optarg);
