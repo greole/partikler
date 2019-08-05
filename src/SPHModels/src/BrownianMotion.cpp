@@ -17,37 +17,30 @@
     contact: go@hpsim.de
 */
 
-#ifndef KERNEL_H
-#define KERNEL_H
-
-#include "SPHModels.hpp"
-#include "SPHDatastructures.hpp"
-
-class Conti : public SPHModel {
-
-    REGISTER_DEC_TYPE(Conti);
-
-private:
-    // In
-    const SPHPointField &pos_; // Particle positions
-
-    // const SortedNeighbours &pn_; // Particle neighbours
-    const SPHField<NeighbourPair> &np_;
-    const SPHFloatField &W_;
-
-    // Out
-    SPHFloatField &rho_;
-
-    // Coeffs
-    const float lower_limit_;
+# include "BrownianMotion.hpp"
 
 
-public:
-    Conti(
-        const std::string &model_name, YAML::Node parameter, RunTime &runTime);
+BrownianMotion::BrownianMotion(
+    const std::string &model_name, YAML::Node parameter, RunTime &runTime)
 
-    void execute();
+    : SPHModel(model_name, parameter, runTime),
+      u_(get_runTime().get_obj<SPHVectorField>("u")),
+      dx_(read_or_default_coeff<float>("dx", 1.0))
+{};
+
+void BrownianMotion::execute() {
+    srand(time(NULL));
+    FOR_ALL(u_, ctr) {
+        float x = ((float)(rand() % 100))/100.0 - 0.5;
+        float y = ((float)(rand() % 100))/100.0 - 0.5;
+        float z = ((float)(rand() % 100))/100.0 - 0.5;
+
+        Vector uv = u_[ctr];
+
+        Vector rv {uv[0] + x * dx_, uv[1] + y * dx_, uv[2] + z * dx_};
+        u_[ctr] = rv;
+    }
+
 };
 
-#endif
-
+REGISTER_DEF_TYPE(TRANSPORTEQN, BrownianMotion);

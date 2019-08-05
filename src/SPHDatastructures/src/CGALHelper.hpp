@@ -1,3 +1,22 @@
+/*  Partikler - A general purpose framework for smoothed particle hydrodynamics
+    simulations Copyright (C) 2019 Gregor Olenik
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    contact: go@hpsim.de
+*/
+
 #ifndef CGALHelper_H
 #define CGALHelper_H
 
@@ -21,9 +40,24 @@ CGALVector facet_normal(const Facet &f);
 
 CGALVector surfaceVector(const Facet &f);
 
+struct Point3D {
+    // 3*4bytes = 12bytes
+    float x,y,z;
+};
+
 struct HitPoint {
     bool hit;
     Point X;
+};
+
+
+struct STLSurfaceDist {
+    // Stores the distance of particles on different
+    // STL surfaces
+
+    float len;
+    CGALVector on;
+    CGALVector no;
 };
 
 HitPoint approximateEdgeHit(
@@ -288,5 +322,9 @@ struct Generate_Points_at_Facets {
 
     void operator()(Facet &f);
 };
+
+STLSurfaceDist compute_STLSurface_dist(
+    Point opos, Point npos,
+    Facet_handle start, Facet_handle end);
 
 #endif

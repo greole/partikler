@@ -15,11 +15,12 @@ add_library(SPHCore SHARED
   src/STLLimitedDx.cpp
   src/STLPosIntegrator.cpp
   src/Viscosity.cpp
+  src/BrownianMotion.cpp
   )
 
 add_dependencies(SPHIO SPHIO)
 
-target_link_libraries(SPHCore SPHIO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARY})
+target_link_libraries(SPHCore SPHIO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 target_include_directories(SPHCore PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(tests/SPHCore)

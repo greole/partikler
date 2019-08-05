@@ -17,44 +17,32 @@
     contact: go@hpsim.de
 */
 
-#ifndef KERNEL_H
-#define KERNEL_H
+
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
 
 #include "SPHModels.hpp"
 #include "yaml-cpp/yaml.h"
 #include "SPHDatastructures.hpp"
 
-class STLWendland2D : public SPHModel {
 
-    REGISTER_DEC_TYPE(STLWendland2D);
+class BrownianMotion : public SPHModel {
 
-  private:
-    // Coeffs
-    const float h_;  // Smoothing length
-    const float ih_; // Inverse Smoothing length
-    // // 3d
-    // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
-    // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
-    // 2d
-    const float W_fak2_;  // = 7. / (64. * M_PI * h * h);
-    const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
+    REGISTER_DEC_TYPE(BrownianMotion);
 
-    // In
-    const SPHPointField &pos_; // Particle positions
+private:
 
-    const SPHField<searchcubes::NeighbourPair> &np_;
-    const SPHField<STLSurfaceDist> &sd_;
+    SPHVectorField &u_;
 
-    // Out
-    // Kernel &kernel                               // Kernel field
-    SPHFloatField &W_;
-    SPHField<VectorPair> &dWdx_;
+    float dx_;
 
-  public:
-    STLWendland2D(
+public:
+    BrownianMotion(
         const std::string &model_name, YAML::Node parameter, RunTime &runTime);
 
     void execute();
+
+    void update_dx(){};
 };
 
 #endif

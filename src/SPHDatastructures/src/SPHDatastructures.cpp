@@ -1,95 +1,23 @@
+/*  Partikler - A general purpose framework for smoothed particle hydrodynamics
+    simulations Copyright (C) 2019 Gregor Olenik
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    contact: go@hpsim.de
+*/
+
 #include "SPHDatastructures.hpp"
-
-STLSurfaceDist compute_STLSurface_dist(
-    Point opos, Point npos,
-    Facet_handle start, Facet_handle end) {
-
-    if (start == end) {
-        // if particles on same facet return Cartesian distance
-        CGALVector lenVo = npos - opos;
-        CGALVector lenVn = opos - npos;
-        return {(float) length(lenVo), lenVo, lenVn};
-    }
-
-    std::pair<bool, Path> ret_path = searchPath({start, end});
-
-    if (!ret_path.first) {
-        // if path search failed use Cartesian distance 
-        CGALVector lenVo = npos - opos;
-        CGALVector lenVn = opos - npos;
-        return {(float) length(lenVo), lenVo, lenVn};
-    }
-
-    Path path = ret_path.second;
-
-    Point nposp, oposp;
-    nposp = projectedPoint(path, npos);
-    reverse(path.begin(), path.end());
-    oposp = projectedPoint(path, opos);
-
-    CGALVector lenVo = nposp - opos;
-    CGALVector lenVn = oposp - npos;
-
-    return {(float) length(lenVo), lenVo, lenVn};
-}
-
-SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> particles, float dx)
-{
-
-    size_t n_particles = particles.size();
-    auto bound_box = bounding_box(particles.begin(), particles.end());
-
-    // bounds are scaled a bit to avoid particles on exact boundary 
-    const float domain_extrusion = 0.01*dx; // in dx
-    float min_x = bound_box.min().x() - domain_extrusion;
-    float min_y = bound_box.min().y() - domain_extrusion;
-    float min_z = bound_box.min().z() - domain_extrusion;
-    float max_x = bound_box.max().x() + domain_extrusion;
-    float max_y = bound_box.max().y() + domain_extrusion;
-    float max_z = bound_box.max().z() + domain_extrusion;
-    // std::cout << "initSearchCubeDomain" << " min_z " << min_z << std::endl;
-    // std::cout << "initSearchCubeDomain" << " max_z " << max_z << std::endl;
-    // for (auto p: particles) std::cout << p << std::endl;
-
-    // ceil with fixed dx increases max(x,y,z) a bit
-    unsigned int n_cubes_x = (unsigned int)ceil(((max_x - min_x) / dx));
-    unsigned int n_cubes_y = (unsigned int)ceil(((max_y - min_y) / dx));
-    unsigned int n_cubes_z = (unsigned int)ceil(((max_z - min_z) / dx));
-
-    // Check if domain is not degenerated
-    // search cubes currently assume 26 neighbour cubes
-    Logger(3, "initSearchCubeDomain:255").check(n_cubes_x >= 3)
-        << " n_cubes_x less than 3";
-    Logger(3, "initSearchCubeDomain:255").check(n_cubes_y >= 3)
-        << " n_cubes_y less than 3";
-    Logger(3, "initSearchCubeDomain:255").check(n_cubes_z >= 3)
-        << " n_cubes_z less than 3";
-
-    std::cout
-      << " [DEBUG] SPHDatastructures.hpp::initSearchCubeDomain"
-      << " min_x " << min_x
-      << " min_y " << min_y
-      << " min_z " << min_z
-      << " max_x " << max_x
-      << " max_y " << max_y
-      << " max_z " << max_z
-      << " n_cubes_x " << n_cubes_x
-      << " n_cubes_y " << n_cubes_y
-      << " n_cubes_z " << n_cubes_z
-      << " dx " << dx
-      << std::endl;
-
-    const float idx = 1.0 / dx;
-    return SearchCubeDomain {
-        Point3D {min_x, min_y, min_z},
-        Point3D {max_x, max_y, max_z},
-        dx,
-        idx,
-        SubDivision {n_cubes_x, n_cubes_y, n_cubes_z},
-        (size_t)n_cubes_x * (size_t)n_cubes_y * (size_t)n_cubes_z,
-    };
-}
 
 template <class T>
 void reorder_vector(const std::vector<size_t>& idxs, std::vector<T>& vec) {
@@ -106,14 +34,14 @@ void reorder_vector(const std::vector<size_t>& idxs, std::vector<T>& vec) {
 // template void reorder_vector<kFacet_handle>;
 template void reorder_vector(const std::vector<size_t>&, std::vector<Facet_handle>& );
 template void reorder_vector(const std::vector<size_t>&, std::vector<size_t>& );
-template void reorder_vector(const std::vector<size_t>&, std::vector<NeighbourPair>& );
+template void reorder_vector(const std::vector<size_t>&, std::vector<searchcubes::NeighbourPair>& );
 template void reorder_vector(const std::vector<size_t>&, std::vector<VectorPair>& );
 template void reorder_vector(const std::vector<size_t>&, std::vector<STLSurfaceDist>& );
-template void reorder_vector(const std::vector<size_t>&, std::vector<SearchCube>& );
+template void reorder_vector(const std::vector<size_t>&, std::vector<searchcubes::SearchCube>& );
 
 
 SPHVectorField
-particle_distance_vec(const SPHPointField &pos, const SPHField<NeighbourPair> &np) {
+particle_distance_vec(const SPHPointField &pos, const SPHField<searchcubes::NeighbourPair> &np) {
 
     const size_t ret_size {np.size()};
 

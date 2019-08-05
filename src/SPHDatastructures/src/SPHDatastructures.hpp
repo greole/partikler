@@ -1,3 +1,22 @@
+/*  Partikler - A general purpose framework for smoothed particle hydrodynamics
+    simulations Copyright (C) 2019 Gregor Olenik
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    contact: go@hpsim.de
+*/
+
 #ifndef SPHDATASTRUCTURES_H
 #define SPHDATASTRUCTURES_H
 
@@ -6,7 +25,9 @@
 #include "FileIO.hpp"
 #include "Logger.hpp"
 #include "Helper.hpp"
+#include "SearchCubes.hpp"
 #include "SPHObject.hpp"
+
 
 #include <iostream>
 #include <vector>
@@ -161,7 +182,7 @@ static Vector zeroVec {0.,0.,0,};
 
 // AB operations
 #define OP_SCALAR_AB(name, op)                                                 \
-    SPHScalarField<T> name##_ab(const SPHField<NeighbourPair> &np) const {     \
+    SPHScalarField<T> name##_ab(const SPHField<searchcubes::NeighbourPair> &np) const { \
         const size_t res_size = np.size();                              \
         std::vector<T> ret(res_size);                                          \
         OP_NEIGHBOUR_LOOP(ret[ctr] = {this->f_[oid] op this->f_[nid]};)        \
@@ -169,7 +190,7 @@ static Vector zeroVec {0.,0.,0,};
     }
 
 #define OP_VECTOR_AB(name, op)                                                 \
-    SPHVectorField name##_ab(const SPHField<NeighbourPair> &np) const {        \
+    SPHVectorField name##_ab(const SPHField<searchcubes::NeighbourPair> &np) const { \
         const size_t ret_size = np.size();                              \
         std::vector<Vector> ret(ret_size);                                     \
         OP_NEIGHBOUR_LOOP(                                                     \
@@ -179,50 +200,11 @@ static Vector zeroVec {0.,0.,0,};
           return SPHVectorField(ret, {"tmpx", "tmpy", "tmpz"}, "tmp"); \
     }
 
-struct Point3D {
-  // 3*4bytes = 12bytes
-  float x,y,z;
-};
-
-// Move to SearchCubeDomain
-struct SubDivision {
-  // 3*4bytes = 12bytes
-  // Max 65535**3 cubes, which are approx (65535*3)**3 particles
-  unsigned int nx, ny, nz;
-};
 
 // Move to NeighboursSearch
 struct FirstLastPair{
   size_t first;
   size_t last;
-};
-
-struct SearchCube {
-  // A search cube stores first and last particle ids
-  size_t first;
-  size_t last;
-
-  // SearchCube(size_t first, size_t last) : first(first), last(last){};
-};
-
-struct SortedParticles {
-  std::vector<SearchCube> searchCubes;
-  std::vector<size_t> sorting_idxs;
-  std::vector<Point> particles;
-};
-
-struct NeighbourPair {
-    size_t ownId;
-    size_t neighId;
-};
-
-struct STLSurfaceDist {
-    // Stores the distance of particles on different
-    // STL surfaces
-
-    float len;
-    CGALVector on;
-    CGALVector no;
 };
 
 struct VectorPair {
@@ -237,39 +219,6 @@ struct TimeInfo {
     float deltaT;
     int   timeStep;
     const float maxDeltaT;
-};
-
-STLSurfaceDist compute_STLSurface_dist(
-    Point opos, Point npos,
-    Facet_handle start, Facet_handle end);
-
-
-struct SortedNeighbours {
-  std::vector<NeighbourPair> ids;
-
-  // since computation of neighbouring particles
-  // on different STL is expensive a vector holding
-  // the STLSurfaceDist is stored here
-  std::vector<STLSurfaceDist> dist;
-};
-
-struct SearchCubeDomain {
-
-  Point3D min;
-  Point3D max;
-
-  float dx;
-  float idx;
-
-  // 32 byte
-
-  SubDivision n;
-  size_t nt;
-
-  // 24 byte
-
-  /* size_t padding; */
-
 };
 
 
@@ -322,9 +271,6 @@ struct NeighbourIdHalfStencil {
 
 // TODO revise
 // use std::vector<Particle> as input
-SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> particles, float dx);
-
 struct Kernel {
 
     std::vector<float> W;
@@ -483,7 +429,7 @@ template <class T> class SPHScalarField : public SPHField<T> {
 
     // TODO specific class for val_ij
     void weighted_sum(
-        const SPHField<NeighbourPair> &np,
+        const SPHField<searchcubes::NeighbourPair> &np,
         const SPHScalarField<float> &val_ij) {
 
         OP_NEIGHBOUR_LOOP(const float val = val_ij[ctr]; this->f_[oid] += val;
@@ -656,7 +602,7 @@ class SPHVectorField : public SPHComponentField<Vector> {
 
     // STL Variant of weighted_sum
   void weighted_sum(
-      const SPHField<NeighbourPair> &np,
+      const SPHField<searchcubes::NeighbourPair> &np,
       const SPHScalarField<float> &val_ij,
       const SPHField<VectorPair> &dWdx) {
 
@@ -737,7 +683,7 @@ std::ostream &operator<<(std::ostream &os, SPHVectorField const &m);
 std::ostream &operator<<(std::ostream &os, SPHPointField const &m);
 
 SPHVectorField
-particle_distance_vec(const SPHPointField &pos, const SPHField<NeighbourPair> &np);
+particle_distance_vec(const SPHPointField &pos, const SPHField<searchcubes::NeighbourPair> &np);
 
 template<class T>
 class SPHEquationBase:SPHObject  {

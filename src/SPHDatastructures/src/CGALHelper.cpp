@@ -1,3 +1,22 @@
+/*  Partikler - A general purpose framework for smoothed particle hydrodynamics
+    simulations Copyright (C) 2019 Gregor Olenik
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    contact: go@hpsim.de
+*/
+
 #include "CGALHelper.hpp"
 
 CGALVector normalise(const CGALVector& v) {
@@ -556,3 +575,36 @@ double Compute_Facet_Area::operator()(const Facet& f) const {
             f.halfedge()->opposite()->vertex()->point() );
 };
 
+
+STLSurfaceDist compute_STLSurface_dist(
+    Point opos, Point npos,
+    Facet_handle start, Facet_handle end) {
+
+    if (start == end) {
+        // if particles on same facet return Cartesian distance
+        CGALVector lenVo = npos - opos;
+        CGALVector lenVn = opos - npos;
+        return {(float) length(lenVo), lenVo, lenVn};
+    }
+
+    std::pair<bool, Path> ret_path = searchPath({start, end});
+
+    if (!ret_path.first) {
+        // if path search failed use Cartesian distance 
+        CGALVector lenVo = npos - opos;
+        CGALVector lenVn = opos - npos;
+        return {(float) length(lenVo), lenVo, lenVn};
+    }
+
+    Path path = ret_path.second;
+
+    Point nposp, oposp;
+    nposp = projectedPoint(path, npos);
+    reverse(path.begin(), path.end());
+    oposp = projectedPoint(path, opos);
+
+    CGALVector lenVo = nposp - opos;
+    CGALVector lenVn = oposp - npos;
+
+    return {(float) length(lenVo), lenVo, lenVn};
+}

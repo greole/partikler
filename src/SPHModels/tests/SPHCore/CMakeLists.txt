@@ -12,6 +12,6 @@ include_directories (BEFORE "${SPHCore_SOURCE_DIR}")
 
 add_executable(sph_core ${test_sources})
 
-target_link_libraries(sph_core ${GTEST_LIBRARIES} pthread SPHDatastructures SPHCore SPHIO)
+target_link_libraries(sph_core ${GTEST_LIBRARIES} pthread SPHDatastructures SPHCore SPHIO )
 
 gtest_discover_tests(sph_core)

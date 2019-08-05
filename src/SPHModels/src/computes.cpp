@@ -1,3 +1,22 @@
+/*  Partikler - A general purpose framework for smoothed particle hydrodynamics
+    simulations Copyright (C) 2019 Gregor Olenik
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    contact: go@hpsim.de
+*/
+
 #include "SPHDatastructures.hpp"
 #include <algorithm>    // std::min
 #include <math.h>    // std::min
@@ -52,17 +71,6 @@ void compute_forces(
 };
 
 void add_random_noise(Logger logger, SPHVectorField &u, const float dx) {
-    srand(time(NULL));
-    FOR_ALL(u, ctr) {
-      float x = ((float)(rand() % 100))/100.0 - 0.5;
-      float y = ((float)(rand() % 100))/100.0 - 0.5;
-      float z = ((float)(rand() % 100))/100.0 - 0.5;
-
-        Vector uv = u[ctr];
-
-        Vector rv {uv[0] + x * dx, uv[1] + y * dx, uv[2] + z * dx};
-        u[ctr] = rv;
-    }
 }
 
 void limit_dt_du(
