@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
+
+
+########################
+# Compiler settings   #
+########################
+
 set(CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
 set(CMAKE_LINKER  "/usr/bin/ldd")
 set(CMAKE_C_COMPILER "/usr/local/bin/clang")
@@ -11,16 +17,10 @@ find_package(OpenMP REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "RELEASE")
-#set(CMAKE_BUILD_TYPE "DEBUG")
 
-set(ENV{LD_PRELOAD} /usr/local/lib64/libCGAL.so.13)
-set(CMAKE_INSTALL_RPATH "/usr/local/lib64")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-    -Wall -Wpedantic -Wextra -march=native -fopenmp"
+    -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
     )
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -29,17 +29,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
       -fno-omit-frame-pointer \
       -Rpass=loop-vectorize \
-      -Rpass-analysis=loop-vectorize \
-      -Rpass-missed=loop-vectorize \
       -ffast-math \
       -fsanitize=address \
       "
+      #-Rpass-analysis=loop-vectorize \
+      #-Rpass-missed=loop-vectorize \
       )
-
-    set(LINK_FLAGS
-      "-rpath /usr/local/lib64/ \
-       -L/usr/local/lib64/ \
-      ")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
@@ -50,7 +45,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         )
 endif()
 
-# add_subdirectory(3rdParty/cgal)
+
+########################
+# 3rd Party Libraries  #
+########################
+#add_subdirectory(3rdParty/cgal)
 
 include( ${CGAL_USE_FILE} )  # needed for the linker
 
@@ -61,22 +60,92 @@ add_custom_command ( OUTPUT tags
 
 enable_testing()
 
+MESSAGE("ADDING GOOGLE TEST")
+add_subdirectory(3rdParty/googletest)
+MESSAGE("ADDING GOOGLE BENCHMARK")
+# add_subdirectory(3rdParty/benchmark)
+
+# build tests (targets: gtest_main, gtest)
+#set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
+
+INCLUDE(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+OPTION(BUILD_YAML_CPP "Building yaml-cpp parser" OFF)
+
+IF(NOT BUILD_YAML_CPP)
+    MESSAGE("Searching for YAML-CPP")
+    FIND_PACKAGE(YAML-CPP CONFIG REQUIRED)
+    # SET(YAML_CPP_LIBRARY yaml-cpp)
+    MESSAGE("Found YAML-CPP CONFIG UNDER" ${YAML-CPP_DIR})
+    MESSAGE("Found " ${YAML_CPP_LIBRARIES})
+ENDIF()
+
+IF(BUILD_YAML_CPP)
+    MESSAGE("BUILDING YAML_CPP ")
+      EXTERNALPROJECT_ADD(yaml-cpp-download
+          GIT_REPOSITORY    "https://github.com/jbeder/yaml-cpp"
+          # GIT_TAG           "0.6.2"
+          DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
+          PREFIX            "${CMAKE_BINARY_DIR}"
+          SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/yaml-cpp"
+          CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+                            -DYAML_CPP_BUILD_TESTS=OFF
+                            -DYAML_CPP_BUILD_TOOLS=OFF
+                            -DYAML_CPP_BUILD_CONTRIB=OFF
+                            -DYAML_CPP_INSTALL=ON
+                            -DBUILD_SHARED_LIBS=ON
+        )
+
+      EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
+      INCLUDE_DIRECTORIES(${install_dir}/include)
+
+      ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
+      SET_TARGET_PROPERTIES(yaml-cpp
+          PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
+      SET(YAML_CPP_LIBRARY yaml-cpp)
+      MESSAGE("SET YAML_CPP_LIBRARY " ${YAML_CPP_LIBRARY})
+ENDIF()
+
+
+########################
+# boost proto          #
+########################
+# OPTION(BUILD_BOOST "Building boost" ON)
+#
+# IF(BUILD_YAML_CPP)
+#       EXTERNALPROJECT_ADD(boost-download
+#           GIT_REPOSITORY    "https://github.com/boostorg/bost.git"
+#           DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
+#           PREFIX            "${CMAKE_BINARY_DIR}"
+#           SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/boost"
+#           CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+#                             -DYAML_CPP_BUILD_TESTS=OFF
+#                             -DYAML_CPP_BUILD_TOOLS=OFF
+#                             -DYAML_CPP_BUILD_CONTRIB=OFF
+#                             -DYAML_CPP_INSTALL=ON
+#                             -DBUILD_SHARED_LIBS=ON
+#         )
+#
+#       EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
+#       INCLUDE_DIRECTORIES(${install_dir}/include)
+#
+#       ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
+#       SET_TARGET_PROPERTIES(yaml-cpp
+#           PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
+#       SET(YAML_CPP_LIBRARY yaml-cpp)
+# ENDIF()
+
+########################
+# own Libraries        #
+########################
 
 add_subdirectory(src/SPHDatastructures)
 add_subdirectory(src/SPHRuntime)
 add_subdirectory(src/SPHModels)
-
-# build google benchmark (target: benchmark)
-# do not build tests of benchmarking lib
-set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
-add_subdirectory(3rdParty/benchmark)
-
-# build tests (targets: gtest_main, gtest)
-add_subdirectory(3rdParty/googletest)
+ADD_DEPENDENCIES(SPHDatastructures yaml-cpp)
 
 add_executable(partikler src/partikler.cpp tags)
 
-target_link_libraries(partikler SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX) # SPHIO SPHCore)
+target_link_libraries(partikler SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
