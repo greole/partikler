@@ -12,6 +12,9 @@ addons:
     packages:
       - clang-6.0
       - cmake
+env:
+  - CC=clang-6.
+  - CXX=clang++-6.0
 
 before_install:
   - sudo apt install -y libyaml-cpp-dev libcgal-dev
