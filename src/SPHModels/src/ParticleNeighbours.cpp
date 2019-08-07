@@ -25,22 +25,19 @@ SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
       dx_(parameter["dx"].as<float>()),
       pos_(get_runTime().get_particle_positions()),
       facets_(get_runTime().get_obj<SPHField<Facet_handle>>("facets")),
-      sc_(get_runTime().get_obj<SPHField<searchcubes::SearchCube>>("search_cubes")),
-
-      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
-      sd_(get_runTime().get_obj<SPHField<STLSurfaceDist>>("surface_dist")),
-
-      scd_(get_runTime().get_obj<SPHGeneric<searchcubes::SearchCubeDomain>>("search_cube_domain"))
-{
+      sc_(get_runTime().create_field<SPHField<searchcubes::SearchCube>>(
+          "search_cubes")),
+      np_(get_runTime().create_field<SPHField<searchcubes::NeighbourPair>>(
+          "neighbour_pairs")),
+      sd_(get_runTime().create_field<SPHField<STLSurfaceDist>>("surface_dist")),
+      scd_(get_runTime()
+               .create_generic<SPHGeneric<searchcubes::SearchCubeDomain>>(
+                   "search_cube_domain")) {
 
     auto pcs = SPHModelFactory::createInstance(
-            "SORTING",
-            "CountingSortParticles",
-            "sort",
-            parameter,
-            runTime);
+        "SORTING", "CountingSortParticles", "sort", parameter, runTime);
 
-    sub_model_push_back(*pcs);
+    sub_model_push_back(pcs);
 };
 
 void SPHSTLParticleNeighbours::execute() {
@@ -56,7 +53,7 @@ void SPHSTLParticleNeighbours::execute() {
     //     get_runTime().get_obj<SPHSizeTField>("sorting_idxs").get_field(),
     //     facets_.get_field());
 
-    log().info() << "Call createSTLNeighbours";
+    log().info_begin() << "Call createSTLNeighbours";
 
     // TODO to much copying
     auto [np, sd] = createSTLNeighbours(
@@ -68,11 +65,9 @@ void SPHSTLParticleNeighbours::execute() {
     np_.set_field(np);
     sd_.set_field(sd);
 
-    log().info() << "Found ";
-    std::cout << np_.size() << " Neighbour Pairs" << std::endl;
+    log().info() << "Found " << np_.size() << " Neighbour Pairs";
 
-    log().info() << "DONE";
-    // logger_.info_end();
+    log().info_end() << "DONE";
 };
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {

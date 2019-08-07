@@ -25,7 +25,7 @@ Conti::Conti (
     pos_(get_runTime().get_particle_positions()),
     np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
     W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
-    rho_(get_runTime().get_obj<SPHFloatField>("rho")),
+    rho_(get_runTime().create_field<SPHFloatField>("rho", 0.0)),
     lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
 {};
 

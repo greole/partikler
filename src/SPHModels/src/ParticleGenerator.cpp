@@ -52,6 +52,7 @@ SPHSTLReader::SPHSTLReader(
 }
 
 void SPHSTLReader::execute() {
+    log().info() << "Doing nothing";
 }
 
 SPHParticleGenerator::SPHParticleGenerator(
@@ -59,8 +60,9 @@ SPHParticleGenerator::SPHParticleGenerator(
     : SPHModel(model_name, parameter, runTime),
       polyhedron_(
           get_runTime().get_obj<SPHGeneric<CGALPolyhedron>>("polyhedron")),
-      facets_(get_runTime().get_obj<SPHField<Facet_handle>>("facets")),
-      pos_(get_runTime().get_particle_positions()),
+      facets_(get_runTime().create_field<SPHField<Facet_handle>>("facets")),
+      pos_(get_runTime().create_field<SPHPointField>("Pos")),
+
       dx_(parameter["dx"].as<float>()) {}
 
 void SPHParticleGenerator::execute() {
@@ -71,10 +73,9 @@ void SPHParticleGenerator::execute() {
     std::for_each(
         polyhedron_().facets_begin(), polyhedron_().facets_end(), gpf);
 
+    log().info_end() << "Generated " << pos_.size() << " Particles";
 
-
-    log().info_end();
-    std::cout << "Generated " << pos_.size() << " Particles" << std::endl;
+    get_runTime().update();
 }
 
 REGISTER_DEF_TYPE(READER, SPHSTLReader);

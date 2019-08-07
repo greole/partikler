@@ -25,6 +25,7 @@
 
 #include "yaml-cpp/yaml.h"
 #include <map>
+#include <memory>
 #include <stdio.h>
 
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
@@ -42,7 +43,7 @@ class SPHModel : public SPHObject {
     RunTime & runTime_;    // Reference to main runTime
     Logger log_;           // Own logger instance for better scoping
 
-    std::vector<SPHModel *> submodels_ = {};
+    std::vector<std::shared_ptr<SPHModel>> submodels_;
 
   public:
     SPHModel(
@@ -54,14 +55,16 @@ class SPHModel : public SPHObject {
         parameter_(parameter),
         runTime_(runTime),
         // TODO inherit verbosity from main Logger
-        log_(Logger(3)) {
-        std::cout << " creating "
-                  << this->get_type()
-                  << " "
-                  << this->get_name()
-                  << std::endl;
+        log_(Logger(3)),
+             submodels_(
+                 std::vector<std::shared_ptr<SPHModel>> ()
+                 )
+    {
         logger_.set_scope(this->get_name());
-        // std::cout << parameter_.as<std::string>() << std::endl;
+        log().info() << "Creating "
+              << this->get_type()
+              << " "
+              << this->get_name();
     };
 
     template<class T>
@@ -89,20 +92,24 @@ class SPHModel : public SPHObject {
     // TODO implement a pre and post execute member
     virtual void execute() = 0;
 
-    void sub_model_push_back(SPHModel &m) {
+    void sub_model_push_back(std::shared_ptr<SPHModel> m) {
 
-        std::cout << " Registering: " << this->get_type() << " "
-                  << this->get_name() << std::endl;
+        log().info()
+            << " Registering: " << this->get_type() << " " << this->get_name();
 
-        submodels_.push_back(&m);
+        submodels_.push_back(m);
     };
 
-
     void execute_submodels () {
-        std::cout << " Executing: " << this->get_type() << " "
-                  << this->get_name() << std::endl;
+        log().info()
+            << " Executing: " << this->get_type() << " " << this->get_name();
 
-        for (auto model : submodels_) model->execute();
+        for (auto model : submodels_) {
+            log().info()
+                      << " Executing: " << model->get_type() << " "
+                      << model->get_name();
+            model->execute();
+        }
     }
 };
 
@@ -123,7 +130,7 @@ struct SPHModelFactory {
     static map_type *map_;
 
   public:
-    static SPHModel *
+    static std::shared_ptr<SPHModel>
     createInstance(
         const std::string &model_type,
         const std::string &model_name,
@@ -140,7 +147,9 @@ struct SPHModelFactory {
             print_models(model_type);
             return 0;
         };
-        return it->second(runTime_name, parameter, runTime);
+        return std::shared_ptr<SPHModel>(
+            it->second(runTime_name, parameter, runTime)
+            );
     }
 
     static void print_models(
@@ -198,14 +207,75 @@ class SPHModelGraph : public SPHModel {
   public:
     // TODO Move implementation to cpp file
     SPHModelGraph(
+        const std::string &model_name, YAML::Node parameter, RunTime &runTime)
+        : SPHModel(model_name, parameter, runTime) {};
+
+    void execute() { execute_submodels(); };
+};
+
+class TimeGraph : public SPHModel {
+
+    // Defines a temporal order for submodels
+    // submodels could also be realised via template args,
+    // static ModelRegister<SPHModelGraph> reg;
+    REGISTER_DEC_TYPE(TimeGraph);
+
+private:
+
+    SPHModelGraph init_;
+
+    SPHModelGraph main_;
+
+    SPHModelGraph post_;
+
+public:
+    // TODO Move implementation to cpp file
+    TimeGraph(
         const std::string &model_name,
         YAML::Node parameter,
         RunTime & runTime)
-        : SPHModel(model_name, parameter, runTime) {};
+        : SPHModel(model_name, parameter, runTime),
+          init_(SPHModelGraph("pre", parameter, runTime)),
+          main_(SPHModelGraph("pre", parameter, runTime)),
+          post_(SPHModelGraph("pre", parameter, runTime))
+    {
+    };
 
     void execute() {
-        execute_submodels();
+        execute_pre();
+        execute_main();
+        execute_post();
     };
+
+    void execute_pre() {
+        init_.execute();
+    }
+
+    void execute_main() {
+        // TODO register some kind of call back
+        while (!get_runTime().end()) {
+            main_.execute();
+            get_runTime().write_to_disk();
+            get_runTime()++;
+        };
+    }
+
+    void execute_post() {
+        post_.execute();
+    }
+
+
+    void push_back_pre(std::shared_ptr<SPHModel> m) {
+        init_.sub_model_push_back(m);
+    }
+
+    void push_back_main(std::shared_ptr<SPHModel> m) {
+        main_.sub_model_push_back(m);
+    }
+
+    void push_back_post(std::shared_ptr<SPHModel> m) {
+        post_.sub_model_push_back(m);
+    }
 };
 
 #endif

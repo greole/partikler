@@ -31,6 +31,13 @@ class Pressure : public SPHModel {
 
   private:
 
+    // Coeffs
+    const float c_;
+    const float rho_0_;
+    const float gamma_;
+    const float p_0_;
+    const float prefac_;
+
     // In
     // Density
     const SPHFloatField &rho_;
@@ -42,13 +49,6 @@ class Pressure : public SPHModel {
     // Pressure
     SPHFloatField &p_;
     SPHVectorField &dp_;
-
-    // Coeffs
-    const float c_;
-    const float rho_0_;
-    const float gamma_;
-    const float p_0_;
-    const float prefac_;
 
   public:
 

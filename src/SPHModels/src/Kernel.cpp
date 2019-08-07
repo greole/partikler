@@ -22,15 +22,15 @@
 STLWendland2D::STLWendland2D(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)
     : SPHModel(model_name, parameter, runTime),
-      h_(read_or_default_coeff<float>("h", 1.0)),
-      ih_(1.0 /h_),
+      h_(read_or_default_coeff<float>("h", 1.0)), ih_(1.0 / h_),
       W_fak2_(7. / (64. * M_PI * h_ * h_)),
       dW_fak2_(7. / (64. * M_PI * h_ * h_ * h_)),
       pos_(get_runTime().get_particle_positions()),
-      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
+      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>(
+          "neighbour_pairs")),
       sd_(get_runTime().get_obj<SPHField<STLSurfaceDist>>("surface_dist")),
-      W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
-      dWdx_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")) {};
+      W_(get_runTime().create_field<SPHFloatField>("KernelW")),
+      dWdx_(get_runTime().create_field<SPHField<VectorPair>>("KerneldWdx")) {};
 
 void STLWendland2D::execute() {
 

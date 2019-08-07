@@ -39,7 +39,7 @@ class MSG {
 
         const std::string scope_;
 
-        std::ostringstream state;
+        std::ostringstream state_;
 
     public:
 
@@ -55,33 +55,29 @@ class MSG {
             verbosity_treshold_(msg.verbosity_treshold_),
             label_(msg.label_),
             scope_(msg.scope_),
-            state(msg.state.str())
+            state_(msg.state_.str())
         {};
 
+        std::ostringstream& get_state() {return state_;};
+
         template<typename T>
-        MSG &operator<<(T &in) {
-            state << in;
+        MSG &operator<<(const T &in) {
+            state_ << in;
             return *this;
         }
-
-        // template<int>
-        // MSG &operator<<(int &in) {
-        //   state << "int";
-        //   return *this;
-        // }
-
 
         ~MSG() {
             if (message_threshold_ > verbosity_treshold_ ) {
                 std::cout
                     << "[" << label_  << scope_ <<  "] "
-                    << state.str()
+                    << state_.str()
                     << std::endl;
             }
 
             if (label_ == "CRITICAL")  exit(EXIT_FAILURE);
         };
 };
+
 
 class Logger {
     // NOTE Verbosity levels
@@ -148,5 +144,14 @@ class Logger {
           else {return MSG(verbosity_treshold_, "CRITICAL", 5, scope_);}
         };
 };
+
+// // Free functions
+// template <class T>
+// MSG& operator<<(MSG& obj, T& b)
+// {
+//     auto state = obj.get_state();
+//     state << b;
+//     return obj;
+// }
 
 #endif

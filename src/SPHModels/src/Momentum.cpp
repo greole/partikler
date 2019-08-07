@@ -19,7 +19,6 @@
 
 # include "Momentum.hpp"
 
-
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)
 
@@ -27,9 +26,9 @@ Momentum::Momentum(
       dnu_(get_runTime().get_obj<SPHVectorField>("dnu")),
       dp_(get_runTime().get_obj<SPHVectorField>("dp")),
       u_(get_runTime().get_obj<SPHVectorField>("u")),
-      du_(get_runTime().get_obj<SPHVectorField>("du")),
-      time_(get_runTime().get_obj<SPHGeneric<TimeInfo>>("TimeInfo"))
-{};
+      du_(get_runTime().create_field<SPHVectorField>(
+              "du", zeroVec, {"dU", "dV", "dW"})),
+      time_(get_runTime().get_obj<SPHGeneric<TimeInfo>>("TimeInfo")) {};
 
 void Momentum::execute() {
 
@@ -48,13 +47,13 @@ void Momentum::execute() {
 
     float maxU = u_.norm().get_max();
 
-    std::cout << "maxU"
-              << maxU
-              << "deltaT" <<  time_().deltaT
-              << "maxCFL"
-              << maxU * time_().deltaT /
-                     std::any_cast<float>(get_runTime().get_dict("dx"))
-              << std::endl;
+    // std::cout << "maxU"
+    //           << maxU
+    //           << "deltaT" <<  time_().deltaT
+    //           << "maxCFL"
+    //           << maxU * time_().deltaT /
+    //                  std::any_cast<float>(get_runTime().get_dict("dx"))
+    //           << std::endl;
 
     // std::cout << du_ << std::endl;
     // std::cout << du_*time_().deltaT << std::endl;

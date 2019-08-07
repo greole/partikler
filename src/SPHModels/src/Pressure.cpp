@@ -19,24 +19,23 @@
 
 # include "Pressure.hpp"
 
-
-
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)
 
     : SPHModel(model_name, parameter, runTime),
-      rho_(get_runTime().get_obj<SPHFloatField>("rho")),
-      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
-      W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
-      dW_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")),
-      p_(get_runTime().get_obj<SPHFloatField>("p")),
-      dp_(get_runTime().get_obj<SPHVectorField>("dp")),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
-      prefac_(c_*c_*rho_0_/gamma_)
-{};
+      prefac_(c_ * c_ * rho_0_ / gamma_),
+      rho_(get_runTime().get_obj<SPHFloatField>("rho")),
+      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>(
+          "neighbour_pairs")),
+      W_(get_runTime().get_obj<SPHFloatField>("KernelW")),
+      dW_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")),
+      p_(get_runTime().create_field<SPHFloatField>("p", p_0_)),
+      dp_(get_runTime().create_field<SPHVectorField>(
+          "dp", zeroVec, {"dpx", "dpy", "dpz"})) {};
 
 void Pressure::execute() {
 

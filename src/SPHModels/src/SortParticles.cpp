@@ -19,17 +19,15 @@
 
 #include "SortParticles.hpp"
 
-
 CountingSortParticles::CountingSortParticles(
-    const std::string &model_name,
-    YAML::Node parameter,
-    RunTime & runTime)
+    const std::string &model_name, YAML::Node parameter, RunTime &runTime)
     : SPHModel(model_name, parameter, runTime),
       pos_(get_runTime().get_particle_positions()),
-      sc_(get_runTime().get_obj<SPHField<searchcubes::SearchCube>>("search_cubes")),
-      si_(get_runTime().get_obj<SPHSizeTField>("sorting_idxs")),
-      scd_(get_runTime().get_obj<SPHGeneric<searchcubes::SearchCubeDomain>>("search_cube_domain")) {};
-
+      sc_(get_runTime().get_obj<SPHField<searchcubes::SearchCube>>(
+          "search_cubes")),
+      si_(get_runTime().create_field<SPHSizeTField>("sorting_idxs")),
+      scd_(get_runTime().get_obj<SPHGeneric<searchcubes::SearchCubeDomain>>(
+          "search_cube_domain")) {};
 
 void CountingSortParticles::execute(){
 

@@ -31,6 +31,9 @@ class Viscosity : public SPHModel {
 
 private:
 
+    // Coeffs
+    float nu_;
+
     // In
     const SPHField<searchcubes::NeighbourPair> &np_;
     const SPHField<VectorPair> &dW_;
@@ -39,9 +42,6 @@ private:
 
     // Out
     SPHVectorField &dnu_;
-
-    // Coeffs
-    float nu_;
 
 public:
     Viscosity(

@@ -18,19 +18,21 @@
 */
 # include "Viscosity.hpp"
 
-
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)
 
     : SPHModel(model_name, parameter, runTime),
-      // rho_(get_runTime().get_obj<SPHFloatField>("rho")),
-      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs")),
+      nu_(read_or_default_coeff<float>("nu", 1e-05)),
+      np_(get_runTime().get_obj<SPHField<searchcubes::NeighbourPair>>(
+          "neighbour_pairs")),
       dW_(get_runTime().get_obj<SPHField<VectorPair>>("KerneldWdx")),
-      u_(get_runTime().get_obj<SPHVectorField>("u")),
+      // DIRTY FIX momentum eqn should create u
+      // but nu already depends on u
+      u_(get_runTime().create_field<SPHVectorField>(
+             "u", zeroVec, {"U", "V", "W"})),
       pos_(get_runTime().get_obj<SPHPointField>("Pos")),
-      dnu_(get_runTime().get_obj<SPHVectorField>("dnu")),
-      nu_(read_or_default_coeff<float>("nu", 1e-05))
-{};
+      dnu_(get_runTime().create_field<SPHVectorField>(
+          "dnu", zeroVec, {"dnux", "dnuy", "dnuz"})) {};
 
 void Viscosity::execute() {
 

@@ -106,14 +106,29 @@ SPHPointField generate_boundary_particles(
 
     RunTime runTime {logger, false};
 
-    float dx = parameter["ParticleGenerator"]["dx"].as<float>();
     int ts = parameter["timesteps"].as<int>();;
     int nw = parameter["writeout"].as<int>();;
 
-    runTime.create_field<SPHPointField>("Pos");
+    TimeGraph loop {"TimeGraph", YAML::Node(), runTime};
 
-    runTime.create_field<SPHField<Facet_handle>>("facets");
+    // Register Models
 
+    for (auto el: parameter["ModelGraph"]["pre"]) {
+
+        auto model_name = el.first.as<std::string>();
+        auto params = el.second;
+
+        auto model = SPHModelFactory::createInstance(
+            el.second["type"].as<std::string>(),
+            model_name,
+            model_name,
+            el.second,
+            runTime);
+
+        loop.push_back_pre(model);
+    }
+
+    loop.execute_pre();
 
     // Part 1:
     // Distribute points randomly over cell facets/triangles
@@ -121,173 +136,34 @@ SPHPointField generate_boundary_particles(
     // float kernel_relaxation = 1.0;
     float noise_relaxation = 1.0;
 
-    // runTime.set_dict("dx", kernel_relaxation*dx);
-    runTime.set_dict("dx", dx);
     runTime.set_dict("n_timesteps", ts);
     runTime.set_dict("write_freq",  nw);
 
     runTime.create_generic<SPHGeneric<TimeInfo>>(
         "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
-    runTime.create_generic<SPHGeneric<searchcubes::SearchCubeDomain>>("search_cube_domain");
-
-    auto main = SPHModelFactory::createInstance(
-        "CORE",
-        "SPHModelGraph",
-        "main",
-        YAML::Node(),
-        runTime);
-
-    auto pre = SPHModelFactory::createInstance(
-        "CORE",
-        "SPHModelGraph",
-        "pre",
-        YAML::Node(),
-        runTime);
-
-    auto reader = SPHModelFactory::createInstance(
-        "READER",
-        "SPHSTLReader",
-        "SPHSTLReader",
-        parameter["STLReader"],
-        runTime);
-
-    auto generator = SPHModelFactory::createInstance(
-        "GENERATOR",
-        "SPHParticleGenerator",
-        "ParticleGenerator",
-        parameter["ParticleGenerator"],
-        runTime);
-
-    main->execute();
-    reader->execute();
-    generator->execute();
-
-    auto kernel_field = runTime.create_field<SPHFloatField>( "KernelW", 0.0);
-
-    kernel_field.set_reorder(false);
-
-    runTime.create_field<SPHField<VectorPair>>("KerneldWdx");
-    runTime.create_field<SPHField<searchcubes::NeighbourPair>>("neighbour_pairs");
-    runTime.create_field<SPHField<STLSurfaceDist>>("surface_dist");
-    runTime.create_field<SPHField<searchcubes::SearchCube>>("search_cubes");
-    runTime.create_field<SPHSizeTField>("sorting_idxs");
-
-    auto kernel = SPHModelFactory::createInstance(
-        "KERNEL",
-        "STLWendland2D",
-        "Kernel",
-        parameter["STLWendland2D"],
-        runTime);
-
-
-    auto neighbours = SPHModelFactory::createInstance(
-        "PARTICLENEIGHBOURS",
-        "SPHSTLParticleNeighbours",
-        "Neighbours",
-        parameter["SPHSTLParticleNeighbours"],
-        runTime);
-
-    neighbours->execute();
-
-    kernel->execute();
-
-    runTime.update();
-
-    Vector zeroVec = {0, 0, 0};
-
-    runTime.create_field<SPHFloatField>("rho", 0.0);
-    runTime.create_field<SPHFloatField>("p", 1.0e5);
-    runTime.create_field<SPHFloatField>("mu", 1e4);
-    runTime.create_field<SPHVectorField>("dp", zeroVec, {"dpx", "dpy", "dpz"});
-    runTime.create_field<SPHVectorField>("du", zeroVec, {"dU", "dV", "dW"});
-    runTime.create_field<SPHVectorField>("dnu", zeroVec,  {"dnux", "dnuy", "dnuz"});
-    runTime.create_field<SPHVectorField>("f", zeroVec, {"fx", "fy", "fz"});
-    auto & u = runTime.create_field<SPHVectorField>("u", zeroVec, {"U", "V", "W"});
-
     // surface slide particle have type 2
     SPHIntField &type = runTime.create_field<SPHIntField>("type", 2);
 
     SPHSizeTField &idx = runTime.create_idx_field();
 
-    auto conti = SPHModelFactory::createInstance(
-        "TRANSPORTEQN",
-        "Conti",
-        "Conti",
-        parameter["Conti"],
-        runTime);
+    // Register Models
+    for (auto el: parameter["ModelGraph"]["main"]) {
 
+        auto model_name = el.first.as<std::string>();
+        auto params = el.second;
 
-    auto pressure = SPHModelFactory::createInstance(
-        "TRANSPORTEQN",
-        "Pressure",
-        "Pressure",
-        parameter["Pressure"],
-        runTime);
+        auto model = SPHModelFactory::createInstance(
+            el.second["type"].as<std::string>(),
+            model_name,
+            model_name,
+            el.second,
+            runTime);
 
-    auto momentum = SPHModelFactory::createInstance(
-        "TRANSPORTEQN",
-        "Momentum",
-        "Momentum",
-        parameter["Momentum"],
-        runTime);
-
-    auto visc = SPHModelFactory::createInstance(
-        "TRANSPORTEQN",
-        "Viscosity",
-        "Viscosity",
-        parameter["Viscosity"],
-        runTime);
-
-    auto pos = SPHModelFactory::createInstance(
-        "TRANSPORTEQN",
-        "STLPosIntegrator",
-        "STLPosIntegrator",
-        parameter["STLPosIntegrator"],
-        runTime);
-
-    kernel_field.set_reorder(false);
-
-    conti->execute();
-
-    pressure->execute();
-
-    visc->execute();
-
-    momentum->execute();
-
-    pos->execute();
-
-    runTime.write_to_disk();
-
-    float dt;
-    dt = 1e-32;
-
-    runTime++;
-    while (!runTime.end()) {
-
-        runTime.print_timestep();
-
-        neighbours->execute();
-
-        kernel->execute();
-
-        conti->execute();
-
-        pressure->execute();
-
-        visc->execute();
-
-        momentum->execute();
-
-        noise_relaxation *= 0.999;
-        add_random_noise(logger, u, dx*0.01*noise_relaxation);
-
-        pos->execute();
-
-        runTime.write_to_disk();
-        runTime++;
+        loop.push_back_main(model);
     }
+
+    loop.execute_main();
 
     return runTime.get_particle_positions();
 }

@@ -359,6 +359,9 @@ template <class T> class SPHField : public SPHObject {
 
     virtual void reorder(const std::vector<size_t> &idx) {
         std::cout << "reorder_" << reorder_ << std::endl;
+        if (f_.size() != idx.size()) {
+            logger_.warn() << " size mismatch " << name_;
+        }
         if (reorder_ && f_.size() > 0) {
             logger_.info_begin() << "reordering " << name_;
             reorder_vector(idx, f_);
