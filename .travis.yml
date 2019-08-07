@@ -8,7 +8,7 @@ addons:
   apt:
     update: true
     sources:
-      - llvm-toolchain-trusty-7.0
+      - llvm-toolchain-bionic-7.0
     packages:
       - clang-7.0
       - cmake
