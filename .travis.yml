@@ -4,7 +4,7 @@ compiler: clang
 os: linux
 
 before_install:
-  - sudo apt install -y libyaml-cpp-dev libcgal-dev clang
+  - sudo apt install -y libyaml-cpp-dev libcgal-dev
 
 
 script:
