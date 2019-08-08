@@ -1,0 +1,53 @@
+
+GenerateBoundaryParticles:
+  timesteps: 1000
+  writeout: 10
+  ModelGraph:
+    pre:
+      SPHSTLReader:
+        type: READER
+        file: ../example/cube.stl
+      SPHParticleGenerator:
+        type: GENERATOR
+        dx: 2.0
+    main:
+      SPHSTLParticleNeighbours:
+        type: PARTICLENEIGHBOURS
+        dx: 2.01
+      STLWendland2D:
+        type: KERNEL
+        h: 2.01
+      Conti:
+        type: TRANSPORTEQN
+        lower_limit: 0.001
+      Pressure:
+        type: TRANSPORTEQN
+        c: 300.0
+        rho_0: 0.3
+        gamma: 1.4
+        p_0: 20000
+      Viscosity:
+        type: TRANSPORTEQN
+        nu: 100.0
+      Momentum:
+        type: TRANSPORTEQN
+      STLPosIntegrator:
+        type: TRANSPORTEQN
+
+GenerateExtrudedParticles:
+  timesteps: 1000
+  writeout: 10
+  ModelGraph:
+    pre:
+      SPHParticleExtruder:
+        type: READER
+    main:
+      SPHSTLParticleNeighbours:
+        type: PARTICLENEIGHBOURS
+        dx: 2.01
+      LennardJonesForces:
+        type: TRANSPORTEQN
+      Momentum:
+        type: TRANSPORTEQN
+      STLPosIntegrator:
+        type: TRANSPORTEQN
