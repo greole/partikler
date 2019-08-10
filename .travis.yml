@@ -16,9 +16,12 @@ addons:
       - clang-6.0
       - cmake
       - libyaml-cpp-dev
-      - libcgal-dev
-      - libgtest-dev
 
 script:
   - cmake --version
-  - mkdir build && cd build && cmake -DBUILD_GOOGLE_TEST=ON .. && make
+  - mkdir build
+  - cd build
+  - cmake \ 
+    -DBUILD_GOOGLE_TEST=ON \
+    -DBUILD_CGAL=ON
+  - make
