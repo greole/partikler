@@ -16,6 +16,8 @@ addons:
       - clang-6.0
       - cmake
       - libyaml-cpp-dev
+      - libmpfr-dev
+      - libgmp-dev
 
 script:
   - cmake --version
