@@ -5,7 +5,6 @@ compiler:
  - gcc
 
 dist: bionic
-
 os: linux
 
 addons:
@@ -18,6 +17,8 @@ addons:
       - cmake
       - libyaml-cpp-dev
       - libcgal-dev
+    env:
+      - CMAKE_CXX_COMPILER="/usr/local/clang-7.0.0/bin"
 
 script:
   - cmake --version
