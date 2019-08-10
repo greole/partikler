@@ -1,7 +1,7 @@
 project(SPHDatastructures LANGUAGES CXX)
 
-include( ${CGAL_USE_FILE} )  # needed for the linker
-find_package(CGAL  REQUIRED)
+#include( ${CGAL_USE_FILE} )  # needed for the linker
+#find_package(CGAL  REQUIRED)
 find_package(OpenMP REQUIRED)
 #find_package(GTest REQUIRED)
 

@@ -10,6 +10,6 @@ add_library(SPHIO SHARED src/RunTime.cpp)
 
 add_dependencies(SPHIO SPHDatastructures)
 
-target_link_libraries(SPHIO SPHDatastructures OpenMP::OpenMP_CXX) 
+target_link_libraries(SPHIO SPHDatastructures OpenMP::OpenMP_CXX)
 
 target_include_directories(SPHIO PUBLIC ${PROJECT_SOURCE_DIR}/src)

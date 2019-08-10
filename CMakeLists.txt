@@ -7,7 +7,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(PARTIKLER LANGUAGES CXX)
 
-find_package(CGAL  REQUIRED)
 find_package(OpenMP REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -47,7 +46,62 @@ endif()
 ########################
 #add_subdirectory(3rdParty/cgal)
 
-include( ${CGAL_USE_FILE} )  # needed for the linker
+include(ExternalProject)
+
+OPTION(BUILD_CGAL "Building CGAL" OFF)
+IF(BUILD_CGAL)
+    message("BUILDING CGAL")
+    # Download and unpack googletest at configure time
+    configure_file(cmake/CGAL.in cgal-download/CMakeLists.txt)
+
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
+    if(result)
+      message(FATAL_ERROR "CMake step for cgal failed: ${result}")
+    endif()
+
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
+    if(result)
+      message(FATAL_ERROR "Build step for cgal failed: ${result}")
+    endif()
+
+    execute_process(COMMAND mkdir -p build
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src )
+    if(result)
+      message(FATAL_ERROR "Build step for cgal failed: ${result}")
+    endif()
+
+    execute_process(COMMAND cmake  -DCGAL_HEADER_ONLY=ON -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build ..
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
+    if(result)
+      message(FATAL_ERROR "Build step for cgal failed: ${result}")
+    endif()
+
+    execute_process(COMMAND make install
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
+    if(result)
+      message(FATAL_ERROR "Build step for cgal failed: ${result}")
+    endif()
+
+    add_compile_definitions(CGAL_HEADER_ONLY)
+
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
+    set(CGAL_DIR  ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
+    find_package(CGAL  REQUIRED)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build/include)
+ENDIF()
+
+
+# find_package(CGAL  REQUIRED)
+
+# MESSAGE("Found CGAL CONFIG UNDER" ${CGAL_DIR})
+# include( ${CGAL_USE_FILE} )  # needed for the linker
 
 add_custom_command ( OUTPUT tags
     COMMAND ctags -R ${CMAKE_SOURCE_DIR}
@@ -95,6 +149,11 @@ IF(BUILD_GOOGLE_TEST)
                      EXCLUDE_FROM_ALL)
 
      message("BUILDING GTEST DONE")
+
+    execute_process(COMMAND make
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+      )
 ENDIF()
 
 #FIND_PACKAGE(GTest REQUIRED)
@@ -175,14 +234,16 @@ ENDIF()
 ########################
 
 add_subdirectory(src/SPHDatastructures)
-add_subdirectory(src/SPHRuntime)
-add_subdirectory(src/SPHModels)
+# add_subdirectory(src/SPHRuntime)
+# add_subdirectory(src/SPHModels)
+#
 ADD_DEPENDENCIES(SPHDatastructures yaml-cpp)
 
 add_executable(partikler src/partikler.cpp tags)
 
-target_link_libraries(partikler SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
+# target_link_libraries(partikler SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
 #
