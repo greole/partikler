@@ -15,6 +15,7 @@ addons:
     packages:
       - clang-6.0
       - cmake
+      - libboost-all-dev
       - libyaml-cpp-dev
       - libmpfr-dev
       - libgmp-dev
