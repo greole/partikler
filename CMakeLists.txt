@@ -5,10 +5,6 @@ cmake_minimum_required(VERSION 3.10)
 # Compiler settings   #
 ########################
 
-# set(CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
-# set(CMAKE_LINKER  "/usr/bin/ldd")
-# set(CMAKE_C_COMPILER "/usr/local/bin/clang")
-# set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 project(PARTIKLER LANGUAGES CXX)
 
 find_package(CGAL  REQUIRED)
@@ -58,11 +54,17 @@ add_custom_command ( OUTPUT tags
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-enable_testing()
+OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
-MESSAGE("ADDING GOOGLE TEST")
-add_subdirectory(3rdParty/googletest)
-MESSAGE("ADDING GOOGLE BENCHMARK")
+# MESSAGE("ADDING GOOGLE TEST")
+# add_subdirectory(3rdParty/googletest)
+# MESSAGE("ADDING GOOGLE BENCHMARK")
+IF(NOT BUILD_GOOGLE_TEST)
+    MESSAGE("Searching for GTEST")
+    FIND_PACKAGE(GTEST REQUIRED)
+ENDIF()
+
+enable_testing()
 # add_subdirectory(3rdParty/benchmark)
 
 # build tests (targets: gtest_main, gtest)

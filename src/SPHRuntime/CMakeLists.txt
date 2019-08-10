@@ -2,7 +2,7 @@ project(SPHIO LANGUAGES CXX)
 
 find_package(CGAL  REQUIRED)
 find_package(OpenMP REQUIRED)
-find_package(googletest REQUIRED)
+find_package(GTest REQUIRED)
 
 include(git_watcher.cmake)
 

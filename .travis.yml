@@ -17,6 +17,7 @@ addons:
       - cmake
       - libyaml-cpp-dev
       - libcgal-dev
+      - googletest
 
 script:
   - cmake --version
