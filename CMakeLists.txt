@@ -5,9 +5,9 @@ cmake_minimum_required(VERSION 3.10)
 # Compiler settings   #
 ########################
 
-set(CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
-set(CMAKE_LINKER  "/usr/bin/ldd")
-set(CMAKE_C_COMPILER "/usr/local/bin/clang")
+# set(CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
+# set(CMAKE_LINKER  "/usr/bin/ldd")
+# set(CMAKE_C_COMPILER "/usr/local/bin/clang")
 # set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 project(PARTIKLER LANGUAGES CXX)
 
