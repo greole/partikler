@@ -91,6 +91,11 @@ IF(BUILD_GOOGLE_TEST)
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                      EXCLUDE_FROM_ALL)
+
+     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+     # Add googletest-build/googletest/generated/ to Module path
+     # so that FIND_PACKAGE(GTest) works as expected
+     LIST(APPEND CMAKE_MODULE_PATH " ${CMAKE_CURRENT_BINARY_DIR}/googletest-build/googletest/generated/")
 ENDIF()
 
 # add_subdirectory(3rdParty/benchmark)
