@@ -92,7 +92,6 @@ IF(BUILD_GOOGLE_TEST)
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                      EXCLUDE_FROM_ALL)
 
-     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
      # Add googletest-build/googletest/generated/ to Module path
      # so that FIND_PACKAGE(GTest) works as expected
      LIST(APPEND CMAKE_MODULE_PATH " ${CMAKE_CURRENT_BINARY_DIR}/googletest-build/googletest/generated/")
