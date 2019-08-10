@@ -22,7 +22,7 @@
 
 namespace searchcubes {
 
-searchcubes::SearchCubeDomain searchcubes::initSearchCubeDomain(
+SearchCubeDomain initSearchCubeDomain(
     const std::vector<Point> particles, float dx) {
     size_t n_particles = particles.size();
     auto bound_box = bounding_box(particles.begin(), particles.end());
