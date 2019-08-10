@@ -1,4 +1,5 @@
 language: cpp
+sudo: false
 compiler:
  - clang
  - gcc
@@ -11,7 +12,7 @@ addons:
   apt:
     update: true
     sources:
-      - llvm-toolchain-bionic-6.0
+      - llvm-toolchain-bionic-8
     packages:
       - clang-6.0
       - cmake
