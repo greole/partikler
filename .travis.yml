@@ -21,4 +21,4 @@ addons:
 
 script:
   - cmake --version
-  - mkdir build && cd build && cmake .. && make
+  - mkdir build && cd build && cmake -DBUILD_GOOGLE_TEST=ON .. && make
