@@ -21,7 +21,5 @@ script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake \ 
-    -DBUILD_GOOGLE_TEST=ON \
-    -DBUILD_CGAL=ON
+  - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
   - make
