@@ -234,9 +234,9 @@ ENDIF()
 ########################
 
 add_subdirectory(src/SPHDatastructures)
-# add_subdirectory(src/SPHRuntime)
-# add_subdirectory(src/SPHModels)
-#
+add_subdirectory(src/SPHRuntime)
+add_subdirectory(src/SPHModels)
+
 ADD_DEPENDENCIES(SPHDatastructures yaml-cpp)
 
 add_executable(partikler src/partikler.cpp tags)
