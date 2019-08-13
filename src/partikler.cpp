@@ -35,12 +35,14 @@
 #include <getopt.h>
 
 
+#include "RunTime.hpp"
+#include "SPHModels.hpp"
+
 #include "SPHDatastructures.hpp"
 #include "CGALHelper.hpp"
 
 // #include "SPHio.hpp"
 // #include "SPHCore.hpp"
-// #include "SPHModels.hpp"
 // #include "ParticleNeighbours.hpp"
 
 // #include "computes.cpp"
@@ -98,82 +100,81 @@ YAML::Node process_args (int argc, char** argv)
     return YAML::LoadFile(conf);
 }
 
+// TODO move to model part
+SPHPointField generate_boundary_particles(
+    YAML::Node parameter
+){
+    Logger logger {1};
 
-// // TODO move to model part
-// SPHPointField generate_boundary_particles(
-//     YAML::Node parameter
-// ){
-//     Logger logger {1};
+    SPHObjectRegistry obj_reg {};
 
-//     SPHObjectRegistry obj_reg {};
+    RunTime runTime {logger, false};
 
-//     RunTime runTime {logger, false};
+    int ts = parameter["timesteps"].as<int>();;
+    int nw = parameter["writeout"].as<int>();;
 
-//     int ts = parameter["timesteps"].as<int>();;
-//     int nw = parameter["writeout"].as<int>();;
+    TimeGraph loop {"TimeGraph", YAML::Node(), runTime};
 
-//     TimeGraph loop {"TimeGraph", YAML::Node(), runTime};
+    // Register Models
 
-//     // Register Models
+    for (auto el: parameter["ModelGraph"]["pre"]) {
 
-//     for (auto el: parameter["ModelGraph"]["pre"]) {
+        auto model_name = el.first.as<std::string>();
+        auto params = el.second;
 
-//         auto model_name = el.first.as<std::string>();
-//         auto params = el.second;
+        auto model = SPHModelFactory::createInstance(
+            el.second["type"].as<std::string>(),
+            model_name,
+            model_name,
+            el.second,
+            runTime);
 
-//         auto model = SPHModelFactory::createInstance(
-//             el.second["type"].as<std::string>(),
-//             model_name,
-//             model_name,
-//             el.second,
-//             runTime);
+        loop.push_back_pre(model);
+    }
 
-//         loop.push_back_pre(model);
-//     }
+    loop.execute_pre();
 
-//     loop.execute_pre();
+    // Part 1:
+    // Distribute points randomly over cell facets/triangles
+    // Returns a vector of initial point packets per facet
+    // float kernel_relaxation = 1.0;
+    float noise_relaxation = 1.0;
 
-//     // Part 1:
-//     // Distribute points randomly over cell facets/triangles
-//     // Returns a vector of initial point packets per facet
-//     // float kernel_relaxation = 1.0;
-//     float noise_relaxation = 1.0;
+    runTime.set_dict("n_timesteps", ts);
+    runTime.set_dict("write_freq",  nw);
 
-//     runTime.set_dict("n_timesteps", ts);
-//     runTime.set_dict("write_freq",  nw);
+    runTime.create_generic<SPHGeneric<TimeInfo>>(
+        "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
-//     runTime.create_generic<SPHGeneric<TimeInfo>>(
-//         "TimeInfo", TimeInfo {1e-32, ts, 1e24});
+    // surface slide particle have type 2
+    SPHIntField &type = runTime.create_field<SPHIntField>("type", 2);
 
-//     // surface slide particle have type 2
-//     SPHIntField &type = runTime.create_field<SPHIntField>("type", 2);
+    SPHSizeTField &idx = runTime.create_idx_field();
 
-//     SPHSizeTField &idx = runTime.create_idx_field();
+    // Register Models
+    for (auto el: parameter["ModelGraph"]["main"]) {
 
-//     // Register Models
-//     for (auto el: parameter["ModelGraph"]["main"]) {
+        auto model_name = el.first.as<std::string>();
+        auto params = el.second;
 
-//         auto model_name = el.first.as<std::string>();
-//         auto params = el.second;
+        auto model = SPHModelFactory::createInstance(
+            el.second["type"].as<std::string>(),
+            model_name,
+            model_name,
+            el.second,
+            runTime);
 
-//         auto model = SPHModelFactory::createInstance(
-//             el.second["type"].as<std::string>(),
-//             model_name,
-//             model_name,
-//             el.second,
-//             runTime);
+        loop.push_back_main(model);
+    }
 
-//         loop.push_back_main(model);
-//     }
+    loop.execute_main();
 
-//     loop.execute_main();
-
-//     return runTime.get_particle_positions();
-// }
+    return runTime.get_particle_positions();
+}
 
 int main(int argc, char* argv[]) {
     // Step 1 generate boundary particles
     YAML::Node config = process_args(argc, argv);
-    // auto boundary_particles =
-    //     generate_boundary_particles(config["GenerateBoundaryParticles"]);
+    auto boundary_particles =
+        generate_boundary_particles(config["GenerateBoundaryParticles"]);
 }
