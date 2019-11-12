@@ -237,6 +237,8 @@ ENDIF()
 add_subdirectory(src/SPHDatastructures)
 add_subdirectory(src/SPHRuntime)
 add_subdirectory(src/SPHModels)
+add_subdirectory(src/kernel)
+add_subdirectory(src/transporteqn)
 
 ADD_DEPENDENCIES(SPHDatastructures yaml-cpp)
 
@@ -244,7 +246,7 @@ add_executable(partikler src/partikler.cpp tags)
 
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
-target_link_libraries(partikler SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler SPHTransportEqn SPHKernel SPHDatastructures SPHIO SPHCore OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
 #

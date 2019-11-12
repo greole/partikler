@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-#include "Kernel.hpp"
+#include "STLWendland2D.hpp"
 
 STLWendland2D::STLWendland2D(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)

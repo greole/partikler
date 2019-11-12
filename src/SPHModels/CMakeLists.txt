@@ -5,7 +5,6 @@ find_package(yaml-cpp REQUIRED)
 
 add_library(SPHCore SHARED
   src/SPHModels.cpp
-  src/Kernel.cpp
   src/ParticleGenerator.cpp
   src/ParticleNeighbours.cpp
   src/SortParticles.cpp
