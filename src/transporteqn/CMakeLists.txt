@@ -5,6 +5,9 @@ project(SPHTransportEqn LANGUAGES CXX)
 
 add_library(SPHTransportEqn SHARED
   src/Momentum.cpp
+  src/Conti.cpp
+  src/Pressure.cpp
+  src/Viscosity.cpp
   )
 
 add_dependencies(SPHIO SPHIO)

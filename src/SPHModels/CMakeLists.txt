@@ -8,12 +8,8 @@ add_library(SPHCore SHARED
   src/ParticleGenerator.cpp
   src/ParticleNeighbours.cpp
   src/SortParticles.cpp
-  src/Conti.cpp
-  src/Pressure.cpp
-  src/Momentum.cpp
   src/STLLimitedDx.cpp
   src/STLPosIntegrator.cpp
-  src/Viscosity.cpp
   src/BrownianMotion.cpp
   )
 
