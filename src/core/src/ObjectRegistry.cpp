@@ -17,29 +17,4 @@
     contact: go@hpsim.de
 */
 
-#include "Conti.hpp"
-
-Conti::Conti (
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    pos_(objReg.get_particle_positions()),
-    np_(objReg.get_object<Field<searchcubes::NeighbourPair>>("neighbour_pairs")),
-    W_(objReg.get_object<FloatField>("KernelW")),
-    rho_(objReg.create_field<FloatField>("rho", 0.0)),
-    lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
-
-void Conti::execute() {
-
-    log().info_begin() << "Computing density";
-
-    rho_.set_uniform(0.0);
-
-    rho_.weighted_sum(np_, W_);
-
-    rho_.lower_limit(lower_limit_);
-
-    log().info_end();
-};
-
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#include "ObjectRegistry.hpp"

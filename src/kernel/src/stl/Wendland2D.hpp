@@ -21,33 +21,40 @@
 #define KERNEL_H
 
 #include "Models.hpp"
+#include "yaml-cpp/yaml.h"
 #include "Datastructures.hpp"
 
-class Conti : public Model {
+class STLWendland2D : public Model {
 
-    REGISTER_DEC_TYPE(Conti);
+    REGISTER_DEC_TYPE(STLWendland2D);
 
-private:
+  private:
+    // Coeffs
+    const float h_;  // Smoothing length
+    const float ih_; // Inverse Smoothing length
+    // // 3d
+    // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
+    // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
+    // 2d
+    const float W_fak2_;  // = 7. / (64. * M_PI * h * h);
+    const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
+
     // In
     const PointField &pos_; // Particle positions
 
-    // const SortedNeighbours &pn_; // Particle neighbours
     const Field<searchcubes::NeighbourPair> &np_;
-    const FloatField &W_;
+    const Field<STLSurfaceDist> &sd_;
 
     // Out
-    FloatField &rho_;
+    // Kernel &kernel                               // Kernel field
+    FloatField &W_;
+    Field<VectorPair> &dWdx_;
 
-    // Coeffs
-    const float lower_limit_;
-
-
-public:
-    Conti(
+  public:
+    STLWendland2D(
         const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
 
     void execute();
 };
 
 #endif
-

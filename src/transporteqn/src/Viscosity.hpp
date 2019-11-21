@@ -20,12 +20,12 @@
 #ifndef VISCOSITY_H
 #define VISCOSITY_H
 
-#include "SPHModels.hpp"
+#include "Models.hpp"
 #include "yaml-cpp/yaml.h"
-#include "SPHDatastructures.hpp"
+#include "Datastructures.hpp"
 
 
-class Viscosity : public SPHModel {
+class Viscosity : public Model {
 
     REGISTER_DEC_TYPE(Viscosity);
 
@@ -35,17 +35,17 @@ private:
     float nu_;
 
     // In
-    const SPHField<searchcubes::NeighbourPair> &np_;
-    const SPHField<VectorPair> &dW_;
-    const SPHVectorField &u_;
-    const SPHPointField &pos_; // Particle positions
+    const Field<searchcubes::NeighbourPair> &np_;
+    const Field<VectorPair> &dW_;
+    const VectorField &u_;
+    const PointField &pos_; // Particle positions
 
     // Out
-    SPHVectorField &dnu_;
+    VectorField &dnu_;
 
 public:
     Viscosity(
-        const std::string &model_name, YAML::Node parameter, RunTime &runTime);
+        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
 
     void execute();
 };

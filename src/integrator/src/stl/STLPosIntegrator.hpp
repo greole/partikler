@@ -17,29 +17,35 @@
     contact: go@hpsim.de
 */
 
-#include "Conti.hpp"
+#ifndef STLPOSINTEGRATOR_H
+#define STLPOSINTEGRATOR_H
 
-Conti::Conti (
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    pos_(objReg.get_particle_positions()),
-    np_(objReg.get_object<Field<searchcubes::NeighbourPair>>("neighbour_pairs")),
-    W_(objReg.get_object<FloatField>("KernelW")),
-    rho_(objReg.create_field<FloatField>("rho", 0.0)),
-    lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
+#include "Models.hpp"
+#include "yaml-cpp/yaml.h"
+#include "Datastructures.hpp"
+#include "stl/STLLimitedDx.hpp"
 
-void Conti::execute() {
+class STLPosIntegrator : public Model {
 
-    log().info_begin() << "Computing density";
+    REGISTER_DEC_TYPE(STLPosIntegrator);
 
-    rho_.set_uniform(0.0);
+private:
 
-    rho_.weighted_sum(np_, W_);
+    // const std::vector<Point> opoints_;
+    const IntField &type_;
+    Field<Facet_handle> & facets_;
+    const SizeTField &idx_;
 
-    rho_.lower_limit(lower_limit_);
+    // Out
+    VectorField &u_;
+    PointField& pos_;
+    Generic<TimeInfo>& time_;
 
-    log().info_end();
+public:
+    STLPosIntegrator(
+        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+
+    void execute();
 };
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#endif

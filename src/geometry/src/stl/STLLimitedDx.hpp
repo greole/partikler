@@ -17,29 +17,18 @@
     contact: go@hpsim.de
 */
 
-#include "Conti.hpp"
+#ifndef STLLIMITEDDX_H
+#define STLLIMITEDDX_H
 
-Conti::Conti (
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    pos_(objReg.get_particle_positions()),
-    np_(objReg.get_object<Field<searchcubes::NeighbourPair>>("neighbour_pairs")),
-    W_(objReg.get_object<FloatField>("KernelW")),
-    rho_(objReg.create_field<FloatField>("rho", 0.0)),
-    lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
+#include "Datastructures.hpp"
 
-void Conti::execute() {
+VectorField STL_limited_dx(
+    VectorField &u,
+    float dt,
+    // const std::vector<Point> &opoints,
+    Field<Facet_handle> &facets,
+    const IntField &type,
+    const SizeTField &idx,
+    const PointField &pos);
 
-    log().info_begin() << "Computing density";
-
-    rho_.set_uniform(0.0);
-
-    rho_.weighted_sum(np_, W_);
-
-    rho_.lower_limit(lower_limit_);
-
-    log().info_end();
-};
-
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#endif

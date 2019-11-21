@@ -21,11 +21,12 @@
 #ifndef Pressure_H
 #define Pressure_H
 
-#include "SPHModels.hpp"
-#include "yaml-cpp/yaml.h"
-#include "SPHDatastructures.hpp"
+#include "Models.hpp"
+#include "Datastructures.hpp"
 
-class Pressure : public SPHModel {
+#include "yaml-cpp/yaml.h"
+
+class Pressure : public Model {
 
     REGISTER_DEC_TYPE(Pressure);
 
@@ -40,20 +41,20 @@ class Pressure : public SPHModel {
 
     // In
     // Density
-    const SPHFloatField &rho_;
-    const SPHField<searchcubes::NeighbourPair> &np_;
-    const SPHFloatField &W_;
-    const SPHField<VectorPair> &dW_;
+    const FloatField &rho_;
+    const Field<searchcubes::NeighbourPair> &np_;
+    const FloatField &W_;
+    const Field<VectorPair> &dW_;
 
     // Out
     // Pressure
-    SPHFloatField &p_;
-    SPHVectorField &dp_;
+    FloatField &p_;
+    VectorField &dp_;
 
   public:
 
     Pressure(
-        const std::string &model_name, YAML::Node parameter, RunTime &runTime);
+        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
 
     void execute();
 };

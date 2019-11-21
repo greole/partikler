@@ -20,15 +20,15 @@
 # include "Momentum.hpp"
 
 Momentum::Momentum(
-    const std::string &model_name, YAML::Node parameter, RunTime &runTime)
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : SPHModel(model_name, parameter, runTime),
-      dnu_(get_runTime().get_obj<SPHVectorField>("dnu")),
-      dp_(get_runTime().get_obj<SPHVectorField>("dp")),
-      u_(get_runTime().get_obj<SPHVectorField>("u")),
-      du_(get_runTime().create_field<SPHVectorField>(
+    : Model(model_name, parameter, objReg),
+      dnu_(objReg.get_object<VectorField>("dnu")),
+      dp_(objReg.get_object<VectorField>("dp")),
+      u_(objReg.get_object<VectorField>("u")),
+      du_(objReg.create_field<VectorField>(
               "du", zeroVec, {"dU", "dV", "dW"})),
-      time_(get_runTime().get_obj<SPHGeneric<TimeInfo>>("TimeInfo")) {};
+      time_(objReg.get_object<Generic<TimeInfo>>("TimeInfo")) {};
 
 void Momentum::execute() {
 

@@ -17,29 +17,50 @@
     contact: go@hpsim.de
 */
 
-#include "Conti.hpp"
+#ifndef PARTICLENEIGHBOURS_H
+#define PARTICLENEIGHBOURS_H
 
-Conti::Conti (
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    pos_(objReg.get_particle_positions()),
-    np_(objReg.get_object<Field<searchcubes::NeighbourPair>>("neighbour_pairs")),
-    W_(objReg.get_object<FloatField>("KernelW")),
-    rho_(objReg.create_field<FloatField>("rho", 0.0)),
-    lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
+#include "Models.hpp"
+#include "SearchCubes.hpp"
+#include "Datastructures.hpp"
 
-void Conti::execute() {
 
-    log().info_begin() << "Computing density";
+class SPHSTLParticleNeighbours: public Model {
 
-    rho_.set_uniform(0.0);
+    REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
 
-    rho_.weighted_sum(np_, W_);
+private:
 
-    rho_.lower_limit(lower_limit_);
+    // Coeffs
+    float dx_;
 
-    log().info_end();
+    // In
+    PointField &pos_;
+
+    Field<Facet_handle> & facets_;
+
+    Field<searchcubes::SearchCube> & sc_;
+
+    // Out
+    Field<searchcubes::NeighbourPair> &np_;
+
+    Field<STLSurfaceDist> &sd_;
+
+    // Regular data member
+    Generic<searchcubes::SearchCubeDomain> & scd_;
+
+    float search_cube_size_ = 1.0;
+public:
+
+    SPHSTLParticleNeighbours(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry & objReg);
+
+    void execute();
+
+    void update_search_cube_domain();
+
 };
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#endif
