@@ -23,36 +23,51 @@
 
 
 GenerateBoundaryParticles::GenerateBoundaryParticles(
-    const std::string &model_name, YAML::Node parameter, RunTime &runTime)
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : SPHModel(model_name, parameter, runTime)
+    : Model(model_name, parameter, objReg),
+      boundaryIds_(objReg.create_field<IntField>("boundary")),
+      typeIds_(objReg.create_field<IntField>("type")),
+      idx_(objReg.create_field<SizeTField>("idx")),
+      pos_(objReg.create_field<PointField>("Pos")),
+      ts_(read_coeff<int>("iterations")),
+      nw_(read_or_default_coeff<int>("writeout", -1))
 {};
 
 void GenerateBoundaryParticles::execute() {
 
-    int ts = get_params()["timesteps"].as<int>();;
-    int nw = get_params()["writeout"].as<int>();;
+    Logger logger {1};
 
-    TimeGraph loop {"TimeGraph", YAML::Node(), get_runTime()};
+    get_objReg().create_generic<Generic<TimeInfo>>(
+        "TimeInfo", TimeInfo {1e-32, ts_, 1e24});
+
+    TimeGraph loop {"TimeGraph", YAML::Node(), get_objReg()};
 
     // Register Models
+    for (auto el: get_parameter()) {
+        std::cout << el << std::endl;
+    }
 
-    for (auto el: get_params()["ModelGraph"]["pre"]) {
+    for (auto el: get_parameter()["ModelGraph"]["pre"]) {
 
-        auto model_name = el.first.as<std::string>();
+        auto model_namespace = el.first.as<std::string>();
+        auto model_name = el.second["model"].as<std::string>();
         auto params = el.second;
 
-        auto model = SPHModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
+        auto model = ModelFactory::createInstance(
+            model_namespace,
             model_name,
             model_name,
             el.second,
-            get_runTime());
+            get_objReg()
+            );
 
         loop.push_back_pre(model);
     }
 
     loop.execute_pre();
+
+    std::cout << pos_.size() << std::endl;
 
     // Part 1:
     // Distribute points randomly over cell facets/triangles
@@ -60,35 +75,32 @@ void GenerateBoundaryParticles::execute() {
     // float kernel_relaxation = 1.0;
     float noise_relaxation = 1.0;
 
-    get_runTime().set_dict("n_timesteps", ts);
-    get_runTime().set_dict("write_freq",  nw);
-
-    get_runTime().create_generic<SPHGeneric<TimeInfo>>(
-        "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
     // surface slide particle have type 2
-    SPHIntField &type = get_runTime().create_field<SPHIntField>("type", 2);
+    // IntField &type = get_objReg().create_field<IntField>("type", 2);
+    // SizeTField &idx = obj_reg.create_idx_field();
 
-    SPHSizeTField &idx = get_runTime().create_idx_field();
+    // // Register Models
+    for (auto el: get_parameter()["ModelGraph"]["main"]) {
 
-    // Register Models
-    for (auto el: get_params()["ModelGraph"]["main"]) {
+        // auto model_name = el.first.as<std::string>();
+        // auto params = el.second;
+        auto model_namespace = el.first.as<std::string>();
+        auto model_name = el.second["model"].as<std::string>();
 
-        auto model_name = el.first.as<std::string>();
-        auto params = el.second;
-
-        auto model = SPHModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
+        auto model = ModelFactory::createInstance(
+            model_namespace,
             model_name,
             model_name,
             el.second,
-            get_runTime());
+            get_objReg());
 
         loop.push_back_main(model);
     }
 
     loop.execute_main();
 
+    // update idx and typeIds
 };
 
-REGISTER_DEF_TYPE(MODEL, GenerateBoundaryParticles);
+REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);

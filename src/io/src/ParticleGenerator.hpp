@@ -68,6 +68,12 @@ private:
     // Reference to positions field
     PointField& pos_;
 
+    SizeTField& idx_;
+
+    IntField& type_;
+
+    IntField& boundary_;
+
     const float dx_;
 
 

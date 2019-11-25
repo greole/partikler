@@ -39,7 +39,12 @@ void STLPosIntegrator::execute() {
 
     PointField old_pos(pos_);
 
-    VectorField dx = STL_limited_dx(u_, time_().deltaT, facets_, type_, idx_, pos_);
+    std::cout << u_.size() << " "
+              << facets_.size() << " "
+              << type_.size() << " "
+              << idx_.size() << std::endl;
+    VectorField dx =
+        STL_limited_dx(u_, time_().deltaT, facets_, type_, idx_, pos_);
 
     pos_ += dx;
 

@@ -27,7 +27,6 @@
 #include <iostream>
 #include <memory>
 
-
 class ObjectRegistry {
 
 private:
@@ -74,18 +73,35 @@ public:
 
     ObjReg& get_objects() { return objects_; }
 
+    bool object_exists(const std::string name) const {
+        for (auto &&f : objects_) {
+            if (f->get_name() == name) {
+                return true;
+            };
+        }
+
+        return false;
+    }
+
+
+    // template <class T>
+    // T &get_field(const std::string name){
+    //     if (object_exists(name)) return get_objects<T> (name)
+    // }
+
     PointField &get_particle_positions() {
         return get_object<PointField &>("Pos");
     }
 
-
     template <class T> T &create_generic(const std::string name) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
             std::make_unique<T>(name, "generic", typename T::value_type()));
     }
 
     template <class T>
     T &create_generic(const std::string name, typename T::value_type val) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
             std::make_unique<T>(name, "generic", val));
     }
@@ -95,6 +111,7 @@ public:
         const std::string name,
         typename T::value_type init_value,
         const std::vector<std::string> comp_names) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_, init_value),
             comp_names, name));
@@ -103,6 +120,7 @@ public:
     template <class T>
     T &create_field(
         const std::string name, typename T::value_type init_value) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_, init_value),
             name));
@@ -110,12 +128,15 @@ public:
 
     template <class T>
     T &create_field(const std::string name) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_), name));
     }
 
     SizeTField &create_idx_field() {
         // TODO move to cpp
+        if (object_exists("idx")) return get_object<SizeTField>("idx");
+
         auto &f = create_field<SizeTField>("idx");
         std::cout << " n_particles_ " << n_particles_ << std::endl;
 

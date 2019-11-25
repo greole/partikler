@@ -68,6 +68,9 @@ class Model : public SPHObject {
               << this->get_name();
     }
 
+
+    YAML::Node get_parameter() { return parameter_;}
+
     template<class T>
     T read_coeff(std::string coeff_name) {
         T coeff = parameter_[coeff_name].as<T>();

@@ -99,80 +99,101 @@ YAML::Node process_args (int argc, char** argv)
     return YAML::LoadFile(conf);
 }
 
-// TODO move to model part
-PointField generate_boundary_particles(
-    YAML::Node parameter
-){
-    Logger logger {1};
+// // TODO move to model part
+// PointField generate_boundary_particles(
+//     YAML::Node parameter
+// ){
+//     Logger logger {1};
 
-    ObjectRegistry obj_reg {};
+//     ObjectRegistry obj_reg {};
 
-    // RunTime runTime {logger, false};
+//     // RunTime runTime {logger, false};
 
-    int ts = parameter["timesteps"].as<int>();;
-    int nw = parameter["writeout"].as<int>();;
+//     int ts = parameter["timesteps"].as<int>();;
+//     int nw = parameter["writeout"].as<int>();;
 
-    obj_reg.create_generic<Generic<TimeInfo>>(
-        "TimeInfo", TimeInfo {1e-32, ts, 1e24});
+//     obj_reg.create_generic<Generic<TimeInfo>>(
+//         "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
-    TimeGraph loop {"TimeGraph", YAML::Node(), obj_reg};
+//     TimeGraph loop {"TimeGraph", YAML::Node(), obj_reg};
 
-    // Register Models
+//     // Register Models
 
-    for (auto el: parameter["ModelGraph"]["pre"]) {
+//     for (auto el: parameter["ModelGraph"]["pre"]) {
 
-        auto model_name = el.first.as<std::string>();
-        auto params = el.second;
+//         auto model_namespace = el.first.as<std::string>();
+//         auto model_name = el.second["model"].as<std::string>();
+//         auto params = el.second;
 
-        auto model = ModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
-            model_name,
-            model_name,
-            el.second,
-            obj_reg
-            // runTime
-            );
+//         auto model = ModelFactory::createInstance(
+//             model_namespace,
+//             model_name,
+//             model_name,
+//             el.second,
+//             obj_reg
+//             // runTime
+//             );
 
-        loop.push_back_pre(model);
-    }
+//         loop.push_back_pre(model);
+//     }
 
-    loop.execute_pre();
+//     loop.execute_pre();
 
-    // Part 1:
-    // Distribute points randomly over cell facets/triangles
-    // Returns a vector of initial point packets per facet
-    // float kernel_relaxation = 1.0;
-    float noise_relaxation = 1.0;
+//     // Part 1:
+//     // Distribute points randomly over cell facets/triangles
+//     // Returns a vector of initial point packets per facet
+//     // float kernel_relaxation = 1.0;
+//     float noise_relaxation = 1.0;
 
 
-    // surface slide particle have type 2
-    IntField &type = obj_reg.create_field<IntField>("type", 2);
-    SizeTField &idx = obj_reg.create_idx_field();
+//     // surface slide particle have type 2
+//     IntField &type = obj_reg.create_field<IntField>("type", 2);
+//     SizeTField &idx = obj_reg.create_idx_field();
 
-    // // Register Models
-    for (auto el: parameter["ModelGraph"]["main"]) {
+//     // // Register Models
+//     for (auto el: parameter["ModelGraph"]["main"]) {
 
-        auto model_name = el.first.as<std::string>();
-        auto params = el.second;
+//         // auto model_name = el.first.as<std::string>();
+//         // auto params = el.second;
+//         auto model_namespace = el.first.as<std::string>();
+//         auto model_name = el.second["model"].as<std::string>();
 
-        auto model = ModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
-            model_name,
-            model_name,
-            el.second,
-            obj_reg);
+//         auto model = ModelFactory::createInstance(
+//             model_namespace,
+//             model_name,
+//             model_name,
+//             el.second,
+//             obj_reg);
 
-        loop.push_back_main(model);
-    }
+//         loop.push_back_main(model);
+//     }
 
-    loop.execute_main();
+//     loop.execute_main();
 
-    return obj_reg.get_particle_positions();
-}
+//     return obj_reg.get_particle_positions();
+// }
 
 int main(int argc, char* argv[]) {
     // Step 1 generate boundary particles
     YAML::Node config = process_args(argc, argv);
-    auto boundary_particles =
-        generate_boundary_particles(config["GenerateBoundaryParticles"]);
+
+    ObjectRegistry obj_reg {};
+
+    // main model loop
+    for (auto el: config) {
+
+        auto model_namespace = el.first.as<std::string>();
+        auto model_name = el.second["model"].as<std::string>();
+        auto params = el.second;
+
+        auto model = ModelFactory::createInstance(
+            model_namespace,
+            model_name,
+            model_name,
+            el.second,
+            obj_reg
+            );
+
+        model->execute();
+    }
 }
