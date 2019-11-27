@@ -26,3 +26,4 @@ script:
   - cd build
   - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
   - make -j4
+  - ./partikler --config=../example.sph
