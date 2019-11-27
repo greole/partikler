@@ -115,6 +115,8 @@ IF(GENERATE_TAGS)
         COMMAND ctags -R ${CMAKE_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
+ELSE()
+    add_custom_target(tags)
 ENDIF()
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
