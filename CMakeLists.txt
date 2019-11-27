@@ -116,7 +116,10 @@ IF(GENERATE_TAGS)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 ELSE()
-    add_custom_target(tags)
+    add_custom_command ( OUTPUT tags
+        COMMAND touch tags
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
 ENDIF()
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
