@@ -30,11 +30,7 @@ PROJECT:
               writeout: 10
               iterations: 100
 
-        - BOUNDARY:
-            model: ExportTOHD5
-
     MAIN:
 
-        -KERNEL:
-            model: Wendland3D
-            h: 2.0
+        - TRANSPORTEQN:
+            model: Conti
