@@ -21,53 +21,98 @@
 
 #include "GenerateBoundaryParticles.hpp"
 
-
 GenerateBoundaryParticles::GenerateBoundaryParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-
     : Model(model_name, parameter, objReg),
-      boundaryIds_(objReg.create_field<IntField>("boundary")),
-      typeIds_(objReg.create_field<IntField>("type")),
-      idx_(objReg.create_field<SizeTField>("idx")),
-      pos_(objReg.create_field<PointField>("Pos")),
-      ts_(read_coeff<int>("iterations")),
-      nw_(read_or_default_coeff<int>("writeout", -1))
+      local_objReg_(ObjectRegistry()),
+      timeGraph_(local_objReg_.register_object<TimeGraph>(
+                     std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
+      boundaryIds_(local_objReg_.create_field<IntField>("boundary")),
+      typeIds_(local_objReg_.create_field<IntField>("type")),
+      idx_(local_objReg_.create_field<SizeTField>("idx")),
+      pos_(local_objReg_.create_field<PointField>("Pos")),
+      iterations_(read_coeff<int>("iterations")),
+      write_freq_(read_or_default_coeff<int>("writeout", -1)),
+      filename_(read_coeff<std::string>("file")),
+      boundary_name_(read_coeff<std::string>("name")),
+      dx_(read_coeff<float>("dx"))
 {};
+
+YAML::Node GenerateBoundaryParticles::default_graph() {
+    YAML::Node node;  // starts out as NULL
+
+    YAML::Node reader;
+    reader["READER"]["model"] = "SPHSTLReader";
+    reader["READER"]["file"] = filename_;
+
+    node["pre"].push_back(reader);
+
+    YAML::Node generator;
+    generator["GENERATOR"]["model"] = "SPHParticleGenerator";
+    generator["GENERATOR"]["dx"] = dx_;
+    node["pre"].push_back(generator);
+
+    YAML::Node neighbours;
+    neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
+    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_ * 1.05;
+    node["main"].push_back(neighbours);
+
+    YAML::Node kernel;
+    kernel["KERNEL"]["model"] = "STLWendland2D";
+    kernel["KERNEL"]["h"] = dx_ * 1.05;
+    node["main"].push_back(kernel);
+
+    YAML::Node conti;
+    conti["TRANSPORTEQN"]["model"] = "Conti";
+    conti["TRANSPORTEQN"]["lower_limit"] = 0.001;
+    node["main"].push_back(conti);
+
+    YAML::Node pressure;
+    pressure["TRANSPORTEQN"]["model"] = "Pressure";
+    node["main"].push_back(pressure);
+
+    YAML::Node visc;
+    visc["TRANSPORTEQN"]["model"] = "Viscosity";
+    visc["TRANSPORTEQN"]["nu"] = 100;
+    node["main"].push_back(visc);
+
+    YAML::Node mom;
+    mom["TRANSPORTEQN"]["model"] = "Momentum";
+    node["main"].push_back(mom);
+
+    YAML::Node integ;
+    integ["TRANSPORTEQN"]["model"] = "STLPosIntegrator";
+    node["main"].push_back(integ);
+
+    return node;
+}
 
 void GenerateBoundaryParticles::execute() {
 
     Logger logger {1};
-
-    get_objReg().create_generic<Generic<TimeInfo>>(
-        "TimeInfo", TimeInfo {1e-32, ts_, 1e24});
-
-    TimeGraph loop {"TimeGraph", YAML::Node(), get_objReg()};
-
+    
     // Register Models
-    for (auto el: get_parameter()) {
-        std::cout << el << std::endl;
-    }
 
-    for (auto el: get_parameter()["ModelGraph"]["pre"]) {
+    auto node = default_graph();
 
-        auto model_namespace = el.first.as<std::string>();
-        auto model_name = el.second["model"].as<std::string>();
-        auto params = el.second;
+    for (auto el: node["pre"]) {
+
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
 
         auto model = ModelFactory::createInstance(
             model_namespace,
             model_name,
             model_name,
-            el.second,
-            get_objReg()
+            it->second,
+            local_objReg_
             );
 
-        loop.push_back_pre(model);
+        timeGraph_.push_back_pre(model);
     }
 
-    loop.execute_pre();
-
-    std::cout << pos_.size() << std::endl;
+    timeGraph_.execute_pre();
 
     // Part 1:
     // Distribute points randomly over cell facets/triangles
@@ -80,27 +125,29 @@ void GenerateBoundaryParticles::execute() {
     // IntField &type = get_objReg().create_field<IntField>("type", 2);
     // SizeTField &idx = obj_reg.create_idx_field();
 
-    // // Register Models
-    for (auto el: get_parameter()["ModelGraph"]["main"]) {
+    // Register Models
+    for (auto el: node["main"]) {
 
-        // auto model_name = el.first.as<std::string>();
-        // auto params = el.second;
-        auto model_namespace = el.first.as<std::string>();
-        auto model_name = el.second["model"].as<std::string>();
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
 
         auto model = ModelFactory::createInstance(
             model_namespace,
             model_name,
             model_name,
-            el.second,
-            get_objReg());
+            it->second,
+            local_objReg_
+            );
 
-        loop.push_back_main(model);
+        timeGraph_.push_back_main(model);
     }
 
-    loop.execute_main();
+    timeGraph_.execute_main();
 
-    // update idx and typeIds
+    // TODO transfer fields and teardown intermediate fields
+
+    // write
 };
 
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);

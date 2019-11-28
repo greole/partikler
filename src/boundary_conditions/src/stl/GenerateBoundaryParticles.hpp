@@ -32,15 +32,28 @@ class GenerateBoundaryParticles : public Model {
 
   private:
 
+    ObjectRegistry local_objReg_;
+    TimeGraph& timeGraph_;
+
     IntField &boundaryIds_;
     IntField &typeIds_;
     SizeTField &idx_;
     PointField &pos_;
 
-    int ts_;
-    int nw_;
+    int iterations_;
+    int write_freq_;
+
+    std::string filename_;
+    std::string boundary_name_;
+
+    float dx_;
+
+
 
   public:
+
+    YAML::Node default_graph();
+
     GenerateBoundaryParticles(
         const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
 

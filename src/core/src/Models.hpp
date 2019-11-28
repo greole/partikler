@@ -236,7 +236,22 @@ private:
 
     float current_time_;
 
-    Generic<TimeInfo>& time_;
+    std::string name_;
+
+    float endTime_;
+
+    float deltaT_;
+
+    float max_deltaT_;
+
+    int iterations_;
+
+    int write_freq_;
+
+    int last_write_;
+
+    bool iter_mode = false;
+
 
 public:
     // TODO Move implementation to cpp file
@@ -250,8 +265,14 @@ public:
           post_(ModelGraph("post", parameter, objReg)),
           current_timestep_(0),
           current_time_(0),
-          time_(objReg.get_object<Generic<TimeInfo>>("TimeInfo"))
+          name_(read_coeff<std::string>("name")),
+          endTime_(read_or_default_coeff<float>("endTime", -1.0 )),
+          deltaT_(read_or_default_coeff<float>("deltaT", -1.0 )),
+          max_deltaT_(read_or_default_coeff<float>("max_deltaT", -1.0 )),
+          iterations_(read_or_default_coeff<int>("iterations", 0)),
+          write_freq_(read_or_default_coeff<int>("write_frequency", 0))
     {
+        if (deltaT_ < 0) {iter_mode = true;}
     };
 
     void execute() {
@@ -266,10 +287,9 @@ public:
 
     void execute_main() {
         // TODO register some kind of call back
-        // TODO reimplement and give TimeGraph needed members
-        while (current_timestep_ < time_().timeSteps) {
+        while (current_timestep_ < iterations_) {
             main_.execute();
-            get_objReg().write_to_disk(current_timestep_);
+            get_objReg().write_to_disk(current_timestep_, name_);
             current_timestep_++;
         };
     }
@@ -290,6 +310,22 @@ public:
     void push_back_post(std::shared_ptr<Model> m) {
         post_.sub_model_push_back(m);
     }
+
+    float get_deltaT() {
+        if (iter_mode) return 1.0e-32;
+        return deltaT_;
+    }
+
+    float get_maxDeltaT() {
+        if (iter_mode) return 1.0;
+        return max_deltaT_;
+    }
+
+    void set_deltaT(float deltaT) {
+        deltaT_ = deltaT;
+    }
+
+    int & get_current_timestep() {return current_timestep_;}
 };
 
 #endif
