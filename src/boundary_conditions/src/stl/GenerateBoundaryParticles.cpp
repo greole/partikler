@@ -90,7 +90,7 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
 void GenerateBoundaryParticles::execute() {
 
     Logger logger {1};
-    
+
     // Register Models
 
     auto node = default_graph();
@@ -145,7 +145,63 @@ void GenerateBoundaryParticles::execute() {
 
     timeGraph_.execute_main();
 
-    // TODO transfer fields and teardown intermediate fields
+    auto& loc_objs = local_objReg_.get_objects();
+
+    logger_.info_begin() << "Transfering ";
+
+    // check if  field already present
+    for (auto &obj: loc_objs) {
+        auto name = obj->get_name();
+        auto type = obj->get_type();
+        // "int" IntField
+        // "long" SizeTField
+        // "float" FloatField
+        // "Point" PointField
+        // "vector" VectorField
+        // TODO Refactor this
+
+        std::cout << "Transfering" << name << std::endl;
+
+        if (get_objReg().object_exists(name)) {
+
+            if (type=="int") {
+
+                get_objReg().get_object<IntField>(name).append(
+                    local_objReg_.get_object<IntField>(name).get_field());
+            }
+
+            if (type=="long") {
+
+                get_objReg().get_object<SizeTField>(name).append(
+                    local_objReg_.get_object<SizeTField>(name).get_field());
+            }
+
+            if (type=="float") {
+
+                get_objReg().get_object<FloatField>(name).append(
+                    local_objReg_.get_object<FloatField>(name).get_field());
+            }
+
+            if (type=="vector") {
+
+                get_objReg().get_object<VectorField>(name).append(
+                    local_objReg_.get_object<VectorField>(name).get_field());
+            }
+
+            if (type=="Point") {
+
+                get_objReg().get_object<PointField>(name).append(
+                    local_objReg_.get_object<PointField>(name).get_field());
+            }
+
+        } else {
+            get_objReg().get_objects().push_back(
+                std::move(obj)
+                );
+        }
+    }
+
+    logger_.info_end();
 
     // write
 };
