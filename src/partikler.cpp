@@ -179,21 +179,53 @@ int main(int argc, char* argv[]) {
 
     ObjectRegistry obj_reg {};
 
-    // main model loop
-    for (auto el: config) {
+    TimeGraph &timeGraph =
+        obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
+            "TimeGraph", config["PROJECT"], obj_reg));
 
-        auto model_namespace = el.first.as<std::string>();
-        auto model_name = el.second["model"].as<std::string>();
-        auto params = el.second;
+    // main model loop
+    for (auto el: config["PROJECT"]["PRE"]) {
+
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
+        auto params = it->second;
 
         auto model = ModelFactory::createInstance(
             model_namespace,
             model_name,
             model_name,
-            el.second,
+            params,
             obj_reg
             );
 
-        model->execute();
+        timeGraph.push_back_pre(model);
     }
+
+    timeGraph.execute_pre();
+
+    std::cout << "main" << std::endl;
+
+    for (auto el: config["PROJECT"]["MAIN"]) {
+
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
+        auto params = it->second;
+
+        std::cout << model_namespace << std::endl;
+        std::cout << model_name << std::endl;
+
+        auto model = ModelFactory::createInstance(
+            model_namespace,
+            model_name,
+            model_name,
+            params,
+            obj_reg
+            );
+
+        timeGraph.push_back_main(model);
+    }
+
+    timeGraph.execute_main();
 }
