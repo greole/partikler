@@ -53,11 +53,7 @@ public:
         n_particles_ = n_particles;
     }
 
-    // void register_object(std::unique_ptr<Object> f) {
-    //     objects_.push_back(std::move(f));
-    // }
-
-    template <class T> T &get_object(const std::string name) const {
+    template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
