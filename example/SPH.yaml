@@ -1,37 +1,40 @@
-BOUNDARY:
-  model: GenerateBoundaryParticles
-  iterations: 1000
-  writeout: 10
-  ModelGraph:
-    pre:
-        READER:
-            model: SPHSTLReader
-            file: ../example/cube.stl
-        GENERATOR:
-            model: SPHParticleGenerator
-            dx: 2.0
+PROJECT:
+    name: ExampleProject
+    path: /home/go/data/partikler_projects
+    debug: False
+    iterations: 1000
+    write_frequency: 10
 
-    main:
-        PARTICLENEIGHBOURS:
-            model: SPHSTLParticleNeighbours
-            dx: 2.01
-        KERNEL:
-            model: STLWendland2D
-            h: 2.01
-        TRANSPORTEQN:
-            model: Conti
-            lower_limit: 0.001
-        TRANSPORTEQN:
-            model: Pressure
-            c: 300.0
-            rho_0: 0.3
-            gamma: 1.4
-            p_0: 20000
-        TRANSPORTEQN:
-            model: Viscosity
-            type: TRANSPORTEQN
-            nu: 100.0
-        TRANSPORTEQN:
-            model: Momentum
-        TRANSPORTEQN:
-            model: STLPosIntegrator
+    PARAMETERSTUDY:
+        model: GenerateBoundaryParticles
+        parameter: dx
+        values: [0.1, 0.5. 1.0]
+
+
+
+    PRE:
+
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Cube
+              file: ../example/cube.stl
+              dx: 2.0
+              writeout: 10
+              iterations: 100
+
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Tetrahedron
+              file: ../example/Tetrahedron.stl
+              dx: 1.0
+              writeout: 10
+              iterations: 100
+
+        - BOUNDARY:
+            model: ExportTOHD5
+
+    MAIN:
+
+        -KERNEL:
+            model: Wendland3D
+            h: 2.0
