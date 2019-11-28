@@ -145,7 +145,7 @@ public:
         return f;
     }
 
-    void write_to_disk(int timestep) {
+    void write_to_disk(int timestep, std::string name="Data") {
         std::cout << "write to disk" << std::endl;
         int cur_timestep = timestep;//get_timestep();
         int write_freq = 1; // get_write_freq();
@@ -155,9 +155,9 @@ public:
         if (cur_timestep - index_on_dist * write_freq == 0) {
             std::cout << get_objects().size() << std::endl;
 
-            prepare_data_folder("Data", index_on_dist);
+            prepare_data_folder(name, index_on_dist);
 
-            const std::string path = "Data/step#" + intToStr(index_on_dist);
+            const std::string path = name + "/step#" + intToStr(index_on_dist);
 
             for (auto &f : get_objects()) f->write_to_disk(path);
         }
