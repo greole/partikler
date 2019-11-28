@@ -215,12 +215,6 @@ struct VectorPair {
     Vector no;
 };
 
-struct TimeInfo {
-    float deltaT;
-    int   timeSteps;
-    const float maxDeltaT;
-};
-
 
 struct NeighbourIdHalfStencil {
   // Stores the stride of a domain, ie the difference of search cubes ids
