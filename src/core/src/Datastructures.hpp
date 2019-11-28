@@ -363,6 +363,14 @@ template <class T> class Field : public SPHObject {
         }
     }
 
+    void append(std::vector<T> b) {
+        this->f_.insert(
+            this->f_.end(),
+            b.begin(),
+            b.end()
+            );
+    };
+
     void set_field(std::vector<T> b) { this->f_ = b; };
 
     void copy_field(std::vector<T> &b) { OP_LOOP(f_[ctr] = b[ctr];) };
