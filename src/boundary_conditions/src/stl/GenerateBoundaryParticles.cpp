@@ -35,8 +35,17 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
       boundary_name_(read_coeff<std::string>("name")),
-      dx_(read_coeff<float>("dx"))
+      dx_(read_coeff<float>("dx")),
+      translation_vector_(read_translation_vector(parameter))
 {};
+
+std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
+
+    if (!parameter["translate"]) return {0, 0, 0};
+
+    auto p = parameter["translate"];
+    return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
+}
 
 YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node node;  // starts out as NULL
@@ -149,15 +158,10 @@ void GenerateBoundaryParticles::execute() {
 
     logger_.info_begin() << "Transfering ";
 
-    // check if  field already present
+    // check if field already present
     for (auto &obj: loc_objs) {
         auto name = obj->get_name();
         auto type = obj->get_type();
-        // "int" IntField
-        // "long" SizeTField
-        // "float" FloatField
-        // "Point" PointField
-        // "vector" VectorField
         // TODO Refactor this
 
         std::cout << "Transfering" << name << std::endl;
@@ -189,6 +193,10 @@ void GenerateBoundaryParticles::execute() {
             }
 
             if (type=="Point") {
+
+                // translate
+                local_objReg_.get_object<PointField>(name).translate(translation_vector_);
+
 
                 get_objReg().get_object<PointField>(name).append(
                     local_objReg_.get_object<PointField>(name).get_field());

@@ -48,6 +48,8 @@ class GenerateBoundaryParticles : public Model {
 
     float dx_;
 
+    std::vector<float> translation_vector_;
+
 
 
   public:
@@ -56,6 +58,8 @@ class GenerateBoundaryParticles : public Model {
 
     GenerateBoundaryParticles(
         const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+
+    std::vector<float> read_translation_vector(YAML::Node parameter);
 
     void execute();
 };

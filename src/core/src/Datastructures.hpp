@@ -657,6 +657,22 @@ class PointField : public ComponentField<Point> {
 
     void write_to_disk(std::string path);
 
+    void translate(std::vector<float> b) {
+        std::cout << "translate " << b[0]
+                  << " " << b[1]
+                  << " " << b[2]
+                  << std::endl;
+        OP_LOOP(
+            Point p (
+                b[0] + this->f_[ctr][0],
+                b[1] + this->f_[ctr][1],
+                b[2] + this->f_[ctr][2]
+                );
+            this->f_[ctr] = p;
+            )
+
+    }
+
   PointField operator-(const PointField b) const {
     // dot product
     OP_FIELD_LOOP_RET(
