@@ -57,6 +57,7 @@ SPHSTLReader::SPHSTLReader(
         );
 
     delete(polyhedron);
+    delete(builder);
 
     log().info_end();
 }
