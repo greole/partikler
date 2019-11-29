@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE "RELEASE")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-    -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
+    -Wall -Wextra -march=native -fopenmp -fPIC"
     )
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -32,13 +32,17 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
       )
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
+        -whole-archive \
         "
         # -fopt-info-vec-missed"
         )
+
+    /
 endif()
 
 
