@@ -41,8 +41,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         "
         # -fopt-info-vec-missed"
         )
-
-    /
 endif()
 
 
