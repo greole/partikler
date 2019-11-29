@@ -37,7 +37,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
-        -whole-archive \
+        -Wl,-whole-archive \
         "
         # -fopt-info-vec-missed"
         )
