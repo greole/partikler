@@ -146,7 +146,8 @@ struct ModelFactory {
         if (it == getMap()->end()) {
             std::cout << " no model named "
                       << model_name
-                      << " found, available models:"
+                      << " found, available models for namespace "
+                      << model_type
                       << std::endl;
             print_models(model_type);
             return 0;
