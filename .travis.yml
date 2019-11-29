@@ -19,6 +19,7 @@ addons:
       - libyaml-cpp-dev
       - libmpfr-dev
       - libgmp-dev
+      - libomp-dev
 
 script:
   - cmake --version
