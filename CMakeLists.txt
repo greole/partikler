@@ -90,7 +90,10 @@ IF(BUILD_CGAL)
       message(FATAL_ERROR "Build step for cgal failed: ${result}")
     endif()
 
-    add_compile_definitions(CGAL_HEADER_ONLY)
+    # add_compile_definitions(CGAL_HEADER_ONLY)
+    #SET_TARGET_PROPERTIES(CGAL
+    #    PROPERTIES
+    #    CGAL_HEADER_ONLY TRUE)
 
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
     set(CGAL_DIR  ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
@@ -104,10 +107,20 @@ ENDIF()
 # MESSAGE("Found CGAL CONFIG UNDER" ${CGAL_DIR})
 # include( ${CGAL_USE_FILE} )  # needed for the linker
 
-add_custom_command ( OUTPUT tags
-    COMMAND ctags -R ${CMAKE_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
+
+OPTION(GENERATE_TAGS "Generating tags" OFF)
+
+IF(GENERATE_TAGS)
+    add_custom_command ( OUTPUT tags
+        COMMAND ctags -R ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ELSE()
+    add_custom_command ( OUTPUT tags
+        COMMAND touch tags
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ENDIF()
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
@@ -243,12 +256,13 @@ add_subdirectory(src/transporteqn)
 add_subdirectory(src/integrator)
 add_subdirectory(src/geometry)
 add_subdirectory(src/io)
+add_subdirectory(src/boundary_conditions)
 
 add_executable(partikler src/partikler.cpp tags)
 
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
-target_link_libraries(partikler Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
 #

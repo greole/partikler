@@ -21,38 +21,107 @@
 
 #include "GenerateBoundaryParticles.hpp"
 
-
 GenerateBoundaryParticles::GenerateBoundaryParticles(
-    const std::string &model_name, YAML::Node parameter, RunTime &runTime)
-
-    : SPHModel(model_name, parameter, runTime)
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+    : Model(model_name, parameter, objReg),
+      local_objReg_(ObjectRegistry()),
+      timeGraph_(local_objReg_.register_object<TimeGraph>(
+                     std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
+      boundaryIds_(local_objReg_.create_field<IntField>("boundary")),
+      typeIds_(local_objReg_.create_field<IntField>("type")),
+      idx_(local_objReg_.create_field<SizeTField>("idx")),
+      pos_(local_objReg_.create_field<PointField>("Pos")),
+      iterations_(read_coeff<int>("iterations")),
+      write_freq_(read_or_default_coeff<int>("writeout", -1)),
+      filename_(read_coeff<std::string>("file")),
+      boundary_name_(read_coeff<std::string>("name")),
+      dx_(read_coeff<float>("dx")),
+      translation_vector_(read_translation_vector(parameter))
 {};
+
+std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
+
+    if (!parameter["translate"]) return {0, 0, 0};
+
+    auto p = parameter["translate"];
+    return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
+}
+
+YAML::Node GenerateBoundaryParticles::default_graph() {
+    YAML::Node node;  // starts out as NULL
+
+    YAML::Node reader;
+    reader["READER"]["model"] = "SPHSTLReader";
+    reader["READER"]["file"] = filename_;
+
+    node["pre"].push_back(reader);
+
+    YAML::Node generator;
+    generator["GENERATOR"]["model"] = "SPHParticleGenerator";
+    generator["GENERATOR"]["dx"] = dx_;
+    node["pre"].push_back(generator);
+
+    YAML::Node neighbours;
+    neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
+    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_ * 1.05;
+    node["main"].push_back(neighbours);
+
+    YAML::Node kernel;
+    kernel["KERNEL"]["model"] = "STLWendland2D";
+    kernel["KERNEL"]["h"] = dx_ * 1.05;
+    node["main"].push_back(kernel);
+
+    YAML::Node conti;
+    conti["TRANSPORTEQN"]["model"] = "Conti";
+    conti["TRANSPORTEQN"]["lower_limit"] = 0.001;
+    node["main"].push_back(conti);
+
+    YAML::Node pressure;
+    pressure["TRANSPORTEQN"]["model"] = "Pressure";
+    node["main"].push_back(pressure);
+
+    YAML::Node visc;
+    visc["TRANSPORTEQN"]["model"] = "Viscosity";
+    visc["TRANSPORTEQN"]["nu"] = 100;
+    node["main"].push_back(visc);
+
+    YAML::Node mom;
+    mom["TRANSPORTEQN"]["model"] = "Momentum";
+    node["main"].push_back(mom);
+
+    YAML::Node integ;
+    integ["TRANSPORTEQN"]["model"] = "STLPosIntegrator";
+    node["main"].push_back(integ);
+
+    return node;
+}
 
 void GenerateBoundaryParticles::execute() {
 
-    int ts = get_params()["timesteps"].as<int>();;
-    int nw = get_params()["writeout"].as<int>();;
-
-    TimeGraph loop {"TimeGraph", YAML::Node(), get_runTime()};
+    Logger logger {1};
 
     // Register Models
 
-    for (auto el: get_params()["ModelGraph"]["pre"]) {
+    auto node = default_graph();
 
-        auto model_name = el.first.as<std::string>();
-        auto params = el.second;
+    for (auto el: node["pre"]) {
 
-        auto model = SPHModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
+
+        auto model = ModelFactory::createInstance(
+            model_namespace,
             model_name,
             model_name,
-            el.second,
-            get_runTime());
+            it->second,
+            local_objReg_
+            );
 
-        loop.push_back_pre(model);
+        timeGraph_.push_back_pre(model);
     }
 
-    loop.execute_pre();
+    timeGraph_.execute_pre();
 
     // Part 1:
     // Distribute points randomly over cell facets/triangles
@@ -60,35 +129,89 @@ void GenerateBoundaryParticles::execute() {
     // float kernel_relaxation = 1.0;
     float noise_relaxation = 1.0;
 
-    get_runTime().set_dict("n_timesteps", ts);
-    get_runTime().set_dict("write_freq",  nw);
-
-    get_runTime().create_generic<SPHGeneric<TimeInfo>>(
-        "TimeInfo", TimeInfo {1e-32, ts, 1e24});
 
     // surface slide particle have type 2
-    SPHIntField &type = get_runTime().create_field<SPHIntField>("type", 2);
-
-    SPHSizeTField &idx = get_runTime().create_idx_field();
+    // IntField &type = get_objReg().create_field<IntField>("type", 2);
+    // SizeTField &idx = obj_reg.create_idx_field();
 
     // Register Models
-    for (auto el: get_params()["ModelGraph"]["main"]) {
+    for (auto el: node["main"]) {
 
-        auto model_name = el.first.as<std::string>();
-        auto params = el.second;
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
 
-        auto model = SPHModelFactory::createInstance(
-            el.second["type"].as<std::string>(),
+        auto model = ModelFactory::createInstance(
+            model_namespace,
             model_name,
             model_name,
-            el.second,
-            get_runTime());
+            it->second,
+            local_objReg_
+            );
 
-        loop.push_back_main(model);
+        timeGraph_.push_back_main(model);
     }
 
-    loop.execute_main();
+    timeGraph_.execute_main();
 
+    auto& loc_objs = local_objReg_.get_objects();
+
+    logger_.info_begin() << "Transfering ";
+
+    // check if field already present
+    for (auto &obj: loc_objs) {
+        auto name = obj->get_name();
+        auto type = obj->get_type();
+        // TODO Refactor this
+
+        std::cout << "Transfering" << name << std::endl;
+
+        if (get_objReg().object_exists(name)) {
+
+            if (type=="int") {
+
+                get_objReg().get_object<IntField>(name).append(
+                    local_objReg_.get_object<IntField>(name).get_field());
+            }
+
+            if (type=="long") {
+
+                get_objReg().get_object<SizeTField>(name).append(
+                    local_objReg_.get_object<SizeTField>(name).get_field());
+            }
+
+            if (type=="float") {
+
+                get_objReg().get_object<FloatField>(name).append(
+                    local_objReg_.get_object<FloatField>(name).get_field());
+            }
+
+            if (type=="vector") {
+
+                get_objReg().get_object<VectorField>(name).append(
+                    local_objReg_.get_object<VectorField>(name).get_field());
+            }
+
+            if (type=="Point") {
+
+                // translate
+                local_objReg_.get_object<PointField>(name).translate(translation_vector_);
+
+
+                get_objReg().get_object<PointField>(name).append(
+                    local_objReg_.get_object<PointField>(name).get_field());
+            }
+
+        } else {
+            get_objReg().get_objects().push_back(
+                std::move(obj)
+                );
+        }
+    }
+
+    logger_.info_end();
+
+    // write
 };
 
-REGISTER_DEF_TYPE(MODEL, GenerateBoundaryParticles);
+REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);

@@ -19,10 +19,12 @@ addons:
       - libyaml-cpp-dev
       - libmpfr-dev
       - libgmp-dev
+      - libomp-dev
 
 script:
   - cmake --version
   - mkdir build
   - cd build
   - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
-  - make
+  - make -j4
+  - ./partikler --config=../example/SPH.yaml

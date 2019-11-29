@@ -39,7 +39,7 @@ private:
     // Out
     VectorField &u_;
     PointField& pos_;
-    Generic<TimeInfo>& time_;
+    TimeGraph& time_;
 
 public:
     STLPosIntegrator(

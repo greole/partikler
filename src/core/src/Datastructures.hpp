@@ -215,12 +215,6 @@ struct VectorPair {
     Vector no;
 };
 
-struct TimeInfo {
-    float deltaT;
-    int   timeSteps;
-    const float maxDeltaT;
-};
-
 
 struct NeighbourIdHalfStencil {
   // Stores the stride of a domain, ie the difference of search cubes ids
@@ -368,6 +362,14 @@ template <class T> class Field : public SPHObject {
             logger_.info_end();
         }
     }
+
+    void append(std::vector<T> b) {
+        this->f_.insert(
+            this->f_.end(),
+            b.begin(),
+            b.end()
+            );
+    };
 
     void set_field(std::vector<T> b) { this->f_ = b; };
 
@@ -654,6 +656,22 @@ class PointField : public ComponentField<Point> {
   }
 
     void write_to_disk(std::string path);
+
+    void translate(std::vector<float> b) {
+        std::cout << "translate " << b[0]
+                  << " " << b[1]
+                  << " " << b[2]
+                  << std::endl;
+        OP_LOOP(
+            Point p (
+                b[0] + this->f_[ctr][0],
+                b[1] + this->f_[ctr][1],
+                b[2] + this->f_[ctr][2]
+                );
+            this->f_[ctr] = p;
+            )
+
+    }
 
   PointField operator-(const PointField b) const {
     // dot product

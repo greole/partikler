@@ -45,7 +45,6 @@ void SPHSTLParticleNeighbours::execute() {
     // log().set_scope("")
     log().info() << " Constructing particle neighbours";
     update_search_cube_domain();
-
     execute_submodels();
 
     // TODO move sorting to countingSortParticles submodel

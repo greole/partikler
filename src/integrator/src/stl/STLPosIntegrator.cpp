@@ -29,17 +29,22 @@ STLPosIntegrator::STLPosIntegrator(
       idx_(objReg.get_object<SizeTField>("idx")),
       u_(objReg.get_object<VectorField>("u")),
       pos_(objReg.get_object<PointField>("Pos")),
-      time_(objReg.get_object<Generic<TimeInfo>>("TimeInfo"))
+      time_(objReg.get_object<TimeGraph>("TimeGraph"))
 {};
 
 void STLPosIntegrator::execute() {
 
     log().info_begin() << " Updating Particle Positions";
-    log().info() << " DeltaT " << time_().deltaT;
+    log().info() << " DeltaT " << time_.get_deltaT();
 
     PointField old_pos(pos_);
 
-    VectorField dx = STL_limited_dx(u_, time_().deltaT, facets_, type_, idx_, pos_);
+    std::cout << u_.size() << " "
+              << facets_.size() << " "
+              << type_.size() << " "
+              << idx_.size() << std::endl;
+    VectorField dx =
+        STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, pos_);
 
     pos_ += dx;
 
@@ -49,7 +54,7 @@ void STLPosIntegrator::execute() {
     float dx_ratio = CFL /current_max_dx;
     float two = 2.0;
     float change = min(two, dx_ratio);
-    time_().deltaT =  min(time_().maxDeltaT, time_().deltaT * change);
+    time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() * change));
 
     log().info_end();
 };

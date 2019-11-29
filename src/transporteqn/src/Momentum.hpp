@@ -40,7 +40,8 @@ private:
     // Out
     VectorField &u_;
     VectorField &du_;
-    Generic<TimeInfo>& time_;
+
+    TimeGraph& time_;
 
 public:
     Momentum(

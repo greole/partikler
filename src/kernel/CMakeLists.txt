@@ -5,6 +5,7 @@ find_package(yaml-cpp REQUIRED)
 
 add_library(Kernel SHARED
   src/stl/Wendland2D.cpp
+  src/Wendland.cpp
   )
 
 add_dependencies(Kernel Core)

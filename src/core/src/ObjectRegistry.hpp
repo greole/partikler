@@ -27,7 +27,6 @@
 #include <iostream>
 #include <memory>
 
-
 class ObjectRegistry {
 
 private:
@@ -54,11 +53,7 @@ public:
         n_particles_ = n_particles;
     }
 
-    // void register_object(std::unique_ptr<Object> f) {
-    //     objects_.push_back(std::move(f));
-    // }
-
-    template <class T> T &get_object(const std::string name) const {
+    template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
@@ -74,18 +69,35 @@ public:
 
     ObjReg& get_objects() { return objects_; }
 
+    bool object_exists(const std::string name) const {
+        for (auto &&f : objects_) {
+            if (f->get_name() == name) {
+                return true;
+            };
+        }
+
+        return false;
+    }
+
+
+    // template <class T>
+    // T &get_field(const std::string name){
+    //     if (object_exists(name)) return get_objects<T> (name)
+    // }
+
     PointField &get_particle_positions() {
         return get_object<PointField &>("Pos");
     }
 
-
     template <class T> T &create_generic(const std::string name) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
             std::make_unique<T>(name, "generic", typename T::value_type()));
     }
 
     template <class T>
     T &create_generic(const std::string name, typename T::value_type val) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
             std::make_unique<T>(name, "generic", val));
     }
@@ -95,6 +107,7 @@ public:
         const std::string name,
         typename T::value_type init_value,
         const std::vector<std::string> comp_names) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_, init_value),
             comp_names, name));
@@ -103,6 +116,7 @@ public:
     template <class T>
     T &create_field(
         const std::string name, typename T::value_type init_value) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_, init_value),
             name));
@@ -110,12 +124,15 @@ public:
 
     template <class T>
     T &create_field(const std::string name) {
+        if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_), name));
     }
 
     SizeTField &create_idx_field() {
         // TODO move to cpp
+        if (object_exists("idx")) return get_object<SizeTField>("idx");
+
         auto &f = create_field<SizeTField>("idx");
         std::cout << " n_particles_ " << n_particles_ << std::endl;
 
@@ -124,7 +141,7 @@ public:
         return f;
     }
 
-    void write_to_disk(int timestep) {
+    void write_to_disk(int timestep, std::string name="Data") {
         std::cout << "write to disk" << std::endl;
         int cur_timestep = timestep;//get_timestep();
         int write_freq = 1; // get_write_freq();
@@ -134,9 +151,9 @@ public:
         if (cur_timestep - index_on_dist * write_freq == 0) {
             std::cout << get_objects().size() << std::endl;
 
-            prepare_data_folder("Data", index_on_dist);
+            prepare_data_folder(name, index_on_dist);
 
-            const std::string path = "Data/step#" + intToStr(index_on_dist);
+            const std::string path = name + "/step#" + intToStr(index_on_dist);
 
             for (auto &f : get_objects()) f->write_to_disk(path);
         }

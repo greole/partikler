@@ -1,53 +1,36 @@
+PROJECT:
+    name: ExampleProject
+    path: /home/go/data/partikler_projects
+    debug: False
+    iterations: 1000
+    write_frequency: 10
 
-GenerateBoundaryParticles:
-  timesteps: 1000
-  writeout: 10
-  ModelGraph:
-    pre:
-      SPHSTLReader:
-        type: READER
-        file: ../example/cube.stl
-      SPHParticleGenerator:
-        type: GENERATOR
-        dx: 2.0
-    main:
-      SPHSTLParticleNeighbours:
-        type: PARTICLENEIGHBOURS
-        dx: 2.01
-      STLWendland2D:
-        type: KERNEL
-        h: 2.01
-      Conti:
-        type: TRANSPORTEQN
-        lower_limit: 0.001
-      Pressure:
-        type: TRANSPORTEQN
-        c: 300.0
-        rho_0: 0.3
-        gamma: 1.4
-        p_0: 20000
-      Viscosity:
-        type: TRANSPORTEQN
-        nu: 100.0
-      Momentum:
-        type: TRANSPORTEQN
-      STLPosIntegrator:
-        type: TRANSPORTEQN
+    PARAMETERSTUDY:
+        model: GenerateBoundaryParticles
+        parameter: dx
+        values: [0.1, 0.5. 1.0]
 
-GenerateExtrudedParticles:
-  timesteps: 1000
-  writeout: 10
-  ModelGraph:
-    pre:
-      SPHParticleExtruder:
-        type: READER
-    main:
-      SPHSTLParticleNeighbours:
-        type: PARTICLENEIGHBOURS
-        dx: 2.01
-      LennardJonesForces:
-        type: TRANSPORTEQN
-      Momentum:
-        type: TRANSPORTEQN
-      STLPosIntegrator:
-        type: TRANSPORTEQN
+
+
+    PRE:
+
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Cube
+              file: ../example/cube.stl
+              dx: 2.0
+              writeout: 10
+              iterations: 100
+
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Tetrahedron
+              file: ../example/Tetrahedron.stl
+              dx: 1.0
+              writeout: 10
+              iterations: 100
+
+    MAIN:
+
+        - TRANSPORTEQN:
+            model: Conti

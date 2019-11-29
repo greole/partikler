@@ -22,19 +22,44 @@
 #ifndef GENERATEBOUNDARYPARTICLES_H
 #define GENERATEBOUNDARYPARTICLES_H
 
-#include "SPHDatastructures.hpp"
-#include "SPHModels.hpp"
+#include "Datastructures.hpp"
+#include "Models.hpp"
 #include "yaml-cpp/yaml.h"
 
-class GenerateBoundaryParticles : public SPHModel {
+class GenerateBoundaryParticles : public Model {
 
     REGISTER_DEC_TYPE(GenerateBoundaryParticles);
 
   private:
 
+    ObjectRegistry local_objReg_;
+    TimeGraph& timeGraph_;
+
+    IntField &boundaryIds_;
+    IntField &typeIds_;
+    SizeTField &idx_;
+    PointField &pos_;
+
+    int iterations_;
+    int write_freq_;
+
+    std::string filename_;
+    std::string boundary_name_;
+
+    float dx_;
+
+    std::vector<float> translation_vector_;
+
+
+
   public:
+
+    YAML::Node default_graph();
+
     GenerateBoundaryParticles(
-        const std::string &model_name, YAML::Node parameter, RunTime &runTime);
+        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+
+    std::vector<float> read_translation_vector(YAML::Node parameter);
 
     void execute();
 };
