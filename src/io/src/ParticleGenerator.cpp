@@ -33,6 +33,13 @@ SPHSTLReader::SPHSTLReader(
     // read_STL(istream, points, facets, false);
     Polyhedron_builder_from_STL<HalfedgeDS> * builder = new
         Polyhedron_builder_from_STL<HalfedgeDS>  (*istream);
+
+    // objReg.register_object<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
+    //     std::make_unique<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
+    //         "builder", "generic", *builder
+    //         )
+    //     );
+
     log().info_end();
 
     log().info_begin() << "Constructing polyhedron";
@@ -40,6 +47,7 @@ SPHSTLReader::SPHSTLReader(
     // TODO make
     // Create input polyhedron
     CGALPolyhedron *polyhedron = new CGALPolyhedron;
+
     polyhedron->delegate(*builder);
 
     objReg.register_object<Generic<CGALPolyhedron>>(
@@ -47,6 +55,8 @@ SPHSTLReader::SPHSTLReader(
             "polyhedron", "generic", *polyhedron
             )
         );
+
+    delete(polyhedron);
 
     log().info_end();
 }
