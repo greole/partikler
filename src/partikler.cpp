@@ -22,13 +22,8 @@
 #include <numeric>
 #include <functional>
 #include <assert.h>
-
-
-// #include <future>
-// #include <execution>
 #include <algorithm>
 #include <math.h>    // std::min
-// #include <parallel/settings.h>
 
 // external header
 #include "yaml-cpp/yaml.h"
@@ -36,23 +31,6 @@
 
 #include "Object.hpp"
 #include "Models.hpp"
-
-// #include "SPHDatastructures.hpp"
-// #include "CGALHelper.hpp"
-
-// #include "SPHio.hpp"
-// #include "SPHCore.hpp"
-// #include "ParticleNeighbours.hpp"
-
-// #include "computes.cpp"
-
-// #include "include/particle_helper.hpp"
-
-// /* file IO */
-// #include <sys/stat.h>
-// #include <pthread.h>
-// #include <math.h>
-// #include <x86intrin.h>
 
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
@@ -82,7 +60,6 @@ REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
 #include "stl/STLPosIntegrator.hpp"
 REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
 #endif
-
 
 
 void print_help() {
@@ -127,80 +104,6 @@ YAML::Node process_args (int argc, char** argv)
 
     return YAML::LoadFile(conf);
 }
-
-// // TODO move to model part
-// PointField generate_boundary_particles(
-//     YAML::Node parameter
-// ){
-//     Logger logger {1};
-
-//     ObjectRegistry obj_reg {};
-
-//     // RunTime runTime {logger, false};
-
-//     int ts = parameter["timesteps"].as<int>();;
-//     int nw = parameter["writeout"].as<int>();;
-
-//     obj_reg.create_generic<Generic<TimeInfo>>(
-//         "TimeInfo", TimeInfo {1e-32, ts, 1e24});
-
-//     TimeGraph loop {"TimeGraph", YAML::Node(), obj_reg};
-
-//     // Register Models
-
-//     for (auto el: parameter["ModelGraph"]["pre"]) {
-
-//         auto model_namespace = el.first.as<std::string>();
-//         auto model_name = el.second["model"].as<std::string>();
-//         auto params = el.second;
-
-//         auto model = ModelFactory::createInstance(
-//             model_namespace,
-//             model_name,
-//             model_name,
-//             el.second,
-//             obj_reg
-//             // runTime
-//             );
-
-//         loop.push_back_pre(model);
-//     }
-
-//     loop.execute_pre();
-
-//     // Part 1:
-//     // Distribute points randomly over cell facets/triangles
-//     // Returns a vector of initial point packets per facet
-//     // float kernel_relaxation = 1.0;
-//     float noise_relaxation = 1.0;
-
-
-//     // surface slide particle have type 2
-//     IntField &type = obj_reg.create_field<IntField>("type", 2);
-//     SizeTField &idx = obj_reg.create_idx_field();
-
-//     // // Register Models
-//     for (auto el: parameter["ModelGraph"]["main"]) {
-
-//         // auto model_name = el.first.as<std::string>();
-//         // auto params = el.second;
-//         auto model_namespace = el.first.as<std::string>();
-//         auto model_name = el.second["model"].as<std::string>();
-
-//         auto model = ModelFactory::createInstance(
-//             model_namespace,
-//             model_name,
-//             model_name,
-//             el.second,
-//             obj_reg);
-
-//         loop.push_back_main(model);
-//     }
-
-//     loop.execute_main();
-
-//     return obj_reg.get_particle_positions();
-// }
 
 int main(int argc, char* argv[]) {
     // Step 1 generate boundary particles
