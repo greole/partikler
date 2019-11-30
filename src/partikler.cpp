@@ -54,6 +54,35 @@
 // #include <math.h>
 // #include <x86intrin.h>
 
+// Currently under ubuntu the gcc compiler optimises
+// the register to call to the model register away
+// if it doesn't see a call anywere in the executable.
+// Hence, for no the register calls are made manually
+// until a better solution is found
+#ifdef WITH_GNU
+#include "stl/GenerateBoundaryParticles.hpp"
+REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
+#include "stl/STLWendland2D.hpp"
+REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
+#include "ParticleNeighbours.hpp"
+REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
+#include "SortParticles.hpp"
+REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
+#include "Conti.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#include "Momentum.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
+#include "Pressure.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
+#include "Viscosity.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
+#include "ParticleGenerator.hpp"
+REGISTER_DEF_TYPE(READER, SPHSTLReader);
+REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
+#include "stl/STLPosIntegrator.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
+#endif
+
 
 
 void print_help() {

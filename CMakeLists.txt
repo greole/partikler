@@ -32,6 +32,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
       )
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+
+    add_compile_definitions(WITH_GNU)
+
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
         -ffast-math \
         -march=native  \
