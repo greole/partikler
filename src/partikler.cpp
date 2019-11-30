@@ -62,7 +62,7 @@
 #ifdef WITH_GNU
 #include "stl/GenerateBoundaryParticles.hpp"
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
-#include "stl/STLWendland2D.hpp"
+#include "stl/Wendland2D.hpp"
 REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
 #include "ParticleNeighbours.hpp"
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
