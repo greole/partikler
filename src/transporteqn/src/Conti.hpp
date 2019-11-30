@@ -17,8 +17,8 @@
     contact: go@hpsim.de
 */
 
-#ifndef KERNEL_H
-#define KERNEL_H
+#ifndef CONTI_H
+#define CONTI_H
 
 #include "Models.hpp"
 #include "Datastructures.hpp"
