@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/greole/partikler/master/doc/LogoSmall.png"><br>
+</div>
+
+-----------------
 ![](https://api.travis-ci.org/greole/partikler.svg?branch=master)
 
 # Build Instructions
