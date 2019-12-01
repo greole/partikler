@@ -17,9 +17,14 @@ The partikler depends on CGAL and google tests. You can use the build process to
 
     cmake  -DBUILD_GOOGLE_TEST=TRUE -DBUILD_CGAL=TRUE ..
 
+### Ubuntu
+
+To install the depencies for build google tests and cgal you can use
+
+    sudo apt install libboost-all-dev libyaml-cpp-dev libmpfr-dev  libgmp-dev libomp-dev
 
 
 # Usage
 
-    ./partikler input.stl output.off dx
+    ./partikler --config=<path/to/config.yaml>
 
