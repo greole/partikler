@@ -173,6 +173,7 @@ IF(BUILD_GOOGLE_TEST)
       )
 ENDIF()
 
+
 #FIND_PACKAGE(GTest REQUIRED)
 
 # add_subdirectory(3rdParty/benchmark)
@@ -215,6 +216,46 @@ IF(BUILD_YAML_CPP)
           PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
       SET(YAML_CPP_LIBRARY yaml-cpp)
       MESSAGE("SET YAML_CPP_LIBRARY " ${YAML_CPP_LIBRARY})
+ENDIF()
+
+
+OPTION(BUILD_YAP "Building YAP" ON)
+# IF(NOT BUILD_YAP)
+#     MESSAGE("Searching for YAP")
+#     FIND_PACKAGE(yap REQUIRED)
+# ENDIF()
+
+IF(BUILD_YAP)
+    # Download and unpack googletest at configure time
+    configure_file(cmake/YAP.in yap-download/CMakeLists.txt)
+
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-download )
+    if(result)
+      message(FATAL_ERROR "CMake step for yap failed: ${result}")
+    endif()
+
+    message("BUILDING YAP")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-download )
+    if(result)
+      message(FATAL_ERROR "Build step for yap failed: ${result}")
+    endif()
+
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yap-src
+                     ${CMAKE_CURRENT_BINARY_DIR}/yap-build
+                     EXCLUDE_FROM_ALL)
+
+                 message("BUILDING YAP DONE")
+
+    execute_process(COMMAND make
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
+      )
 ENDIF()
 
 
