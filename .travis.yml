@@ -27,4 +27,5 @@ script:
   - cd build
   - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
   - make -j4
+  - ctest -R "Partikler_Test"
   - ./partikler --config=../example/SPH.yaml
