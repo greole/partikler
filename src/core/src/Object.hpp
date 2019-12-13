@@ -100,7 +100,7 @@ private:
 public:
 
     EquationBase(std::string name, bool active, T & result):
-        SPHObject(name, "Equation", active),
+        SPHObject(name, "Equation"),
         result_(result) {
 
         logger_.info() << " Created Equation: " << name_;
