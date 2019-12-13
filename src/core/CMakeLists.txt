@@ -6,8 +6,10 @@ find_package(yaml-cpp REQUIRED)
 # TODO move SearchCubes to neighbours?
 
 add_library(Core SHARED
+  src/Vec3.cpp
   src/FileIO.cpp
   src/Object.cpp
+  src/Field.cpp
   src/Models.cpp
   src/SearchCubes.cpp
   src/Datastructures.cpp
@@ -19,4 +21,4 @@ add_library(Core SHARED
 target_link_libraries(Core OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 target_include_directories(Core PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
-#add_subdirectory(tests/SPHCore)
+add_subdirectory(tests)

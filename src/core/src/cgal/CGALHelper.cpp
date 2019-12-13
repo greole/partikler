@@ -552,7 +552,7 @@ Point projectedPoint(Path p, Point P)
 }
 
 
-Vector rotate(Matrix R, Vector a) {
+Vec3 rotate(Matrix R, Vec3 a) {
   CGALVector v {a[0], a[1], a[2]};
   CGALVector ret {R.x*v, R.y*v, R.z*v};
   return {(float)ret[0], (float)ret[1], (float)ret[2]};

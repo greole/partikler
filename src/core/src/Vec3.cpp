@@ -1,3 +1,4 @@
+
 /*  Partikler - A general purpose framework for smoothed particle hydrodynamics
     simulations Copyright (C) 2019 Gregor Olenik
 
@@ -17,4 +18,35 @@
     contact: go@hpsim.de
 */
 
-#include "Object.hpp"
+#include "Vec3.hpp"
+
+Vec3& Vec3::operator=(const Vec3 & x) {
+    operator[](0) = x[0];
+    operator[](1) = x[1];
+    operator[](2) = x[2];
+    return *this;
+}
+
+Vec3 operator*(float a, Vec3 x) {
+    return {a * x[0], a * x[1], a * x[2]};
+}
+
+// scalar division
+Vec3 operator/(Vec3 x, float a) {
+    float ia = 1. / a;
+    return {ia * x[0], ia * x[1], ia * x[2]};
+}
+
+// dot product
+float operator*(Vec3& x, Vec3& y) {
+    return {x[0] * x[0] + x[1] * x[1] + x[2] * x[2]};
+}
+
+// addition
+Vec3 operator+(Vec3& x, Vec3& y) {
+    return {x[0] + y[0],  x[1] + y[1], x[2] + y[2]};
+}
+
+Vec3 operator-(Vec3& x, Vec3& y) {
+    return {x[0] - y[0],  x[1] - y[1], x[2] - y[2]};
+}

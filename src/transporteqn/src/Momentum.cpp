@@ -45,7 +45,7 @@ void Momentum::execute() {
 
     // CFL = max(u)*deltaT/dx
 
-    float maxU = u_.norm().get_max();
+    // float maxU = u_.norm().get_max();
 
     // std::cout << "maxU"
     //           << maxU

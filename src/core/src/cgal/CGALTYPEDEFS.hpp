@@ -45,7 +45,6 @@ typedef K::Point_3                        Point;
 typedef K::Plane_3                        Plane;
 typedef K::Line_3                         Line;
 typedef CGALPolyhedron::Traits::Vector_3      CGALVector;
-typedef std::array<float, 3>              Vector;
 
 typedef K::FT                             FT;
 

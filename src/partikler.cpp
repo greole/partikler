@@ -29,37 +29,36 @@
 #include "yaml-cpp/yaml.h"
 #include <getopt.h>
 
-#include "Object.hpp"
-#include "Models.hpp"
+#include "core.hpp"
 
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
 // if it doesn't see a call anywere in the executable.
 // Hence, for no the register calls are made manually
 // until a better solution is found
-#ifdef WITH_GNU
-#include "stl/GenerateBoundaryParticles.hpp"
-REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
-#include "stl/Wendland2D.hpp"
-REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
-#include "ParticleNeighbours.hpp"
-REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
-#include "SortParticles.hpp"
-REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
-#include "Conti.hpp"
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
-#include "Momentum.hpp"
-REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
-#include "Pressure.hpp"
-REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
-#include "Viscosity.hpp"
-REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
-#include "ParticleGenerator.hpp"
-REGISTER_DEF_TYPE(READER, SPHSTLReader);
-REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
-#include "stl/STLPosIntegrator.hpp"
-REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
-#endif
+// #ifdef WITH_GNU
+// #include "stl/GenerateBoundaryParticles.hpp"
+// REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
+// #include "stl/Wendland2D.hpp"
+// REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
+// #include "ParticleNeighbours.hpp"
+// REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
+// #include "SortParticles.hpp"
+// REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
+// #include "Conti.hpp"
+// REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+// #include "Momentum.hpp"
+// REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
+// #include "Pressure.hpp"
+// REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
+// #include "Viscosity.hpp"
+// REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
+// #include "ParticleGenerator.hpp"
+// REGISTER_DEF_TYPE(READER, SPHSTLReader);
+// REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
+// #include "stl/STLPosIntegrator.hpp"
+// REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
+// #endif
 
 
 void print_help() {
@@ -106,58 +105,120 @@ YAML::Node process_args (int argc, char** argv)
 }
 
 int main(int argc, char* argv[]) {
-    // Step 1 generate boundary particles
-    YAML::Node config = process_args(argc, argv);
 
-    ObjectRegistry obj_reg {};
+    FloatField res(5, 0.0);
 
-    TimeGraph &timeGraph =
-        obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
-            "TimeGraph", config["PROJECT"], obj_reg));
+    FloatFieldB rho(5, 1.0);
 
-    // main model loop
-    for (auto el: config["PROJECT"]["PRE"]) {
+    FloatFieldA m(5, 1.0);
 
-        YAML::const_iterator it = el.begin();
-        auto model_namespace = it->first.as<std::string>();
-        auto model_name = it->second["model"].as<std::string>();
-        auto params = it->second;
+    NeighbourFieldAB nb(
+                        {
+                        {0,1},
+                        {0,2},
+                        {0,3},
+                        {0,4},
+                        {1,2},
+                        {1,3},
+                        {1,4},
+                        {2,3},
+                        {2,4},
+                        {3,4}}
+        );
 
-        auto model = ModelFactory::createInstance(
-            model_namespace,
-            model_name,
-            model_name,
-            params,
-            obj_reg
-            );
+    FloatFieldAB W(10, 0.5);
+    IntFieldAB foo(10, 1);
 
-        timeGraph.push_back_pre(model);
-    }
+    KernelGradientField dW({
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5},
+        {0.5,-0.5}}
 
-    timeGraph.execute_pre();
+        );
+    // auto p2 = pow_f(2.0f);
+    // auto s10 = reset_f(10.f);
 
-    std::cout << "main" << std::endl;
+    // auto p2 = Terminal_Generator<Pow_Wrapper<float>, float>(4.f);
+    // auto p2 = Pow<float>(6.f);
+    // auto n = Norm<>();
+    // auto s = Set<float>(99.0);
+    // auto sum_AB = boost::yap::make_terminal(
+    //     Sum_Wrapper(nb, a));
 
-    for (auto el: config["PROJECT"]["MAIN"]) {
 
-        YAML::const_iterator it = el.begin();
-        auto model_namespace = it->first.as<std::string>();
-        auto model_name = it->second["model"].as<std::string>();
-        auto params = it->second;
+    // assign(b, sum_AB(idx));
 
-        std::cout << model_namespace << std::endl;
-        std::cout << model_name << std::endl;
+    // auto rho_eqn = boost::yap::make_terminal(
+    //     sum_ab<float>(b.size(), nb, w)
+    //     );
 
-        auto model = ModelFactory::createInstance(
-            model_namespace,
-            model_name,
-            model_name,
-            params,
-            obj_reg
-            );
+    // floatfield rho = solve<floatfield>(rho_eqn);
 
-        timeGraph.push_back_main(model);
-    }
+    // sum_AB_dW(res, nb,  dW, rho*m);
+    std::cout << res << std::endl;
 
-    timeGraph.execute_main();
 }
+
+// int main(int argc, char* argv[]) {
+//     // Step 1 generate boundary particles
+//     YAML::Node config = process_args(argc, argv);
+
+//     ObjectRegistry obj_reg {};
+
+//     TimeGraph &timeGraph =
+//         obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
+//             "TimeGraph", config["PROJECT"], obj_reg));
+
+//     // main model loop
+//     for (auto el: config["PROJECT"]["PRE"]) {
+
+//         YAML::const_iterator it = el.begin();
+//         auto model_namespace = it->first.as<std::string>();
+//         auto model_name = it->second["model"].as<std::string>();
+//         auto params = it->second;
+
+//         auto model = ModelFactory::createInstance(
+//             model_namespace,
+//             model_name,
+//             model_name,
+//             params,
+//             obj_reg
+//             );
+
+//         timeGraph.push_back_pre(model);
+//     }
+
+//     timeGraph.execute_pre();
+
+//     std::cout << "main" << std::endl;
+
+//     for (auto el: config["PROJECT"]["MAIN"]) {
+
+//         YAML::const_iterator it = el.begin();
+//         auto model_namespace = it->first.as<std::string>();
+//         auto model_name = it->second["model"].as<std::string>();
+//         auto params = it->second;
+
+//         std::cout << model_namespace << std::endl;
+//         std::cout << model_name << std::endl;
+
+//         auto model = ModelFactory::createInstance(
+//             model_namespace,
+//             model_name,
+//             model_name,
+//             params,
+//             obj_reg
+//             );
+
+//         timeGraph.push_back_main(model);
+//     }
+
+//     timeGraph.execute_main();
+// }

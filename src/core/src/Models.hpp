@@ -52,14 +52,14 @@ class Model : public SPHObject {
         YAML::Node parameter,
         ObjectRegistry & objReg)
         :
-        SPHObject(name, "Model",  true),
+        SPHObject(name, "Model"),
         parameter_(parameter),
         objReg_(objReg),
         // TODO inherit verbosity from main Logger
         log_(Logger(3)),
-             submodels_(
-                 std::vector<std::shared_ptr<Model>> ()
-                 )
+        submodels_(
+            std::vector<std::shared_ptr<Model>> ()
+            )
     {
         logger_.set_scope(this->get_name());
         log().info() << "Creating "
@@ -218,6 +218,21 @@ class ModelGraph : public Model {
     void execute() { execute_submodels(); };
 };
 
+// class TransportEqn : public Model {
+
+// private:
+
+//     NeighbourFieldAB& nb_;
+
+// public: 
+
+//     TransportEqn() {};
+
+//     sum_AB() {};
+
+
+// }
+
 class TimeGraph : public Model {
 
     // Defines a temporal order for submodels
@@ -328,5 +343,23 @@ public:
 
     int & get_current_timestep() {return current_timestep_;}
 };
+
+
+// class Ddt : Model {
+//
+//
+// }
+
+
+
+// TODO TransportedQuantity
+// a class providing field to Equation depedency
+// has an update method that calls the dependend transport eqn
+
+// TODO TransportEqn Base class
+// - Access previous timestep result if activated
+// - has an update method
+// - allows other TransportEqn as dependencies
+// - Computes a d(...)
 
 #endif

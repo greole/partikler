@@ -20,6 +20,7 @@
 #ifndef CGALHelper_H
 #define CGALHelper_H
 
+#include "Vec3.hpp"
 #include "Helper.hpp"
 #include "CGALTYPEDEFS.hpp"
 
@@ -113,7 +114,7 @@ std::pair<bool, Path> searchPath(Path p);
 
 Point projectedPoint(Path p, Point P);
 
-Vector rotate(Matrix R, Vector a);
+Vec3 rotate(Matrix R, Vec3 a);
 
 Triangle facetToTriangle(const Facet& facet);
 

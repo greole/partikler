@@ -43,6 +43,7 @@ void STLPosIntegrator::execute() {
               << facets_.size() << " "
               << type_.size() << " "
               << idx_.size() << std::endl;
+
     VectorField dx =
         STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, pos_);
 

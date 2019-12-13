@@ -17,4 +17,35 @@
     contact: go@hpsim.de
 */
 
-#include "Object.hpp"
+#ifndef PARTIKLER_VEC3_INCLUDED
+#define PARTIKLER_VEC3_INCLUDED
+
+#include <array>
+
+struct Vec3: std::array<float, 3> {
+
+    Vec3& operator=(const Vec3 &x);
+
+};
+
+// Eager Operators
+//
+// Here are the operators on the Vec3 type
+// which are eager, since they are only used as
+// inner type for the lazy field functions
+
+// scalar multiplication
+Vec3 operator*(float a, Vec3 x);
+
+// scalar division
+Vec3 operator/(Vec3 x, float a);
+
+// dot product
+float operator*(Vec3& x, Vec3& y);
+
+// addition
+Vec3 operator+(Vec3& x, Vec3& y);
+
+Vec3 operator-(Vec3& x, Vec3& y);
+
+#endif

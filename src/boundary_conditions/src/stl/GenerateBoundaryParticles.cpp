@@ -15,6 +15,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     contact: go@hpsim.de
+
+    // TODO  set boundaryIds:
+    // 1. look in boundaryId map if boundary with given name exists
+    //    if true get existing id
+    //    if not calculate new id
+    // 2. set boundary id to boundaryIds_ field
 */
 
 

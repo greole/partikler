@@ -171,6 +171,7 @@ IF(BUILD_GOOGLE_TEST)
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-src
       )
+    find_package(GTest)
 ENDIF()
 
 
@@ -256,36 +257,12 @@ IF(BUILD_YAP)
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
       )
+
+    execute_process(COMMAND make
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
+      )
 ENDIF()
-
-
-########################
-# boost proto          #
-########################
-# OPTION(BUILD_BOOST "Building boost" ON)
-#
-# IF(BUILD_YAML_CPP)
-#       EXTERNALPROJECT_ADD(boost-download
-#           GIT_REPOSITORY    "https://github.com/boostorg/bost.git"
-#           DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
-#           PREFIX            "${CMAKE_BINARY_DIR}"
-#           SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/boost"
-#           CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-#                             -DYAML_CPP_BUILD_TESTS=OFF
-#                             -DYAML_CPP_BUILD_TOOLS=OFF
-#                             -DYAML_CPP_BUILD_CONTRIB=OFF
-#                             -DYAML_CPP_INSTALL=ON
-#                             -DBUILD_SHARED_LIBS=ON
-#         )
-#
-#       EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
-#       INCLUDE_DIRECTORIES(${install_dir}/include)
-#
-#       ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
-#       SET_TARGET_PROPERTIES(yaml-cpp
-#           PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
-#       SET(YAML_CPP_LIBRARY yaml-cpp)
-# ENDIF()
 
 ########################
 # own Libraries        #
@@ -294,19 +271,23 @@ ENDIF()
 # add_subdirectory(src/SPHRuntime)
 add_subdirectory(src/core)
 # add_subdirectory(src/SPHDatastructures)
-add_subdirectory(src/kernel)
-add_subdirectory(src/neighbours)
-add_subdirectory(src/transporteqn)
-add_subdirectory(src/integrator)
-add_subdirectory(src/geometry)
-add_subdirectory(src/io)
-add_subdirectory(src/boundary_conditions)
+# add_subdirectory(src/kernel)
+# add_subdirectory(src/neighbours)
+# add_subdirectory(src/transporteqn)
+# add_subdirectory(src/integrator)
+# add_subdirectory(src/geometry)
+# add_subdirectory(src/io)
+# add_subdirectory(src/boundary_conditions)
 
 add_executable(partikler src/partikler.cpp tags)
 
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
-target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+# target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler Core OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+
+
+
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
 #

@@ -26,9 +26,9 @@
 #include <iostream>
 #include <memory>
 
+// Base class for fields and models
 class SPHObject {
 
-    // Base class for fields and models
 
   protected:
 
@@ -36,44 +36,77 @@ class SPHObject {
 
     const std::string type_;
 
-    // marks an object as temporary and thus avoids
-    // registration
-    // const bool tmp_;
-
-    bool active_;
-
     //  use a copy or default here
     Logger logger_ = Logger(1);
 
-    static std::vector<SPHObject*> objects_;
-
   public:
+
+    SPHObject() {};
+
     SPHObject(
         const std::string name,
-        const std::string type,
-        const bool active = true)
-        : name_(name), type_(type), active_(active) {
-        // TODO dont register tmp objects
-        // if (!tmp_) this->register_object(*this);
+        const std::string type
+        )
+        : name_(name), type_(type){
     };
 
     virtual ~SPHObject() = default;
-
-    // activate or deactivate object
-    void set_active(bool active) { active_ = active; };
-
-    // get status
-    bool active() const { return active_; };
 
     std::string get_name() const { return name_; };
 
     std::string get_type() const { return type_; };
 
-
     // reorder after particle sorting
     virtual void reorder(const std::vector<size_t> &idxs) {};
 
     virtual void write_to_disk(std::string path) {};
+
+};
+
+template<class T>
+class Generic: public SPHObject {
+
+protected:
+
+    T obj_;
+
+public:
+
+    typedef T value_type;
+
+    Generic(
+        const std::string name,
+        const std::string type,
+        T obj
+        ) :
+        SPHObject(name, type),
+        obj_(obj) {};
+
+    T& operator()(){return obj_;};
+};
+
+
+template<class T>
+class EquationBase:SPHObject  {
+    // Base class for equations
+
+    // TODO Separate object registry and runTime
+
+
+private:
+
+    T &result_;
+
+public:
+
+    EquationBase(std::string name, bool active, T & result):
+        SPHObject(name, "Equation", active),
+        result_(result) {
+
+        logger_.info() << " Created Equation: " << name_;
+    };
+
+    void compute();
 
 };
 

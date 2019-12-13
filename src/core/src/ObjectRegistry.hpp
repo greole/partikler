@@ -85,9 +85,9 @@ public:
     //     if (object_exists(name)) return get_objects<T> (name)
     // }
 
-    PointField &get_particle_positions() {
-        return get_object<PointField &>("Pos");
-    }
+    // PointField &get_particle_positions() {
+    //     return get_object<PointField &>("Pos");
+    // }
 
     template <class T> T &create_generic(const std::string name) {
         if (object_exists(name)) return get_object<T>(name);
@@ -129,17 +129,17 @@ public:
             std::vector<typename T::value_type>(n_particles_), name));
     }
 
-    SizeTField &create_idx_field() {
-        // TODO move to cpp
-        if (object_exists("idx")) return get_object<SizeTField>("idx");
+    // SizeTField &create_idx_field() {
+    //     // TODO move to cpp
+    //     if (object_exists("idx")) return get_object<SizeTField>("idx");
 
-        auto &f = create_field<SizeTField>("idx");
-        std::cout << " n_particles_ " << n_particles_ << std::endl;
+    //     auto &f = create_field<SizeTField>("idx");
+    //     std::cout << " n_particles_ " << n_particles_ << std::endl;
 
-        for (size_t i = 0; i < n_particles_; i++) { f[i] = i; }
+    //     for (size_t i = 0; i < n_particles_; i++) { f[i] = i; }
 
-        return f;
-    }
+    //     return f;
+    // }
 
     void write_to_disk(int timestep, std::string name="Data") {
         std::cout << "write to disk" << std::endl;

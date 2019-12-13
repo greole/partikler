@@ -31,15 +31,29 @@ Conti::Conti (
 
 void Conti::execute() {
 
-    log().info_begin() << "Computing density";
+    // log().info_begin() << "Computing density";
 
-    rho_.set_uniform(0.0);
+    // auto rho = set(rho_, 0.0).weighted_sum();
 
-    rho_.weighted_sum(np_, W_);
+    // auto rho_eqn = sum_AB(rho_.size(), np_, W_);
 
-    rho_.lower_limit(lower_limit_);
+    // solve(rho_, rho_eqn);
 
-    log().info_end();
+    // rho_.set_uniform(0.0);
+
+    // rho_.weighted_sum(np_, W_);
+
+    // rho_.lower_limit(lower_limit_);
+
+    // log().info_end();
+
+    // auto rho_eqn = boost::yap::make_terminal(
+    //     sum_ab<float>(rho_.size(), np_, W_)
+    //     );
+
+    rho_ = solve<floatfield>(rho_eqn);
+
+    // return sum_ab();
 };
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
