@@ -262,6 +262,8 @@ IF(BUILD_YAP)
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
       )
+
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
 ENDIF()
 
 ########################
