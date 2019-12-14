@@ -29,7 +29,7 @@ struct Pow_Wrapper {
     Pow_Wrapper() {};
     Pow_Wrapper(ValType i) { inner = i; };
     template <typename T> T operator()(T x)
-    {return std::pow(x, inner);};
+    {return std::pow(x, inner);}
     ValType inner;
 };
 
@@ -50,7 +50,7 @@ using Pow = Terminal_Generator<Pow_Wrapper<ValType...>, ValType...>;
 struct Norm_Wrapper {
     Norm_Wrapper() {};
     template <typename T> float operator()(T x)
-    {return std::sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);};
+    {return std::sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);}
 };
 
 template<class... ValType>
@@ -62,7 +62,7 @@ struct Set_Wrapper {
     Set_Wrapper(ValType i) { inner = i; }
     template <typename T> T operator()(T x)
     {
-        return inner;};
+        return inner;}
     ValType inner;
 };
 
@@ -90,6 +90,6 @@ T solve(I terminal) {
     std::cout << "end " << std::endl;
 
     return res;
-};
+}
 
 #endif
