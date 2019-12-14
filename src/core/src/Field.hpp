@@ -322,18 +322,6 @@ using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
-// template <typename Expr>
-// Field<std::vector<float>>& solve (Expr const & e)
-// {
-//     std::cout << "solving" << std::endl;
-//     decltype(auto) expr = boost::yap::as_expr(e);
-//     // return boost::yap::evaluate(
-//     //         boost::yap::transform(boost::yap::as_expr(expr)));
-//     return boost::yap::evaluate(boost::yap::as_expr(expr),);
-//     std::cout << "done" << std::endl;
-// }
-
-
 // struct to access field elements
 //
 // This struct implements several operator() versions
@@ -354,7 +342,8 @@ struct take_nth {
         return boost::yap::make_terminal(f[ab]);
     }
 
-    <typename T> auto operator()(
+    template <typename T>
+    auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
         A<std::vector<T>> const &f) {
         return boost::yap::make_terminal(f()[a]);
