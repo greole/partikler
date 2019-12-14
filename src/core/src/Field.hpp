@@ -211,12 +211,6 @@ struct is_field<Field<std::vector<T, A>>> : std::true_type {};
 template <typename T, typename A>
 struct is_field<FieldAB<std::vector<T, A>>> : std::true_type {};
 
-template <typename T, typename A>
-struct is_field<FieldA<std::vector<T, A>>> : std::true_type {};
-
-template <typename T, typename A>
-struct is_field<FieldB<std::vector<T, A>>> : std::true_type {};
-
 template <typename T, typename Alloc>
 struct is_field<A<std::vector<T, Alloc>>> : std::true_type {};
 
