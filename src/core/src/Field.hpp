@@ -336,6 +336,13 @@ using PointField = Field<std::vector<Point>>;
 //     return boost::yap::evaluate(boost::yap::as_expr(expr),);
 //     std::cout << "done" << std::endl;
 // }
+
+
+// struct to access field elements
+//
+// This struct implements several operator() versions
+// dependent on the passed typed it either uses the
+// a-th, b-th, or ab-th index
 struct take_nth
 {
     template <typename T>
@@ -359,9 +366,13 @@ struct take_nth
         return boost::yap::make_terminal(f[b]);
     }
 
-
+    // owner particle index a
     std::size_t a;
+
+    // neighbour particle index b
     std::size_t b;
+
+    // running ab index
     std::size_t ab;
 };
 
