@@ -4,6 +4,7 @@
 
 -----------------
 ![](https://api.travis-ci.org/greole/partikler.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/greole/partikler/badge.svg?branch=master)](https://coveralls.io/github/greole/partikler?branch=master)
 
 # Build Instructions
 
