@@ -4,10 +4,63 @@
 #include "core.hpp"
 #include <vector>
 
-TEST (foo, bar) {
-  std::cout << normalise(CGALVector {1,2,3}) << std::endl;
+TEST (FloatField, sumABTest ) {
 
-  ASSERT_TRUE(true);
+    FloatField a(2, 1.0);
+
+    FloatField b(2, 2.0);
+
+    NeighbourFieldAB n(1, {0, 1});
+
+    FloatField res(2, 0.0);
+
+    sum_AB(res, n, A(a) + B(b));
+
+    ASSERT_EQ(res[0], 3.0);
+    ASSERT_EQ(res[1], 3.0);
+
+}
+
+TEST (FloatField, ComplexArithmeticFields ) {
+
+    FloatField a(1, 1.0);
+
+    FloatField b(1, 2.0);
+
+    FloatField res(1, 0.0);
+
+    solve(res, (a+b)/b);
+
+    ASSERT_EQ(res[0], 1.5);
+
+}
+
+
+TEST (FloatField, MultFloatFields ) {
+
+    FloatField a(1, 1.0);
+
+    FloatField b(1, 2.0);
+
+    FloatField res(1, 0.0);
+
+    solve(res, a*b);
+
+    ASSERT_EQ(res[0], 2.0);
+
+}
+
+TEST (FloatField, AddFloatFields ) {
+
+  FloatField a(1, 1.0);
+
+  FloatField b(1, 2.0);
+
+  FloatField res(1, 0.0);
+
+  solve(res, a+b);
+
+  ASSERT_EQ(res[0], 3.0);
 
 }
 

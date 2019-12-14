@@ -59,19 +59,6 @@ bool equal_sizes (std::size_t size, Expr const & expr)
 }
 
 
-// // Assigns some expression e to the given vector by evaluating e elementwise,
-// // to avoid temporaries and allocations.
-// template <typename T, typename Expr>
-// std::vector<T> & assign (std::vector<T> & vec, Expr const & e)
-// {
-//     decltype(auto) expr = boost::yap::as_expr(e);
-//     assert(equal_sizes(vec.size(), expr));
-//     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
-//         auto vec_i_expr = boost::yap::transform(boost::yap::as_expr(expr), take_nth{i});
-//         vec[i] = boost::yap::evaluate(vec_i_expr);
-//     }
-//     return vec;
-// }
 
 
 
@@ -159,19 +146,33 @@ class FieldAB: public Field<T> {
     using F::F;
 };
 
+// A Field wrapper for Field<T>
+//
+// This field wrapper allows take_nth to dispatch to
+// different operator() implementations and select correct
+// index
+template <class T> class A {
+  private:
+    Field<T> &f_;
 
-template<class T>
-class FieldA: public Field<T> {
-    using F = Field<T>;
-    using F::F;
+  public:
+    A(Field<T> &f) : f_(f) {};
+
+    Field<T> &operator()() { return f_; };
+
+    Field<T> &operator()() const { return f_; };
 };
 
-template<class T>
-class FieldB: public Field<T> {
-    using F = Field<T>;
-    using F::F;
-};
+template <class T> class B {
 
+  private:
+    Field<T> &f_;
+
+  public:
+    B(Field<T> &f) : f_(f) {};
+
+    Field<T> &operator()() const { return f_; };
+};
 
 // Free functions
 
@@ -215,6 +216,9 @@ struct is_field<FieldA<std::vector<T, A>>> : std::true_type {};
 
 template <typename T, typename A>
 struct is_field<FieldB<std::vector<T, A>>> : std::true_type {};
+
+template <typename T, typename Alloc>
+struct is_field<A<std::vector<T, Alloc>>> : std::true_type {};
 
 // template <>
 // struct is_field<Field<std::vector<Vec3>>> : std::true_type {};
@@ -312,8 +316,6 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
 using FloatField = Field<std::vector<float>>;
 using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
-using FloatFieldB = FieldB<std::vector<float>>;
-using FloatFieldA = FieldA<std::vector<float>>;
 
 using FloatFieldAB = FieldAB<std::vector<float>>;
 using IntFieldAB = FieldAB<std::vector<int>>;
@@ -343,27 +345,32 @@ using PointField = Field<std::vector<Point>>;
 // This struct implements several operator() versions
 // dependent on the passed typed it either uses the
 // a-th, b-th, or ab-th index
-struct take_nth
-{
+struct take_nth {
     template <typename T>
-    auto operator() (boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-                     FieldAB<std::vector<T>> const & f)
-    {
-        return boost::yap::make_terminal(f[ab]);
-    }
-
-    template <typename T>
-    auto operator() (boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-                     FieldA<std::vector<T>> const & f)
-    {
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        Field<std::vector<T>> const &f) {
         return boost::yap::make_terminal(f[a]);
     }
 
     template <typename T>
-    auto operator() (boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-                     FieldB<std::vector<T>> const & f)
-    {
-        return boost::yap::make_terminal(f[b]);
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        FieldAB<std::vector<T>> const &f) {
+        return boost::yap::make_terminal(f[ab]);
+    }
+
+    <typename T> auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        A<std::vector<T>> const &f) {
+        return boost::yap::make_terminal(f()[a]);
+    }
+
+    template <typename T>
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        B<std::vector<T>> const &f) {
+        return boost::yap::make_terminal(f()[a]);
     }
 
     // owner particle index a
@@ -379,13 +386,28 @@ struct take_nth
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
+std::vector<T> & solve (std::vector<T> & vec, Expr const & e)
+{
+    decltype(auto) expr = boost::yap::as_expr(e);
+    assert(equal_sizes(vec.size(), expr));
+    for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
+        auto vec_i_expr = boost::yap::transform(boost::yap::as_expr(expr), take_nth{i, 0, 0});
+        vec[i] = boost::yap::evaluate(vec_i_expr);
+    }
+    return vec;
+}
+
+
+// Assigns some expression e to the given vector by evaluating e elementwise,
+// to avoid temporaries and allocations.
+template <typename T, typename Expr>
 std::vector<T> &
 sum_AB(std::vector<T> &vec, NeighbourFieldAB &nb, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     // Iterate particle index a
     size_t ab_index = 0;
     for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (a == nb[ab_index].ownId ) {
+        while (a == nb[ab_index].ownId && ab_index < nb.size() ) {
             auto nb_pair = nb[ab_index];
             size_t b = nb_pair.neighId;
             auto vec_ij_expr = boost::yap::transform(
