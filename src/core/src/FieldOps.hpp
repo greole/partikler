@@ -69,76 +69,6 @@ struct Set_Wrapper {
 template<class... ValType>
 using Set = Terminal_Generator<Set_Wrapper<ValType...>, ValType...>;
 
-// struct Sum_Wrapper {
-//     Sum_Wrapper(SizeTVectorField & nb, FloatField& f):nb_(nb),f_(f)  {
-//     };
-//     template <typename T> float operator()(T x) {
-//         float ret = 0;
-//         for (auto i : nb_[x]) {
-//             ret += f_[i];
-//         }
-
-//         return ret;
-//     };
-
-//     SizeTVectorField& nb_;
-//     FloatField& f_;
-// };
-
-// struct Weighted_Sum_Wrapper {
-
-//     Sum_Wrapper(SizeTVectorField& nb, FloatField& f):nb_(nb), f_(f)  {};
-
-//     template <typename T> float operator()(T x) {
-//         float ret = 0;
-//         for (auto i : nb_[x]) {
-//             ret += f_[i];
-//         }
-
-//         return ret;
-//     };
-
-//     SizeTVectorField& nb_;
-//     FloatVectorField& W_;
-//     FloatField& f_;
-// };
-
-
-
-// template <class T>
-// Field<std::vector<T>>
-// sum_AB(Field<std::vector<T>> f, NeighbourFieldAB nbs, FloatFieldAB W) {
-
-//     Field<std::vector<T>> ret(f.size(), zero<T>::val);
-
-//     for (size_t i = 0; i < W.size(); i++) {
-//         ret[nbs[i].ownId] += f*W[i];
-//         ret[nbs[i].neighId] += f*W[i];
-//     }
-//     return ret;
-// };
-
-// template <class T>
-// struct sum_AB {
-
-//     sum_AB(size_t n, NeighbourFieldAB &nbs, FloatFieldAB &W)
-//         : n_(n),nbs_(nbs), W_(W) {};
-
-//     auto operator()() {
-//         Field<std::vector<T>> ret(n_, zero<T>::val);
-
-//         for (size_t i = 0; i < W_.size(); i++) {
-//             ret[nbs_[i].ownId] += W_[i];
-//             ret[nbs_[i].neighId] += W_[i];
-//         }
-
-//         return ret;
-//     }
-
-//     size_t n_;
-//     NeighbourFieldAB &nbs_;
-//     FloatField &W_;
-// };
 
 template <boost::yap::expr_kind Kind, typename eqn>
 struct equation
@@ -161,29 +91,5 @@ T solve(I terminal) {
 
     return res;
 };
-
-
-    // template <class T>
-    // Field<T> sum_AB(
-    //     Field<T> f,
-    //     FieldAB<searchcubes::NeighbourPair> nbs,
-    //     FieldAB<std::vector<float>> W) {
-
-    //     Field<T> ret ();
-
-    //     for (auto nb:nbs) {
-    //         ret[nb.first] += ;
-    //         ret[nb.second] +=
-    //     }
-
-    // };
-
-    // template <class T>
-    // Field<T> sum_AB(
-    //     Field<T> f,
-    //     FieldAB<searchcubes::NeighbourPair> nb,
-    //     FieldAB<VectorPair> dWdx) {
-
-    // };
 
 #endif
