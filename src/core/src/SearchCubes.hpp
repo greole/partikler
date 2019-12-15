@@ -20,11 +20,12 @@
 #ifndef SEARCHCUBES_H
 #define SEARCHCUBES_H
 
-#include "cgal/CGALHelper.hpp" // Point3D
-#include "Logger.hpp" // Logger
+#include "cgal/CGALHelper.hpp"
+#include "Field.hpp"
+#include "Logger.hpp"
+
 #include <omp.h>      // omp_get_num_threads
 
-namespace searchcubes {
 
 struct NeighbourIdHalfStencil {
   // Stores the stride of a domain, ie the difference of search cubes ids
@@ -98,7 +99,7 @@ struct SearchCubeDomain {
 };
 
 SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> particles, float dx);
+initSearchCubeDomain(const std::vector<Point> & particles, float dx);
 
 struct NeighbourPair {
     size_t ownId;
@@ -142,5 +143,5 @@ struct SortedParticles {
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
 
-} // namespace searchcubes
+using NeighbourFieldAB = FieldAB<std::vector<NeighbourPair>>;
 #endif
