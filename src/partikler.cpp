@@ -104,121 +104,60 @@ YAML::Node process_args (int argc, char** argv)
     return YAML::LoadFile(conf);
 }
 
+
 int main(int argc, char* argv[]) {
+    // Step 1 generate boundary particles
+    YAML::Node config = process_args(argc, argv);
 
-    FloatField res(5, 0.0);
+    ObjectRegistry obj_reg {};
 
-    FloatFieldB rho(5, 1.0);
+    TimeGraph &timeGraph =
+        obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
+            "TimeGraph", config["PROJECT"], obj_reg));
 
-    FloatFieldA m(5, 1.0);
+    // main model loop
+    for (auto el: config["PROJECT"]["PRE"]) {
 
-    NeighbourFieldAB nb(
-                        {
-                        {0,1},
-                        {0,2},
-                        {0,3},
-                        {0,4},
-                        {1,2},
-                        {1,3},
-                        {1,4},
-                        {2,3},
-                        {2,4},
-                        {3,4}}
-        );
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
+        auto params = it->second;
 
-    FloatFieldAB W(10, 0.5);
-    IntFieldAB foo(10, 1);
+        auto model = ModelFactory::createInstance(
+            model_namespace,
+            model_name,
+            model_name,
+            params,
+            obj_reg
+            );
 
-    KernelGradientField dW({
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5},
-        {0.5,-0.5}}
+        timeGraph.push_back_pre(model);
+    }
 
-        );
-    // auto p2 = pow_f(2.0f);
-    // auto s10 = reset_f(10.f);
+    timeGraph.execute_pre();
 
-    // auto p2 = Terminal_Generator<Pow_Wrapper<float>, float>(4.f);
-    // auto p2 = Pow<float>(6.f);
-    // auto n = Norm<>();
-    // auto s = Set<float>(99.0);
-    // auto sum_AB = boost::yap::make_terminal(
-    //     Sum_Wrapper(nb, a));
+    std::cout << "main" << std::endl;
 
+    for (auto el: config["PROJECT"]["MAIN"]) {
 
-    // assign(b, sum_AB(idx));
+        YAML::const_iterator it = el.begin();
+        auto model_namespace = it->first.as<std::string>();
+        auto model_name = it->second["model"].as<std::string>();
+        auto params = it->second;
 
-    // auto rho_eqn = boost::yap::make_terminal(
-    //     sum_ab<float>(b.size(), nb, w)
-    //     );
+        std::cout << model_namespace << std::endl;
+        std::cout << model_name << std::endl;
 
-    // floatfield rho = solve<floatfield>(rho_eqn);
+        auto model = ModelFactory::createInstance(
+            model_namespace,
+            model_name,
+            model_name,
+            params,
+            obj_reg
+            );
 
-    // sum_AB_dW(res, nb,  dW, rho*m);
-    std::cout << res << std::endl;
+        timeGraph.push_back_main(model);
+    }
 
+    timeGraph.execute_main();
 }
-
-// int main(int argc, char* argv[]) {
-//     // Step 1 generate boundary particles
-//     YAML::Node config = process_args(argc, argv);
-
-//     ObjectRegistry obj_reg {};
-
-//     TimeGraph &timeGraph =
-//         obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
-//             "TimeGraph", config["PROJECT"], obj_reg));
-
-//     // main model loop
-//     for (auto el: config["PROJECT"]["PRE"]) {
-
-//         YAML::const_iterator it = el.begin();
-//         auto model_namespace = it->first.as<std::string>();
-//         auto model_name = it->second["model"].as<std::string>();
-//         auto params = it->second;
-
-//         auto model = ModelFactory::createInstance(
-//             model_namespace,
-//             model_name,
-//             model_name,
-//             params,
-//             obj_reg
-//             );
-
-//         timeGraph.push_back_pre(model);
-//     }
-
-//     timeGraph.execute_pre();
-
-//     std::cout << "main" << std::endl;
-
-//     for (auto el: config["PROJECT"]["MAIN"]) {
-
-//         YAML::const_iterator it = el.begin();
-//         auto model_namespace = it->first.as<std::string>();
-//         auto model_name = it->second["model"].as<std::string>();
-//         auto params = it->second;
-
-//         std::cout << model_namespace << std::endl;
-//         std::cout << model_name << std::endl;
-
-//         auto model = ModelFactory::createInstance(
-//             model_namespace,
-//             model_name,
-//             model_name,
-//             params,
-//             obj_reg
-//             );
-
-//         timeGraph.push_back_main(model);
-//     }
-
-//     timeGraph.execute_main();
-// }
