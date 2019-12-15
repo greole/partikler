@@ -50,3 +50,8 @@ Vec3 operator+(Vec3& x, Vec3& y) {
 Vec3 operator-(Vec3& x, Vec3& y) {
     return {x[0] - y[0],  x[1] - y[1], x[2] - y[2]};
 }
+
+std::ostream &operator<<(std::ostream &os, Vec3 const &f) {
+    os << "[" << f[0] << ", " << f[1] << ", " << f[2] << "]";
+    return os;
+}
