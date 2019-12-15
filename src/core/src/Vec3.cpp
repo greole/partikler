@@ -39,7 +39,7 @@ Vec3 operator/(Vec3 x, float a) {
 
 // dot product
 float operator*(Vec3& x, Vec3& y) {
-    return {x[0] * x[0] + x[1] * x[1] + x[2] * x[2]};
+    return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
 }
 
 // addition
