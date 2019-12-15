@@ -4,6 +4,33 @@
 #include "core.hpp"
 #include <vector>
 
+TEST (FloatField, copyStdVector ) {
+
+    std::vector<float> a(2, 2.0);
+
+    FloatField res(2, 0.0);
+
+    res = a;
+
+    ASSERT_EQ(res[0], 2.0);
+    ASSERT_EQ(res[1], 2.0);
+
+}
+
+TEST (FloatField, eagerCopy ) {
+
+    FloatField a(2, 2.0);
+
+    FloatField res(2, 0.0);
+
+    res = a;
+
+    ASSERT_EQ(res[0], 2.0);
+    ASSERT_EQ(res[1], 2.0);
+
+}
+
+
 TEST (FloatField, sumABTest ) {
 
     FloatField a(2, 1.0);
