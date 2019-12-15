@@ -20,10 +20,9 @@
 
 #include "SearchCubes.hpp"
 
-namespace searchcubes {
 
 SearchCubeDomain initSearchCubeDomain(
-    const std::vector<Point> particles, float dx) {
+    const std::vector<Point> & particles, float dx) {
     size_t n_particles = particles.size();
     auto bound_box = bounding_box(particles.begin(), particles.end());
 
@@ -103,7 +102,7 @@ void owner_cube_search(
             };
         }
     }
-};
+}
 
 std::array<bool, 27> vector_inner_owner_cube_search(
     Point opos,
@@ -159,7 +158,7 @@ void neighbour_cube_search(
             };
         }
     }
-};
+}
 
 size_t position_to_cube_id(SearchCubeDomain scd, const Point &p) {
     // TODO test if speed up n_cubes are copied to a const size_t nx ...
@@ -359,7 +358,7 @@ SortedParticles countingSortParticles(
     }
 
     return {retc, rets, retp};
-};
+}
 
 SortedNeighbours mergedCountingSortAndNeighbourSearch(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles) {
@@ -488,13 +487,13 @@ SortedNeighbours mergedCountingSortAndNeighbourSearch(
     //  }
 
     return ret;
-};
+}
 
 // void owner_cube_search(first, last, ret,) {};
 SortedNeighbours createNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Point> &pos,
-    std::vector<SearchCube> &searchCubes) {};
+    std::vector<SearchCube> &searchCubes) {}
 
 SortedNeighbours createSTLNeighbours(
     const SearchCubeDomain scd,
@@ -569,6 +568,4 @@ SortedNeighbours createSTLNeighbours(
     }
 
     return ret;
-};
-
-} // namespace searchcubes
+}
