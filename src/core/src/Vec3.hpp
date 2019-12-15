@@ -21,6 +21,7 @@
 #define PARTIKLER_VEC3_INCLUDED
 
 #include <array>
+#include <iostream>
 
 struct Vec3: std::array<float, 3> {
 
@@ -47,5 +48,13 @@ float operator*(Vec3& x, Vec3& y);
 Vec3 operator+(Vec3& x, Vec3& y);
 
 Vec3 operator-(Vec3& x, Vec3& y);
+
+std::ostream &operator<<(std::ostream &os, Vec3 const &f);
+
+// A pair of Vec3 to store particle particle  distances on stl surfaces
+struct VectorPair {
+    Vec3 on;
+    Vec3 no;
+};
 
 #endif
