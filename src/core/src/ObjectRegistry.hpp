@@ -22,6 +22,9 @@
 
 #include "Logger.hpp"
 #include "Datastructures.hpp"
+#include "Field.hpp"
+#include "FileIO.hpp"
+
 #include <vector>
 #include <stdio.h>
 #include <iostream>
@@ -85,9 +88,9 @@ public:
     //     if (object_exists(name)) return get_objects<T> (name)
     // }
 
-    // PointField &get_particle_positions() {
-    //     return get_object<PointField &>("Pos");
-    // }
+    PointField &get_particle_positions() {
+        return get_object<PointField &>("Pos");
+    }
 
     template <class T> T &create_generic(const std::string name) {
         if (object_exists(name)) return get_object<T>(name);
@@ -114,8 +117,7 @@ public:
     }
 
     template <class T>
-    T &create_field(
-        const std::string name, typename T::value_type init_value) {
+    T &create_field(const std::string name, typename T::value_type init_value) {
         if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_, init_value),
