@@ -26,7 +26,7 @@ CGALVector normalise(const CGALVector& v) {
 
 CGALVector vectorRejection(const CGALVector & a, const CGALVector & b) {
     return normalise(b - (a*b)*a);
-};
+}
 
 bool approachesEdge(
     Point A,      // Beginning edge
@@ -147,7 +147,7 @@ HitPoint approximateEdgeHit(
 
 CGALVector surfaceProject(CGALVector N, CGALVector S) {
     return S - (N * S) * N;
-};
+}
 
 Matrix mult(Matrix a, Matrix b) {
 
@@ -573,7 +573,7 @@ double Compute_Facet_Area::operator()(const Facet& f) const {
             f.halfedge()->vertex()->point(),
             f.halfedge()->next()->vertex()->point(),
             f.halfedge()->opposite()->vertex()->point() );
-};
+}
 
 
 STLSurfaceDist compute_STLSurface_dist(

@@ -218,6 +218,6 @@ void GenerateBoundaryParticles::execute() {
     logger_.info_end();
 
     // write
-};
+}
 
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
