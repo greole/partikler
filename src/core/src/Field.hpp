@@ -19,18 +19,17 @@
 #ifndef PARTIKLER_FIELD_INCLUDED
 #define PARTIKLER_FIELD_INCLUDED
 
-#include <boost/yap/yap.hpp>
+#include "Vec3.hpp"
 #include "Object.hpp"
 #include "cgal/CGALTYPEDEFS.hpp"
-#include "SearchCubes.hpp"
 #include "Datastructures.hpp"
-#include "Vec3.hpp"
 
+#include <boost/yap/yap.hpp>
 #include <iostream>
 #include <vector>
 #include <math.h>
 
-
+#include <memory>
 
 // A stateful transform that records whether all the std::vector<> terminals
 // it has seen are equal to the given size.
@@ -58,30 +57,13 @@ bool equal_sizes (std::size_t size, Expr const & expr)
     return impl.value;
 }
 
-
-
-
-
-
-// // As assign() above, just using +=.
-// template <typename T, typename Expr>
-// std::vector<T> & operator+= (std::vector<T> & vec, Expr const & e)
-// {
-//     decltype(auto) expr = boost::yap::as_expr(e);
-//     assert(equal_sizes(vec.size(), expr));
-//     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
-//         vec[i] += boost::yap::evaluate(
-//             boost::yap::transform(boost::yap::as_expr(expr), take_nth{i}));
-//     }
-//     return vec;
-// }
-
-// As assign() above, just using +=.
-
 template <class T> class Field : public T, public SPHObject {
 
   private:
+
     std::vector<std::string> comp_names_;
+
+    std::vector<T> prev_;
 
   protected:
     bool reorder_ = true;
@@ -104,6 +86,22 @@ template <class T> class Field : public T, public SPHObject {
         std::vector<std::string> comp_names = {})
         : T(size, val), SPHObject(name, "Field") {
     };
+
+    T& get_Vec(){ return dynamic_cast<T&>(*this); }
+
+    void operator=(Field<T> &b) { T::operator=(b.get_Vec()); }
+
+    void operator=(T &b) { T::operator=(b); }
+
+    void operator=(Field<T> &&b) { T::operator=(std::move(b.get_Vec())); }
+
+    void copy_old() {
+        prev_.emplace_back();
+        size_t idx = prev_.size();
+        for(size_t i=0; i<T::size(); i++) {
+            prev_[idx].push_back(T::operator[](i));
+        }
+    }
 
     virtual void set_reorder(bool reorder) { reorder_ = reorder; }
 
@@ -182,8 +180,6 @@ void reorder_vector(const std::vector<size_t>& idxs, std::vector<T>& vec);
 
 void write_to_disk(std::string path);
 
-// std::ostream &operator<<(std::ostream &os, Field const &m);
-
 // template<class T>
 // T::value_type get_max(const Field<T> &f) {
 //     const size_t size = this->f_.size();
@@ -235,66 +231,61 @@ struct zero<Vec3> {constexpr static Vec3 val = {0.0, 0.0, 0.0};};
 
 // -
 BOOST_YAP_USER_UDT_UNARY_OPERATOR(
-    negate, boost::yap::expression, is_field);
+    negate, boost::yap::expression, is_field)
 
 // *
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    multiplies, boost::yap::expression, is_field);
+    multiplies, boost::yap::expression, is_field)
 
 // /
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    divides, boost::yap::expression, is_field);
+    divides, boost::yap::expression, is_field)
 
 // %
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    modulus, boost::yap::expression, is_field);
+    modulus, boost::yap::expression, is_field)
 
 // +
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    plus, boost::yap::expression, is_field);
+    plus, boost::yap::expression, is_field)
 
 // -
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    minus, boost::yap::expression, is_field);
+    minus, boost::yap::expression, is_field)
 
 // <
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    less, boost::yap::expression, is_field);
+    less, boost::yap::expression, is_field)
 
 // >
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    greater, boost::yap::expression, is_field);
+    greater, boost::yap::expression, is_field)
 
 // <=
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    less_equal, boost::yap::expression, is_field);
+    less_equal, boost::yap::expression, is_field)
 
 // >=
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    greater_equal, boost::yap::expression, is_field);
+    greater_equal, boost::yap::expression, is_field)
 
 // ==
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    equal_to, boost::yap::expression, is_field);
+    equal_to, boost::yap::expression, is_field)
 
 // !=
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    not_equal_to, boost::yap::expression, is_field);
+    not_equal_to, boost::yap::expression, is_field)
 
 // ||
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    logical_or, boost::yap::expression, is_field);
+    logical_or, boost::yap::expression, is_field)
 
 
 // &&
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    logical_and, boost::yap::expression, is_field);
+    logical_and, boost::yap::expression, is_field)
 
-
-std::ostream &operator<<(std::ostream &os, Vec3 const &f) {
-    os << "[" << f[0] << ", " << f[1] << ", " << f[2] << "]";
-    return os;
-};
 
 template<class T>
 std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
@@ -304,7 +295,7 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     }
     os << "\n]\n";
     return os;
-};
+}
 
 
 using FloatField = Field<std::vector<float>>;
@@ -314,7 +305,6 @@ using SizeTField = Field<std::vector<size_t>>;
 using FloatFieldAB = FieldAB<std::vector<float>>;
 using IntFieldAB = FieldAB<std::vector<int>>;
 using SizeTFieldAB = FieldAB<std::vector<size_t>>;
-using NeighbourFieldAB = FieldAB<std::vector<searchcubes::NeighbourPair>>;
 using KernelGradientField = FieldAB<std::vector<VectorPair>>;
 
 using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
@@ -322,112 +312,5 @@ using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
-// struct to access field elements
-//
-// This struct implements several operator() versions
-// dependent on the passed typed it either uses the
-// a-th, b-th, or ab-th index
-struct take_nth {
-    template <typename T>
-    auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        Field<std::vector<T>> const &f) {
-        return boost::yap::make_terminal(f[a]);
-    }
-
-    template <typename T>
-    auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        FieldAB<std::vector<T>> const &f) {
-        return boost::yap::make_terminal(f[ab]);
-    }
-
-    template <typename T>
-    auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        A<std::vector<T>> const &f) {
-        return boost::yap::make_terminal(f()[a]);
-    }
-
-    template <typename T>
-    auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        B<std::vector<T>> const &f) {
-        return boost::yap::make_terminal(f()[a]);
-    }
-
-    // owner particle index a
-    std::size_t a;
-
-    // neighbour particle index b
-    std::size_t b;
-
-    // running ab index
-    std::size_t ab;
-};
-
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-template <typename T, typename Expr>
-std::vector<T> & solve (std::vector<T> & vec, Expr const & e)
-{
-    decltype(auto) expr = boost::yap::as_expr(e);
-    assert(equal_sizes(vec.size(), expr));
-    for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
-        auto vec_i_expr = boost::yap::transform(boost::yap::as_expr(expr), take_nth{i, 0, 0});
-        vec[i] = boost::yap::evaluate(vec_i_expr);
-    }
-    return vec;
-}
-
-
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-template <typename T, typename Expr>
-std::vector<T> &
-sum_AB(std::vector<T> &vec, NeighbourFieldAB &nb, Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (a == nb[ab_index].ownId && ab_index < nb.size() ) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res;
-            vec[b] += res;
-            ab_index++;
-        }
-    }
-    return vec;
-}
-
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    KernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res * dW[ab_index].on;
-            vec[b] += res * dW[ab_index].no;
-            ab_index++;
-        }
-    }
-    return vec;
-}
 
 #endif
