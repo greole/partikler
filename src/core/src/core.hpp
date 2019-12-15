@@ -26,5 +26,6 @@
 #include "Models.hpp"
 #include "Field.hpp"
 #include "FieldOps.hpp"
+#include "SearchCubes.hpp"
 
 #endif
