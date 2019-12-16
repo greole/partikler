@@ -271,6 +271,7 @@ ENDIF()
 ########################
 
 add_subdirectory(src/core)
+add_subdirectory(src/boundary_conditions)
 add_subdirectory(src/neighbours)
 # add_subdirectory(src/SPHDatastructures)
 # add_subdirectory(src/kernel)
@@ -278,14 +279,13 @@ add_subdirectory(src/neighbours)
 # add_subdirectory(src/integrator)
 # add_subdirectory(src/geometry)
 # add_subdirectory(src/io)
-# add_subdirectory(src/boundary_conditions)
 
 add_executable(partikler src/partikler.cpp tags)
 
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
 # target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
-target_link_libraries(partikler Core Neighbours OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler Core Neighbours BoundaryConditions OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 
 
 
