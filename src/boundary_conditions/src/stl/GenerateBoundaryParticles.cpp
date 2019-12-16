@@ -102,6 +102,28 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     return node;
 }
 
+template <class T> void GenerateBoundaryParticles::append(std::string name) {
+    auto & oreg = get_objReg();
+    if (oreg.object_exists(name)) {
+        field_append(
+            oreg.get_object<T>(name),
+               local_objReg_.get_object<T>(name));
+    }
+}
+
+template<>
+void GenerateBoundaryParticles::append<PointField>(std::string name) {
+    // local_objReg_.get_object<PointField>(name).translate(translation_vector_);
+
+    auto & oreg = get_objReg();
+    if (oreg.object_exists(name)) {
+        field_append(
+            oreg.get_object<PointField>(name),
+            local_objReg_.get_object<PointField>(name)
+            );
+    }
+}
+
 void GenerateBoundaryParticles::execute() {
 
     Logger logger {1};
@@ -164,54 +186,25 @@ void GenerateBoundaryParticles::execute() {
 
     logger_.info_begin() << "Transfering ";
 
-    // check if field already present
-    for (auto &obj: loc_objs) {
+    for (std::unique_ptr<SPHObject> &obj : loc_objs) {
         auto name = obj->get_name();
         auto type = obj->get_type();
-        // TODO Refactor this
 
         std::cout << "Transfering" << name << std::endl;
 
-        if (get_objReg().object_exists(name)) {
-
-            if (type=="int") {
-
-                get_objReg().get_object<IntField>(name).append(
-                    local_objReg_.get_object<IntField>(name).get_field());
-            }
-
-            if (type=="long") {
-
-                get_objReg().get_object<SizeTField>(name).append(
-                    local_objReg_.get_object<SizeTField>(name).get_field());
-            }
-
-            if (type=="float") {
-
-                get_objReg().get_object<FloatField>(name).append(
-                    local_objReg_.get_object<FloatField>(name).get_field());
-            }
-
-            if (type=="vector") {
-
-                get_objReg().get_object<VectorField>(name).append(
-                    local_objReg_.get_object<VectorField>(name).get_field());
-            }
-
-            if (type=="Point") {
-
-                // translate
-                local_objReg_.get_object<PointField>(name).translate(translation_vector_);
-
-
-                get_objReg().get_object<PointField>(name).append(
-                    local_objReg_.get_object<PointField>(name).get_field());
-            }
-
-        } else {
-            get_objReg().get_objects().push_back(
-                std::move(obj)
-                );
+        switch (type) {
+        case IntFieldType:
+            append<IntField>(name);
+        case SizeTFieldType:
+            append<SizeTField>(name);
+        case FloatFieldType:
+            append<FloatField>(name);
+        case VectorFieldType:
+            append<VectorField>(name);
+        case PointFieldType:
+            append<PointField>(name);
+        default:
+            continue;
         }
     }
 

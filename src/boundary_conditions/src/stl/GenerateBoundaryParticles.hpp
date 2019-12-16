@@ -25,6 +25,7 @@
 #include "Datastructures.hpp"
 #include "Models.hpp"
 #include "yaml-cpp/yaml.h"
+#include "FieldOps.hpp"
 
 class GenerateBoundaryParticles : public Model {
 
@@ -62,6 +63,9 @@ class GenerateBoundaryParticles : public Model {
     std::vector<float> read_translation_vector(YAML::Node parameter);
 
     void execute();
+
+    template<class T>
+    void append(std::string name);
 };
 
 #endif
