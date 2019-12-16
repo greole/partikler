@@ -26,6 +26,19 @@
 #include <iostream>
 #include <memory>
 
+enum SPHObjectType {
+    GenericType,
+    FieldType,
+    IntFieldType,
+    SizeTFieldType,
+    FloatFieldType,
+    VectorFieldType,
+    PointFieldType,
+    KernelGradientFieldType,
+    EquationType,
+    ModelType,
+};
+
 // Base class for fields and models
 class SPHObject {
 
@@ -34,18 +47,18 @@ class SPHObject {
 
     const std::string name_;
 
-    const std::string type_;
+    const SPHObjectType type_;
 
     //  use a copy or default here
     Logger logger_ = Logger(1);
 
   public:
 
-    SPHObject() {};
+    SPHObject():name_(),type_(GenericType) {};
 
     SPHObject(
         const std::string name,
-        const std::string type
+        const SPHObjectType type
         )
         : name_(name), type_(type){
     };
@@ -54,7 +67,7 @@ class SPHObject {
 
     std::string get_name() const { return name_; };
 
-    std::string get_type() const { return type_; };
+    SPHObjectType get_type() const { return type_; };
 
     // reorder after particle sorting
     virtual void reorder(const std::vector<size_t> &idxs) {};
@@ -76,10 +89,10 @@ public:
 
     Generic(
         const std::string name,
-        const std::string type,
+        const SPHObjectType ,
         T obj
         ) :
-        SPHObject(name, type),
+        SPHObject(name, GenericType),
         obj_(obj) {};
 
     T& operator()(){return obj_;};
@@ -100,7 +113,7 @@ private:
 public:
 
     EquationBase(std::string name, bool active, T & result):
-        SPHObject(name, "Equation"),
+        SPHObject(name, EquationType),
         result_(result) {
 
         logger_.info() << " Created Equation: " << name_;

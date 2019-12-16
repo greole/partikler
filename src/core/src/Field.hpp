@@ -57,7 +57,7 @@ bool equal_sizes (std::size_t size, Expr const & expr)
     return impl.value;
 }
 
-template <class T> class Field : public T, public SPHObject {
+template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : public T, public SPHObject {
 
   private:
 
@@ -76,7 +76,7 @@ template <class T> class Field : public T, public SPHObject {
         T f,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : T(f), SPHObject(name, "Field") {
+        : T(f), SPHObject(name, FieldType) {
     };
 
     Field(
@@ -84,7 +84,7 @@ template <class T> class Field : public T, public SPHObject {
         typename T::value_type val,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : T(size, val), SPHObject(name, "Field") {
+        : T(size, val), SPHObject(name, FieldType) {
     };
 
     T& get_Vec(){ return dynamic_cast<T&>(*this); }

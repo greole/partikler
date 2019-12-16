@@ -52,7 +52,7 @@ class Model : public SPHObject {
         YAML::Node parameter,
         ObjectRegistry & objReg)
         :
-        SPHObject(name, "Model"),
+        SPHObject(name, ModelType),
         parameter_(parameter),
         objReg_(objReg),
         // TODO inherit verbosity from main Logger
@@ -99,7 +99,7 @@ class Model : public SPHObject {
     void sub_model_push_back(std::shared_ptr<Model> m) {
 
         log().info()
-            << " Registering: " << this->get_type() << " " << this->get_name();
+            << " Registering: Submodel" << this->get_name();
 
         submodels_.push_back(m);
     };

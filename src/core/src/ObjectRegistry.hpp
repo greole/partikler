@@ -92,17 +92,19 @@ public:
         return get_object<PointField &>("Pos");
     }
 
+    // create an generic with default val
     template <class T> T &create_generic(const std::string name) {
         if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
-            std::make_unique<T>(name, "generic", typename T::value_type()));
+            std::make_unique<T>(name, GenericType, typename T::value_type()));
     }
 
+    // create an generic with defined  val
     template <class T>
     T &create_generic(const std::string name, typename T::value_type val) {
         if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(
-            std::make_unique<T>(name, "generic", val));
+            std::make_unique<T>(name, GenericType, val));
     }
 
     template <class T>
