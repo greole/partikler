@@ -62,10 +62,7 @@ class Model : public SPHObject {
             )
     {
         logger_.set_scope(this->get_name());
-        log().info() << "Creating "
-              << this->get_type()
-              << " "
-              << this->get_name();
+        log().info() << "Creating Model: " << this->get_name();
     }
 
 
@@ -99,18 +96,18 @@ class Model : public SPHObject {
     void sub_model_push_back(std::shared_ptr<Model> m) {
 
         log().info()
-            << " Registering: Submodel" << this->get_name();
+            << "Registering: Submodel: " << this->get_name();
 
         submodels_.push_back(m);
     };
 
     void execute_submodels () {
         log().info()
-            << " Executing: " << this->get_type() << " " << this->get_name();
+            << "Executing: " << this->get_type() << " " << this->get_name();
 
         for (auto model : submodels_) {
             log().info()
-                      << " Executing: " << model->get_type() << " "
+                      << "Executing: " << model->get_type() << " "
                       << model->get_name();
             model->execute();
         }
