@@ -33,12 +33,12 @@ class CountingSortParticles : public Model {
     // In
     PointField &pos_;
 
-    Field<searchcubes::SearchCube> &sc_;
+    Field<std::vector<SearchCube>> &sc_;
 
     //  Sorting indexes
     SizeTField &si_;
 
-    Generic<searchcubes::SearchCubeDomain> &scd_;
+    Generic<SearchCubeDomain> &scd_;
 
   public:
     CountingSortParticles(

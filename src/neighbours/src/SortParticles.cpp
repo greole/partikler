@@ -23,31 +23,33 @@ CountingSortParticles::CountingSortParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
       pos_(objReg.get_particle_positions()),
-      sc_(objReg.get_object<Field<searchcubes::SearchCube>>(
+      sc_(objReg.get_object<Field<std::vector<SearchCube>>>(
           "search_cubes")),
       si_(objReg.create_field<SizeTField>("sorting_idxs")),
-      scd_(objReg.get_object<Generic<searchcubes::SearchCubeDomain>>(
-          "search_cube_domain")) {};
+      scd_(objReg.get_object<Generic<SearchCubeDomain>>(
+          "search_cube_domain")) {}
 
 void CountingSortParticles::execute(){
 
     log().info_begin() << "Sorting particles ";
 
-    std::vector<Point> old_pos = pos_.get_field();
+    // PointField old_pos(pos_);
+
+    // pos.store_old();
 
     // TODO too much copying
-    auto [sc, si, pos] = countingSortParticles(
-        scd_(),
-        old_pos
-        );
+    // auto [sc, si, pos] = countingSortParticles(
+    //     scd_(),
+    //     pos
+    //     );
 
-    sc_.set_field(sc);
-    si_.set_field(si);
-    pos_.set_field(pos);
+    // sc_.set_field(sc);
+    // si_.set_field(si);
+    // pos_.set_field(pos);
 
     log().info_end();
     reorder_fields();
-};
+}
 
 void CountingSortParticles::reorder_fields(){
     log().info_begin() << "Reordering particle fields ";
@@ -60,7 +62,7 @@ void CountingSortParticles::reorder_fields(){
         if (f->get_name() == "surface_dist" ) continue;
         if (f->get_name() == "search_cubes" ) continue;
         if (f->get_name() == "sorting_idxs" ) continue;
-        f->reorder(si_.get_field());
+        f->reorder(si_.get_Vec());
     }
 
     log().info_end();
