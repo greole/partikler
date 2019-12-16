@@ -19,26 +19,24 @@
 
 #include "ParticleNeighbours.hpp"
 
+
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      dx_(parameter["dx"].as<float>()),
+    : Model(model_name, parameter, objReg), dx_(parameter["dx"].as<float>()),
       pos_(objReg.get_particle_positions()),
-      facets_(objReg.get_object<Field<Facet_handle>>("facets")),
-      sc_(objReg.create_field<Field<searchcubes::SearchCube>>(
-          "search_cubes")),
-      np_(objReg.create_field<Field<searchcubes::NeighbourPair>>(
+      facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
+      sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
+      np_(objReg.create_field<NeighbourFieldAB>(
           "neighbour_pairs")),
-      sd_(objReg.create_field<Field<STLSurfaceDist>>("surface_dist")),
-      scd_(objReg
-               .create_generic<Generic<searchcubes::SearchCubeDomain>>(
-                   "search_cube_domain")) {
+      sd_(objReg.create_field<STLSurfaceDistAB>("surface_dist")),
+      scd_(objReg.create_generic<Generic<SearchCubeDomain>>(
+          "search_cube_domain")) {
 
     auto pcs = ModelFactory::createInstance(
         "SORTING", "CountingSortParticles", "sort", parameter, objReg);
 
     sub_model_push_back(pcs);
-};
+}
 
 void SPHSTLParticleNeighbours::execute() {
 
@@ -57,21 +55,23 @@ void SPHSTLParticleNeighbours::execute() {
     // TODO to much copying
     auto [np, sd] = createSTLNeighbours(
         scd_(),
-        pos_.get_field(),
-        sc_.get_field(),
-        facets_.get_field());
+        pos_.get_Vec(),
+        sc_.get_Vec(),
+        facets_.get_Vec());
 
-    np_.set_field(np);
-    sd_.set_field(sd);
+    // np_.set_field(np);
+    np_ = np;
+    // sd_.set_field(sd);
+    sd_=sd;
 
     log().info() << "Found " << np_.size() << " Neighbour Pairs";
 
     log().info_end() << "DONE";
-};
+}
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {
-    scd_() = searchcubes::initSearchCubeDomain(
-        pos_.get_field(), search_cube_size_*dx_);
+    scd_() = initSearchCubeDomain(
+        pos_.get_Vec(), search_cube_size_*dx_);
 }
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);

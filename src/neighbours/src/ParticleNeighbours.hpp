@@ -22,12 +22,14 @@
 
 #include "Models.hpp"
 #include "SearchCubes.hpp"
-#include "Datastructures.hpp"
-
+#include "Field.hpp"
 
 class SPHSTLParticleNeighbours: public Model {
 
     REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
+
+    using SearchCubeFieldAB = FieldAB<std::vector<SearchCube>>;
+    using STLSurfaceDistAB = FieldAB<std::vector<STLSurfaceDist>>;
 
 private:
 
@@ -37,19 +39,20 @@ private:
     // In
     PointField &pos_;
 
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> & facets_;
 
-    Field<searchcubes::SearchCube> & sc_;
+    SearchCubeFieldAB & sc_;
 
     // Out
-    Field<searchcubes::NeighbourPair> &np_;
+    NeighbourFieldAB &np_;
 
-    Field<STLSurfaceDist> &sd_;
+    STLSurfaceDistAB &sd_;
 
     // Regular data member
-    Generic<searchcubes::SearchCubeDomain> & scd_;
+    Generic<SearchCubeDomain> & scd_;
 
     float search_cube_size_ = 1.0;
+
 public:
 
     SPHSTLParticleNeighbours(
