@@ -200,4 +200,10 @@ std::vector<T> &sum_AB_dW(
     }
     return vec;
 }
+
+// appends the values of b to a inplace
+template <class T> void field_append(T &a, T& b) {
+    a.insert(a.end(), b.begin(), b.end());
+}
+
 #endif
