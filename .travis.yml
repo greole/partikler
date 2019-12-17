@@ -7,6 +7,10 @@ compiler:
 dist: bionic
 os: linux
 
+matrix:
+    - env: BUILD_TYPE=Debug
+    - env: BUILD_TYPE=Release
+
 addons:
   apt:
     update: true
@@ -21,11 +25,16 @@ addons:
       - libgmp-dev
       - libomp-dev
 
+before_install:
+  - pip install --user cpp-coveralls
+
 script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
+  - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
   - ctest -R "Partikler_Test"
+  - coveralls
   - ./partikler --config=../example/SPH.yaml
+

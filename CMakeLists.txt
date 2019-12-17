@@ -7,23 +7,28 @@ cmake_minimum_required(VERSION 3.10)
 
 project(PARTIKLER LANGUAGES CXX)
 
-find_package(OpenMP REQUIRED)
+set(default_build_type "Release")
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "${default_build_type}")
+endif()
+
+MESSAGE($CMAKE_BUILD_TYPE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "RELEASE")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC ")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-    -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
-    )
+  -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
+  )
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-      -fno-omit-frame-pointer \
-      -Rpass=loop-vectorize \
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
+    -fno-omit-frame-pointer \
+    -Rpass=loop-vectorize \
       -ffast-math \
       -fsanitize=address \
       "
@@ -34,6 +39,11 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
     add_definitions(-DWITH_GNU)
+
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage\
+      -fprofile-arcs \
+      -ftest-coverage"
+)
 
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
         -ffast-math \
@@ -48,6 +58,8 @@ endif()
 ########################
 # 3rd Party Libraries  #
 ########################
+
+find_package(OpenMP REQUIRED)
 
 include(ExternalProject)
 
@@ -133,6 +145,26 @@ IF(BUILD_YAP)
 ENDIF()
 
 OPTION(GENERATE_TAGS "Generating tags" OFF)
+
+########################
+# gcov                 #
+########################
+
+include (cmake/CodeCoverage.cmake)
+
+append_coverage_compiler_flags()
+
+setup_target_for_coverage_lcov(
+  NAME coverage
+  EXECUTABLE ./src/core/tests/Field/Partikler_Test_Field)
+
+# setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
+# target_link_libraries(${PROJECT_TEST_NAME} gcov)
+
+########################
+# ctags                #
+########################
+
 
 IF(GENERATE_TAGS)
     add_custom_command ( OUTPUT tags
