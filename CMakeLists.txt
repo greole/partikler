@@ -48,7 +48,6 @@ endif()
 ########################
 # 3rd Party Libraries  #
 ########################
-#add_subdirectory(3rdParty/cgal)
 
 include(ExternalProject)
 
@@ -72,58 +71,9 @@ IF(BUILD_CGAL)
       message(FATAL_ERROR "Build step for cgal failed: ${result}")
     endif()
 
-    execute_process(COMMAND mkdir -p build
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND cmake  -DCGAL_HEADER_ONLY=ON -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build ..
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND make install
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    # add_compile_definitions(CGAL_HEADER_ONLY)
-    #SET_TARGET_PROPERTIES(CGAL
-    #    PROPERTIES
-    #    CGAL_HEADER_ONLY TRUE)
-
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
-    set(CGAL_DIR  ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
-    find_package(CGAL  REQUIRED)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build/include)
 ENDIF()
 
-
-# find_package(CGAL  REQUIRED)
-
-# MESSAGE("Found CGAL CONFIG UNDER" ${CGAL_DIR})
-# include( ${CGAL_USE_FILE} )  # needed for the linker
-
-
-OPTION(GENERATE_TAGS "Generating tags" OFF)
-
-IF(GENERATE_TAGS)
-    add_custom_command ( OUTPUT tags
-        COMMAND ctags -R ${CMAKE_SOURCE_DIR}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-ELSE()
-    add_custom_command ( OUTPUT tags
-        COMMAND touch tags
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-ENDIF()
+find_package(CGAL REQUIRED)
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
@@ -138,7 +88,7 @@ ENDIF()
 
 IF(BUILD_GOOGLE_TEST)
     # Download and unpack googletest at configure time
-    configure_file(cmake/GTest.in googletest-download/CMakeLists.txt)
+    configure_file(cmake/googletest.in googletest-download/CMakeLists.txt)
 
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
       RESULT_VARIABLE result
@@ -159,30 +109,20 @@ IF(BUILD_GOOGLE_TEST)
     # settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # Add googletest directly to our build. This defines
-    # the gtest and gtest_main targets.
+    # # Add googletest directly to our build. This defines
+    # # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                      EXCLUDE_FROM_ALL)
 
-     message("BUILDING GTEST DONE")
+    #  message("BUILDING GTEST DONE")
 
-    execute_process(COMMAND make
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-      )
-    find_package(GTest)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/googletest-build/lib/cmake/GTest/")
 ENDIF()
 
+find_package(GTest)
 
-#FIND_PACKAGE(GTest REQUIRED)
 
-# add_subdirectory(3rdParty/benchmark)
-
-# build tests (targets: gtest_main, gtest)
-#set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
-
-INCLUDE(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 OPTION(BUILD_YAML_CPP "Building yaml-cpp parser" OFF)
 
 IF(NOT BUILD_YAML_CPP)
@@ -195,36 +135,35 @@ ENDIF()
 
 IF(BUILD_YAML_CPP)
     MESSAGE("BUILDING YAML_CPP ")
-      EXTERNALPROJECT_ADD(yaml-cpp-download
-          GIT_REPOSITORY    "https://github.com/jbeder/yaml-cpp"
-          # GIT_TAG           "0.6.2"
-          DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
-          PREFIX            "${CMAKE_BINARY_DIR}"
-          SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/yaml-cpp"
-          CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-                            -DYAML_CPP_BUILD_TESTS=OFF
-                            -DYAML_CPP_BUILD_TOOLS=OFF
-                            -DYAML_CPP_BUILD_CONTRIB=OFF
-                            -DYAML_CPP_INSTALL=ON
-                            -DBUILD_SHARED_LIBS=ON
-        )
+    configure_file(cmake/YAML.in yaml-cpp-download/CMakeLists.txt)
 
-      EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
-      INCLUDE_DIRECTORIES(${install_dir}/include)
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download )
+    if(result)
+      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+    endif()
 
-      ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
-      SET_TARGET_PROPERTIES(yaml-cpp
-          PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
-      SET(YAML_CPP_LIBRARY yaml-cpp)
-      MESSAGE("SET YAML_CPP_LIBRARY " ${YAML_CPP_LIBRARY})
+    message("BUILDING YAML_CPP")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download )
+    if(result)
+      message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    endif()
+
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
+                     ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
+                     EXCLUDE_FROM_ALL)
 ENDIF()
 
+FIND_PACKAGE(YAML-CPP CONFIG REQUIRED)
 
 OPTION(BUILD_YAP "Building YAP" ON)
-# IF(NOT BUILD_YAP)
-#     MESSAGE("Searching for YAP")
-#     FIND_PACKAGE(yap REQUIRED)
-# ENDIF()
+IF(NOT BUILD_YAP)
+    MESSAGE("Searching for YAP")
+    FIND_PACKAGE(yap REQUIRED)
+ENDIF()
 
 IF(BUILD_YAP)
     # Download and unpack googletest at configure time
@@ -251,19 +190,21 @@ IF(BUILD_YAP)
                      ${CMAKE_CURRENT_BINARY_DIR}/yap-build
                      EXCLUDE_FROM_ALL)
 
-                 message("BUILDING YAP DONE")
+    message("BUILDING YAP DONE")
+ENDIF()
 
-    execute_process(COMMAND make
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
-      )
+OPTION(GENERATE_TAGS "Generating tags" OFF)
 
-    execute_process(COMMAND make
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-src
-      )
-
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
+IF(GENERATE_TAGS)
+    add_custom_command ( OUTPUT tags
+        COMMAND ctags -R ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ELSE()
+    add_custom_command ( OUTPUT tags
+        COMMAND touch tags
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
 ENDIF()
 
 ########################

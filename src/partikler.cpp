@@ -36,7 +36,7 @@
 // if it doesn't see a call anywere in the executable.
 // Hence, for no the register calls are made manually
 // until a better solution is found
-// #ifdef WITH_GNU
+#ifdef WITH_GNU
 // #include "stl/GenerateBoundaryParticles.hpp"
 // REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
 // #include "stl/Wendland2D.hpp"
@@ -58,7 +58,7 @@
 // REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
 // #include "stl/STLPosIntegrator.hpp"
 // REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
-// #endif
+#endif
 
 
 void print_help() {
@@ -161,3 +161,4 @@ int main(int argc, char* argv[]) {
 
     timeGraph.execute_main();
 }
+

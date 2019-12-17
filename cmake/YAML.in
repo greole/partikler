@@ -1,0 +1,17 @@
+
+include(ExternalProject)
+
+EXTERNALPROJECT_ADD(yaml-cpp-download
+  GIT_REPOSITORY    "https://github.com/jbeder/yaml-cpp"
+  # GIT_TAG           "0.6.2"
+  DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
+  PREFIX            "${CMAKE_BINARY_DIR}"
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build"
+  CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+                    -DYAML_CPP_BUILD_TESTS=OFF
+                    -DYAML_CPP_BUILD_TOOLS=OFF
+                    -DYAML_CPP_BUILD_CONTRIB=OFF
+                    -DYAML_CPP_INSTALL=ON
+                    -DBUILD_SHARED_LIBS=ON
+)

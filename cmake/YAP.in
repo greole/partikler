@@ -4,12 +4,13 @@ project(yap-download NONE)
 
 include(ExternalProject)
 ExternalProject_Add(yap
-  GIT_REPOSITORY    https://github.com/boostorg/yap.git
-  GIT_TAG           master
+  GIT_REPOSITORY    https://github.com/greole/yap.git
+  GIT_TAG           develop
   SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-src"
   BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-build"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ""
-  INSTALL_COMMAND   ""
-  TEST_COMMAND      ""
+  PREFIX            "${CMAKE_BINARY_DIR}"
+  CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+                    -DYAP_BUILD_TESTS=OFF
+                    -DYAP_BUILD_PERF=OFF
+                    -DYAP_BUILD_DOC=OFF
 )
