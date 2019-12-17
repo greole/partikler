@@ -24,6 +24,7 @@ addons:
       - libmpfr-dev
       - libgmp-dev
       - libomp-dev
+      - lcov
 
 before_install:
   - pip install --user cpp-coveralls
