@@ -7,9 +7,9 @@ compiler:
 dist: bionic
 os: linux
 
-matrix:
-    - env: BUILD_TYPE=Debug
-    - env: BUILD_TYPE=Release
+env:
+    - BUILD_TYPE=Debug
+    - BUILD_TYPE=Release
 
 addons:
   apt:
