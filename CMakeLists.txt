@@ -51,26 +51,11 @@ endif()
 
 include(ExternalProject)
 
+include(cmake/build_3rd_party.cmake)
+
 OPTION(BUILD_CGAL "Building CGAL" OFF)
 IF(BUILD_CGAL)
-    message("BUILDING CGAL")
-    # Download and unpack googletest at configure time
-    configure_file(cmake/CGAL.in cgal-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
+    BUILD(CGAL)
 ENDIF()
 
 find_package(CGAL CONFIG REQUIRED)
@@ -86,24 +71,9 @@ IF(NOT BUILD_GOOGLE_TEST)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
+
 IF(BUILD_GOOGLE_TEST)
-    # Download and unpack googletest at configure time
-    configure_file(cmake/googletest.in googletest-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-    endif()
-
-    message("BUILDING GTEST")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
+    BUILD(googletest)
 
     # Prevent overriding the parent project's compiler/linker
     # settings on Windows
@@ -134,23 +104,7 @@ IF(NOT BUILD_YAML_CPP)
 ENDIF()
 
 IF(BUILD_YAML_CPP)
-    MESSAGE("BUILDING YAML_CPP ")
-    configure_file(cmake/YAML.in yaml-cpp-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-    endif()
-
-    message("BUILDING YAML_CPP")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
+    BUILD(YAML)
 
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
                      ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
@@ -166,23 +120,7 @@ IF(NOT BUILD_YAP)
 ENDIF()
 
 IF(BUILD_YAP)
-    # Download and unpack googletest at configure time
-    configure_file(cmake/YAP.in yap-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for yap failed: ${result}")
-    endif()
-
-    message("BUILDING YAP")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yap-download )
-    if(result)
-      message(FATAL_ERROR "Build step for yap failed: ${result}")
-    endif()
+    BUILD(YAP)
 
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
