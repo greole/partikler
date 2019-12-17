@@ -59,6 +59,16 @@ endif()
 # 3rd Party Libraries  #
 ########################
 
+set(CMAKE_ARGS "${CMAKE_ARGS} \
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR} \
+        -DYAP_BUILD_TESTS=OFF \
+        -DYAP_BUILD_PERF=OFF  \
+        -DYAP_BUILD_DOC=OFF   \
+        -DYAML_CPP_BUILD_TESTS=OFF \
+        -DYAML_CPP_BUILD_TOOLS=OFF \
+        -DYAML_CPP_BUILD_CONTRIB=OFF "
+  )
+
 find_package(OpenMP REQUIRED)
 
 include(ExternalProject)
@@ -116,14 +126,16 @@ IF(NOT BUILD_YAML_CPP)
 ENDIF()
 
 IF(BUILD_YAML_CPP)
-    BUILD(YAML)
 
+    SET(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    SET(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+    SET(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+    BUILD(YAML)
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
                      ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
                      EXCLUDE_FROM_ALL)
 ENDIF()
 
-FIND_PACKAGE(YAML-CPP CONFIG REQUIRED)
 
 OPTION(BUILD_YAP "Building YAP" ON)
 IF(NOT BUILD_YAP)
@@ -132,13 +144,16 @@ IF(NOT BUILD_YAP)
 ENDIF()
 
 IF(BUILD_YAP)
+    SET(YAP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    SET(YAP_BUILD_PERF OFF CACHE BOOL "" FORCE)
+    SET(YAP_BUILD_DOC OFF CACHE BOOL  "" FORCE)
     BUILD(YAP)
 
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
-    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yap-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/yap-build
-                     EXCLUDE_FROM_ALL)
+    # add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yap-src
+    #                  ${CMAKE_CURRENT_BINARY_DIR}/yap-build
+    #                  EXCLUDE_FROM_ALL)
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
     message("BUILDING YAP DONE")

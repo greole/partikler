@@ -9,8 +9,6 @@ ExternalProject_Add(yap
   SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-src"
   BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-build"
   PREFIX            "${CMAKE_BINARY_DIR}"
-  CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-                    -DYAP_BUILD_TESTS=OFF
-                    -DYAP_BUILD_PERF=OFF
-                    -DYAP_BUILD_DOC=OFF
-)
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  )
