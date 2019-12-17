@@ -33,7 +33,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
-    add_compile_definitions(WITH_GNU)
+    add_definitions(-DWITH_GNU)
 
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
         -ffast-math \
@@ -73,7 +73,7 @@ IF(BUILD_CGAL)
 
 ENDIF()
 
-find_package(CGAL REQUIRED)
+find_package(CGAL CONFIG REQUIRED)
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
@@ -190,6 +190,7 @@ IF(BUILD_YAP)
                      ${CMAKE_CURRENT_BINARY_DIR}/yap-build
                      EXCLUDE_FROM_ALL)
 
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
     message("BUILDING YAP DONE")
 ENDIF()
 
