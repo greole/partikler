@@ -27,6 +27,14 @@
 #include <string>       // std::string
 #include <sstream>
 
+enum MSGTYPE {
+    INFO,
+    INFOSTART,
+    INFOEND,
+    WARN,
+    CRITICAL
+};
+
 class MSG {
 
     private:
@@ -35,7 +43,7 @@ class MSG {
 
         const int verbosity_treshold_;
 
-        const char* label_;
+        const MSGTYPE label_;
 
         const std::string scope_;
 
@@ -43,7 +51,7 @@ class MSG {
 
     public:
 
-        MSG(int verbosity_treshold, const char* label, int message_threshold, std::string scope):
+        MSG(int verbosity_treshold, const MSGTYPE label, int message_threshold, std::string scope):
             message_threshold_(message_threshold),
             verbosity_treshold_(verbosity_treshold),
             label_(label),
@@ -67,14 +75,34 @@ class MSG {
         }
 
         ~MSG() {
-            if (message_threshold_ > verbosity_treshold_ ) {
+            std::string label_str;
+
+            switch (label_) {
+            case INFO:
+                label_str = "INFO";
+                break;
+            case INFOSTART:
+                label_str = "INFO START";
+                break;
+            case INFOEND:
+                label_str = "INFO END";
+                break;
+            case WARN:
+                label_str = "WARN";
+                break;
+            case CRITICAL:
+                label_str = "CRITICAL";
+                break;
+            }
+
+            if (message_threshold_ > verbosity_treshold_) {
                 std::cout
-                    << "[" << label_  << scope_ <<  "] "
+                    << "[" << label_str  << scope_ <<  "] "
                     << state_.str()
                     << std::endl;
             }
 
-            if (label_ == "CRITICAL")  exit(EXIT_FAILURE);
+            if (label_ == CRITICAL)  exit(EXIT_FAILURE);
         };
 };
 
@@ -109,12 +137,12 @@ class Logger {
 
         MSG info_begin() {
             invoked_stack_.push_back(std::chrono::system_clock::system_clock::now());
-            return MSG(verbosity_treshold_, "INFO START", 3, scope_);
+            return MSG(verbosity_treshold_, INFOSTART, 3, scope_);
         };
 
         MSG info_end() {
             std::chrono::system_clock::time_point end = std::chrono::system_clock::system_clock::now();
-            MSG msg(verbosity_treshold_, "INFO END", 3, scope_);
+            MSG msg(verbosity_treshold_, INFOEND, 3, scope_);
             std::chrono::system_clock::time_point invoked {invoked_stack_.back()};
             invoked_stack_.pop_back();
             auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - invoked).count();
@@ -123,25 +151,25 @@ class Logger {
         };
 
         MSG info() {
-            return MSG(verbosity_treshold_, "INFO", 3, scope_);
+            return MSG(verbosity_treshold_, INFO, 3, scope_);
         };
 
         MSG verbose(int i) {
-            return MSG(verbosity_treshold_, "INFO", i, scope_);
+            return MSG(verbosity_treshold_, INFO, i, scope_);
         };
 
         MSG warn() {
-            return MSG(verbosity_treshold_, "WARN", 4, scope_);
+            return MSG(verbosity_treshold_, WARN, 4, scope_);
         };
 
         MSG critical() {
-            return MSG(verbosity_treshold_, "CRITICAL", 5, scope_);
+            return MSG(verbosity_treshold_, CRITICAL, 5, scope_);
         };
 
   // TODO implement an assert statement
         MSG check(bool b) {
-          if (b) {return MSG(verbosity_treshold_, "INFO", 0, scope_);}
-          else {return MSG(verbosity_treshold_, "CRITICAL", 5, scope_);}
+          if (b) {return MSG(verbosity_treshold_, INFO, 0, scope_);}
+          else {return MSG(verbosity_treshold_, CRITICAL, 5, scope_);}
         };
 };
 
