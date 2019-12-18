@@ -63,7 +63,7 @@ private:
     // The base polyhedron on which particles are created
     Generic<CGALPolyhedron>& polyhedron_;
 
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> & facets_;
 
     // Reference to positions field
     PointField& pos_;

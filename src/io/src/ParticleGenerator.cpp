@@ -52,7 +52,7 @@ SPHSTLReader::SPHSTLReader(
 
     objReg.register_object<Generic<CGALPolyhedron>>(
         std::make_unique<Generic<CGALPolyhedron>>(
-            "polyhedron", "generic", *polyhedron
+            "polyhedron", GenericType, *polyhedron
             )
         );
 
@@ -72,7 +72,7 @@ SPHParticleGenerator::SPHParticleGenerator(
     : Model(model_name, parameter, objReg),
       polyhedron_(
           objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
-      facets_(objReg.create_field<Field<Facet_handle>>("facets")),
+      facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
       pos_(objReg.create_field<PointField>("Pos")),
       idx_(objReg.create_field<SizeTField>("idx")),
       type_(objReg.create_field<IntField>("type")),
@@ -96,9 +96,9 @@ void SPHParticleGenerator::execute() {
     get_objReg().set_n_particles(n);
 
     for (size_t i=0; i<(n-n_0); i++){
-        idx_.get_field().push_back(n_0+i);
-        type_.get_field().push_back(2);
-        boundary_.get_field().push_back(0);
+        idx_.push_back(n_0+i);
+        type_.push_back(2);
+        boundary_.push_back(0);
     }
 }
 
