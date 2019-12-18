@@ -55,9 +55,9 @@ void SPHSTLParticleNeighbours::execute() {
     // TODO to much copying
     auto [np, sd] = createSTLNeighbours(
         scd_(),
-        pos_.get_Vec(),
-        sc_.get_Vec(),
-        facets_.get_Vec());
+        pos_,
+        sc_,
+        facets_);
 
     // np_.set_field(np);
     np_ = np;
@@ -71,7 +71,7 @@ void SPHSTLParticleNeighbours::execute() {
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {
     scd_() = initSearchCubeDomain(
-        pos_.get_Vec(), search_cube_size_*dx_);
+        pos_, search_cube_size_*dx_);
 }
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);

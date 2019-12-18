@@ -82,7 +82,7 @@ SPHParticleGenerator::SPHParticleGenerator(
 void SPHParticleGenerator::execute() {
 
     log().info_begin() << "Generating initial particles ";
-    Generate_Points_at_Facets gpf(dx_, pos_.get_field(), facets_.get_field());
+    Generate_Points_at_Facets gpf(dx_, pos_, facets_);
 
     size_t n_0 = pos_.size();
 

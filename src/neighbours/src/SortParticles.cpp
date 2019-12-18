@@ -62,7 +62,7 @@ void CountingSortParticles::reorder_fields(){
         if (f->get_name() == "surface_dist" ) continue;
         if (f->get_name() == "search_cubes" ) continue;
         if (f->get_name() == "sorting_idxs" ) continue;
-        f->reorder(si_.get_Vec());
+        f->reorder(si_);
     }
 
     log().info_end();

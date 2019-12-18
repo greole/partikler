@@ -87,13 +87,11 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
         : T(size, val), SPHObject(name, FieldType) {
     };
 
-    T& get_Vec(){ return dynamic_cast<T&>(*this); }
-
-    void operator=(Field<T> &b) { T::operator=(b.get_Vec()); }
+    void operator=(Field<T> &b) { T::operator=(b); }
 
     void operator=(T &b) { T::operator=(b); }
 
-    void operator=(Field<T> &&b) { T::operator=(std::move(b.get_Vec())); }
+    void operator=(Field<T> &&b) { T::operator=(std::move(b)); }
 
     void copy_old() {
         prev_.emplace_back();
