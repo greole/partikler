@@ -21,18 +21,17 @@
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Model(model_name, parameter, objReg),
+    : Equation(model_name, parameter, objReg),
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
-      np_(objReg.get_object<Field<searchcubes::NeighbourPair>>(
-          "neighbour_pairs")),
-      dW_(objReg.get_object<Field<VectorPair>>("KerneldWdx")),
       // DIRTY FIX momentum eqn should create u
       // but nu already depends on u
       u_(objReg.create_field<VectorField>(
-             "u", zeroVec, {"U", "V", "W"})),
+          "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
       pos_(objReg.get_object<PointField>("Pos")),
       dnu_(objReg.create_field<VectorField>(
-          "dnu", zeroVec, {"dnux", "dnuy", "dnuz"})) {};
+          "dnu",
+          zero<VectorField::value_type>::val,
+          {"dnux", "dnuy", "dnuz"})) {};
 
 void Viscosity::execute() {
 
@@ -40,16 +39,16 @@ void Viscosity::execute() {
 
     // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
 
-    const VectorField dxp = particle_distance_vec(pos_, np_);
+    // const VectorField dxp = particle_distance_vec(pos_, np_);
 
-    // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
+    // // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
 
-    // const SPHFloatField tmp = tmp0*tmp1;
+    // // const SPHFloatField tmp = tmp0*tmp1;
 
-    const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
+    // const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
 
-    // TODO Reset 
-    dnu_.set(Vector {0,0,0});
+    // // TODO Reset 
+    // dnu_.set(Vector {0,0,0});
 
     // // weighted sum
     // const size_t size = pn.ids.size();
@@ -63,9 +62,9 @@ void Viscosity::execute() {
     //     }
     // }
 
-    dnu_.weighted_sum(np_, tmp, dW_);
+    // dnu_.weighted_sum(np_, tmp, dW_);
 
-    dnu_ *= nu_;
+    // dnu_ *= nu_;
 
     log().info_end();
 

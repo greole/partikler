@@ -21,19 +21,17 @@
 #define CONTI_H
 
 #include "Models.hpp"
-#include "Datastructures.hpp"
+#include "Field.hpp"
+#include "SearchCubes.hpp"
+#include "FieldOps.hpp"
 
-class Conti : public Model {
+class Conti : public Equation {
 
     REGISTER_DEC_TYPE(Conti);
 
 private:
     // In
     const PointField &pos_; // Particle positions
-
-    // const SortedNeighbours &pn_; // Particle neighbours
-    const Field<searchcubes::NeighbourPair> &np_;
-    const FloatField &W_;
 
     // Out
     FloatField &rho_;

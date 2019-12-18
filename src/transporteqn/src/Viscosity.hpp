@@ -21,11 +21,13 @@
 #define VISCOSITY_H
 
 #include "Models.hpp"
+#include "Field.hpp"
+#include "FieldOps.hpp"
+#include "SearchCubes.hpp"
+
 #include "yaml-cpp/yaml.h"
-#include "Datastructures.hpp"
 
-
-class Viscosity : public Model {
+class Viscosity : public Equation {
 
     REGISTER_DEC_TYPE(Viscosity);
 
@@ -35,8 +37,6 @@ private:
     float nu_;
 
     // In
-    const Field<searchcubes::NeighbourPair> &np_;
-    const Field<VectorPair> &dW_;
     const VectorField &u_;
     const PointField &pos_; // Particle positions
 

@@ -18,6 +18,7 @@ add_library(Core SHARED
 
 
 target_link_libraries(Core OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES} ${CGAL_LIBRARIES})
+
 target_include_directories(Core PUBLIC ${PROJECT_SOURCE_DIR}/src ${CGAL_INCLUDE_DIR})
 
 add_subdirectory(tests)

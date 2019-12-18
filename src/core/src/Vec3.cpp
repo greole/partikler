@@ -27,12 +27,12 @@ Vec3& Vec3::operator=(const Vec3 & x) {
     return *this;
 }
 
-Vec3 operator*(float a, Vec3 x) {
+Vec3 operator*(float a, const Vec3& x) {
     return {a * x[0], a * x[1], a * x[2]};
 }
 
 // scalar division
-Vec3 operator/(Vec3 x, float a) {
+Vec3 operator/(const Vec3& x, float a) {
     float ia = 1. / a;
     return {ia * x[0], ia * x[1], ia * x[2]};
 }
@@ -43,11 +43,11 @@ float operator*(Vec3& x, Vec3& y) {
 }
 
 // addition
-Vec3 operator+(Vec3& x, Vec3& y) {
+Vec3 operator+(const Vec3& x, const Vec3& y) {
     return {x[0] + y[0],  x[1] + y[1], x[2] + y[2]};
 }
 
-Vec3 operator-(Vec3& x, Vec3& y) {
+Vec3 operator-(const Vec3& x, const Vec3& y) {
     return {x[0] - y[0],  x[1] - y[1], x[2] - y[2]};
 }
 

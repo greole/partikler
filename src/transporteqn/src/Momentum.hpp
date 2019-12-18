@@ -22,12 +22,14 @@
 #define MOMENTUM_H
 
 #include "Models.hpp"
-#include "Datastructures.hpp"
+#include "Field.hpp"
+#include "FieldOps.hpp"
+#include "Vec3.hpp"
 
 #include "yaml-cpp/yaml.h"
 
 
-class Momentum : public Model {
+class Momentum : public Equation {
 
     REGISTER_DEC_TYPE(Momentum);
 

@@ -28,10 +28,10 @@ Wendland::Wendland(
       W_fak2_(hfact/(h_*h_)),
       dW_fak2_(hfact/(h_*h_*h_)),
       pos_(objReg.get_particle_positions()),
-      np_(objReg.get_object<Field<searchcubes::NeighbourPair>>(
+      np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<FloatField>("KernelW")),
-      dWdx_(objReg.create_field<Field<Vector>>("KerneldWdx")) {};
+      dWdx_(objReg.create_field<Field<std::vector<Vec3>>>("KerneldWdx")) {};
 
 void Wendland::execute() {
 

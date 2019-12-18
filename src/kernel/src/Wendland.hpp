@@ -21,8 +21,11 @@
 #define KERNEL_H
 
 #include "Models.hpp"
+#include "SearchCubes.hpp"
+#include "Field.hpp"
+#include "cgal/CGALHelper.hpp"
+
 #include "yaml-cpp/yaml.h"
-#include "Datastructures.hpp"
 
 class Wendland : public Model {
 
@@ -41,13 +44,13 @@ class Wendland : public Model {
     // In
     const PointField &pos_; // Particle positions
 
-    const Field<searchcubes::NeighbourPair> &np_;
+    const Field<std::vector<NeighbourPair>> &np_;
     // const Field<STLSurfaceDist> &sd_;
 
     // Out
     // Kernel &kernel                               // Kernel field
     FloatField &W_;
-    Field<Vector> &dWdx_;
+    Field<std::vector<Vec3>> &dWdx_;
 
   public:
 

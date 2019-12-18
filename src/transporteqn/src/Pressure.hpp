@@ -22,11 +22,13 @@
 #define Pressure_H
 
 #include "Models.hpp"
-#include "Datastructures.hpp"
+#include "Field.hpp"
+#include "FieldOps.hpp"
+#include "SearchCubes.hpp"
 
 #include "yaml-cpp/yaml.h"
 
-class Pressure : public Model {
+class Pressure : public Equation {
 
     REGISTER_DEC_TYPE(Pressure);
 
@@ -42,9 +44,6 @@ class Pressure : public Model {
     // In
     // Density
     const FloatField &rho_;
-    const Field<searchcubes::NeighbourPair> &np_;
-    const FloatField &W_;
-    const Field<VectorPair> &dW_;
 
     // Out
     // Pressure

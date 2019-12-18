@@ -204,9 +204,8 @@ add_subdirectory(src/core)
 add_subdirectory(src/boundary_conditions)
 add_subdirectory(src/neighbours)
 add_subdirectory(src/io)
-# add_subdirectory(src/SPHDatastructures)
-# add_subdirectory(src/kernel)
-# add_subdirectory(src/transporteqn)
+add_subdirectory(src/kernel)
+add_subdirectory(src/transporteqn)
 # add_subdirectory(src/integrator)
 # add_subdirectory(src/geometry)
 
@@ -215,18 +214,31 @@ add_executable(partikler src/partikler.cpp tags)
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
 # target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
-target_link_libraries(partikler Core Neighbours BoundaryConditions IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler
+  Core
+  Neighbours
+  BoundaryConditions
+  IO
+  TransportEqn
+  Kernel
+  OpenMP::OpenMP_CXX
+  ${YAML_CPP_LIBRARIES}
+  )
 
 
 OPTION(COVERALLS "Calling Coveralls" OFF)
-if(COVERALLS)
-  if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" )
-    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
-        execute_process(COMMAND coveralls)
-    endif()
-  endif()
-endif()
 
+IF(COVERALLS AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      add_custom_command ( OUTPUT covered
+          COMMAND coveralls && touch covered
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      )
+ELSE()
+    add_custom_command ( OUTPUT covered
+        COMMAND touch covered
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ENDIF()
 
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)

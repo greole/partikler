@@ -156,7 +156,7 @@ std::vector<T> & solve (std::vector<T> & vec, Expr const & e)
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
 std::vector<T> &
-sum_AB(std::vector<T> &vec, NeighbourFieldAB &nb, Expr const &e) {
+sum_AB(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     // Iterate particle index a
     size_t ab_index = 0;

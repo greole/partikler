@@ -58,6 +58,7 @@ public:
 
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
+            std::cout << f->get_name() << std::endl;
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
             };
@@ -113,9 +114,8 @@ public:
         typename T::value_type init_value,
         const std::vector<std::string> comp_names) {
         if (object_exists(name)) return get_object<T>(name);
-        return register_object<T>(std::make_unique<T>(
-            std::vector<typename T::value_type>(n_particles_, init_value),
-            comp_names, name));
+        return register_object<T>(
+            std::make_unique<T>(n_particles_, init_value, name, comp_names));
     }
 
     template <class T>

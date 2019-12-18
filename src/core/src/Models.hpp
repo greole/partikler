@@ -20,9 +20,9 @@
 #ifndef SPHMODEL_H
 #define SPHMODEL_H
 
-#include "Datastructures.hpp"
 #include "Object.hpp"
 #include "ObjectRegistry.hpp"
+#include "FieldOps.hpp"
 
 #include "yaml-cpp/yaml.h"
 #include <map>
@@ -33,16 +33,13 @@
 
 #define REGISTER_DEF_TYPE(CLASS, NAME) ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME )
 
+// Abstract base class for Models
 class Model : public SPHObject {
-    /**
-       Abstract base class for Models
-
-     */
 
   private:
-    YAML::Node parameter_; // Parameter of given model
-    ObjectRegistry & objReg_;    // Reference to main runTime
-    Logger log_;           // Own logger instance for better scoping
+    YAML::Node parameter_;   // Parameter of given model
+    ObjectRegistry &objReg_; // Reference to main runTime
+    Logger log_;             // Own logger instance for better scoping
 
     std::vector<std::shared_ptr<Model>> submodels_;
 
@@ -358,5 +355,46 @@ public:
 // - has an update method
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
+
+class Equation : public Model {
+
+    private:
+
+        NeighbourFieldAB & np_;
+
+        FloatField&      W_;
+
+        KernelGradientField & dW_;
+
+    public:
+
+      Equation(
+          const std::string &model_name,
+          YAML::Node parameter,
+          ObjectRegistry &objReg);
+
+      FloatField &W() { return W_; };
+
+      NeighbourFieldAB &N() { return np_; };
+
+      KernelGradientField &dWdx() { return dW_; };
+
+    // template<class T>
+    // virtual T expression();
+
+    // template <class RHS, class LHS>
+    // RHS sum_AB(LHS lhs){
+    //     struct sum_AB_s {
+
+
+
+    //     }
+    //    return sum_AB_s
+    // } 
+
+    // solve();
+
+
+};
 
 #endif

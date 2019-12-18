@@ -26,11 +26,11 @@ STLWendland2D::STLWendland2D(
       W_fak2_(7. / (64. * M_PI * h_ * h_)),
       dW_fak2_(7. / (64. * M_PI * h_ * h_ * h_)),
       pos_(objReg.get_particle_positions()),
-      np_(objReg.get_object<Field<searchcubes::NeighbourPair>>(
-          "neighbour_pairs")),
-      sd_(objReg.get_object<Field<STLSurfaceDist>>("surface_dist")),
+      np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
+      sd_(objReg.get_object<Field<std::vector<STLSurfaceDist>>>(
+          "surface_dist")),
       W_(objReg.create_field<FloatField>("KernelW")),
-      dWdx_(objReg.create_field<Field<VectorPair>>("KerneldWdx")) {};
+      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {};
 
 void STLWendland2D::execute() {
 

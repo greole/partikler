@@ -22,26 +22,26 @@
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Model(model_name, parameter, objReg),
+    : Equation(model_name, parameter, objReg),
       dnu_(objReg.get_object<VectorField>("dnu")),
       dp_(objReg.get_object<VectorField>("dp")),
       u_(objReg.get_object<VectorField>("u")),
       du_(objReg.create_field<VectorField>(
-              "du", zeroVec, {"dU", "dV", "dW"})),
+              "du", zero<VectorField::value_type>::val, {"dU", "dV", "dW"})),
       time_(objReg.get_object<TimeGraph>("TimeGraph")) {};
 
 void Momentum::execute() {
 
     log().info_begin() << "Computing du/dt";
 
-    du_ = dnu_ - dp_;
+    solve(du_, dnu_ - dp_);
 
     log().info_end();
 
     log().info_begin() << "Computing velocity";
 
     // TODO implement time integrator
-     u_ = u_/1.3;
+     // u_ = u_/1.3;
 
     // CFL = max(u)*deltaT/dx
 
