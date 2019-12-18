@@ -215,6 +215,15 @@ add_executable(partikler src/partikler.cpp tags)
 target_link_libraries(partikler Core Neighbours BoundaryConditions OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 
 
+OPTION(COVERALLS "Calling Coveralls" OFF)
+if(COVERALLS)
+  if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" )
+    if (${CMAKE_BUILD_TYPE} MATCHES "Debug") 
+    execute_process( coveralls)
+    endif()
+  endif()
+endif()
+
 
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
