@@ -159,7 +159,6 @@ IF(BUILD_YAP)
     message("BUILDING YAP DONE")
 ENDIF()
 
-OPTION(GENERATE_TAGS "Generating tags" OFF)
 
 ########################
 # gcov                 #
@@ -171,7 +170,10 @@ append_coverage_compiler_flags()
 
 setup_target_for_coverage_lcov(
   NAME coverage
-  EXECUTABLE ./src/core/tests/Field/Partikler_Test_Field)
+  EXECUTABLE ./src/core/tests/Field/Partikler_Test_Field
+  BASE_DIRECTORY "${PROJECT_SOURCE_DIR}/src"
+  EXCLUDE "build/*" "/usr/*"
+  )
 
 # setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
 # target_link_libraries(${PROJECT_TEST_NAME} gcov)
@@ -181,6 +183,7 @@ setup_target_for_coverage_lcov(
 ########################
 
 
+OPTION(GENERATE_TAGS "Generating tags" OFF)
 IF(GENERATE_TAGS)
     add_custom_command ( OUTPUT tags
         COMMAND ctags -R ${CMAKE_SOURCE_DIR}
@@ -200,25 +203,25 @@ ENDIF()
 add_subdirectory(src/core)
 add_subdirectory(src/boundary_conditions)
 add_subdirectory(src/neighbours)
+add_subdirectory(src/io)
 # add_subdirectory(src/SPHDatastructures)
 # add_subdirectory(src/kernel)
 # add_subdirectory(src/transporteqn)
 # add_subdirectory(src/integrator)
 # add_subdirectory(src/geometry)
-# add_subdirectory(src/io)
 
 add_executable(partikler src/partikler.cpp tags)
 
 #target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
 
 # target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
-target_link_libraries(partikler Core Neighbours BoundaryConditions OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler Core Neighbours BoundaryConditions IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 
 
 OPTION(COVERALLS "Calling Coveralls" OFF)
 if(COVERALLS)
   if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" )
-    if (${CMAKE_BUILD_TYPE} MATCHES "Debug") 
+    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
         execute_process(COMMAND coveralls)
     endif()
   endif()
