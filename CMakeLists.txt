@@ -49,6 +49,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
+        -g -rdynamic \
         "
         # -fopt-info-vec-missed"
         )
@@ -206,8 +207,8 @@ add_subdirectory(src/neighbours)
 add_subdirectory(src/io)
 add_subdirectory(src/kernel)
 add_subdirectory(src/transporteqn)
-# add_subdirectory(src/integrator)
-# add_subdirectory(src/geometry)
+add_subdirectory(src/integrator)
+add_subdirectory(src/geometry)
 
 add_executable(partikler src/partikler.cpp tags)
 
@@ -221,6 +222,8 @@ target_link_libraries(partikler
   IO
   TransportEqn
   Kernel
+  Integrator
+  Geometry
   OpenMP::OpenMP_CXX
   ${YAML_CPP_LIBRARIES}
   )

@@ -29,7 +29,14 @@
 #include "yaml-cpp/yaml.h"
 #include <getopt.h>
 
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "core.hpp"
+
 
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
@@ -60,6 +67,19 @@
 // REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
 #endif
 
+
+void handler(int sig) {
+    void *array[10];
+    size_t size;
+
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
 
 void print_help() {
   std::cout <<
@@ -106,6 +126,7 @@ YAML::Node process_args (int argc, char** argv)
 
 
 int main(int argc, char* argv[]) {
+    signal(SIGSEGV, handler);   // install our handler
     // Step 1 generate boundary particles
     YAML::Node config = process_args(argc, argv);
 
