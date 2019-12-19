@@ -76,6 +76,8 @@ class MSG {
 
         ~MSG() {
             std::string label_str;
+            std::string color_start="\033[3;43;30m";
+            std::string color_end = "\033[0m";
 
             switch (label_) {
             case INFO:
@@ -96,10 +98,13 @@ class MSG {
             }
 
             if (message_threshold_ > verbosity_treshold_) {
-                std::cout
-                    << "[" << label_str  << scope_ <<  "] "
-                    << state_.str()
-                    << std::endl;
+                std::cout << color_start
+                          << "["
+                          << label_str << scope_
+                          << "]"
+                          << state_.str()
+                          << color_end
+                          << std::endl;
             }
 
             if (label_ == CRITICAL)  exit(EXIT_FAILURE);
