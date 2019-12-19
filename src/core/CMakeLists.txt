@@ -10,6 +10,7 @@ add_library(Core SHARED
   src/Object.cpp
   src/Field.cpp
   src/Models.cpp
+  src/Helper.cpp
   src/SearchCubes.cpp
   src/Datastructures.cpp
   src/ObjectRegistry.cpp
