@@ -4,6 +4,23 @@
 #include "core.hpp"
 #include <vector>
 
+TEST (FloatField, reoderVector ) {
+
+    std::vector<size_t> idx {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+
+    FloatField v(10, 0.0);
+
+    for  (size_t i = 0; i<idx.size();i++) {
+        v[i] = float(i);
+    }
+
+    reorder_vector(v, idx);
+
+    for (size_t i=0; i<idx.size(); i++) {
+        ASSERT_EQ(v[i], float(9-i));
+    }
+}
+
 TEST (FloatField, copyStdVector ) {
 
     std::vector<float> a(2, 2.0);

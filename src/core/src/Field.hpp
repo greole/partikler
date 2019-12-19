@@ -101,18 +101,22 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
         }
     }
 
-    virtual void set_reorder(bool reorder) { reorder_ = reorder; }
+    void set_reorder(bool reorder) { reorder_ = reorder; }
 
-    virtual void reorder(const std::vector<size_t> &idx) {
+    // reoder the vector by the idx vector
+    void reorder(const std::vector<size_t> &idx) {
         // // TODO refactor with better error handling system
-        // if (*this->size() != idx.size()) {
-        //     logger_.warn() << " size mismatch " << name_;
-        // }
-        // if (reorder_ && *this->size() > 0) {
-        //     logger_.info_begin() << __func__ << " reordering " << name_;
-        //     reorder_vector(idx, *this);
-        //     logger_.info_end();
-        // }
+        if (T::size() != idx.size()) {
+            logger_.warn() << " size mismatch " << name_;
+        }
+        if (reorder_ && T::size() > 0) {
+            logger_.info_begin()
+                // << __PRETTY_FUNCTION__
+                << " reordering "
+                << name_;
+            reorder_vector(*this, idx);
+            logger_.info_end();
+        }
     }
 
     // Setter
@@ -173,8 +177,6 @@ template <class T> class B {
 // Free functions
 
 // TODO make it a member function of the fields
-template <class T>
-void reorder_vector(const std::vector<size_t>& idxs, std::vector<T>& vec);
 
 void write_to_disk(std::string path);
 
@@ -189,8 +191,17 @@ void write_to_disk(std::string path);
 //     return ret;
 // }
 
+// free function re-oders the vector by the idx vector
+template <class T>
+void reorder_vector(std::vector<T>& vec, const std::vector<size_t>& idxs){
+    std::vector<T> tmp(vec.size());
 
+    for(size_t i=0; i<idxs.size(); i++) {
+        tmp[idxs[i]] = vec[i];
+    }
 
+    vec=tmp;
+};
 
 
 // Lazy functions
@@ -310,5 +321,6 @@ using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
+PointField& operator+=(PointField& a, VectorField& b);
 
 #endif
