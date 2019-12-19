@@ -5,6 +5,9 @@
 -----------------
 [![Build Status](https://travis-ci.org/greole/partikler.svg?branch=master)](https://travis-ci.org/greole/partikler)
 [![Coverage Status](https://coveralls.io/repos/github/greole/partikler/badge.svg?branch=master)](https://coveralls.io/github/greole/partikler?branch=master)
+https://codedocs.xyz/greole/partikler
+[![Documentation](https://codedocs.xyz/greole/partikler.svg)](https://codedocs.xyz/greole/partikler/)
+<Paste>
 
 # Build Instructions
 
