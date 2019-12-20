@@ -73,7 +73,7 @@ SPHParticleGenerator::SPHParticleGenerator(
       polyhedron_(
           objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
       facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
-      pos_(objReg.create_field<PointField>("Pos")),
+      pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       idx_(objReg.create_field<SizeTField>("idx")),
       type_(objReg.create_field<IntField>("type")),
       boundary_(objReg.create_field<IntField>("boundary")),
