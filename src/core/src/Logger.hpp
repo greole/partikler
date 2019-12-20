@@ -98,13 +98,10 @@ class MSG {
             }
 
             if (message_threshold_ > verbosity_treshold_) {
-                std::cout << color_start
-                          << "["
-                          << label_str << scope_
-                          << "]"
-                          << state_.str()
-                          << color_end
-                          << std::endl;
+                std::cerr << color_start << std::flush;
+                std::cout << "[" << label_str << scope_ << "]" << std::flush;
+                std::cerr << color_end << std::flush;
+                std::cout << state_.str() << std::endl;
             }
 
             if (label_ == CRITICAL)  exit(EXIT_FAILURE);
