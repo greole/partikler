@@ -324,6 +324,8 @@ struct Generate_Points_at_Facets {
     void operator()(Facet &f);
 };
 
+std::ostream &operator<<(std::ostream &os, Point const &p);
+
 STLSurfaceDist compute_STLSurface_dist(
     Point opos, Point npos,
     Facet_handle start, Facet_handle end);

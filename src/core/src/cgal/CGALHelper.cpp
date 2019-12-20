@@ -486,10 +486,12 @@ std::pair<bool, Path> searchPath(Path p)
 
   CommonVertices commonVerts = commonVertices(f1, f2);
   // success if last facets are connected
-  if (commonVerts.n == 2) return {true, p};
+  if (commonVerts.n == 2) {
+      return {true, p};
+  }
 
   if (commonVerts.n == 1) {
-    // pick a neighbour 
+    // pick a neighbour
 
     auto h = f1.facet_begin();
 
@@ -590,7 +592,7 @@ STLSurfaceDist compute_STLSurface_dist(
     std::pair<bool, Path> ret_path = searchPath({start, end});
 
     if (!ret_path.first) {
-        // if path search failed use Cartesian distance 
+        // if path search failed use Cartesian distance
         CGALVector lenVo = npos - opos;
         CGALVector lenVn = opos - npos;
         return {(float) length(lenVo), lenVo, lenVn};
@@ -607,4 +609,11 @@ STLSurfaceDist compute_STLSurface_dist(
     CGALVector lenVn = oposp - npos;
 
     return {(float) length(lenVo), lenVo, lenVn};
+}
+
+
+std::ostream &operator<<(std::ostream &os, Point const &p)
+{
+    os << "Point [" << p[0] << ", " << p[1] << ", " << p[2] << "]";
+    return os;
 }
