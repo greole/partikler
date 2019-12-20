@@ -143,7 +143,6 @@ template <typename T, typename Expr>
 std::vector<T> & solve (std::vector<T> & vec, Expr const & e)
 {
     decltype(auto) expr = boost::yap::as_expr(e);
-    assert(equal_sizes(vec.size(), expr));
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
         auto vec_i_expr = boost::yap::transform(boost::yap::as_expr(expr), take_nth{i, 0, 0});
         vec[i] = boost::yap::evaluate(vec_i_expr);

@@ -20,15 +20,18 @@
 #ifndef STLLIMITEDDX_H
 #define STLLIMITEDDX_H
 
-#include "Datastructures.hpp"
+#include "Field.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"
+#include "cgal/CGALHelper.hpp"
 
-VectorField STL_limited_dx(
+void STL_limited_dx(
     VectorField &u,
     float dt,
-    // const std::vector<Point> &opoints,
-    Field<Facet_handle> &facets,
+    Field<std::vector<Facet_handle>> &facets,
     const IntField &type,
     const SizeTField &idx,
-    const PointField &pos);
+    const PointField &pos,
+    VectorField& ret
+    );
 
 #endif

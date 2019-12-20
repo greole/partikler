@@ -21,8 +21,10 @@
 #define STLPOSINTEGRATOR_H
 
 #include "Models.hpp"
+#include "Field.hpp"
+#include "FieldOps.hpp"
+
 #include "yaml-cpp/yaml.h"
-#include "Datastructures.hpp"
 #include "stl/STLLimitedDx.hpp"
 
 class STLPosIntegrator : public Model {
@@ -33,7 +35,7 @@ private:
 
     // const std::vector<Point> opoints_;
     const IntField &type_;
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> & facets_;
     const SizeTField &idx_;
 
     // Out

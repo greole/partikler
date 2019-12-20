@@ -25,7 +25,7 @@ STLPosIntegrator::STLPosIntegrator(
 
     : Model(model_name, parameter, objReg),
       type_(objReg.get_object<IntField>("type")),
-      facets_(objReg.get_object<Field<Facet_handle>>("facets")),
+      facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
       idx_(objReg.get_object<SizeTField>("idx")),
       u_(objReg.get_object<VectorField>("u")),
       pos_(objReg.get_object<PointField>("Pos")),
@@ -37,25 +37,26 @@ void STLPosIntegrator::execute() {
     log().info_begin() << " Updating Particle Positions";
     log().info() << " DeltaT " << time_.get_deltaT();
 
-    PointField old_pos(pos_);
+    // PointField old_pos(pos_);
 
     std::cout << u_.size() << " "
               << facets_.size() << " "
               << type_.size() << " "
               << idx_.size() << std::endl;
 
-    VectorField dx =
-        STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, pos_);
+    VectorField dx(u_.size(), {0.0, 0.0, 0.0});
+
+    STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, pos_, dx);
 
     pos_ += dx;
 
     const float CFL = 0.01;
-    float current_max_dx = (pos_ - old_pos).norm().get_max();
-    // float dx_ratio = CFL*dx_max/current_max_dx;
-    float dx_ratio = CFL /current_max_dx;
-    float two = 2.0;
-    float change = min(two, dx_ratio);
-    time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() * change));
+    // float current_max_dx = (pos_ - old_pos).norm().get_max();
+    // // float dx_ratio = CFL*dx_max/current_max_dx;
+    // float dx_ratio = CFL /current_max_dx;
+    // float two = 2.0;
+    // float change = min(two, dx_ratio);
+    // time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() * change));
 
     log().info_end();
 };

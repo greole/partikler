@@ -501,7 +501,6 @@ SortedNeighbours createSTLNeighbours(
     std::vector<SearchCube> &searchCubes,
     const std::vector<Facet_handle> &facets) {
     // Step 0 initialise return values
-    std::cout << "SEARCHCUBES.cpp " << std::endl;
 
     SortedNeighbours ret {std::vector<NeighbourPair>(0),
                           std::vector<STLSurfaceDist>(0)};

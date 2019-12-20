@@ -58,7 +58,6 @@ public:
 
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
-            std::cout << f->get_name() << std::endl;
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
             };

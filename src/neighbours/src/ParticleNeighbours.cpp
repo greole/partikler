@@ -19,15 +19,14 @@
 
 #include "ParticleNeighbours.hpp"
 
-
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg), dx_(parameter["dx"].as<float>()),
+    : Model(model_name, parameter, objReg),
+      dx_(parameter["dx"].as<float>()),
       pos_(objReg.get_particle_positions()),
       facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
       sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
-      np_(objReg.create_field<NeighbourFieldAB>(
-          "neighbour_pairs")),
+      np_(objReg.create_field<NeighbourFieldAB>("neighbour_pairs")),
       sd_(objReg.create_field<STLSurfaceDistAB>("surface_dist")),
       scd_(objReg.create_generic<Generic<SearchCubeDomain>>(
           "search_cube_domain")) {
@@ -46,9 +45,10 @@ void SPHSTLParticleNeighbours::execute() {
     execute_submodels();
 
     // TODO move sorting to countingSortParticles submodel
-    // reorder_vector(
-    //     get_runTime().get_obj<SPHSizeTField>("sorting_idxs").get_field(),
-    //     facets_.get_field());
+    reorder_vector(
+        facets_,
+        get_objReg().get_object<SizeTField>("sorting_idxs")
+        );
 
     log().info_begin() << "Call createSTLNeighbours";
 
@@ -62,7 +62,7 @@ void SPHSTLParticleNeighbours::execute() {
     // np_.set_field(np);
     np_ = np;
     // sd_.set_field(sd);
-    sd_=sd;
+    sd_ = sd;
 
     log().info() << "Found " << np_.size() << " Neighbour Pairs";
 

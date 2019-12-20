@@ -22,9 +22,11 @@ TEST (OwnerCubeSearch, FindsNeighbours) {
   SortedNeighbours ret {};
   ret.ids.reserve(tot_n_particles*points.size()/2);
 
+  // Assume all particles on same facet
+  const std::vector<Facet_handle> facets(points.size(), NULL);
 
-// TODO needs facets, create facets with test data
-  // owner_cube_search(points, 0, tot_n_particles, 5.0, ret);
+  // TODO needs facets, create facets with test data
+  owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);
 
   // Should find at least some neighbours
   ASSERT_GT(ret.ids.size(), 0);
@@ -94,12 +96,15 @@ TEST (NeighbourCubeSearch, FindsNeighbours) {
   SortedNeighbours ret {};
   ret.ids.reserve(tot_n_particles*points.size()/2);
 
-  // neighbour_cube_search(
-  //         points,
-  //         0, tot_n_particles,
-  //         tot_n_particles, 2*tot_n_particles,
-  //         10.0, ret
-  // );
+  // Assume all particles on same facet
+  const std::vector<Facet_handle> facets(points.size(), NULL);
+
+  neighbour_cube_search(
+          points,
+          0, tot_n_particles,
+          tot_n_particles, 2*tot_n_particles,
+          10.0, facets, ret
+  );
 
   // Should find at least some neighbours
   ASSERT_GT(ret.ids.size(), 0);
@@ -163,8 +168,13 @@ TEST (ParticleNeighbourSearch, createNeighbours) {
 
   SortedParticles sp = countingSortParticles(scd, points);
 
-  SortedNeighbours ret {};
-  // SortedNeighbours ret = createNeighbours(scd, sp);
+  // Assume all particles on same facet
+  const std::vector<Facet_handle> facets(points.size(), NULL);
+
+  // TODO searchCubes are created by counting sort
+  std::vector<SearchCube> searchCubes(1, {0, points.size()});
+
+  SortedNeighbours ret = createSTLNeighbours(scd, sp.particles, sp.searchCubes, facets);
 
   // Should find at least some neighbours
   ASSERT_GT(ret.ids.size(), 0);

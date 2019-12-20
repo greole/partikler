@@ -33,7 +33,7 @@ struct SurfaceSlide {
     CGALVector dx;          // Slide vector on current facet
     Facet_handle new_facet; // new facet of particle
     CGALVector new_facet_N;
-    Vector u;
+    Vec3 u;
     SkipEdge ske;
 };
 
@@ -63,7 +63,7 @@ SurfaceSlide slide_surface(
     Facet_handle f, // Handle to facet on which particle slides
     SkipEdge ske, // Skip the edgeHit detection for given edge after edge has
                   // been crossed
-    Vector u) {
+    Vec3 u) {
 
     Facet facet = Facet(*f);
     CGALVector FN = facet_normal(facet);
@@ -137,8 +137,8 @@ SurfaceSlide slide_surface(
         //   << " B " << B
         //   << std::endl;
 
-        CGALVector PB = B - P;
-        CGALVector AP = P - A;
+        // CGALVector PB = B - P;
+        // CGALVector AP = P - A;
 
         if (!approachesEdge(A, B, P, S)) {
             // std::cout
@@ -216,7 +216,7 @@ SurfaceSlide slide_surface(
 
         // Rotation angles around Cartesian coordinates
         // Matrix R =  createRotationMatrix(D, ON);
-        Matrix R = createRotationMatrix(next_facet, facet);
+        // Matrix R = createRotationMatrix(next_facet, facet);
         Matrix R2 = createRotationMatrix(FN, ON);
 
         // std::cout
@@ -235,7 +235,7 @@ SurfaceSlide slide_surface(
         //   << "  " << surface_slide.u[2]
         //   << std::endl;
 
-        CGALVector remVecOrig = remVec;
+        // CGALVector remVecOrig = remVec;
         if (ON != -FN) {
             // std::cout
             //   << "[DEBUG SLIDE] Rotate "
@@ -307,26 +307,28 @@ SurfaceSlide slide_surface(
     return surface_slide;
 }
 
-VectorField STL_limited_dx(
+void STL_limited_dx(
     VectorField &u,
     float dt,
-    Field<Facet_handle> &facets,
+    Field<std::vector<Facet_handle>> &facets,
     const IntField &type,
     const SizeTField &idx,
-    const PointField &pos
+    const PointField &pos,
+    VectorField& ret
     ) {
 
-    VectorField dx = u*dt;
-    // TODO relax dt by CFL criterion
+    // VectorField dx = u*dt;
+    // // TODO relax dt by CFL criterion
 
-    std::vector<Vector> &ret = dx.get_field();
+    // std::vector<Vector> &ret = dx.get_field();
+    // VectorField ret(u.size(), {0.0,0.0,0.0});
 
 #pragma omp for nowait
     for (size_t i = 0; i < pos.size(); i++) {
         int mType = type[i];
         // Point O = pos[fdp.fixId[i]];
         Point P = pos[i];
-        CGALVector PN = {dx[i][0], dx[i][1], dx[i][2]};
+        CGALVector PN = {dt*u[i][0], dt*u[i][1], dt*u[i][2]};
         // CGALVector D = fdp.dir[i];
         // float maxDx = fdp.maxDx[i];
 
@@ -401,5 +403,5 @@ VectorField STL_limited_dx(
         //   << std::endl;
     }
 
-    return VectorField (ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);
+    // return std::move(ret); // VectorField (ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);
 }

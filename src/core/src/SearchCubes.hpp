@@ -106,6 +106,7 @@ struct NeighbourPair {
     size_t neighId;
 };
 
+
 struct SortedNeighbours {
     std::vector<NeighbourPair> ids;
 
@@ -115,12 +116,28 @@ struct SortedNeighbours {
     std::vector<STLSurfaceDist> dist;
 };
 
+void neighbour_cube_search(
+    const std::vector<Point> &pos,
+    const size_t first,
+    const size_t last,
+    const size_t first_nc,
+    const size_t last_nc,
+    const float maxDistanceSqr,
+    const std::vector<Facet_handle> &facets,
+    SortedNeighbours &ret);
+
+void owner_cube_search(
+    const std::vector<Point> &pos,
+    const size_t first,
+    const size_t last,
+    const float maxDistanceSqr,
+    const std::vector<Facet_handle> &facets,
+    SortedNeighbours &ret);
+
+// A search cube stores first and last particle ids
 struct SearchCube {
-    // A search cube stores first and last particle ids
     size_t first;
     size_t last;
-
-    // SearchCube(size_t first, size_t last) : first(first), last(last){};
 };
 
 SortedNeighbours createSTLNeighbours(

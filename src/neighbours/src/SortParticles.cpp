@@ -38,14 +38,14 @@ void CountingSortParticles::execute(){
     // pos.store_old();
 
     // TODO too much copying
-    // auto [sc, si, pos] = countingSortParticles(
-    //     scd_(),
-    //     pos
-    //     );
+    auto [sc, si, pos] = countingSortParticles(
+        scd_(),
+        pos_
+        );
 
-    // sc_.set_field(sc);
-    // si_.set_field(si);
-    // pos_.set_field(pos);
+    sc_ = sc;
+    si_ = si;
+    pos_ = pos;
 
     log().info_end();
     reorder_fields();
