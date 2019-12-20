@@ -10,8 +10,6 @@ PROJECT:
         parameter: dx
         values: [0.1, 0.5. 1.0]
 
-
-
     PRE:
 
         - BOUNDARY:
@@ -26,7 +24,7 @@ PROJECT:
               model: GenerateBoundaryParticles
               name: Tetrahedron
               file: ../example/Tetrahedron.stl
-              dx: 1.0
+              dx: 2.0
               writeout: 10
               iterations: 100
 
