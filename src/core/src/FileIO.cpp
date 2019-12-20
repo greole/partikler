@@ -46,26 +46,6 @@ void prepare_data_folder(std::string foldername, int step) {
     fdotfile.open(dotName.c_str(), std::fstream::out);
     fdotfile.close();
 }
-template <class T>
-void write_int_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<T> &data,
-    const std::string type,
-    const std::string size) {
-
-    std::vector<int> buffer(data.size());
-    for (size_t i = 0; i < data.size(); i++) buffer[i] =(int) data[i];
-
-    std::cout << "writing scalar field " << fieldname << data.size()<< std::endl;
-    std::string filename = foldername + "/" + fieldname + "." + type + size;
-
-    std::ofstream fh;
-    fh.open(filename.c_str());
-    fh.write(
-        reinterpret_cast<const char *>(&buffer[0]), data.size() * sizeof(int));
-    fh.close();
-}
 
 template <class T>
 void write_field(
@@ -117,69 +97,3 @@ void write_vector_field(
         j++;
     }
 }
-
-void write_point_field(
-    const std::string & foldername,
-    const std::string & fieldname,
-    const std::vector<Point>& data,
-    const std::string& type,
-    const std::string& size,
-    const std::vector<std::string>& comp_names
-    ) {
-    std::vector<float> buffer(data.size());
-
-    std::cout << "writing point field " << fieldname << std::endl;
-
-
-    size_t j = 0;
-    for (std::string component : comp_names) {
-        std::vector<float> buffer(data.size());
-        for (size_t i = 0; i < data.size(); i++) {
-            buffer[i] = data[i].cartesian(j);
-        }
-
-        std::string filename = foldername + "/" + component + ".float" + size;
-
-        std::ofstream fh;
-        fh.open(filename.c_str());
-        fh.write(
-            reinterpret_cast<const char *>(&buffer[0]),
-            data.size() * sizeof(float));
-        fh.close();
-        j++;
-    }
-}
-
-template
-void write_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<float> &data,
-    const std::string type,
-    const std::string size);
-
-template
-void write_int_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<int> &data,
-    const std::string type,
-    const std::string size);
-
-template
-void write_int_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<size_t> &data,
-    const std::string type,
-    const std::string size);
-
-template
-void write_vector_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<std::array<float, 3>> &data,
-    const std::string type,
-    const std::string size,
-    const std::vector<std::string> comp_names
-    );

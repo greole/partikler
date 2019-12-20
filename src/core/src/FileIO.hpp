@@ -41,36 +41,43 @@ void createFolder(std::string dirname);
 void prepare_data_folder(std::string foldername, int step);
 
 template <class T>
-void write_int_field(
+void write_scalar_field_impl(
+    const T &data,
     const std::string foldername,
     const std::string fieldname,
-    const std::vector<T> &data,
     const std::string type,
-    const std::string size);
+    const std::string size) {
+
+    std::cout << "writing scalar field " << fieldname << data.size()
+              << std::endl;
+    std::string filename = foldername + "/" + fieldname + "." + type + size;
+    std::ofstream fh;
+    fh.open(filename.c_str());
+    fh.write(
+        reinterpret_cast<const char *>(&data[0]),
+        data.size() * sizeof(typename T::value_type));
+    fh.close();
+};
 
 template <class T>
-void write_field(
+void write_vector_field_impl(
+    const T &data,
     const std::string foldername,
     const std::string fieldname,
-    const std::vector<T> &data,
+    const std::vector<std::string>& comp_names,
     const std::string type,
-    const std::string size);
+    const std::string size
+    ) {
 
-template <class T>
-void write_vector_field(
-    const std::string foldername,
-    const std::string fieldname,
-    const std::vector<T> &data,
-    const std::string type,
-    const std::string size,
-    const std::vector<std::string> comp_names);
-
-void write_point_field(
-    const std::string & foldername,
-    const std::string & fieldname,
-    const std::vector<Point> & data,
-    const std::string& type,
-    const std::string& size,
-    const std::vector<std::string>& comp_names);
+    size_t j = 0;
+    for (std::string component : comp_names) {
+        std::vector<float> buffer(data.size());
+        for (size_t i = 0; i < data.size(); i++) {
+            buffer[i] = data[i][j];
+        }
+        write_scalar_field_impl(buffer,  foldername, component, type, size);
+        j++;
+    }
+};
 
 #endif

@@ -23,6 +23,7 @@
 #include "Object.hpp"
 #include "cgal/CGALTYPEDEFS.hpp"
 #include "Datastructures.hpp"
+#include "FileIO.hpp"
 
 #include <boost/yap/yap.hpp>
 #include <iostream>
@@ -31,31 +32,22 @@
 
 #include <memory>
 
-// A stateful transform that records whether all the std::vector<> terminals
-// it has seen are equal to the given size.
-struct equal_sizes_impl
-{
-    template <typename T>
-    auto operator() (boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-                     std::vector<T> const & vec)
-    {
-        auto const expr_size = vec.size();
-        if (expr_size != size)
-            value = false;
-        return 0;
-    }
-
-    std::size_t const size;
-    bool value;
+enum ReadOptions {
+    MUST_READ,
+    NO_READ
 };
 
-template <typename Expr>
-bool equal_sizes (std::size_t size, Expr const & expr)
-{
-    equal_sizes_impl impl{size, true};
-    boost::yap::transform(boost::yap::as_expr(expr), impl);
-    return impl.value;
-}
+enum WriteOptions {
+    NO_WRITE,
+    WRITE
+};
+
+struct IOOptions {
+    ReadOptions r;
+    WriteOptions w;
+};
+
+
 
 template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : public T, public SPHObject {
 
@@ -65,7 +57,10 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
 
     std::vector<T> prev_;
 
+    IOOptions iooptions_;
+
   protected:
+
     bool reorder_ = true;
 
   public:
@@ -76,7 +71,8 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
         T f,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : T(f), SPHObject(name, FieldType) {
+        : comp_names_(comp_names), T(f), SPHObject(name, FieldType) {
+        std::cout << "CONSTRUCTOR " << name << "comp_names_.size()" << comp_names_.size() << std::endl;
     };
 
     Field(
@@ -84,8 +80,13 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
         typename T::value_type val,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : T(size, val), SPHObject(name, FieldType) {
+        : comp_names_(comp_names), T(size, val), SPHObject(name, FieldType)  {
+        std::cout << "CONSTRUCTOR " << name << "comp_names_.size()" << comp_names_.size() << std::endl;
     };
+
+    void set_io_options(IOOptions ioo) {iooptions_ = ioo;};
+
+    IOOptions get_io_options() {return iooptions_;};
 
     void operator=(Field<T> &b) { T::operator=(b); }
 
@@ -119,21 +120,14 @@ template <class T, SPHObjectType E=SPHObjectType::FieldType> class Field : publi
         }
     }
 
-    // Setter
+    void write_to_disk(std::string path) {
+        std::cout <<  "default: " << path << " " << get_name() << std::endl;
+    };
 
-    // template <class T, class I>
-    // T set(I val);
+    std::vector<std::string> get_comp_names() {return comp_names_;};
 
-    // void weighted_sum();
-
-    // void append(std::vector<T> b) {
-    //     this->f_.insert(
-    //         this->f_.end(),
-    //         b.begin(),
-    //         b.end()
-    //         );
-    // };
 };
+
 
 // A derived field to distinguish AB fields from normal fields
 //
@@ -178,7 +172,8 @@ template <class T> class B {
 
 // TODO make it a member function of the fields
 
-void write_to_disk(std::string path);
+// template<>
+//     void Field<std::vector<int>, IntFieldType>::write_to_disk(std::string path);
 
 // template<class T>
 // T::value_type get_max(const Field<T> &f) {
@@ -322,5 +317,17 @@ using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
 PointField& operator+=(PointField& a, VectorField& b);
+
+template<>
+void IntField::write_to_disk(std::string path);
+
+template<>
+void FloatField::write_to_disk(std::string path);
+
+template<>
+void VectorField::write_to_disk(std::string path);
+
+template<>
+void PointField::write_to_disk(std::string path);
 
 #endif
