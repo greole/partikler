@@ -36,7 +36,7 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       boundaryIds_(local_objReg_.create_field<IntField>("boundary")),
       typeIds_(local_objReg_.create_field<IntField>("type")),
       idx_(local_objReg_.create_field<SizeTField>("idx")),
-      pos_(local_objReg_.create_field<PointField>("Pos")),
+      pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
@@ -57,17 +57,20 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node node;  // starts out as NULL
 
     YAML::Node reader;
+    // Reads the STL file
     reader["READER"]["model"] = "SPHSTLReader";
     reader["READER"]["file"] = filename_;
 
     node["pre"].push_back(reader);
 
     YAML::Node generator;
+    // Generates the particles at the surface
     generator["GENERATOR"]["model"] = "SPHParticleGenerator";
     generator["GENERATOR"]["dx"] = dx_;
     node["pre"].push_back(generator);
 
     YAML::Node neighbours;
+    // finds the neighbours
     neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
     neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_ * 1.05;
     node["main"].push_back(neighbours);
