@@ -5,7 +5,7 @@ project(Geometry LANGUAGES CXX)
 
 add_library(Geometry SHARED
   src/stl/STLLimitedDx.cpp
-  src/stl/computes.cpp
+  # src/stl/computes.cpp
   )
 
 add_dependencies(Geometry Core)
