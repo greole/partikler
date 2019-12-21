@@ -28,5 +28,17 @@ PROJECT:
               writeout: 10
               iterations: 100
 
+        - FIELDS:
+            model: InitFields
+            scalarFields: ["T", "f"]
+
+        - BOUNDARY:
+            model: FixedValue
+            boundaries: { Cube: {T: 300}, Tetrahedron: {T: 400}}
+
+        - EXPORT:
+            model: SuperSPHWriter
+            name: Boundary
+
     MAIN:
 
