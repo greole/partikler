@@ -256,10 +256,6 @@ private:
 
     int iterations_;
 
-    int write_freq_;
-
-    int last_write_;
-
     bool iter_mode = false;
 
 
@@ -279,8 +275,7 @@ public:
           endTime_(read_or_default_coeff<float>("endTime", -1.0 )),
           deltaT_(read_or_default_coeff<float>("deltaT", -1.0 )),
           max_deltaT_(read_or_default_coeff<float>("max_deltaT", -1.0 )),
-          iterations_(read_or_default_coeff<int>("iterations", 0)),
-          write_freq_(read_or_default_coeff<int>("write_frequency", 0))
+          iterations_(read_or_default_coeff<int>("iterations", 0))
     {
         if (deltaT_ < 0) {iter_mode = true;}
     };
@@ -299,7 +294,8 @@ public:
         // TODO register some kind of call back
         while (current_timestep_ < iterations_) {
             main_.execute();
-            get_objReg().write_to_disk(current_timestep_, name_);
+            // TODO dont write via objReg, write via Writer SubModel
+            // get_objReg().write_to_disk(current_timestep_, name_);
             current_timestep_++;
         };
     }

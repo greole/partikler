@@ -28,13 +28,21 @@ PROJECT:
               writeout: 10
               iterations: 100
 
-        - FIELDS:
-            model: InitFields
-            scalarFields: ["T", "f"]
-
         - BOUNDARY:
-            model: FixedValue
-            boundaries: { Cube: {T: 300}, Tetrahedron: {T: 400}}
+              model: GenerateBoundaryParticles
+              name: Cube
+              file: ../example/bunny.stl
+              dx: 2.0
+              writeout: 10
+              iterations: 100
+
+        # - FIELDS:
+        #     model: InitFields
+        #     scalarFields: ["T", "f"]
+        #
+        # - BOUNDARY:
+        #     model: FixedValue
+        #     boundaries: { Cube: {T: 300}, Tetrahedron: {T: 400}}
 
         - EXPORT:
             model: SuperSPHWriter

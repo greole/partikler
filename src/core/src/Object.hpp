@@ -21,6 +21,8 @@
 #define SPHOBJECT_H
 
 #include "Logger.hpp"
+#include "Vec3.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"
 #include <vector>
 #include <stdio.h>
 #include <iostream>
@@ -38,6 +40,26 @@ enum SPHObjectType {
     EquationType,
     ModelType,
 };
+
+// Template meta function to get SPHObjectType from std::vector<T>
+template<class T>
+struct GetFieldType {constexpr static SPHObjectType value = GenericType;};
+
+template<>
+struct GetFieldType<std::vector<float>> {constexpr static  SPHObjectType value = FloatFieldType;};
+
+template<>
+struct GetFieldType<std::vector<int>> {constexpr static  SPHObjectType value = IntFieldType;};
+
+template<>
+struct GetFieldType<std::vector<size_t>> {constexpr static  SPHObjectType value = SizeTFieldType;};
+
+template<>
+struct GetFieldType<std::vector<Vec3>> {constexpr static  SPHObjectType value = VectorFieldType;};
+
+template<>
+struct GetFieldType<std::vector<Point>> {constexpr static  SPHObjectType value = PointFieldType;};
+
 
 // Base class for fields and models
 class SPHObject {

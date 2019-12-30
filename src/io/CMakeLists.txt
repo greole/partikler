@@ -5,6 +5,8 @@ project(IO LANGUAGES CXX)
 
 add_library(IO SHARED
   src/ParticleGenerator.cpp
+  src/WriterBase.cpp
+  src/SuperSPHWriter.cpp
   )
 
 add_dependencies(IO Core)

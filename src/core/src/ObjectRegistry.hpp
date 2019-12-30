@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <memory>
+#include <map>
+#include <algorithm>
 
 class ObjectRegistry {
 
@@ -58,16 +60,19 @@ public:
 
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
+            if (f == nullptr ) continue;
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
             };
         }
-        // for (Object *f : objects_) {
-        //     if (f->get_name() == name) {
-        //         return dynamic_cast<T &>(*f);
-        //     };
-        // }
-        std::cout << "Could not find object " << name << std::endl;
+    }
+
+    // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
+    auto get_object_ptr(const std::string name) {
+        return std::find_if(
+            objects_.begin(), objects_.end(), [&](const auto &val) {
+                return val->get_name() == name;
+            });
     }
 
     ObjReg& get_objects() { return objects_; }
@@ -132,35 +137,6 @@ public:
             std::vector<typename T::value_type>(n_particles_), name));
     }
 
-    // SizeTField &create_idx_field() {
-    //     // TODO move to cpp
-    //     if (object_exists("idx")) return get_object<SizeTField>("idx");
-
-    //     auto &f = create_field<SizeTField>("idx");
-    //     std::cout << " n_particles_ " << n_particles_ << std::endl;
-
-    //     for (size_t i = 0; i < n_particles_; i++) { f[i] = i; }
-
-    //     return f;
-    // }
-
-    void write_to_disk(int timestep, std::string name="Data") {
-        std::cout << "write to disk" << std::endl;
-        int cur_timestep = timestep;//get_timestep();
-        int write_freq = 1; // get_write_freq();
-        int index_on_dist = cur_timestep / write_freq;
-        std::cout << "TIMESTEP: " << cur_timestep << " " << write_freq << std::endl;
-
-        if (cur_timestep - index_on_dist * write_freq == 0) {
-            std::cout << get_objects().size() << std::endl;
-
-            prepare_data_folder(name, index_on_dist);
-
-            const std::string path = name + "/step#" + intToStr(index_on_dist);
-
-            for (auto &f : get_objects()) f->write_to_disk(path);
-        }
-    }
 };
 
 #endif

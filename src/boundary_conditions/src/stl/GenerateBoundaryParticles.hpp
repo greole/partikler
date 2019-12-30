@@ -22,7 +22,7 @@
 #ifndef GENERATEBOUNDARYPARTICLES_H
 #define GENERATEBOUNDARYPARTICLES_H
 
-#include "Datastructures.hpp"
+#include "Field.hpp"
 #include "Models.hpp"
 #include "yaml-cpp/yaml.h"
 #include "FieldOps.hpp"
@@ -65,7 +65,7 @@ class GenerateBoundaryParticles : public Model {
     void execute();
 
     template<class T>
-    void append(std::string name);
+    void append(T&, std::string name);
 };
 
 #endif

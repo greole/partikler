@@ -43,7 +43,7 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       boundary_name_(read_coeff<std::string>("name")),
       dx_(read_coeff<float>("dx")),
       translation_vector_(read_translation_vector(parameter))
-{};
+{}
 
 std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
 
@@ -105,26 +105,10 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     return node;
 }
 
-template <class T> void GenerateBoundaryParticles::append(std::string name) {
-    auto & oreg = get_objReg();
-    if (oreg.object_exists(name)) {
-        field_append(
-            oreg.get_object<T>(name),
-               local_objReg_.get_object<T>(name));
-    }
-}
-
-template<>
-void GenerateBoundaryParticles::append<PointField>(std::string name) {
-    // local_objReg_.get_object<PointField>(name).translate(translation_vector_);
-
-    auto & oreg = get_objReg();
-    if (oreg.object_exists(name)) {
-        field_append(
-            oreg.get_object<PointField>(name),
-            local_objReg_.get_object<PointField>(name)
-            );
-    }
+template <class T>
+void GenerateBoundaryParticles::append(T &, std::string name) {
+    auto &oreg = get_objReg();
+    field_append(oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
 }
 
 void GenerateBoundaryParticles::execute() {
@@ -189,31 +173,33 @@ void GenerateBoundaryParticles::execute() {
 
     logger_.info_begin() << "Transfering ";
 
-    for (std::unique_ptr<SPHObject> &obj : loc_objs) {
+    int num_rem_objs = loc_objs.size();
+    for (int i = 0; i < num_rem_objs; i++) {
+        std::unique_ptr<SPHObject> &obj = loc_objs[i];
         auto name = obj->get_name();
         auto type = obj->get_type();
 
-        std::cout << "Transfering" << name << std::endl;
+        std::cout << "Transfering " << name << std::endl;
+        auto &oreg = get_objReg();
+        // dynamic_cast<B&>(*my_unique_ptr)
+        if (oreg.object_exists(name)) {
+            std::cout << "Appending" << std::endl;
+            std::unique_ptr<SPHObject> *obj_ptr = &loc_objs[i];
+            DISPATCH(obj_ptr, append, type, name);
+        } else {
+            std::cout << "Moving" << std::endl;
+            // Move the object if it doesn't exist in the main registry yet
+            // auto ref = local_objReg_.get_object_ptr(name);
 
-        switch (type) {
-        case IntFieldType:
-            append<IntField>(name);
-        case SizeTFieldType:
-            append<SizeTField>(name);
-        case FloatFieldType:
-            append<FloatField>(name);
-        case VectorFieldType:
-            append<VectorField>(name);
-        case PointFieldType:
-            append<PointField>(name);
-        default:
-            continue;
+            oreg.get_objects().push_back(std::move(loc_objs[i]));
+            // local_objReg_.get_objects().erase(ref);
+            // the move reduces the size of the local_objReg_ hence loop bounds
+            // need to be adjusted
+            num_rem_objs--;
         }
     }
 
     logger_.info_end();
-
-    // write
 }
 
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
