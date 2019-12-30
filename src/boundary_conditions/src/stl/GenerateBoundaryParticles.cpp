@@ -189,13 +189,7 @@ void GenerateBoundaryParticles::execute() {
         } else {
             std::cout << "Moving" << std::endl;
             // Move the object if it doesn't exist in the main registry yet
-            // auto ref = local_objReg_.get_object_ptr(name);
-
             oreg.get_objects().push_back(std::move(loc_objs[i]));
-            // local_objReg_.get_objects().erase(ref);
-            // the move reduces the size of the local_objReg_ hence loop bounds
-            // need to be adjusted
-            num_rem_objs--;
         }
     }
 
