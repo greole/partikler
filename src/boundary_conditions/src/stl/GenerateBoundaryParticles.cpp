@@ -179,15 +179,12 @@ void GenerateBoundaryParticles::execute() {
         auto name = obj->get_name();
         auto type = obj->get_type();
 
-        std::cout << "Transfering " << name << std::endl;
         auto &oreg = get_objReg();
         // dynamic_cast<B&>(*my_unique_ptr)
         if (oreg.object_exists(name)) {
-            std::cout << "Appending" << std::endl;
             std::unique_ptr<SPHObject> *obj_ptr = &loc_objs[i];
             DISPATCH(obj_ptr, append, type, name);
         } else {
-            std::cout << "Moving" << std::endl;
             // Move the object if it doesn't exist in the main registry yet
             oreg.get_objects().push_back(std::move(loc_objs[i]));
         }
