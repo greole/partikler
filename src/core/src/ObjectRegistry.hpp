@@ -149,7 +149,6 @@ public:
 
     // get field id from name string
     int getId(const std::string name) {
-        std::cout << "searching boundary " << name << std::endl;
         for(int i=0; i<fields_.size(); i++) {
             if(name == fields_[i]) return i;
         }
@@ -158,7 +157,6 @@ public:
     int append(std::string field_name) {
         int id = fields_.size();
         fields_.push_back(field_name);
-        std::cout << "FieldIdMap" << id << std::endl;
         return id;
     };
 

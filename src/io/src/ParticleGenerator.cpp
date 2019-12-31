@@ -70,7 +70,6 @@ void SPHSTLReader::execute() {
 SPHParticleGenerator::SPHParticleGenerator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
-      // fieldIdMap_(objReg.get_object<FieldIdMap>("FieldIdMap")),
       boundary_id_(read_coeff<int>("id")),
       polyhedron_(
           objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),

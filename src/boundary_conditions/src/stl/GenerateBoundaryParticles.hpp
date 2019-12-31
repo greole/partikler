@@ -37,10 +37,7 @@ class GenerateBoundaryParticles : public Model {
     ObjectRegistry local_objReg_;
     TimeGraph& timeGraph_;
 
-    // IntField &boundaryIds_;
-    // IntField &typeIds_;
     int fieldId_;
-    // SizeTField &idx_;
     PointField &pos_;
 
     int iterations_;

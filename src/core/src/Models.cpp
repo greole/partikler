@@ -27,7 +27,7 @@ Equation::Equation(
     : Model(model_name, parameter, objReg),
       np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
       W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")) {};
+      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")) {}
 
 // ModelRegister<SPHModelGraph> SPHModelGraph::reg("Core::SPHModelGraph");
 

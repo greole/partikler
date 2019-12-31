@@ -34,10 +34,7 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       local_objReg_(ObjectRegistry()),
       timeGraph_(local_objReg_.register_object<TimeGraph>(
           std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
-      // boundaryIds_(local_objReg_.create_field<IntField>(
       fieldId_(fieldIdMap_.append(boundary_name_)),
-      // typeIds_(local_objReg_.create_field<IntField>("type")),
-      // idx_(local_objReg_.create_field<SizeTField>("idx")),
       pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
