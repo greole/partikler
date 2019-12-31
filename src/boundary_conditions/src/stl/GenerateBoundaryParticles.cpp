@@ -30,20 +30,22 @@
 GenerateBoundaryParticles::GenerateBoundaryParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
+      fieldIdMap_(objReg.get_object<FieldIdMap>("FieldIdMap")),
       local_objReg_(ObjectRegistry()),
       timeGraph_(local_objReg_.register_object<TimeGraph>(
-                     std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
-      boundaryIds_(local_objReg_.create_field<IntField>("boundary")),
-      typeIds_(local_objReg_.create_field<IntField>("type")),
-      idx_(local_objReg_.create_field<SizeTField>("idx")),
+          std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
+      // boundaryIds_(local_objReg_.create_field<IntField>(
+      fieldId_(fieldIdMap_.append(boundary_name_)),
+      // typeIds_(local_objReg_.create_field<IntField>("type")),
+      // idx_(local_objReg_.create_field<SizeTField>("idx")),
       pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
       boundary_name_(read_coeff<std::string>("name")),
       dx_(read_coeff<float>("dx")),
-      translation_vector_(read_translation_vector(parameter))
-{}
+      translation_vector_(read_translation_vector(parameter)) {
+}
 
 std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
 
@@ -67,6 +69,7 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     // Generates the particles at the surface
     generator["GENERATOR"]["model"] = "SPHParticleGenerator";
     generator["GENERATOR"]["dx"] = dx_;
+    generator["GENERATOR"]["id"] = fieldId_;
     node["pre"].push_back(generator);
 
     YAML::Node neighbours;

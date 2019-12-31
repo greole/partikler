@@ -70,6 +70,8 @@ void SPHSTLReader::execute() {
 SPHParticleGenerator::SPHParticleGenerator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
+      // fieldIdMap_(objReg.get_object<FieldIdMap>("FieldIdMap")),
+      boundary_id_(read_coeff<int>("id")),
       polyhedron_(
           objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
       facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
@@ -98,7 +100,7 @@ void SPHParticleGenerator::execute() {
     for (size_t i=0; i<(n-n_0); i++){
         idx_.push_back(n_0+i);
         type_.push_back(2);
-        boundary_.push_back(0);
+        boundary_.push_back(boundary_id_);
     }
 }
 

@@ -28,10 +28,12 @@ PROJECT:
               writeout: 10
               iterations: 100
 
+        # Generate Additional fields for export
         # - FIELDS:
         #     model: InitFields
         #     scalarFields: ["T", "f"]
         #
+        # # Set fixed value boundaries
         # - BOUNDARY:
         #     model: FixedValue
         #     boundaries: { Cube: {T: 300}, Tetrahedron: {T: 400}}

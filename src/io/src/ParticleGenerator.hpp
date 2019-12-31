@@ -60,6 +60,11 @@ class SPHParticleGenerator: public Model {
 
 private:
 
+    // FieldIdMap& fieldIdMap_;
+
+    // id of the boundary
+    int boundary_id_;
+
     // The base polyhedron on which particles are created
     Generic<CGALPolyhedron>& polyhedron_;
 

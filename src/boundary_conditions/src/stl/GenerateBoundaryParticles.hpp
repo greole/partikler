@@ -33,12 +33,14 @@ class GenerateBoundaryParticles : public Model {
 
   private:
 
+    FieldIdMap& fieldIdMap_;
     ObjectRegistry local_objReg_;
     TimeGraph& timeGraph_;
 
-    IntField &boundaryIds_;
-    IntField &typeIds_;
-    SizeTField &idx_;
+    // IntField &boundaryIds_;
+    // IntField &typeIds_;
+    int fieldId_;
+    // SizeTField &idx_;
     PointField &pos_;
 
     int iterations_;
@@ -50,8 +52,6 @@ class GenerateBoundaryParticles : public Model {
     float dx_;
 
     std::vector<float> translation_vector_;
-
-
 
   public:
 

@@ -87,12 +87,6 @@ public:
         return false;
     }
 
-
-    // template <class T>
-    // T &get_field(const std::string name){
-    //     if (object_exists(name)) return get_objects<T> (name)
-    // }
-
     PointField &get_particle_positions() {
         return get_object<PointField &>("Pos");
     }
@@ -136,6 +130,37 @@ public:
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_), name));
     }
+
+
+};
+
+class FieldIdMap: public SPHObject  {
+
+private:
+
+    std::vector<std::string> fields_;
+
+public:
+
+    FieldIdMap(
+        const std::string name,
+        const SPHObjectType type
+        ):SPHObject(name,type), fields_({}) {};
+
+    // get field id from name string
+    int getId(const std::string name) {
+        std::cout << "searching boundary " << name << std::endl;
+        for(int i=0; i<fields_.size(); i++) {
+            if(name == fields_[i]) return i;
+        }
+    }
+
+    int append(std::string field_name) {
+        int id = fields_.size();
+        fields_.push_back(field_name);
+        std::cout << "FieldIdMap" << id << std::endl;
+        return id;
+    };
 
 };
 

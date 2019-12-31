@@ -136,6 +136,9 @@ int main(int argc, char* argv[]) {
         obj_reg.register_object<TimeGraph>(std::make_unique<TimeGraph>(
             "TimeGraph", config["PROJECT"], obj_reg));
 
+    FieldIdMap &fieldIdMap = obj_reg.register_object<FieldIdMap>(
+        std::make_unique<FieldIdMap>("FieldIdMap", GenericType));
+
     // main model loop
     for (auto el: config["PROJECT"]["PRE"]) {
 
