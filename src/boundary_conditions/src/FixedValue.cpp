@@ -46,7 +46,6 @@ void FixedValue::execute() {
             auto & target = get_objReg().get_object<FloatField>(field.first);
             std::cout << target.get_name() << target.size() << std::endl;
                 for(size_t idx=0; idx<target.size(); idx++) {
-                    std::cout << idx << " " << boundary_id_[idx] << std::endl;
                     if (boundary_id_[idx] == fieldId) {
                         target[idx] = boundary.second;
                     }
