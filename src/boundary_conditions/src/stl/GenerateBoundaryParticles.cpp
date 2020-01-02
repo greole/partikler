@@ -34,12 +34,12 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       local_objReg_(ObjectRegistry()),
       timeGraph_(local_objReg_.register_object<TimeGraph>(
           std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
-      fieldId_(fieldIdMap_.append(boundary_name_)),
       pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
       boundary_name_(read_coeff<std::string>("name")),
+      fieldId_(fieldIdMap_.append(boundary_name_)),
       dx_(read_coeff<float>("dx")),
       translation_vector_(read_translation_vector(parameter)) {
 }
@@ -189,6 +189,8 @@ void GenerateBoundaryParticles::execute() {
             oreg.get_objects().push_back(std::move(loc_objs[i]));
         }
     }
+
+    get_objReg().update_n_particles();
 
     logger_.info_end();
 }

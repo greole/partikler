@@ -37,7 +37,6 @@ class GenerateBoundaryParticles : public Model {
     ObjectRegistry local_objReg_;
     TimeGraph& timeGraph_;
 
-    int fieldId_;
     PointField &pos_;
 
     int iterations_;
@@ -45,6 +44,7 @@ class GenerateBoundaryParticles : public Model {
 
     std::string filename_;
     std::string boundary_name_;
+    int fieldId_;
 
     float dx_;
 

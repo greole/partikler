@@ -32,12 +32,13 @@ PROJECT:
         - FIELDS:
             model: InitFields
             FloatFields: ["T", "f"]
-        
+
         # Set fixed value boundaries
         - BOUNDARY:
             model: FixedValue
             boundaries:
-              -field: T
+              - field: T
+                values:
                 - name: Cube
                   value: 300
                 - name: Tetrahedron

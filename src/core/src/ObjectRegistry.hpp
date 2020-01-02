@@ -58,6 +58,10 @@ public:
         n_particles_ = n_particles;
     }
 
+    void update_n_particles() {
+        n_particles_ = get_particle_positions().size();
+    }
+
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
             if (f == nullptr ) continue;
