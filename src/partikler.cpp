@@ -44,27 +44,33 @@
 // Hence, for no the register calls are made manually
 // until a better solution is found
 #ifdef WITH_GNU
-// #include "stl/GenerateBoundaryParticles.hpp"
-// REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
-// #include "stl/Wendland2D.hpp"
-// REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
-// #include "ParticleNeighbours.hpp"
-// REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
-// #include "SortParticles.hpp"
-// REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
-// #include "Conti.hpp"
-// REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
-// #include "Momentum.hpp"
-// REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
-// #include "Pressure.hpp"
-// REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
-// #include "Viscosity.hpp"
-// REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
-// #include "ParticleGenerator.hpp"
-// REGISTER_DEF_TYPE(READER, SPHSTLReader);
-// REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
-// #include "stl/STLPosIntegrator.hpp"
-// REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
+#include "stl/GenerateBoundaryParticles.hpp"
+REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
+#include "stl/Wendland2D.hpp"
+REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
+#include "ParticleNeighbours.hpp"
+REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
+#include "SortParticles.hpp"
+REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
+#include "Conti.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+#include "Momentum.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
+#include "Pressure.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
+#include "Viscosity.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
+#include "ParticleGenerator.hpp"
+REGISTER_DEF_TYPE(READER, SPHSTLReader);
+REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
+#include "stl/STLPosIntegrator.hpp"
+REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
+#include "SuperSPHWriter.hpp"
+REGISTER_DEF_TYPE(EXPORT, SuperSPHWriter);
+#include "CreateFields.hpp"
+REGISTER_DEF_TYPE(FIELDS, InitFields);
+#include "FixedValue.hpp"
+REGISTER_DEF_TYPE(BOUNDARY, FixedValue);
 #endif
 
 
