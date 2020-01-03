@@ -35,6 +35,6 @@ script:
   - cd build
   - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DBUILD_CGAL=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
-  - ctest -R "Partikler_Test"
+  - ctest -VV -R "Partikler_Test"
   - ./partikler --config=../example/SPH.yaml
 
