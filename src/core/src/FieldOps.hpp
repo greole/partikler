@@ -160,7 +160,7 @@ sum_AB(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
     // Iterate particle index a
     size_t ab_index = 0;
     for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (a == nb[ab_index].ownId && ab_index < nb.size() ) {
+        while (ab_index < nb.size() && a == nb[ab_index].ownId ) {
             auto nb_pair = nb[ab_index];
             size_t b = nb_pair.neighId;
             auto vec_ij_expr = boost::yap::transform(
@@ -186,7 +186,7 @@ std::vector<T> &sum_AB_dW(
     // Iterate particle index a
     size_t ab_index = 0;
     for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (a == nb[ab_index].ownId) {
+        while (ab_index < nb.size() && a == nb[ab_index].ownId ) {
             auto nb_pair = nb[ab_index];
             size_t b = nb_pair.neighId;
             auto vec_ij_expr = boost::yap::transform(
