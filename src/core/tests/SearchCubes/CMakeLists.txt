@@ -14,4 +14,4 @@ target_link_libraries(Partikler_Test_SearchCubes Core ${GTEST_LIBRARIES} gtest g
 
 gtest_discover_tests(Partikler_Test_SearchCubes)
 
-add_test(NAME Partikler_Test_SearchCubes COMMAND Partikler_Test_Field)
+add_test(NAME Partikler_Test_SearchCubes COMMAND Partikler_Test_SearchCubes)

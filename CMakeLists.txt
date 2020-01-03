@@ -40,8 +40,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
     add_definitions(-DWITH_GNU)
 
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage\
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+      --coverage\
       -fprofile-arcs \
+      -fsanitize=address
       -ftest-coverage"
 )
 
