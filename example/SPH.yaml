@@ -2,7 +2,7 @@ PROJECT:
     name: ExampleProject
     path: /home/go/data/partikler_projects
     debug: False
-    iterations: 1000
+    iterations: 1
     write_frequency: 10
 
     PARAMETERSTUDY:
