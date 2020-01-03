@@ -171,6 +171,7 @@ ENDIF()
 # gcov                 #
 ########################
 
+IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 include (cmake/CodeCoverage.cmake)
 
 append_coverage_compiler_flags()
@@ -185,6 +186,7 @@ setup_target_for_coverage_lcov(
 # setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
 # target_link_libraries(${PROJECT_TEST_NAME} gcov)
 
+ENDIF()
 ########################
 # ctags                #
 ########################
