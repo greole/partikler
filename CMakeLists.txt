@@ -26,11 +26,15 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+      -fno-omit-frame-pointer \
+      -fsanitize=address"
+    )
+
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
     -fno-omit-frame-pointer \
     -Rpass=loop-vectorize \
       -ffast-math \
-      -fsanitize=address \
       "
       #-Rpass-analysis=loop-vectorize \
       #-Rpass-missed=loop-vectorize \
