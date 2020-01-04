@@ -166,7 +166,8 @@ void SuperSPHWriter::execute() {
             auto name = obj->get_name();
             auto type = obj->get_type();
 
-            std::unique_ptr<SPHObject> *obj_ptr = &obj;
+            // TODO
+            std::shared_ptr<SPHObject> *obj_ptr = &obj;
             std::cout << "DISPATCH " << name  << std::endl;
             DISPATCH(obj_ptr, write_to_disk, type, stepname);
         }

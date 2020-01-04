@@ -22,7 +22,7 @@
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Equation(model_name, parameter, objReg),
+    : VectorFieldEquation(model_name, parameter, objReg, objReg.get_object<VectorField>("u")),
       dnu_(objReg.get_object<VectorField>("dnu")),
       dp_(objReg.get_object<VectorField>("dp")),
       u_(objReg.get_object<VectorField>("u")),

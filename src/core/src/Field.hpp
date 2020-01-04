@@ -77,8 +77,6 @@ template <class T> class Field : public T, public SPHObject {
 
     std::vector<std::string> comp_names_;
 
-    std::vector<T> prev_;
-
     IOOptions iooptions_;
 
   protected:
@@ -93,18 +91,16 @@ template <class T> class Field : public T, public SPHObject {
         T f,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : comp_names_(comp_names), T(f), SPHObject(name, GetFieldType<T>::value) {
-        std::cout << "CONSTRUCTOR " << name << "comp_names_.size()" << comp_names_.size() << std::endl;
-    };
+        : comp_names_(comp_names), T(f),
+          SPHObject(name, GetFieldType<T>::value) {};
 
     Field(
         int size,
         typename T::value_type val,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : comp_names_(comp_names), T(size, val), SPHObject(name, GetFieldType<T>::value)  {
-        std::cout << "CONSTRUCTOR " << name << "comp_names_.size()" << comp_names_.size() << std::endl;
-    };
+        : comp_names_(comp_names), T(size, val),
+          SPHObject(name, GetFieldType<T>::value) {};
 
     void set_io_options(IOOptions ioo) {iooptions_ = ioo;};
 
@@ -116,13 +112,13 @@ template <class T> class Field : public T, public SPHObject {
 
     void operator=(Field<T> &&b) { T::operator=(std::move(b)); }
 
-    void copy_old() {
-        prev_.emplace_back();
-        size_t idx = prev_.size();
-        for(size_t i=0; i<T::size(); i++) {
-            prev_[idx].push_back(T::operator[](i));
-        }
-    }
+    // void copy_old() {
+    //     prev_.emplace_back();
+    //     size_t idx = prev_.size();
+    //     for(size_t i=0; i<T::size(); i++) {
+    //         prev_[idx].push_back(T::operator[](i));
+    //     }
+    // }
 
     void set_reorder(bool reorder) { reorder_ = reorder; }
 

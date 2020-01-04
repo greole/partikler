@@ -36,7 +36,7 @@ class ObjectRegistry {
 
 private:
 
-    using ObjReg = std::vector<std::unique_ptr<SPHObject>>;
+    using ObjReg = std::vector<std::shared_ptr<SPHObject>>;
 
     ObjReg objects_;
 
@@ -45,12 +45,21 @@ private:
 public:
 
     template <class T>
-    T& register_object(std::unique_ptr<SPHObject> f) {
+    T& register_object(std::shared_ptr<SPHObject> f) {
         std::cout << "Register object " << f->get_name() << std::endl;
         int idx = objects_.size();
         objects_.push_back(std::move(f));
         return dynamic_cast<T &> ( *objects_[idx] );
     }
+
+    template <class T>
+    std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
+        std::cout << "Register object " << f->get_name() << std::endl;
+        int idx = objects_.size();
+        objects_.push_back(std::move(f));
+        return std::dynamic_pointer_cast<T>( objects_[idx] );
+    }
+
 
     // Setter
 

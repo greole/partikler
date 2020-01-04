@@ -58,7 +58,7 @@ TEST (FloatField, sumABTest ) {
 
     FloatField res(2, 0.0);
 
-    sum_AB(res, n, A(a) + B(b));
+    sum_AB_impl(res, n, A(a) + B(b));
 
     ASSERT_EQ(res[0], 3.0);
     ASSERT_EQ(res[1], 3.0);

@@ -28,7 +28,7 @@
 
 #include "yaml-cpp/yaml.h"
 
-class Pressure : public Equation {
+class Pressure : public FloatFieldEquation {
 
     REGISTER_DEC_TYPE(Pressure);
 

@@ -29,7 +29,7 @@
 #include "yaml-cpp/yaml.h"
 
 
-class Momentum : public Equation {
+class Momentum : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Momentum);
 

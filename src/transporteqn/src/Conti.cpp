@@ -21,7 +21,7 @@
 
 Conti::Conti (
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Equation(model_name, parameter, objReg),
+    FloatFieldEquation(model_name, parameter, objReg, objReg.create_field<FloatField>("rho", 0.0)),
     pos_(objReg.get_particle_positions()),
     rho_(objReg.create_field<FloatField>("rho", 0.0)),
     lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
@@ -52,7 +52,7 @@ void Conti::execute() {
     // rho_ = solve<floatfield>(rho_eqn);
 
     // TODO needs reset of rho_;
-    sum_AB(rho_, N(), W());
+    sum_AB();
 
     // return sum_ab();
 };

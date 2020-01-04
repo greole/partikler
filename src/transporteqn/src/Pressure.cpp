@@ -22,7 +22,7 @@
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Equation(model_name, parameter, objReg),
+    : FloatFieldEquation(model_name, parameter, objReg, objReg.create_field<FloatField>("p", p_0_)),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),

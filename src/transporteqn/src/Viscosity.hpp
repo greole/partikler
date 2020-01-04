@@ -27,7 +27,7 @@
 
 #include "yaml-cpp/yaml.h"
 
-class Viscosity : public Equation {
+class Viscosity : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Viscosity);
 

@@ -144,11 +144,12 @@ struct ModelFactory {
                       << model_type
                       << std::endl;
             print_models(model_type);
-            return 0;
+            // throw
         };
-        return std::shared_ptr<Model>(
-            it->second(objReg_name, parameter, objReg)
-            );
+
+        Model* model_ptr = it->second(objReg_name, parameter, objReg);
+
+        return objReg.register_object_get_ptr<Model>(std::shared_ptr<Model>(model_ptr));
     }
 
     static void print_models(
@@ -352,9 +353,11 @@ public:
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
 
-class Equation : public Model {
+class FloatFieldEquation : public Model {
 
-    private:
+    protected:
+
+        TimeGraph& time_;
 
         NeighbourFieldAB & np_;
 
@@ -362,18 +365,93 @@ class Equation : public Model {
 
         KernelGradientField & dW_;
 
+        FloatField& f_;
+
+        // store previous results
+        std::map<int, FloatField> prev_;
+
+        // the current iteraton 
+        int iteration;
+
+
     public:
 
-      Equation(
+      FloatFieldEquation(
           const std::string &model_name,
           YAML::Node parameter,
-          ObjectRegistry &objReg);
+          ObjectRegistry &objReg,
+          FloatField& f);
+
+    // get result for iteration i
+    // if result is not cached solve gets executed
+    FloatField& get(int i);
 
       FloatField &W() { return W_; };
 
       NeighbourFieldAB &N() { return np_; };
 
       KernelGradientField &dWdx() { return dW_; };
+
+      FloatField& sum_AB() {
+        sum_AB_impl(f_, np_, W_);
+        return f_;
+    };
+
+
+    template <class RHS>
+    FloatField& sum_AB(RHS rhs){
+        sum_AB_impl(f_, np_, rhs*W_);
+        return f_;
+    };
+
+    VectorField& ddx() {
+    };
+
+    template <class RHS>
+    void ddt(RHS rhs) {
+
+        // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1) ...
+        
+
+
+    }
+
+    // template<class T>
+    // virtual T expression();
+
+
+    // solve();
+
+
+};
+
+class VectorFieldEquation : public Model {
+
+protected:
+
+    TimeGraph& time_;
+
+    NeighbourFieldAB & np_;
+
+    FloatField&      W_;
+
+    KernelGradientField & dW_;
+
+    VectorField& f_;
+
+public:
+
+    VectorFieldEquation(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        VectorField& f);
+
+    FloatField &W() { return W_; };
+
+    NeighbourFieldAB &N() { return np_; };
+
+    KernelGradientField &dWdx() { return dW_; };
 
     // template<class T>
     // virtual T expression();
@@ -392,5 +470,4 @@ class Equation : public Model {
 
 
 };
-
 #endif

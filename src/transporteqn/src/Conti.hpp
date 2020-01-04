@@ -25,7 +25,7 @@
 #include "SearchCubes.hpp"
 #include "FieldOps.hpp"
 
-class Conti : public Equation {
+class Conti : public FloatFieldEquation {
 
     REGISTER_DEC_TYPE(Conti);
 
