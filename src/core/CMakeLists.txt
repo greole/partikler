@@ -6,7 +6,6 @@ find_package(yaml-cpp REQUIRED)
 
 add_library(Core SHARED
   src/Vec3.cpp
-  src/FileIO.cpp
   src/Object.cpp
   src/Field.cpp
   src/Models.cpp
