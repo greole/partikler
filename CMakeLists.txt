@@ -162,7 +162,7 @@ IF(BUILD_YAP)
     #                  ${CMAKE_CURRENT_BINARY_DIR}/yap-build
     #                  EXCLUDE_FROM_ALL)
 
-    include_directories(${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
+    include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
     message("BUILDING YAP DONE")
 ENDIF()
 
