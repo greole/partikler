@@ -402,7 +402,7 @@ class FloatFieldEquation : public Model {
     FloatField& sum_AB(RHS rhs){
         sum_AB_impl(f_, np_, rhs*W_);
         return f_;
-    };
+    }
 
     VectorField& ddx() {
     };
