@@ -23,7 +23,6 @@
 #include "Object.hpp"
 #include "cgal/CGALTYPEDEFS.hpp"
 #include "Datastructures.hpp"
-#include "FileIO.hpp"
 
 #include <boost/yap/yap.hpp>
 #include <iostream>

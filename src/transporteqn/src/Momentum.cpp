@@ -28,7 +28,7 @@ Momentum::Momentum(
       u_(objReg.get_object<VectorField>("u")),
       du_(objReg.create_field<VectorField>(
               "du", zero<VectorField::value_type>::val, {"dU", "dV", "dW"})),
-      time_(objReg.get_object<TimeGraph>("TimeGraph")) {};
+      time_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 void Momentum::execute() {
 
@@ -62,6 +62,6 @@ void Momentum::execute() {
     u_ += (du_ * time_.get_deltaT());
 
     log().info_end();
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);

@@ -26,6 +26,10 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include <sys/stat.h>
+#include <iostream>
+#include <sstream>
+#include <fstream>
 
 class SuperSPHWriter: public WriterBase {
 

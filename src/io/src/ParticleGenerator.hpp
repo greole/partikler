@@ -21,9 +21,9 @@
 #define PARTICLE_GENERATOR_H
 
 #include "Models.hpp"
-#include "Datastructures.hpp"
 #include "cgal/CGALHelper.hpp"
 
+#include <fstream>
 #include <memory>
 // TODO needs a polyhedron generator
 

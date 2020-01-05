@@ -31,7 +31,7 @@ Wendland::Wendland(
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<FloatField>("KernelW")),
-      dWdx_(objReg.create_field<Field<std::vector<Vec3>>>("KerneldWdx")) {};
+      dWdx_(objReg.create_field<Field<std::vector<Vec3>>>("KerneldWdx")) {}
 
 void Wendland::execute() {
 
@@ -88,13 +88,13 @@ void Wendland::execute() {
     }
 
     log().info_end();
-};
+}
 
 Wendland2D::Wendland2D(
     const std::string &model_name,
     YAML::Node parameter,
     ObjectRegistry &objReg)
-    : Wendland(model_name, parameter, objReg, 7. / 64.) {};
+    : Wendland(model_name, parameter, objReg, 7. / 64.) {}
 
 Wendland3D::Wendland3D(
     const std::string &model_name,
@@ -104,7 +104,7 @@ Wendland3D::Wendland3D(
           model_name,
           parameter,
           objReg,
-          21. / (256. * read_or_default_coeff<float>("h", 1.0))) {};
+          21. / (256. * read_or_default_coeff<float>("h", 1.0))) {}
 
 REGISTER_DEF_TYPE(KERNEL, Wendland2D);
 REGISTER_DEF_TYPE(KERNEL, Wendland3D);

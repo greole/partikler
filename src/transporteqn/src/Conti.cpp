@@ -25,7 +25,7 @@ Conti::Conti (
     pos_(objReg.get_particle_positions()),
     rho_(objReg.create_field<FloatField>("rho", 0.0)),
     lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
+{}
 
 void Conti::execute() {
 
