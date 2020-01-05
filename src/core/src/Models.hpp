@@ -119,37 +119,34 @@ struct ModelFactory {
 
     typedef std::map<
         std::string,
-        Model *(*)(
-            const std::string &,
-            YAML::Node,
-            ObjectRegistry&)> map_type;
+        Model *(*)(const std::string &, YAML::Node, ObjectRegistry &)>
+        map_type;
 
   private:
     static map_type *map_;
 
   public:
-    static std::shared_ptr<Model>
-    createInstance(
+    static std::shared_ptr<Model> createInstance(
         const std::string &model_type,
         const std::string &model_name,
         const std::string &objReg_name,
         YAML::Node parameter,
         ObjectRegistry &objReg) {
+        std::cout << "createInstance" << model_name << std::endl;
         const std::string delim = "::";
         map_type::iterator it = getMap()->find(model_type + delim + model_name);
         if (it == getMap()->end()) {
-            std::cout << " no model named "
-                      << model_name
-                      << " found, available models for namespace "
-                      << model_type
+            std::cout << " no model named " << model_name
+                      << " found, available models for namespace " << model_type
                       << std::endl;
             print_models(model_type);
             // throw
         };
 
-        Model* model_ptr = it->second(objReg_name, parameter, objReg);
+        Model *model_ptr = it->second(model_name, parameter, objReg);
 
-        return objReg.register_object_get_ptr<Model>(std::shared_ptr<Model>(model_ptr));
+        return objReg.register_object_get_ptr<Model>(
+            std::shared_ptr<Model>(model_ptr));
     }
 
     static void print_models(
