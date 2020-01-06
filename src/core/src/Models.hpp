@@ -60,13 +60,7 @@ class Model : public SPHObject {
     std::vector<std::shared_ptr<Model>> submodels_;
 
   public:
-    Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg)
-        : SPHObject(name, ModelType), parameter_(parameter), objReg_(objReg),
-          // TODO inherit verbosity from main Logger
-          log_(Logger(3)), submodels_(std::vector<std::shared_ptr<Model>>()) {
-        logger_.set_scope(this->get_name());
-        log().info() << "Creating Model: " << this->get_name();
-    }
+    Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg);
 
     YAML::Node get_parameter() { return parameter_; }
 
@@ -91,26 +85,12 @@ class Model : public SPHObject {
     // TODO implement a pre and post execute member
     virtual void execute() = 0;
 
-    void sub_model_push_back(std::shared_ptr<Model> m) {
+    void sub_model_push_back(std::shared_ptr<Model> m);
 
-        log().info() << "Registering: Submodel: " << this->get_name();
-
-        submodels_.push_back(m);
-    };
-
-    void execute_submodels() {
-        log().info() << "Executing Submodel: " << this->get_type_str() << " "
-                     << this->get_name();
-
-        for (auto model : submodels_) {
-            log().info() << "Executing: " << model->get_type_str() << " "
-                         << model->get_name();
-            model->execute();
-        }
-    }
+    void execute_submodels();
 };
 
-struct ModelFactory {
+class ModelFactory {
     /**
        Factory for Models, implements a map of constructor pointers
        for all existing and registered models.
@@ -130,36 +110,9 @@ struct ModelFactory {
         const std::string &model_name,
         const std::string, //&objReg_name,
         YAML::Node parameter,
-        ObjectRegistry &objReg) {
-        std::cout << "createInstance" << model_name << std::endl;
-        const std::string delim = "::";
-        map_type::iterator it = getMap()->find(model_type + delim + model_name);
-        if (it == getMap()->end()) {
-            std::cout << " no model named " << model_name
-                      << " found, available models for namespace " << model_type
-                      << std::endl;
-            print_models(model_type);
-            // throw
-        };
+        ObjectRegistry &objReg);
 
-        Model *model_ptr = it->second(model_name, parameter, objReg);
-
-        return objReg.register_object_get_ptr<Model>(
-            std::shared_ptr<Model>(model_ptr));
-    }
-
-    static void print_models(const std::string &model_type) {
-
-        map_type::iterator it = getMap()->begin();
-        while (it != getMap()->end()) {
-            std::string word = it->first;
-            if (word.rfind(model_type, 0) == 0) {
-                std::cout << word << std::endl;
-            }
-
-            it++;
-        }
-    }
+    static void print_models(const std::string &model_type);
 
   protected:
     static map_type *getMap() {
@@ -207,20 +160,6 @@ class ModelGraph : public Model {
 
     void execute() { execute_submodels(); };
 };
-
-// class TransportEqn : public Model {
-
-// private:
-
-//     NeighbourFieldAB& nb_;
-
-// public:
-
-//     TransportEqn() {};
-
-//     sum_AB() {};
-
-// }
 
 class TimeGraph : public Model {
 
@@ -318,11 +257,6 @@ class TimeGraph : public Model {
 
     int &get_current_timestep() { return current_timestep_; }
 };
-
-// class Ddt : Model {
-//
-//
-// }
 
 // TODO TransportedQuantity
 // a class providing field to Equation depedency

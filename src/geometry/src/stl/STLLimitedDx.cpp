@@ -307,7 +307,7 @@ void STL_limited_dx(
     float dt,
     Field<std::vector<Facet_handle>> &facets,
     const IntField &type,
-    const SizeTField &idx,
+    const SizeTField &, //&idx,
     const PointField &pos,
     VectorField &ret) {
 

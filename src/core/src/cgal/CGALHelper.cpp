@@ -87,7 +87,9 @@ HitPoint approximateEdgeHit(
     Point &B,      // End edge
     Point &P,      // Particle start position
     CGALVector &S, // Slide vector
-    float tolerance) {
+    // float tolerance
+    float
+    ) {
     // Given a tolerance this function checks if the Vector S from point P hits
     // the edge AB
     Line G1 = Line(A, B);
@@ -517,8 +519,8 @@ Point projectedPoint(Path p, Point P) {
     // the coordinate system is needed
     CommonVertices PAB = commonVertices(f1, f2);
     Point A = PAB.A;
-    Point B = PAB.B;
-    CGALVector AB = B - A;
+    // Point B = PAB.B;
+    // CGALVector AB = B - A;
     CGALVector AP = P - A;
 
     CGALVector ABP1 = rotate(RO, AP);

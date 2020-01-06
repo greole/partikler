@@ -74,12 +74,13 @@ std::string field_type_to_str(SPHObjectType t) {
         return "int";
     case (SizeTFieldType):
         return "long";
-    case (FloatFieldType):
-        return "float";
-    case (PointFieldType):
-        return "float";
-    case (VectorFieldType):
-        return "float";
+    // case (FloatFieldType):
+    //     return "float";
+    // case (PointFieldType):
+    //     return "float";
+    // case (VectorFieldType):
+    //     return "float";
+    default: return "float";
     }
 }
 
