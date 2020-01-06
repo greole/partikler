@@ -21,7 +21,6 @@
 #define PARTIKLER_CORE_INCLUDED
 
 #include "Vec3.hpp"
-#include "Datastructures.hpp"
 #include "Object.hpp"
 #include "Models.hpp"
 #include "Field.hpp"

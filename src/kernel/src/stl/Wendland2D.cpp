@@ -45,10 +45,10 @@ void STLWendland2D::execute() {
 
     for (size_t pid = 0; pid < size; pid++) {
 
-        auto [oid, nid] = np_[pid];
+        // auto [oid, nid] = np_[pid];
 
-        const Point &opos = pos_[oid];
-        const Point &npos = pos_[nid];
+        // const Point &opos = pos_[oid];
+        // const Point &npos = pos_[nid];
 
         auto [len, lenVo, lenVn] = sd_[pid];
 

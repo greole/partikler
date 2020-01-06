@@ -33,7 +33,6 @@
 #include "Vec3.hpp"                   // for Vec3, VectorPair (ptr only)
 #include "Object.hpp"                 // for SPHObject, GetFieldType, FloatF...
 #include "cgal/CGALTYPEDEFS.hpp"      // for Point
-#include "Datastructures.hpp"
 #include "Logger.hpp"                 // for Logger
 
 // Dynamically dispatches func based on its kind

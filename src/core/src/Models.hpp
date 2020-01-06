@@ -115,11 +115,11 @@ class Model : public SPHObject {
 
     void execute_submodels () {
         log().info()
-            << "Executing: " << this->get_type() << " " << this->get_name();
+            << "Executing Submodel: " << this->get_type_str() << " " << this->get_name();
 
         for (auto model : submodels_) {
             log().info()
-                      << "Executing: " << model->get_type() << " "
+                      << "Executing: " << model->get_type_str() << " "
                       << model->get_name();
             model->execute();
         }

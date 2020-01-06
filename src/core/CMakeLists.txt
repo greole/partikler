@@ -11,7 +11,6 @@ add_library(Core SHARED
   src/Models.cpp
   src/Helper.cpp
   src/SearchCubes.cpp
-  src/Datastructures.cpp
   src/ObjectRegistry.cpp
   src/cgal/CGALHelper.cpp
   )
