@@ -20,42 +20,37 @@
 #ifndef PARTIKLER_SUPERSPHWRITER_INCLUDED_H
 #define PARTIKLER_SUPERSPHWRITER_INCLUDED_H
 
-#include <sys/stat.h>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
-#include <string>          // for string
+#include <string> // for string
+#include <sys/stat.h>
 
-#include "WriterBase.hpp"  // for WriterBase
 #include "Field.hpp"
+#include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "WriterBase.hpp" // for WriterBase
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
-#include "Models.hpp"      // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
-class SuperSPHWriter: public WriterBase {
+class SuperSPHWriter : public WriterBase {
 
     REGISTER_DEC_TYPE(SuperSPHWriter);
 
-private:
-
+  private:
     std::string export_name_;
 
-
-
-public:
-
-   SuperSPHWriter(
+  public:
+    SuperSPHWriter(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
+        ObjectRegistry &objReg);
 
-   template <class T>
-   void write_to_disk(T const &t, const std::string path);
+    template <class T> void write_to_disk(T const &t, const std::string path);
 
     void execute();
 };

@@ -20,19 +20,19 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include <string>           // for string
-#include <vector>           // for vector
+#include <string> // for string
+#include <vector> // for vector
 
-#include "Models.hpp"       // for Model, ModelRegister (ptr only), REGISTER...
-#include "SearchCubes.hpp"  // for NeighbourFieldAB
+#include "Field.hpp"       // for Field (ptr only), FloatField, KernelGradi...
+#include "Models.hpp"      // for Model, ModelRegister (ptr only), REGISTER...
+#include "SearchCubes.hpp" // for NeighbourFieldAB
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
-#include "Field.hpp"        // for Field (ptr only), FloatField, KernelGradi...
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 struct STLSurfaceDist;
 
 class STLWendland2D : public Model {
@@ -41,8 +41,8 @@ class STLWendland2D : public Model {
 
   private:
     // Coeffs
-    const float h_;  // Smoothing length
-    const float ih_; // Inverse Smoothing length
+    const float h_;       // Smoothing length
+    const float ih_;      // Inverse Smoothing length
     const float W_fak2_;  // = 7. / (64. * M_PI * h * h);
     const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
 
@@ -59,7 +59,9 @@ class STLWendland2D : public Model {
 
   public:
     STLWendland2D(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };

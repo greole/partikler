@@ -17,7 +17,6 @@
     contact: go@hpsim.de
 */
 
-
 #include "SuperSPHWriter.hpp"
 
 std::string intToStr(int number) {
@@ -71,11 +70,16 @@ std::string prepare_data_folder(std::string foldername, int step) {
 
 std::string field_type_to_str(SPHObjectType t) {
     switch (t) {
-    case(IntFieldType): return "int";
-    case(SizeTFieldType): return "long";
-    case(FloatFieldType): return "float";
-    case(PointFieldType): return "float";
-    case(VectorFieldType): return "float";
+    case (IntFieldType):
+        return "int";
+    case (SizeTFieldType):
+        return "long";
+    case (FloatFieldType):
+        return "float";
+    case (PointFieldType):
+        return "float";
+    case (VectorFieldType):
+        return "float";
     }
 }
 
@@ -108,15 +112,13 @@ void SuperSPHWriter::write_to_disk(T const &data, const std::string path) {
 //     write_to_disk_impl(data, path, data.get_name(), data.get_type());
 // }
 
-
 // TODO use SFINAE here
 template <>
 void SuperSPHWriter::write_to_disk<PointField>(
-    const PointField &data,
-    const std::string path) {
+    const PointField &data, const std::string path) {
 
     size_t j = 0;
-    for (std::string comp: data.get_comp_names()) {
+    for (std::string comp : data.get_comp_names()) {
         std::vector<float> buffer(data.size());
         for (size_t i = 0; i < data.size(); i++) {
             buffer[i] = data[i][j];
@@ -129,11 +131,10 @@ void SuperSPHWriter::write_to_disk<PointField>(
 // TODO use SFINAE here
 template <>
 void SuperSPHWriter::write_to_disk<VectorField>(
-    const VectorField &data,
-    const std::string path) {
+    const VectorField &data, const std::string path) {
 
     size_t j = 0;
-    for (std::string comp: data.get_comp_names()) {
+    for (std::string comp : data.get_comp_names()) {
         std::vector<float> buffer(data.size());
         for (size_t i = 0; i < data.size(); i++) {
             buffer[i] = data[i][j];
@@ -150,9 +151,9 @@ SuperSPHWriter::SuperSPHWriter(
 
 void SuperSPHWriter::execute() {
 
-    std::cout << __PRETTY_FUNCTION__ <<  std::endl;
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
-        std::cout <<  "write" << std::endl;
+        std::cout << "write" << std::endl;
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
 
@@ -168,7 +169,7 @@ void SuperSPHWriter::execute() {
 
             // TODO
             std::shared_ptr<SPHObject> *obj_ptr = &obj;
-            std::cout << "DISPATCH " << name  << std::endl;
+            std::cout << "DISPATCH " << name << std::endl;
             DISPATCH(obj_ptr, write_to_disk, type, stepname);
         }
     }

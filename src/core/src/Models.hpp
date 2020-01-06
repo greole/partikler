@@ -20,33 +20,34 @@
 #ifndef SPHMODEL_H
 #define SPHMODEL_H
 
+#include <algorithm>                // for max
+#include <boost/hana/at.hpp>        // for at_t::operator()
+#include <boost/yap/expression.hpp> // for as_expr, make_terminal
+#include <iostream>                 // for operator<<, basic_ostream, endl
+#include <map>                      // for map<>::iterator, operator!=, ope...
+#include <memory>                   // for shared_ptr, allocator, __shared_...
 #include <stdio.h>
-#include <boost/hana/at.hpp>         // for at_t::operator()
-#include <boost/yap/expression.hpp>  // for as_expr, make_terminal
-#include <map>                       // for map<>::iterator, operator!=, ope...
-#include <memory>                    // for shared_ptr, allocator, __shared_...
-#include <algorithm>                 // for max
-#include <iostream>                  // for operator<<, basic_ostream, endl
-#include <string>                    // for string, operator<<, operator+
-#include <utility>                   // for move, pair, make_pair
-#include <vector>                    // for vector
+#include <string>  // for string, operator<<, operator+
+#include <utility> // for move, pair, make_pair
+#include <vector>  // for vector
 
-#include "Object.hpp"                // for SPHObject, ModelType
-#include "ObjectRegistry.hpp"        // for ObjectRegistry
-#include "FieldOps.hpp"              // for sum_AB_impl
+#include "Field.hpp"            // for FloatField, KernelGradientField
+#include "FieldOps.hpp"         // for sum_AB_impl
+#include "Logger.hpp"           // for MSG, Logger
+#include "Object.hpp"           // for SPHObject, ModelType
+#include "ObjectRegistry.hpp"   // for ObjectRegistry
+#include "SearchCubes.hpp"      // for NeighbourFieldAB
+#include "yaml-cpp/node/impl.h" // for Node::~Node, Node::Node, Node::as
+#include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
-#include "Field.hpp"                 // for FloatField, KernelGradientField
-#include "Logger.hpp"                // for MSG, Logger
-#include "SearchCubes.hpp"           // for NeighbourFieldAB
-#include "yaml-cpp/node/impl.h"      // for Node::~Node, Node::Node, Node::as
-#include "yaml-cpp/node/node.h"      // for Node
 
 class ModelGraph;
 class TimeGraph;
 
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
 
-#define REGISTER_DEF_TYPE(CLASS, NAME) ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME )
+#define REGISTER_DEF_TYPE(CLASS, NAME)                                         \
+    ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME)
 
 // Abstract base class for Models
 class Model : public SPHObject {
@@ -59,68 +60,51 @@ class Model : public SPHObject {
     std::vector<std::shared_ptr<Model>> submodels_;
 
   public:
-    Model(
-        const std::string name,
-        YAML::Node parameter,
-        ObjectRegistry & objReg)
-        :
-        SPHObject(name, ModelType),
-        parameter_(parameter),
-        objReg_(objReg),
-        // TODO inherit verbosity from main Logger
-        log_(Logger(3)),
-        submodels_(
-            std::vector<std::shared_ptr<Model>> ()
-            )
-    {
+    Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg)
+        : SPHObject(name, ModelType), parameter_(parameter), objReg_(objReg),
+          // TODO inherit verbosity from main Logger
+          log_(Logger(3)), submodels_(std::vector<std::shared_ptr<Model>>()) {
         logger_.set_scope(this->get_name());
         log().info() << "Creating Model: " << this->get_name();
     }
 
+    YAML::Node get_parameter() { return parameter_; }
 
-    YAML::Node get_parameter() { return parameter_;}
-
-    template<class T>
-    T read_coeff(std::string coeff_name) {
+    template <class T> T read_coeff(std::string coeff_name) {
         T coeff = parameter_[coeff_name].as<T>();
-        log().info() << "Reading coefficient "
-                     << coeff_name << " "
-                     << coeff;
+        log().info() << "Reading coefficient " << coeff_name << " " << coeff;
         return coeff;
     }
 
-    template<class T>
+    template <class T>
     T read_or_default_coeff(std::string coeff_name, T default_val) {
         if (parameter_[coeff_name]) return read_coeff<T>(coeff_name);
-        log().info() << "Using default coefficient "
-                     << coeff_name << " "
+        log().info() << "Using default coefficient " << coeff_name << " "
                      << default_val;
         return default_val;
     }
 
-    ObjectRegistry & get_objReg() {return objReg_;};
+    ObjectRegistry &get_objReg() { return objReg_; };
 
-    Logger & log() {return logger_;};
+    Logger &log() { return logger_; };
 
     // TODO implement a pre and post execute member
     virtual void execute() = 0;
 
     void sub_model_push_back(std::shared_ptr<Model> m) {
 
-        log().info()
-            << "Registering: Submodel: " << this->get_name();
+        log().info() << "Registering: Submodel: " << this->get_name();
 
         submodels_.push_back(m);
     };
 
-    void execute_submodels () {
-        log().info()
-            << "Executing Submodel: " << this->get_type_str() << " " << this->get_name();
+    void execute_submodels() {
+        log().info() << "Executing Submodel: " << this->get_type_str() << " "
+                     << this->get_name();
 
         for (auto model : submodels_) {
-            log().info()
-                      << "Executing: " << model->get_type_str() << " "
-                      << model->get_name();
+            log().info() << "Executing: " << model->get_type_str() << " "
+                         << model->get_name();
             model->execute();
         }
     }
@@ -144,7 +128,7 @@ struct ModelFactory {
     static std::shared_ptr<Model> createInstance(
         const std::string &model_type,
         const std::string &model_name,
-        const std::string ,//&objReg_name,
+        const std::string, //&objReg_name,
         YAML::Node parameter,
         ObjectRegistry &objReg) {
         std::cout << "createInstance" << model_name << std::endl;
@@ -164,13 +148,10 @@ struct ModelFactory {
             std::shared_ptr<Model>(model_ptr));
     }
 
-    static void print_models(
-        const std::string &model_type
-        ) {
+    static void print_models(const std::string &model_type) {
 
         map_type::iterator it = getMap()->begin();
-        while (it != getMap()->end())
-        {
+        while (it != getMap()->end()) {
             std::string word = it->first;
             if (word.rfind(model_type, 0) == 0) {
                 std::cout << word << std::endl;
@@ -194,7 +175,7 @@ struct ModelFactory {
 template <typename T>
 Model *createModel(
     // creates instance of Model at runTime
-    const std::string &model_name,  // model name at runtime e.g. wendland
+    const std::string &model_name, // model name at runtime e.g. wendland
     YAML::Node parameter,
     ObjectRegistry &objReg) {
     return new T(model_name, parameter, objReg);
@@ -219,7 +200,9 @@ class ModelGraph : public Model {
   public:
     // TODO Move implementation to cpp file
     ModelGraph(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg)
         : Model(model_name, parameter, objReg) {};
 
     void execute() { execute_submodels(); };
@@ -231,12 +214,11 @@ class ModelGraph : public Model {
 
 //     NeighbourFieldAB& nb_;
 
-// public: 
+// public:
 
 //     TransportEqn() {};
 
 //     sum_AB() {};
-
 
 // }
 
@@ -247,15 +229,14 @@ class TimeGraph : public Model {
     // static ModelRegister<ModelGraph> reg;
     REGISTER_DEC_TYPE(TimeGraph);
 
-private:
-
+  private:
     ModelGraph init_;
 
     ModelGraph main_;
 
     ModelGraph post_;
 
-    int   current_timestep_;
+    int current_timestep_;
 
     float current_time_;
 
@@ -271,26 +252,24 @@ private:
 
     bool iter_mode = false;
 
-
-public:
+  public:
     // TODO Move implementation to cpp file
     TimeGraph(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg)
+        ObjectRegistry &objReg)
         : Model(model_name, parameter, objReg),
-          init_(ModelGraph("pre",  parameter, objReg)),
+          init_(ModelGraph("pre", parameter, objReg)),
           main_(ModelGraph("main", parameter, objReg)),
-          post_(ModelGraph("post", parameter, objReg)),
-          current_timestep_(0),
-          current_time_(0),
-          name_(read_coeff<std::string>("name")),
-          endTime_(read_or_default_coeff<float>("endTime", -1.0 )),
-          deltaT_(read_or_default_coeff<float>("deltaT", -1.0 )),
-          max_deltaT_(read_or_default_coeff<float>("max_deltaT", -1.0 )),
-          iterations_(read_or_default_coeff<int>("iterations", 0))
-    {
-        if (deltaT_ < 0) {iter_mode = true;}
+          post_(ModelGraph("post", parameter, objReg)), current_timestep_(0),
+          current_time_(0), name_(read_coeff<std::string>("name")),
+          endTime_(read_or_default_coeff<float>("endTime", -1.0)),
+          deltaT_(read_or_default_coeff<float>("deltaT", -1.0)),
+          max_deltaT_(read_or_default_coeff<float>("max_deltaT", -1.0)),
+          iterations_(read_or_default_coeff<int>("iterations", 0)) {
+        if (deltaT_ < 0) {
+            iter_mode = true;
+        }
     };
 
     void execute() {
@@ -299,9 +278,7 @@ public:
         execute_post();
     };
 
-    void execute_pre() {
-        init_.execute();
-    }
+    void execute_pre() { init_.execute(); }
 
     void execute_main() {
         // TODO register some kind of call back
@@ -313,10 +290,7 @@ public:
         };
     }
 
-    void execute_post() {
-        post_.execute();
-    }
-
+    void execute_post() { post_.execute(); }
 
     void push_back_pre(std::shared_ptr<Model> m) {
         init_.sub_model_push_back(m);
@@ -340,20 +314,15 @@ public:
         return max_deltaT_;
     }
 
-    void set_deltaT(float deltaT) {
-        deltaT_ = deltaT;
-    }
+    void set_deltaT(float deltaT) { deltaT_ = deltaT; }
 
-    int & get_current_timestep() {return current_timestep_;}
+    int &get_current_timestep() { return current_timestep_; }
 };
-
 
 // class Ddt : Model {
 //
 //
 // }
-
-
 
 // TODO TransportedQuantity
 // a class providing field to Equation depedency
@@ -367,97 +336,84 @@ public:
 
 class FloatFieldEquation : public Model {
 
-    protected:
+  protected:
+    TimeGraph &time_;
 
-        TimeGraph& time_;
+    NeighbourFieldAB &np_;
 
-        NeighbourFieldAB & np_;
+    FloatField &W_;
 
-        FloatField&      W_;
+    KernelGradientField &dW_;
 
-        KernelGradientField & dW_;
+    FloatField &f_;
 
-        FloatField& f_;
+    // store previous results
+    std::map<int, FloatField> prev_;
 
-        // store previous results
-        std::map<int, FloatField> prev_;
+    // the current iteraton
+    int iteration;
 
-        // the current iteraton 
-        int iteration;
-
-
-    public:
-
-      FloatFieldEquation(
-          const std::string &model_name,
-          YAML::Node parameter,
-          ObjectRegistry &objReg,
-          FloatField& f);
+  public:
+    FloatFieldEquation(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        FloatField &f);
 
     // get result for iteration i
     // if result is not cached solve gets executed
-    FloatField& get(int i);
+    FloatField &get(int i);
 
-      FloatField &W() { return W_; };
+    FloatField &W() { return W_; };
 
-      NeighbourFieldAB &N() { return np_; };
+    NeighbourFieldAB &N() { return np_; };
 
-      KernelGradientField &dWdx() { return dW_; };
+    KernelGradientField &dWdx() { return dW_; };
 
-      FloatField& sum_AB() {
+    FloatField &sum_AB() {
         sum_AB_impl(f_, np_, W_);
         return f_;
     };
 
-
-    template <class RHS>
-    FloatField& sum_AB(RHS rhs){
-        sum_AB_impl(f_, np_, rhs*W_);
+    template <class RHS> FloatField &sum_AB(RHS rhs) {
+        sum_AB_impl(f_, np_, rhs * W_);
         return f_;
     }
 
     // VectorField& ddx() {
     // };
 
-    template <class RHS>
-    void ddt(RHS rhs) {
+    template <class RHS> void ddt(RHS rhs) {
 
-        // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1) ...
-        
-
-
+        // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1)
+        // ...
     }
 
     // template<class T>
     // virtual T expression();
 
-
     // solve();
-
-
 };
 
 class VectorFieldEquation : public Model {
 
-protected:
+  protected:
+    TimeGraph &time_;
 
-    TimeGraph& time_;
+    NeighbourFieldAB &np_;
 
-    NeighbourFieldAB & np_;
+    FloatField &W_;
 
-    FloatField&      W_;
+    KernelGradientField &dW_;
 
-    KernelGradientField & dW_;
+    VectorField &f_;
 
-    VectorField& f_;
-
-public:
-
+  public:
     VectorFieldEquation(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        VectorField& f);
+        VectorField &f);
 
     FloatField &W() { return W_; };
 
@@ -472,14 +428,10 @@ public:
     // RHS sum_AB(LHS lhs){
     //     struct sum_AB_s {
 
-
-
     //     }
     //    return sum_AB_s
-    // } 
+    // }
 
     // solve();
-
-
 };
 #endif

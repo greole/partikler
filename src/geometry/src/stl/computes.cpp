@@ -17,14 +17,14 @@
     contact: go@hpsim.de
 */
 
-#include "Logger.hpp"
 #include "Field.hpp"
+#include "Logger.hpp"
 #include "SearchCubes.hpp"
 
-#include <algorithm>    // std::min
+#include <algorithm> // std::min
 #include <math.h>    // std::min
+#include <stdlib.h>  // std::min
 #include <time.h>    // std::min
-#include <stdlib.h>    // std::min
 
 // TODO Refactor to proper model
 // void compute_forces(
@@ -74,8 +74,7 @@
 //   // logger.info_end();
 // };
 
-void add_random_noise(Logger logger, VectorField &u, const float dx) {
-}
+void add_random_noise(Logger logger, VectorField &u, const float dx) {}
 
 // void limit_dt_du(
 //          const VectorField &du,
@@ -145,7 +144,6 @@ half_sphere(Point O, Point P, CGALVector PN, CGALVector D, float maxDx) {
     }
     return PN * frac;
 }
-
 
 // void snap_to_surface(
 //   std::vector<Facet_handle>& facets,

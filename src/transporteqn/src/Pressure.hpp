@@ -17,29 +17,27 @@
     contact: go@hpsim.de
 */
 
-
 #ifndef Pressure_H
 #define Pressure_H
 
-#include <string>      // for string
+#include <string> // for string
 
-#include "Models.hpp"  // for FloatFieldEquation, ModelRegister (ptr only)
-#include "Field.hpp"   // for FloatField, VectorField
+#include "Field.hpp" // for FloatField, VectorField
 #include "FieldOps.hpp"
+#include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
 class Pressure : public FloatFieldEquation {
 
     REGISTER_DEC_TYPE(Pressure);
 
   private:
-
     // Coeffs
     const float c_;
     const float rho_0_;
@@ -57,9 +55,10 @@ class Pressure : public FloatFieldEquation {
     VectorField &dp_;
 
   public:
-
     Pressure(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };

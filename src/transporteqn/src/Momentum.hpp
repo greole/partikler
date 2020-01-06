@@ -17,30 +17,27 @@
     contact: go@hpsim.de
 */
 
-
 #ifndef MOMENTUM_H
 #define MOMENTUM_H
 
-#include <string>      // for string
+#include <string> // for string
 
-#include "Models.hpp"  // for ModelRegister (ptr only), REGISTER_DEC_TYPE
-#include "Field.hpp"   // for VectorField
+#include "Field.hpp" // for VectorField
 #include "FieldOps.hpp"
+#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "Vec3.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
-
+} // namespace YAML
 
 class Momentum : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Momentum);
 
-private:
-
+  private:
     // In
     const VectorField &dnu_;
     const VectorField &dp_;
@@ -49,14 +46,15 @@ private:
     VectorField &u_;
     VectorField &du_;
 
-    TimeGraph& time_;
+    TimeGraph &time_;
 
-public:
+  public:
     Momentum(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
-
 };
 
 #endif

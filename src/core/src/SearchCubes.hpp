@@ -20,61 +20,60 @@
 #ifndef SEARCHCUBES_H
 #define SEARCHCUBES_H
 
-#include <omp.h>      // omp_get_num_threads
-#include <stddef.h>               // for size_t
-#include <vector>                 // for vector
+#include <omp.h>    // omp_get_num_threads
+#include <stddef.h> // for size_t
+#include <vector>   // for vector
 
-#include "cgal/CGALHelper.hpp"    // for STLSurfaceDist, Point3D
-#include "Field.hpp"              // for FieldAB
+#include "Field.hpp" // for FieldAB
 #include "Logger.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"  // for Point, Facet_handle
-
+#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist, Point3D
+#include "cgal/CGALTYPEDEFS.hpp" // for Point, Facet_handle
 
 struct NeighbourIdHalfStencil {
-  // Stores the stride of a domain, ie the difference of search cubes ids
-  // for the 26 neighbour cubes. Since the stride is symmetric
-  // only half of the 26 values are stored. Addition of the stencil
-  // values yields the upper and subtraction the lower neighbours
-  // Values are Stored as size_t for simpler addition without type conversion.
+    // Stores the stride of a domain, ie the difference of search cubes ids
+    // for the 26 neighbour cubes. Since the stride is symmetric
+    // only half of the 26 values are stored. Addition of the stencil
+    // values yields the upper and subtraction the lower neighbours
+    // Values are Stored as size_t for simpler addition without type conversion.
 
-  //  Bottom        Middle        Top
-  //  ^ y           ^ y           ^ y
-  //  |x  x  x      |1  2  3      |10 11  12 // back
-  //  |x  x  x      |x  x  0      |7   8   9 // middle
-  //  |x  x  x      |x  x  x      |4   5   6 // front
-  //  |-------> x   |-------> x   |-------> x
-  //  left  right                           n_cubes_[0]=3
-  //  Bottom        Middle        Top
-  //  ^ y           ^ y           ^ y
-  //  |06 07 08     | x  x  x     | x  x  x // back
-  //  |03 04 05     |12  x  x     | x  x  x // middle
-  //  |00 01 02     |09 10 11     | x  x  x // front
-  //  |-------> x   |-------> x   |-------> x
-  //  left  right                           n_cubes_[0]=3
+    //  Bottom        Middle        Top
+    //  ^ y           ^ y           ^ y
+    //  |x  x  x      |1  2  3      |10 11  12 // back
+    //  |x  x  x      |x  x  0      |7   8   9 // middle
+    //  |x  x  x      |x  x  x      |4   5   6 // front
+    //  |-------> x   |-------> x   |-------> x
+    //  left  right                           n_cubes_[0]=3
+    //  Bottom        Middle        Top
+    //  ^ y           ^ y           ^ y
+    //  |06 07 08     | x  x  x     | x  x  x // back
+    //  |03 04 05     |12  x  x     | x  x  x // middle
+    //  |00 01 02     |09 10 11     | x  x  x // front
+    //  |-------> x   |-------> x   |-------> x
+    //  left  right                           n_cubes_[0]=3
 
-  std::vector<size_t> stencil;
+    std::vector<size_t> stencil;
 
-  NeighbourIdHalfStencil (size_t nx, size_t ny) {
-    // TODO leave it a size_t, iterate only till 12, since
-    // the stencil is symmetric anyway
-    const size_t ny_nx = nx*ny;
+    NeighbourIdHalfStencil(size_t nx, size_t ny) {
+        // TODO leave it a size_t, iterate only till 12, since
+        // the stencil is symmetric anyway
+        const size_t ny_nx = nx * ny;
 
-    stencil = std::vector<size_t> {
-                                   1,              // right
-                                   nx - 1,         // back left
-                                   nx    ,         // back centre
-                                   nx + 1,         // back right
-                                   ny_nx - nx - 1, // upper front left
-                                   ny_nx - nx    , // upper front centre
-                                   ny_nx - nx + 1, // upper front right
-                                   ny_nx       -1, // upper middle left
-                                   ny_nx         , // upper middle centre
-                                   ny_nx      + 1, // upper middle right
-                                   ny_nx + nx - 1, // upper back left
-                                   ny_nx + nx    , // upper back centre
-                                   ny_nx + nx + 1  // upper back right
+        stencil = std::vector<size_t> {
+            1,              // right
+            nx - 1,         // back left
+            nx,             // back centre
+            nx + 1,         // back right
+            ny_nx - nx - 1, // upper front left
+            ny_nx - nx,     // upper front centre
+            ny_nx - nx + 1, // upper front right
+            ny_nx - 1,      // upper middle left
+            ny_nx,          // upper middle centre
+            ny_nx + 1,      // upper middle right
+            ny_nx + nx - 1, // upper back left
+            ny_nx + nx,     // upper back centre
+            ny_nx + nx + 1  // upper back right
+        };
     };
-  };
 };
 
 struct SubDivision {
@@ -102,13 +101,12 @@ struct SearchCubeDomain {
 };
 
 SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> & particles, float dx);
+initSearchCubeDomain(const std::vector<Point> &particles, float dx);
 
 struct NeighbourPair {
     size_t ownId;
     size_t neighId;
 };
-
 
 struct SortedNeighbours {
     std::vector<NeighbourPair> ids;

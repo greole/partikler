@@ -20,9 +20,9 @@
 #ifndef CGALHelper_H
 #define CGALHelper_H
 
-#include "Vec3.hpp"                          // for Vec3
+#include "CGALTYPEDEFS.hpp" // for Facet_handle, CGALVector
 #include "Helper.hpp"
-#include "CGALTYPEDEFS.hpp"                  // for Facet_handle, CGALVector
+#include "Vec3.hpp" // for Vec3
 
 // A collection of CGAL related functions
 
@@ -43,14 +43,13 @@ CGALVector surfaceVector(const Facet &f);
 
 struct Point3D {
     // 3*4bytes = 12bytes
-    float x,y,z;
+    float x, y, z;
 };
 
 struct HitPoint {
     bool hit;
     Point X;
 };
-
 
 struct STLSurfaceDist {
     // Stores the distance of particles on different
@@ -93,10 +92,10 @@ double length(CGALVector a);
 
 Matrix createRotationMatrix(CGALVector N1, CGALVector N2);
 
-struct CommonVertices{
-  int n;
-  Point A;
-  Point B;
+struct CommonVertices {
+    int n;
+    Point A;
+    Point B;
 };
 
 CommonVertices commonVertices(const Facet &F1, const Facet &F2);
@@ -104,7 +103,7 @@ CommonVertices commonVertices(const Facet &F1, const Facet &F2);
 // TODO compute face2facePath of type std::vector<Facet> from
 // (Point P1, Point P2, Facet F1, Facet F2) {
 // Step 1. check if F1 and F2 have two common vertices
-// if so stop 
+// if so stop
 // otherwise compute face2facePath of neighbour of F1
 // if already recursed then dont do another recursion
 // if no two common points try next facet neighbour
@@ -116,18 +115,16 @@ Point projectedPoint(Path p, Point P);
 
 Vec3 rotate(Matrix R, Vec3 a);
 
-Triangle facetToTriangle(const Facet& facet);
+Triangle facetToTriangle(const Facet &facet);
 
 // Functors
-struct Compute_Facet_Area
-{
-    double operator()(const Facet& f) const;
+struct Compute_Facet_Area {
+    double operator()(const Facet &f) const;
 };
 
-struct Compute_Facet_Normal
-{
-    inline CGALVector operator() (const Facet& f) const {
-      return facet_normal(f);
+struct Compute_Facet_Normal {
+    inline CGALVector operator()(const Facet &f) const {
+        return facet_normal(f);
     }
 };
 
@@ -141,23 +138,21 @@ struct Compute_Facet_Directions {
     }
 };
 
-struct movePoint
-{
+struct movePoint {
     CGALVector n;
     float x, y, z;
 
-    inline movePoint (CGALVector normal, float dx) {
+    inline movePoint(CGALVector normal, float dx) {
         n = normal;
         x = dx;
         y = dx;
         z = dx;
     }
 
-    inline Point operator() (const Point& p) const {
-        return Point(p.x() + x*n.x(), p.y() + y*n.y(), p.z() + z*n.z());
+    inline Point operator()(const Point &p) const {
+        return Point(p.x() + x * n.x(), p.y() + y * n.y(), p.z() + z * n.z());
     }
 };
-
 
 // struct Generate_Points_at_Edges {
 //     const float dx_;
@@ -189,8 +184,8 @@ struct movePoint
 //                   float lambda = (float)i / ((float)n_points + 1.0);
 //                   // TODO use emplace back
 //                   // TODO shift outwards by dx in edge normal direction
-//                   fdp_.points.push_back(Point(F + lambda * (L - F))); // + 0.01*dx_*(float)j*C));
-//                   fdp_.fixId.push_back(0);
+//                   fdp_.points.push_back(Point(F + lambda * (L - F))); // +
+//                   0.01*dx_*(float)j*C)); fdp_.fixId.push_back(0);
 //                   fdp_.maxDx.push_back(0.0);
 //                   fdp_.mType.push_back(0);   // Fixed Point atm
 //                   fdp_.dir.push_back(L - F); // Fixed Point atm
@@ -200,7 +195,6 @@ struct movePoint
 //         }
 //     }
 // };
-
 
 // struct Generate_Random_Points_at_Facets
 // {
@@ -278,16 +272,11 @@ struct movePoint
 // };
 
 struct EdgeNormal {
-  CGALVector EN;
-  CGALVector FN;
+    CGALVector EN;
+    CGALVector FN;
 };
 
-
-EdgeNormal inwardPointingEdgeNormal(
-                                    Point &A,
-                                    Point &B,
-                                    Facet &f
-    );
+EdgeNormal inwardPointingEdgeNormal(Point &A, Point &B, Facet &f);
 
 Point limited_project_point(
     Point P,
@@ -311,8 +300,7 @@ struct Generate_Points_at_Facets {
     Generate_Points_at_Facets(
         const float dx,
         std::vector<Point> &points,
-        std::vector<Facet_handle> &initial_facets
-        )
+        std::vector<Facet_handle> &initial_facets)
         : dx_(dx),
           // dx2_(dx*dx),
           points_(points),
@@ -327,7 +315,6 @@ struct Generate_Points_at_Facets {
 std::ostream &operator<<(std::ostream &os, Point const &p);
 
 STLSurfaceDist compute_STLSurface_dist(
-    Point opos, Point npos,
-    Facet_handle start, Facet_handle end);
+    Point opos, Point npos, Facet_handle start, Facet_handle end);
 
 #endif

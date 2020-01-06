@@ -23,8 +23,6 @@
     // 2. set boundary id to boundaryIds_ field
 */
 
-
-
 #include "GenerateBoundaryParticles.hpp"
 
 GenerateBoundaryParticles::GenerateBoundaryParticles(
@@ -41,10 +39,10 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       boundary_name_(read_coeff<std::string>("name")),
       fieldId_(fieldIdMap_.append(boundary_name_)),
       dx_(read_coeff<float>("dx")),
-      translation_vector_(read_translation_vector(parameter)) {
-}
+      translation_vector_(read_translation_vector(parameter)) {}
 
-std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
+std::vector<float>
+GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
 
     if (!parameter["translate"]) return {0, 0, 0};
 
@@ -53,7 +51,7 @@ std::vector<float> GenerateBoundaryParticles::read_translation_vector(YAML::Node
 }
 
 YAML::Node GenerateBoundaryParticles::default_graph() {
-    YAML::Node node;  // starts out as NULL
+    YAML::Node node; // starts out as NULL
 
     YAML::Node reader;
     // Reads the STL file
@@ -119,19 +117,14 @@ void GenerateBoundaryParticles::execute() {
 
     auto node = default_graph();
 
-    for (auto el: node["pre"]) {
+    for (auto el : node["pre"]) {
 
         YAML::const_iterator it = el.begin();
         auto model_namespace = it->first.as<std::string>();
         auto model_name = it->second["model"].as<std::string>();
 
         auto model = ModelFactory::createInstance(
-            model_namespace,
-            model_name,
-            model_name,
-            it->second,
-            local_objReg_
-            );
+            model_namespace, model_name, model_name, it->second, local_objReg_);
 
         timeGraph_.push_back_pre(model);
     }
@@ -144,32 +137,26 @@ void GenerateBoundaryParticles::execute() {
     // float kernel_relaxation = 1.0;
     // float noise_relaxation = 1.0;
 
-
     // surface slide particle have type 2
     // IntField &type = get_objReg().create_field<IntField>("type", 2);
     // SizeTField &idx = obj_reg.create_idx_field();
 
     // Register Models
-    for (auto el: node["main"]) {
+    for (auto el : node["main"]) {
 
         YAML::const_iterator it = el.begin();
         auto model_namespace = it->first.as<std::string>();
         auto model_name = it->second["model"].as<std::string>();
 
         auto model = ModelFactory::createInstance(
-            model_namespace,
-            model_name,
-            model_name,
-            it->second,
-            local_objReg_
-            );
+            model_namespace, model_name, model_name, it->second, local_objReg_);
 
         timeGraph_.push_back_main(model);
     }
 
     timeGraph_.execute_main();
 
-    auto& loc_objs = local_objReg_.get_objects();
+    auto &loc_objs = local_objReg_.get_objects();
 
     logger_.info_begin() << "Transfering ";
 

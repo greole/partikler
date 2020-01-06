@@ -23,10 +23,9 @@
 #include <array>
 #include <iostream>
 
-struct Vec3: std::array<float, 3> {
+struct Vec3 : std::array<float, 3> {
 
-    Vec3& operator=(const Vec3 &x);
-
+    Vec3 &operator=(const Vec3 &x);
 };
 
 // Eager Operators
@@ -36,18 +35,18 @@ struct Vec3: std::array<float, 3> {
 // inner type for the lazy field functions
 
 // scalar multiplication
-Vec3 operator*(float a, const Vec3& x);
+Vec3 operator*(float a, const Vec3 &x);
 
 // scalar division
-Vec3 operator/(const Vec3& x, float a);
+Vec3 operator/(const Vec3 &x, float a);
 
 // dot product
-float operator*(const Vec3& x, const Vec3& y);
+float operator*(const Vec3 &x, const Vec3 &y);
 
 // addition
-Vec3 operator+(const Vec3& x, const Vec3& y);
+Vec3 operator+(const Vec3 &x, const Vec3 &y);
 
-Vec3 operator-(const Vec3& x, const Vec3& y);
+Vec3 operator-(const Vec3 &x, const Vec3 &y);
 
 std::ostream &operator<<(std::ostream &os, Vec3 const &f);
 

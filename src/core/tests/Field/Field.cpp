@@ -1,27 +1,27 @@
-#include "cgal/CGALTYPEDEFS.hpp"
-#include "gtest/gtest.h"
 #include "cgal/CGALHelper.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"
 #include "core.hpp"
+#include "gtest/gtest.h"
 #include <vector>
 
-TEST (FloatField, reoderVector ) {
+TEST(FloatField, reoderVector) {
 
     std::vector<size_t> idx {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
     FloatField v(10, 0.0);
 
-    for  (size_t i = 0; i<idx.size();i++) {
+    for (size_t i = 0; i < idx.size(); i++) {
         v[i] = float(i);
     }
 
     reorder_vector(v, idx);
 
-    for (size_t i=0; i<idx.size(); i++) {
-        ASSERT_EQ(v[i], float(9-i));
+    for (size_t i = 0; i < idx.size(); i++) {
+        ASSERT_EQ(v[i], float(9 - i));
     }
 }
 
-TEST (FloatField, copyStdVector ) {
+TEST(FloatField, copyStdVector) {
 
     std::vector<float> a(2, 2.0);
 
@@ -31,10 +31,9 @@ TEST (FloatField, copyStdVector ) {
 
     ASSERT_EQ(res[0], 2.0);
     ASSERT_EQ(res[1], 2.0);
-
 }
 
-TEST (FloatField, eagerCopy ) {
+TEST(FloatField, eagerCopy) {
 
     FloatField a(2, 2.0);
 
@@ -44,11 +43,9 @@ TEST (FloatField, eagerCopy ) {
 
     ASSERT_EQ(res[0], 2.0);
     ASSERT_EQ(res[1], 2.0);
-
 }
 
-
-TEST (FloatField, sumABTest ) {
+TEST(FloatField, sumABTest) {
 
     FloatField a(2, 1.0);
 
@@ -62,10 +59,9 @@ TEST (FloatField, sumABTest ) {
 
     ASSERT_EQ(res[0], 3.0);
     ASSERT_EQ(res[1], 3.0);
-
 }
 
-TEST (FloatField, ComplexArithmeticFields ) {
+TEST(FloatField, ComplexArithmeticFields) {
 
     FloatField a(1, 1.0);
 
@@ -73,14 +69,12 @@ TEST (FloatField, ComplexArithmeticFields ) {
 
     FloatField res(1, 0.0);
 
-    solve(res, (a+b)/b);
+    solve(res, (a + b) / b);
 
     ASSERT_EQ(res[0], 1.5);
-
 }
 
-
-TEST (FloatField, MultFloatFields ) {
+TEST(FloatField, MultFloatFields) {
 
     FloatField a(1, 1.0);
 
@@ -88,28 +82,26 @@ TEST (FloatField, MultFloatFields ) {
 
     FloatField res(1, 0.0);
 
-    solve(res, a*b);
+    solve(res, a * b);
 
     ASSERT_EQ(res[0], 2.0);
-
 }
 
-TEST (FloatField, AddFloatFields ) {
+TEST(FloatField, AddFloatFields) {
 
-  FloatField a(1, 1.0);
+    FloatField a(1, 1.0);
 
-  FloatField b(1, 2.0);
+    FloatField b(1, 2.0);
 
-  FloatField res(1, 0.0);
+    FloatField res(1, 0.0);
 
-  solve(res, a+b);
+    solve(res, a + b);
 
-  ASSERT_EQ(res[0], 3.0);
-
+    ASSERT_EQ(res[0], 3.0);
 }
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleTest(&argc, argv);
 
-  return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

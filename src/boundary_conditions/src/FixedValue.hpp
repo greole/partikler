@@ -17,42 +17,36 @@
     contact: go@hpsim.de
 */
 
-
 #ifndef PARTIKLER_FIXEDVALUE_INCLUDED_H
 #define PARTIKLER_FIXEDVALUE_INCLUDED_H
 
-#include <map>         // for map
-#include <string>      // for string
+#include <map>    // for map
+#include <string> // for string
 
-#include "Models.hpp"  // for Model, ModelRegister (ptr only), REGISTER_DEC_...
+#include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
-class FixedValue: public Model {
+class FixedValue : public Model {
 
     REGISTER_DEC_TYPE(FixedValue);
 
-private:
-
-
+  private:
     // maps boundary id to fixed uniform values
     std::map<std::string, std::map<std::string, float>> float_fields_ {};
 
-
-public:
-
-FixedValue(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry & objReg);
+  public:
+    FixedValue(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
-
 };
 
 #endif

@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-# include "Pressure.hpp"
+#include "Pressure.hpp"
 
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -43,7 +43,6 @@ void Pressure::execute() {
 
     // const ScalarField tmp0 = (rho_/rho_0_).pow(gamma_);
     // const ScalarField tmp1 = ((tmp0 - 1.0)*prefac_)+p_0_;
-
 
     // assign(p,
     //     prefac_ * ((rho_ / rho_0_).pow(gamma_) - 1.0) + p_0_,

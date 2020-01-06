@@ -17,44 +17,39 @@
     contact: go@hpsim.de
 */
 
-
 #ifndef PARTIKLER_CREATEFIELDS_INCLUDED_H
 #define PARTIKLER_CREATEFIELDS_INCLUDED_H
 
-#include <string>      // for string
-#include <vector>      // for vector
+#include <string> // for string
+#include <vector> // for vector
 
-#include "Models.hpp"  // for Model, ModelRegister (ptr only), REGISTER_DEC_...
+#include "Field.hpp"  // for PointField
+#include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "cgal/CGALHelper.hpp"
-#include "Field.hpp"   // for PointField
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
-class InitFields: public Model {
+class InitFields : public Model {
 
     REGISTER_DEC_TYPE(InitFields);
 
-private:
-
-    PointField& pos_;
+  private:
+    PointField &pos_;
 
     std::vector<std::string> float_fields_ {};
 
     std::vector<std::string> vec_fields_ {};
 
-
-public:
-
-InitFields(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry & objReg);
+  public:
+    InitFields(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
-
 };
 
 #endif

@@ -20,23 +20,23 @@
 #ifndef CONTI_H
 #define CONTI_H
 
-#include <string>      // for string
+#include <string> // for string
 
-#include "Models.hpp"  // for FloatFieldEquation, ModelRegister (ptr only)
-#include "Field.hpp"   // for FloatField, PointField
-#include "SearchCubes.hpp"
+#include "Field.hpp" // for FloatField, PointField
 #include "FieldOps.hpp"
+#include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
+#include "SearchCubes.hpp"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
 class Conti : public FloatFieldEquation {
 
     REGISTER_DEC_TYPE(Conti);
 
-private:
+  private:
     // In
     const PointField &pos_; // Particle positions
 
@@ -46,13 +46,13 @@ private:
     // Coeffs
     const float lower_limit_;
 
-
-public:
+  public:
     Conti(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };
 
 #endif
-

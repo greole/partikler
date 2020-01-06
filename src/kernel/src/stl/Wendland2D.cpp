@@ -57,7 +57,7 @@ void STLWendland2D::execute() {
         if (q > 2.) {
             log().warn() << "Outside kernel radius";
             W_[pid] = 0.0;
-            dWdx_[pid] = {{0,0,0}, {0,0,0}};
+            dWdx_[pid] = {{0, 0, 0}, {0, 0, 0}};
             continue;
         }
 
@@ -71,16 +71,16 @@ void STLWendland2D::execute() {
         W_[pid] = qfac4 * q2 * W_fak2_;
 
         const float prefact = 10. * qfac2 * q * dW_fak2_;
-        if( len != 0.0) {
-          for(int j=0;j<3;j++) {
-              dWdx_[pid].on[j] = (float)lenVo[j] / len * prefact;
-              dWdx_[pid].no[j] = (float)lenVn[j] / len * prefact;
-          }
+        if (len != 0.0) {
+            for (int j = 0; j < 3; j++) {
+                dWdx_[pid].on[j] = (float)lenVo[j] / len * prefact;
+                dWdx_[pid].no[j] = (float)lenVn[j] / len * prefact;
+            }
         } else {
-          for(int j=0;j<3;j++) {
-              dWdx_[pid] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
-          }
-          log().warn() << "Neighbour sum == 0";
+            for (int j = 0; j < 3; j++) {
+                dWdx_[pid] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+            }
+            log().warn() << "Neighbour sum == 0";
         }
     }
 

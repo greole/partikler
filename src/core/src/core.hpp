@@ -20,11 +20,11 @@
 #ifndef PARTIKLER_CORE_INCLUDED
 #define PARTIKLER_CORE_INCLUDED
 
-#include "Vec3.hpp"
-#include "Object.hpp"
-#include "Models.hpp"
 #include "Field.hpp"
 #include "FieldOps.hpp"
+#include "Models.hpp"
+#include "Object.hpp"
 #include "SearchCubes.hpp"
+#include "Vec3.hpp"
 
 #endif

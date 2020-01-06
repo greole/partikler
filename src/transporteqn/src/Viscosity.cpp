@@ -16,7 +16,7 @@
 
     contact: go@hpsim.de
 */
-# include "Viscosity.hpp"
+#include "Viscosity.hpp"
 
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -56,7 +56,7 @@ void Viscosity::execute() {
 
     // const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
 
-    // // TODO Reset 
+    // // TODO Reset
     // dnu_.set(Vector {0,0,0});
 
     // // weighted sum
@@ -76,7 +76,6 @@ void Viscosity::execute() {
     // dnu_ *= nu_;
 
     log().info_end();
-
 }
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);

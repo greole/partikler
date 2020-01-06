@@ -17,12 +17,11 @@
     contact: go@hpsim.de
 */
 
-# include "FixedValue.hpp"
+#include "FixedValue.hpp"
 
 FixedValue::FixedValue(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg)
-{
+    : Model(model_name, parameter, objReg) {
     for (YAML::Node ps : parameter["boundaries"]) {
         std::string fname = ps["field"].as<std::string>();
         for (auto p : ps["values"]) {
@@ -36,24 +35,22 @@ FixedValue::FixedValue(
 void FixedValue::execute() {
 
     // TODO move to constructor use create fields methods
-    FieldIdMap& fieldIdMap_(get_objReg().get_object<FieldIdMap>("FieldIdMap"));
-    IntField& boundary_id_(get_objReg().get_object<IntField>("boundary"));
+    FieldIdMap &fieldIdMap_(get_objReg().get_object<FieldIdMap>("FieldIdMap"));
+    IntField &boundary_id_(get_objReg().get_object<IntField>("boundary"));
 
-    for(auto field: float_fields_) {
-        for (auto boundary: field.second) {
+    for (auto field : float_fields_) {
+        for (auto boundary : field.second) {
             int fieldId = fieldIdMap_.getId(boundary.first);
 
-            auto & target = get_objReg().get_object<FloatField>(field.first);
+            auto &target = get_objReg().get_object<FloatField>(field.first);
             std::cout << target.get_name() << target.size() << std::endl;
-                for(size_t idx=0; idx<target.size(); idx++) {
-                    if (boundary_id_[idx] == fieldId) {
-                        target[idx] = boundary.second;
-                    }
+            for (size_t idx = 0; idx < target.size(); idx++) {
+                if (boundary_id_[idx] == fieldId) {
+                    target[idx] = boundary.second;
                 }
+            }
         }
     }
-
-
 }
 
 REGISTER_DEF_TYPE(BOUNDARY, FixedValue);

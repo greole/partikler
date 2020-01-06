@@ -22,24 +22,26 @@
 ModelFactory::map_type *ModelFactory::map_;
 
 FloatFieldEquation::FloatFieldEquation(
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg, FloatField& f)
+    const std::string &model_name,
+    YAML::Node parameter,
+    ObjectRegistry &objReg,
+    FloatField &f)
     : Model(model_name, parameter, objReg),
       time_(objReg.get_object<TimeGraph>("TimeGraph")),
       np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
       W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")),
-      f_(f)
-{}
+      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f) {}
 
 VectorFieldEquation::VectorFieldEquation(
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg, VectorField& f)
+    const std::string &model_name,
+    YAML::Node parameter,
+    ObjectRegistry &objReg,
+    VectorField &f)
     : Model(model_name, parameter, objReg),
       time_(objReg.get_object<TimeGraph>("TimeGraph")),
       np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
       W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")),
-      f_(f)
-{}
+      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f) {}
 // ModelRegister<SPHModelGraph> SPHModelGraph::reg("Core::SPHModelGraph");
 
 REGISTER_DEF_TYPE(CORE, ModelGraph);

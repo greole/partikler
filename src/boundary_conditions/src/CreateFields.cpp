@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-# include "CreateFields.hpp"
+#include "CreateFields.hpp"
 
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)

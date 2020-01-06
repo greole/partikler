@@ -20,42 +20,36 @@
 #ifndef PARTIKLER_WRITER_INCLUDED_H
 #define PARTIKLER_WRITER_INCLUDED_H
 
-#include <string>      // for string
+#include <string> // for string
 
-#include "Models.hpp"  // for TimeGraph (ptr only), Model
+#include "Models.hpp" // for TimeGraph (ptr only), Model
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 
-class WriterBase: public Model {
+class WriterBase : public Model {
 
-private:
-
+  private:
     int write_freq_;
 
     int last_write_;
 
     // store reference to current TimeGraph instance
-    TimeGraph& time_graph_;
+    TimeGraph &time_graph_;
 
-public:
-
-
+  public:
     WriterBase(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
+        ObjectRegistry &objReg);
 
-    TimeGraph& get_timeGraph(){return time_graph_;};
+    TimeGraph &get_timeGraph() { return time_graph_; };
 
-    int get_write_freq(){return write_freq_;};
+    int get_write_freq() { return write_freq_; };
 
     bool write();
-
 };
 
 #endif
-
-

@@ -17,7 +17,6 @@
     contact: go@hpsim.de
 */
 
-
 #include "ParticleGenerator.hpp"
 
 SPHSTLReader::SPHSTLReader(
@@ -25,14 +24,13 @@ SPHSTLReader::SPHSTLReader(
     : Model(model_name, parameter, objReg),
       fn_(parameter["file"].as<std::string>()) {
 
+    log().info_begin() << "Reading input file: " << fn_;
 
-    log().info_begin() << "Reading input file: " <<  fn_;
-
-    std::ifstream * istream= new std::ifstream(fn_);
+    std::ifstream *istream = new std::ifstream(fn_);
 
     // read_STL(istream, points, facets, false);
-    Polyhedron_builder_from_STL<HalfedgeDS> * builder = new
-        Polyhedron_builder_from_STL<HalfedgeDS>  (*istream);
+    Polyhedron_builder_from_STL<HalfedgeDS> *builder =
+        new Polyhedron_builder_from_STL<HalfedgeDS>(*istream);
 
     // objReg.register_object<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
     //     std::make_unique<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
@@ -52,27 +50,21 @@ SPHSTLReader::SPHSTLReader(
 
     objReg.register_object<Generic<CGALPolyhedron>>(
         std::make_unique<Generic<CGALPolyhedron>>(
-            "polyhedron", GenericType, *polyhedron
-            )
-        );
+            "polyhedron", GenericType, *polyhedron));
 
-    delete(polyhedron);
-    delete(builder);
-    delete(istream);
+    delete (polyhedron);
+    delete (builder);
+    delete (istream);
 
     log().info_end();
 }
 
-void SPHSTLReader::execute() {
-    log().info() << "Doing nothing";
-}
+void SPHSTLReader::execute() { log().info() << "Doing nothing"; }
 
 SPHParticleGenerator::SPHParticleGenerator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      boundary_id_(read_coeff<int>("id")),
-      polyhedron_(
-          objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
+    : Model(model_name, parameter, objReg), boundary_id_(read_coeff<int>("id")),
+      polyhedron_(objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
       facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
       pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       idx_(objReg.create_field<SizeTField>("idx")),
@@ -96,8 +88,8 @@ void SPHParticleGenerator::execute() {
 
     get_objReg().set_n_particles(n);
 
-    for (size_t i=0; i<(n-n_0); i++){
-        idx_.push_back(n_0+i);
+    for (size_t i = 0; i < (n - n_0); i++) {
+        idx_.push_back(n_0 + i);
         type_.push_back(2);
         boundary_.push_back(boundary_id_);
     }

@@ -17,8 +17,7 @@
     contact: go@hpsim.de
 */
 
-# include "STLPosIntegrator.hpp"
-
+#include "STLPosIntegrator.hpp"
 
 STLPosIntegrator::STLPosIntegrator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -29,8 +28,7 @@ STLPosIntegrator::STLPosIntegrator(
       idx_(objReg.get_object<SizeTField>("idx")),
       u_(objReg.get_object<VectorField>("u")),
       pos_(objReg.get_object<PointField>("Pos")),
-      time_(objReg.get_object<TimeGraph>("TimeGraph"))
-{}
+      time_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 void STLPosIntegrator::execute() {
 
@@ -39,10 +37,8 @@ void STLPosIntegrator::execute() {
 
     // PointField old_pos(pos_);
 
-    std::cout << u_.size() << " "
-              << facets_.size() << " "
-              << type_.size() << " "
-              << idx_.size() << std::endl;
+    std::cout << u_.size() << " " << facets_.size() << " " << type_.size()
+              << " " << idx_.size() << std::endl;
 
     VectorField dx(u_.size(), {0.0, 0.0, 0.0});
 
@@ -56,7 +52,8 @@ void STLPosIntegrator::execute() {
     // float dx_ratio = CFL /current_max_dx;
     // float two = 2.0;
     // float change = min(two, dx_ratio);
-    // time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() * change));
+    // time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() *
+    // change));
 
     log().info_end();
 }

@@ -19,21 +19,21 @@
 #ifndef PARTIKLER_FIELD_INCLUDED
 #define PARTIKLER_FIELD_INCLUDED
 
+#include <boost/yap/expression.hpp>  // for expression
+#include <boost/yap/user_macros.hpp> // for BOOST_YAP_USER_UDT_ANY_BINARY_O...
 #include <boost/yap/yap.hpp>
+#include <iostream> // for operator<<, ostream, basic_ostream
 #include <math.h>
-#include <stddef.h>                   // for size_t
-#include <boost/yap/expression.hpp>   // for expression
-#include <boost/yap/user_macros.hpp>  // for BOOST_YAP_USER_UDT_ANY_BINARY_O...
-#include <iostream>                   // for operator<<, ostream, basic_ostream
-#include <vector>                     // for vector, allocator
 #include <memory>
-#include <string>                     // for string, operator<<
-#include <type_traits>                // for true_type, false_type
+#include <stddef.h>    // for size_t
+#include <string>      // for string, operator<<
+#include <type_traits> // for true_type, false_type
+#include <vector>      // for vector, allocator
 
-#include "Vec3.hpp"                   // for Vec3, VectorPair (ptr only)
-#include "Object.hpp"                 // for SPHObject, GetFieldType, FloatF...
-#include "cgal/CGALTYPEDEFS.hpp"      // for Point
-#include "Logger.hpp"                 // for Logger
+#include "Logger.hpp"            // for Logger
+#include "Object.hpp"            // for SPHObject, GetFieldType, FloatF...
+#include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
+#include "cgal/CGALTYPEDEFS.hpp" // for Point
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
@@ -61,37 +61,26 @@
         continue;                                                              \
     }
 
-enum ReadOptions {
-    MUST_READ,
-    NO_READ
-};
+enum ReadOptions { MUST_READ, NO_READ };
 
-enum WriteOptions {
-    NO_WRITE,
-    WRITE
-};
+enum WriteOptions { NO_WRITE, WRITE };
 
 struct IOOptions {
     ReadOptions r;
     WriteOptions w;
 };
 
-
-
 template <class T> class Field : public T, public SPHObject {
 
   private:
-
     std::vector<std::string> comp_names_;
 
     IOOptions iooptions_;
 
   protected:
-
     bool reorder_ = true;
 
   public:
-
     Field() {};
 
     Field(
@@ -106,14 +95,12 @@ template <class T> class Field : public T, public SPHObject {
         typename T::value_type val,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : T(size, val),
-          SPHObject(name, GetFieldType<T>::value),
-          comp_names_(comp_names)
-        {};
+        : T(size, val), SPHObject(name, GetFieldType<T>::value),
+          comp_names_(comp_names) {};
 
-    void set_io_options(IOOptions ioo) {iooptions_ = ioo;};
+    void set_io_options(IOOptions ioo) { iooptions_ = ioo; };
 
-    IOOptions get_io_options() {return iooptions_;};
+    IOOptions get_io_options() { return iooptions_; };
 
     void operator=(Field<T> &b) { T::operator=(b); }
 
@@ -132,25 +119,21 @@ template <class T> class Field : public T, public SPHObject {
         if (reorder_ && T::size() > 0) {
             logger_.info_begin()
                 // << __PRETTY_FUNCTION__
-                << " reordering "
-                << name_;
+                << " reordering " << name_;
             reorder_vector(*this, idx);
             logger_.info_end();
         }
     }
 
-    std::vector<std::string> get_comp_names() const {return comp_names_;};
-
+    std::vector<std::string> get_comp_names() const { return comp_names_; };
 };
-
 
 // A derived field to distinguish AB fields from normal fields
 //
 // A FieldAB is an alias to Field, however, using inheritance
 // disallows using Field and FieldAB in binary operators of
 // type operator(T a, T b)
-template<class T>
-class FieldAB: public Field<T> {
+template <class T> class FieldAB : public Field<T> {
     using F = Field<T>;
     using F::F;
 };
@@ -185,22 +168,20 @@ template <class T> class B {
 
 // free function re-oders the vector by the idx vector
 template <class T>
-void reorder_vector(std::vector<T>& vec, const std::vector<size_t>& idxs){
+void reorder_vector(std::vector<T> &vec, const std::vector<size_t> &idxs) {
     std::vector<T> tmp(vec.size());
 
-    for(size_t i=0; i<idxs.size(); i++) {
+    for (size_t i = 0; i < idxs.size(); i++) {
         tmp[idxs[i]] = vec[i];
     }
 
-    vec=tmp;
+    vec = tmp;
 }
-
 
 // Lazy functions
 
 // Define a type trait that identifies std::vectors.
-template <typename T>
-struct is_field : std::false_type {};
+template <typename T> struct is_field : std::false_type {};
 
 template <typename T, typename A>
 struct is_field<Field<std::vector<T, A>>> : std::true_type {};
@@ -214,25 +195,20 @@ struct is_field<A<std::vector<T, Alloc>>> : std::true_type {};
 // template <>
 // struct is_field<Field<std::vector<Vec3>>> : std::true_type {};
 
-template<typename T>
-struct zero {};
+template <typename T> struct zero {};
 
-template<>
-struct zero<int> {constexpr static int val = 1;};
+template <> struct zero<int> { constexpr static int val = 1; };
 
-template<>
-struct zero<float> {constexpr static float val = 0.0;};
+template <> struct zero<float> { constexpr static float val = 0.0; };
 
-template<>
-struct zero<Vec3> {constexpr static Vec3 val = {0.0, 0.0, 0.0};};
+template <> struct zero<Vec3> { constexpr static Vec3 val = {0.0, 0.0, 0.0}; };
 
 // Define all the expression-returning numeric operators we need.  Each will
 // accept any std::vector<> as any of its arguments, and then any value in the
 // remaining argument, if any -- some of the operators below are unary.
 
 // -
-BOOST_YAP_USER_UDT_UNARY_OPERATOR(
-    negate, boost::yap::expression, is_field)
+BOOST_YAP_USER_UDT_UNARY_OPERATOR(negate, boost::yap::expression, is_field)
 
 // *
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
@@ -247,16 +223,13 @@ BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     modulus, boost::yap::expression, is_field)
 
 // +
-BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    plus, boost::yap::expression, is_field)
+BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(plus, boost::yap::expression, is_field)
 
 // -
-BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    minus, boost::yap::expression, is_field)
+BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(minus, boost::yap::expression, is_field)
 
 // <
-BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
-    less, boost::yap::expression, is_field)
+BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(less, boost::yap::expression, is_field)
 
 // >
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
@@ -282,22 +255,19 @@ BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     logical_or, boost::yap::expression, is_field)
 
-
 // &&
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     logical_and, boost::yap::expression, is_field)
 
-
-template<class T>
+template <class T>
 std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     os << f.get_type() << ": " << f.get_name() << "\n[";
-    for (auto &v: f) {
+    for (auto &v : f) {
         os << "\n " << v;
     }
     os << "\n]\n";
     return os;
 }
-
 
 using FloatField = Field<std::vector<float>>;
 using IntField = Field<std::vector<int>>;
@@ -313,13 +283,11 @@ using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
-PointField& operator+=(PointField& a, VectorField& b);
+PointField &operator+=(PointField &a, VectorField &b);
 
 // Template meta function to get SPHObjectType from std::vector<T>
-template<enum SPHObjectType T>
-struct GetField {};
+template <enum SPHObjectType T> struct GetField {};
 
-template<>
-struct GetField<FloatFieldType> {using type = FloatField;};
+template <> struct GetField<FloatFieldType> { using type = FloatField; };
 
 #endif

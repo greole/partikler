@@ -22,11 +22,13 @@
 // TODO Implement 2d and 3d kernel by deriving from base class
 
 Wendland::Wendland(
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg, float hfact)
+    const std::string &model_name,
+    YAML::Node parameter,
+    ObjectRegistry &objReg,
+    float hfact)
     : Model(model_name, parameter, objReg),
       h_(read_or_default_coeff<float>("h", 1.0)), ih_(1.0 / h_),
-      W_fak2_(hfact/(h_*h_)),
-      dW_fak2_(hfact/(h_*h_*h_)),
+      W_fak2_(hfact / (h_ * h_)), dW_fak2_(hfact / (h_ * h_ * h_)),
       pos_(objReg.get_particle_positions()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
@@ -61,7 +63,7 @@ void Wendland::execute() {
         if (q > 2.) {
             log().warn() << "Outside kernel radius";
             W_[pid] = 0.0;
-            dWdx_[pid] = {0,0,0};
+            dWdx_[pid] = {0, 0, 0};
             continue;
         }
 
@@ -75,15 +77,15 @@ void Wendland::execute() {
         W_[pid] = qfac4 * q2 * W_fak2_;
 
         const float prefact = 10. * qfac2 * q * dW_fak2_;
-        if( maglen > 0.0) {
-          for(int j=0;j<3;j++) {
-              dWdx_[pid][j] = (float) len[j] / maglen * prefact;
-          }
+        if (maglen > 0.0) {
+            for (int j = 0; j < 3; j++) {
+                dWdx_[pid][j] = (float)len[j] / maglen * prefact;
+            }
         } else {
-          for(int j=0;j<3;j++) {
-              dWdx_[pid] = {0.0, 0.0, 0.0};
-          }
-          log().warn() << "Neighbour sum == 0";
+            for (int j = 0; j < 3; j++) {
+                dWdx_[pid] = {0.0, 0.0, 0.0};
+            }
+            log().warn() << "Neighbour sum == 0";
         }
     }
 
@@ -91,15 +93,11 @@ void Wendland::execute() {
 }
 
 Wendland2D::Wendland2D(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg)
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Wendland(model_name, parameter, objReg, 7. / 64.) {}
 
 Wendland3D::Wendland3D(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg)
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Wendland(
           model_name,
           parameter,

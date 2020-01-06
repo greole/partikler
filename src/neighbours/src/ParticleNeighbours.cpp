@@ -21,8 +21,7 @@
 
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      dx_(parameter["dx"].as<float>()),
+    : Model(model_name, parameter, objReg), dx_(parameter["dx"].as<float>()),
       pos_(objReg.get_particle_positions()),
       facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
       sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
@@ -46,18 +45,12 @@ void SPHSTLParticleNeighbours::execute() {
 
     // TODO move sorting to countingSortParticles submodel
     reorder_vector(
-        facets_,
-        get_objReg().get_object<SizeTField>("sorting_idxs")
-        );
+        facets_, get_objReg().get_object<SizeTField>("sorting_idxs"));
 
     log().info_begin() << "Call createSTLNeighbours";
 
     // TODO to much copying
-    auto [np, sd] = createSTLNeighbours(
-        scd_(),
-        pos_,
-        sc_,
-        facets_);
+    auto [np, sd] = createSTLNeighbours(scd_(), pos_, sc_, facets_);
 
     // np_.set_field(np);
     np_ = np;
@@ -70,8 +63,7 @@ void SPHSTLParticleNeighbours::execute() {
 }
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {
-    scd_() = initSearchCubeDomain(
-        pos_, search_cube_size_*dx_);
+    scd_() = initSearchCubeDomain(pos_, search_cube_size_ * dx_);
 }
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);

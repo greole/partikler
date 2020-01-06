@@ -17,12 +17,10 @@
     contact: go@hpsim.de
 */
 
-
 #include "SearchCubes.hpp"
 
-
-SearchCubeDomain initSearchCubeDomain(
-    const std::vector<Point> & particles, float dx) {
+SearchCubeDomain
+initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
     auto bound_box = bounding_box(particles.begin(), particles.end());
 
     // bounds are scaled a bit to avoid particles on exact boundary

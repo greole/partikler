@@ -20,17 +20,17 @@
 #ifndef SORTPARTRICLES_H
 #define SORTPARTRICLES_H
 
-#include <string>      // for string
-#include <vector>      // for vector
+#include <string> // for string
+#include <vector> // for vector
 
-#include "Models.hpp"  // for Model, ModelRegister (ptr only), REGISTER_DEC_...
+#include "Field.hpp"  // for Field (ptr only), PointField, SizeTField
+#include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "SearchCubes.hpp"
-#include "Field.hpp"   // for Field (ptr only), PointField, SizeTField
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 struct SearchCube;
 struct SearchCubeDomain;
 template <class T> class Generic;
@@ -52,7 +52,9 @@ class CountingSortParticles : public Model {
 
   public:
     CountingSortParticles(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 

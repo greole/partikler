@@ -20,26 +20,24 @@
 #ifndef SPHOBJECT_REGISTRY_H
 #define SPHOBJECT_REGISTRY_H
 
-#include <stdio.h>             // for size_t
-#include <ext/alloc_traits.h>  // for __alloc_traits<>::value_type
-#include <vector>              // for vector<>::iterator, vector
-#include <iostream>            // for operator<<, basic_ostream, endl, char_...
-#include <memory>              // for shared_ptr, __shared_ptr_access, make_...
+#include <algorithm>          // for find_if, max
+#include <ext/alloc_traits.h> // for __alloc_traits<>::value_type
+#include <iostream>           // for operator<<, basic_ostream, endl, char_...
 #include <map>
-#include <algorithm>           // for find_if, max
-#include <string>              // for string, operator==, operator<<
-#include <utility>             // for move
+#include <memory> // for shared_ptr, __shared_ptr_access, make_...
 #include <stdexcept>
+#include <stdio.h> // for size_t
+#include <string>  // for string, operator==, operator<<
+#include <utility> // for move
+#include <vector>  // for vector<>::iterator, vector
 
-
-#include "Logger.hpp"          // for Logger
-#include "Field.hpp"           // for PointField
-#include "Object.hpp"          // for SPHObject, GenericType, SPHObjectType
+#include "Field.hpp"  // for PointField
+#include "Logger.hpp" // for Logger
+#include "Object.hpp" // for SPHObject, GenericType, SPHObjectType
 
 class ObjectRegistry {
 
-private:
-
+  private:
     using ObjReg = std::vector<std::shared_ptr<SPHObject>>;
 
     ObjReg objects_;
@@ -48,29 +46,27 @@ private:
 
     Logger logger_ = {};
 
-public:
-  template <class T> T &register_object(std::shared_ptr<SPHObject> f) {
-      std::cout << "Register " << f->get_type_str() << " "
-                << f->get_name() << std::endl;
-      int idx = objects_.size();
-      objects_.push_back(std::move(f));
-      return dynamic_cast<T &>(*objects_[idx]);
-  }
+  public:
+    template <class T> T &register_object(std::shared_ptr<SPHObject> f) {
+        std::cout << "Register " << f->get_type_str() << " " << f->get_name()
+                  << std::endl;
+        int idx = objects_.size();
+        objects_.push_back(std::move(f));
+        return dynamic_cast<T &>(*objects_[idx]);
+    }
 
-  template <class T>
-  std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
-      std::cout << "Register " << f->get_type_str() << " "
-                << f->get_name() << std::endl;
-      int idx = objects_.size();
-      objects_.push_back(std::move(f));
-      return std::dynamic_pointer_cast<T>(objects_[idx]);
-  }
+    template <class T>
+    std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
+        std::cout << "Register " << f->get_type_str() << " " << f->get_name()
+                  << std::endl;
+        int idx = objects_.size();
+        objects_.push_back(std::move(f));
+        return std::dynamic_pointer_cast<T>(objects_[idx]);
+    }
 
     // Setter
 
-    void set_n_particles(size_t n_particles) {
-        n_particles_ = n_particles;
-    }
+    void set_n_particles(size_t n_particles) { n_particles_ = n_particles; }
 
     void update_n_particles() {
         n_particles_ = get_particle_positions().size();
@@ -78,13 +74,13 @@ public:
 
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
-            if (f == nullptr ) continue;
+            if (f == nullptr) continue;
             if (f->get_name() == name) {
                 return dynamic_cast<T &>(*f);
             };
         }
         // TODO
-        throw std::invalid_argument( "received negative value" );
+        throw std::invalid_argument("received negative value");
     }
 
     // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
@@ -95,7 +91,7 @@ public:
             });
     }
 
-    ObjReg& get_objects() { return objects_; }
+    ObjReg &get_objects() { return objects_; }
 
     bool object_exists(const std::string name) const {
         for (auto &&f : objects_) {
@@ -122,8 +118,7 @@ public:
     template <class T>
     T &create_generic(const std::string name, typename T::value_type val) {
         if (object_exists(name)) return get_object<T>(name);
-        return register_object<T>(
-            std::make_unique<T>(name, GenericType, val));
+        return register_object<T>(std::make_unique<T>(name, GenericType, val));
     }
 
     template <class T>
@@ -144,36 +139,29 @@ public:
             name));
     }
 
-    template <class T>
-    T &create_field(const std::string name) {
+    template <class T> T &create_field(const std::string name) {
         if (object_exists(name)) return get_object<T>(name);
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_), name));
     }
-
-
 };
 
-class FieldIdMap: public SPHObject  {
+class FieldIdMap : public SPHObject {
 
-private:
-
+  private:
     std::vector<std::string> fields_;
 
-public:
-
-    FieldIdMap(
-        const std::string name,
-        const SPHObjectType type
-        ):SPHObject(name,type), fields_({}) {};
+  public:
+    FieldIdMap(const std::string name, const SPHObjectType type)
+        : SPHObject(name, type), fields_({}) {};
 
     // get field id from name string
     int getId(const std::string name) {
-        for(size_t i=0; i<fields_.size(); i++) {
-            if(name == fields_[i]) return i;
+        for (size_t i = 0; i < fields_.size(); i++) {
+            if (name == fields_[i]) return i;
         }
         // TODO
-        throw std::invalid_argument( "received negative value" );
+        throw std::invalid_argument("received negative value");
     }
 
     int append(std::string field_name) {
@@ -181,7 +169,6 @@ public:
         fields_.push_back(field_name);
         return id;
     };
-
 };
 
 #endif

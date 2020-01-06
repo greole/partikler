@@ -20,39 +20,38 @@
 #ifndef PARTICLENEIGHBOURS_H
 #define PARTICLENEIGHBOURS_H
 
-#include <string>                 // for string
-#include <vector>                 // for vector
+#include <string> // for string
+#include <vector> // for vector
 
-#include "Models.hpp"             // for Model, ModelRegister (ptr only)
-#include "SearchCubes.hpp"        // for SearchCube, NeighbourFieldAB, Searc...
-#include "Field.hpp"              // for FieldAB, Field (ptr only), PointField
-#include "cgal/CGALHelper.hpp"    // for STLSurfaceDist
-#include "cgal/CGALTYPEDEFS.hpp"  // for Facet_handle
+#include "Field.hpp"             // for FieldAB, Field (ptr only), PointField
+#include "Models.hpp"            // for Model, ModelRegister (ptr only)
+#include "SearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
+#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist
+#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 template <class T> class Generic;
 
-class SPHSTLParticleNeighbours: public Model {
+class SPHSTLParticleNeighbours : public Model {
 
     REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
 
     using SearchCubeFieldAB = FieldAB<std::vector<SearchCube>>;
     using STLSurfaceDistAB = FieldAB<std::vector<STLSurfaceDist>>;
 
-private:
-
+  private:
     // Coeffs
     float dx_;
 
     // In
     PointField &pos_;
 
-    Field<std::vector<Facet_handle>> & facets_;
+    Field<std::vector<Facet_handle>> &facets_;
 
-    SearchCubeFieldAB & sc_;
+    SearchCubeFieldAB &sc_;
 
     // Out
     NeighbourFieldAB &np_;
@@ -60,21 +59,19 @@ private:
     STLSurfaceDistAB &sd_;
 
     // Regular data member
-    Generic<SearchCubeDomain> & scd_;
+    Generic<SearchCubeDomain> &scd_;
 
     float search_cube_size_ = 1.0;
 
-public:
-
+  public:
     SPHSTLParticleNeighbours(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
+        ObjectRegistry &objReg);
 
     void execute();
 
     void update_search_cube_domain();
-
 };
 
 #endif

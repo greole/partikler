@@ -20,24 +20,23 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include <string>      // for string
-#include <vector>      // for vector
+#include <string> // for string
+#include <vector> // for vector
 
-#include "Models.hpp"  // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Field.hpp"  // for Field (ptr only), FloatField, PointField
+#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
-#include "Field.hpp"   // for Field (ptr only), FloatField, PointField
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
-}  // namespace YAML
+} // namespace YAML
 struct NeighbourPair;
 struct Vec3;
 
 class Wendland : public Model {
-
 
   private:
     // Coeffs
@@ -62,9 +61,11 @@ class Wendland : public Model {
     Field<std::vector<Vec3>> &dWdx_;
 
   public:
-
     Wendland(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg, float hfact);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        float hfact);
 
     void execute();
 };
@@ -73,23 +74,22 @@ class Wendland2D : public Wendland {
 
     REGISTER_DEC_TYPE(Wendland2D);
 
-public:
-
+  public:
     Wendland2D(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
-
-
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 };
 
 class Wendland3D : public Wendland {
 
     REGISTER_DEC_TYPE(Wendland3D);
 
-public:
-
+  public:
     Wendland3D(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
-
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 };
 
 #endif

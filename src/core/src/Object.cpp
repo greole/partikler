@@ -21,15 +21,25 @@
 
 std::string sphObjectType_to_string(SPHObjectType t) {
     switch (t) {
-    case(FieldType): return "FieldType";
-    case(IntFieldType): return "IntFieldType";
-    case(SizeTFieldType): return "SizeTFieldType";
-    case(FloatFieldType): return "FloatFieldType";
-    case(VectorFieldType): return "VectorFieldType";
-    case(PointFieldType): return "PointFieldType";
-    case(KernelGradientFieldType): return "KernelGradientFieldType";
-    case(EquationType): return "EquationType";
-    case(ModelType): return "ModelType";
-    default: return "GenericType";
+    case (FieldType):
+        return "FieldType";
+    case (IntFieldType):
+        return "IntFieldType";
+    case (SizeTFieldType):
+        return "SizeTFieldType";
+    case (FloatFieldType):
+        return "FloatFieldType";
+    case (VectorFieldType):
+        return "VectorFieldType";
+    case (PointFieldType):
+        return "PointFieldType";
+    case (KernelGradientFieldType):
+        return "KernelGradientFieldType";
+    case (EquationType):
+        return "EquationType";
+    case (ModelType):
+        return "ModelType";
+    default:
+        return "GenericType";
     }
 }
