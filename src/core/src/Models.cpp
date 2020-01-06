@@ -17,7 +17,6 @@
     contact: go@hpsim.de
 */
 
-#include <vector>
 #include "Models.hpp"
 
 ModelFactory::map_type *ModelFactory::map_;

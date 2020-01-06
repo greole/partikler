@@ -20,11 +20,20 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "Models.hpp"
-#include "SearchCubes.hpp"
-#include "cgal/CGALHelper.hpp"
+#include <string>           // for string
+#include <vector>           // for vector
 
+#include "Models.hpp"       // for Model, ModelRegister (ptr only), REGISTER...
+#include "SearchCubes.hpp"  // for NeighbourFieldAB
+#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+#include "Field.hpp"        // for Field (ptr only), FloatField, KernelGradi...
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
+struct STLSurfaceDist;
 
 class STLWendland2D : public Model {
 

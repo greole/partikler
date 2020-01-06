@@ -20,12 +20,21 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "Models.hpp"
-#include "SearchCubes.hpp"
-#include "Field.hpp"
-#include "cgal/CGALHelper.hpp"
+#include <string>      // for string
+#include <vector>      // for vector
 
+#include "Models.hpp"  // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "SearchCubes.hpp"
+#include "Field.hpp"   // for Field (ptr only), FloatField, PointField
+#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
+struct NeighbourPair;
+struct Vec3;
 
 class Wendland : public Model {
 

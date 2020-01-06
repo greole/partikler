@@ -20,12 +20,20 @@
 #ifndef STLPOSINTEGRATOR_H
 #define STLPOSINTEGRATOR_H
 
-#include "Models.hpp"
-#include "Field.hpp"
-#include "FieldOps.hpp"
+#include <string>                 // for string
+#include <vector>                 // for vector
 
+#include "Models.hpp"             // for Model, ModelRegister (ptr only)
+#include "Field.hpp"              // for Field (ptr only), IntField, PointField
+#include "FieldOps.hpp"
 #include "yaml-cpp/yaml.h"
 #include "stl/STLLimitedDx.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"  // for Facet_handle
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class STLPosIntegrator : public Model {
 

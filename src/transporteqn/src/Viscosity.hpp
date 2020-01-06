@@ -20,12 +20,18 @@
 #ifndef VISCOSITY_H
 #define VISCOSITY_H
 
-#include "Models.hpp"
-#include "Field.hpp"
+#include <string>      // for string
+
+#include "Models.hpp"  // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Field.hpp"   // for VectorField, PointField
 #include "FieldOps.hpp"
 #include "SearchCubes.hpp"
-
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class Viscosity : public VectorFieldEquation {
 

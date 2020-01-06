@@ -19,35 +19,44 @@
 #ifndef PARTIKLER_FIELD_INCLUDED
 #define PARTIKLER_FIELD_INCLUDED
 
-#include "Vec3.hpp"
-#include "Object.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"
-#include "Datastructures.hpp"
-
 #include <boost/yap/yap.hpp>
-#include <iostream>
-#include <vector>
 #include <math.h>
-
+#include <stddef.h>                   // for size_t
+#include <boost/yap/expression.hpp>   // for expression
+#include <boost/yap/user_macros.hpp>  // for BOOST_YAP_USER_UDT_ANY_BINARY_O...
+#include <iostream>                   // for operator<<, ostream, basic_ostream
+#include <vector>                     // for vector, allocator
 #include <memory>
+#include <string>                     // for string, operator<<
+#include <type_traits>                // for true_type, false_type
+
+#include "Vec3.hpp"                   // for Vec3, VectorPair (ptr only)
+#include "Object.hpp"                 // for SPHObject, GetFieldType, FloatF...
+#include "cgal/CGALTYPEDEFS.hpp"      // for Point
+#include "Datastructures.hpp"
+#include "Logger.hpp"                 // for Logger
 
 // Dynamically dispatches func based on its kind
-#define DISPATCH(obj, func, type_enum,  ...)     \
-    switch (type_enum) {                                                  \
-    case IntFieldType:                                             \
-        func<IntField>(dynamic_cast<IntField &>(*obj->get()),__VA_ARGS__); \
+#define DISPATCH(obj, func, type_enum, ...)                                    \
+    switch (type_enum) {                                                       \
+    case IntFieldType:                                                         \
+        func<IntField>(dynamic_cast<IntField &>(*obj->get()), __VA_ARGS__);    \
         break;                                                                 \
     case SizeTFieldType:                                                       \
-        func<SizeTField>(dynamic_cast<SizeTField &>(*obj->get()),__VA_ARGS__); \
+        func<SizeTField>(                                                      \
+            dynamic_cast<SizeTField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
     case FloatFieldType:                                                       \
-        func<FloatField>(dynamic_cast<FloatField &>(*obj->get()),__VA_ARGS__); \
+        func<FloatField>(                                                      \
+            dynamic_cast<FloatField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
     case VectorFieldType:                                                      \
-        func<VectorField>(dynamic_cast<VectorField &>(*obj->get()),__VA_ARGS__); \
+        func<VectorField>(                                                     \
+            dynamic_cast<VectorField &>(*obj->get()), __VA_ARGS__);            \
         break;                                                                 \
     case PointFieldType:                                                       \
-        func<PointField>(dynamic_cast<PointField &>(*obj->get()),__VA_ARGS__); \
+        func<PointField>(                                                      \
+            dynamic_cast<PointField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
     default:                                                                   \
         continue;                                                              \

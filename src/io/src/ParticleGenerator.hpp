@@ -20,11 +20,21 @@
 #ifndef PARTICLE_GENERATOR_H
 #define PARTICLE_GENERATOR_H
 
-#include "Models.hpp"
-#include "cgal/CGALHelper.hpp"
-
 #include <fstream>
 #include <memory>
+#include <string>                 // for string
+#include <vector>                 // for vector
+
+#include "Models.hpp"             // for Model, ModelRegister (ptr only)
+#include "cgal/CGALHelper.hpp"
+#include "Field.hpp"              // for IntField, Field (ptr only), PointField
+#include "cgal/CGALTYPEDEFS.hpp"  // for CGALPolyhedron, Facet_handle
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
+template <class T> class Generic;
 // TODO needs a polyhedron generator
 
 class SPHSTLReader: public Model {

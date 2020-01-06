@@ -17,25 +17,33 @@
     contact: go@hpsim.de
 */
 
-#include <iostream>
-#include <fstream>
-#include <numeric>
-#include <functional>
-#include <assert.h>
-#include <algorithm>
-#include <math.h>    // std::min
-
-// external header
-#include "yaml-cpp/yaml.h"
-#include <getopt.h>
-
-#include <stdio.h>
-#include <execinfo.h>
+#include <getopt.h>                             // for getopt_long, no_argument
+#include <bits/getopt_core.h>                   // for optarg
+#include <iostream>                             // for endl, operator<<, cout
+#include <memory>                               // for make_unique, allocator
+#include <memory>                               // for make_unique, allocator
+#include <string>                               // for string, operator<<
 #include <signal.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <execinfo.h>
 
-#include "core.hpp"
+#include "Models.hpp"                           // for TimeGraph, ModelFactory
+#include "Object.hpp"                           // for GenericType
+#include "ObjectRegistry.hpp"                   // for FieldIdMap, ObjectReg...
+#include "yaml-cpp/node/detail/iterator.h"      // for iterator_base, iterat...
+#include "yaml-cpp/node/detail/iterator_fwd.h"  // for const_iterator
+#include "yaml-cpp/node/impl.h"                 // for Node::operator[], Nod...
+#include "yaml-cpp/node/iterator.h"             // for iterator_value
+#include "yaml-cpp/node/parse.h"                // for LoadFile
+#include "Models.hpp"                           // for TimeGraph, ModelFactory
+#include "Object.hpp"                           // for GenericType
+#include "ObjectRegistry.hpp"                   // for FieldIdMap, ObjectReg...
+#include "yaml-cpp/node/detail/iterator.h"      // for iterator_base, iterat...
+#include "yaml-cpp/node/detail/iterator_fwd.h"  // for const_iterator
+#include "yaml-cpp/node/impl.h"                 // for Node::operator[], Nod...
+#include "yaml-cpp/node/iterator.h"             // for iterator_value
+#include "yaml-cpp/node/node.h"                 // for Node
+#include "yaml-cpp/node/parse.h"                // for LoadFile
 
 
 // Currently under ubuntu the gcc compiler optimises
@@ -45,31 +53,44 @@
 // until a better solution is found
 #ifdef WITH_GNU
 #include "stl/GenerateBoundaryParticles.hpp"
+
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
 #include "stl/Wendland2D.hpp"
+
 REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
 #include "ParticleNeighbours.hpp"
+
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
 #include "SortParticles.hpp"
+
 REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
 #include "Conti.hpp"
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 #include "Momentum.hpp"
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
 #include "Pressure.hpp"
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
 #include "Viscosity.hpp"
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
 #include "ParticleGenerator.hpp"
+
 REGISTER_DEF_TYPE(READER, SPHSTLReader);
 REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
 #include "stl/STLPosIntegrator.hpp"
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
 #include "SuperSPHWriter.hpp"
+
 REGISTER_DEF_TYPE(EXPORT, SuperSPHWriter);
 #include "CreateFields.hpp"
+
 REGISTER_DEF_TYPE(FIELDS, InitFields);
 #include "FixedValue.hpp"
+
 REGISTER_DEF_TYPE(BOUNDARY, FixedValue);
 #endif
 

@@ -22,10 +22,15 @@
 #ifndef GENERATEBOUNDARYPARTICLES_H
 #define GENERATEBOUNDARYPARTICLES_H
 
-#include "Field.hpp"
-#include "Models.hpp"
+#include <string>                // for string
+#include <vector>                // for vector
+
+#include "Field.hpp"             // for PointField
+#include "Models.hpp"            // for Model, ModelRegister (ptr only), REG...
 #include "yaml-cpp/yaml.h"
 #include "FieldOps.hpp"
+#include "ObjectRegistry.hpp"    // for FieldIdMap (ptr only), ObjectRegistry
+#include "yaml-cpp/node/node.h"  // for Node
 
 class GenerateBoundaryParticles : public Model {
 

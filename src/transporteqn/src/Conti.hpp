@@ -20,10 +20,17 @@
 #ifndef CONTI_H
 #define CONTI_H
 
-#include "Models.hpp"
-#include "Field.hpp"
+#include <string>      // for string
+
+#include "Models.hpp"  // for FloatFieldEquation, ModelRegister (ptr only)
+#include "Field.hpp"   // for FloatField, PointField
 #include "SearchCubes.hpp"
 #include "FieldOps.hpp"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class Conti : public FloatFieldEquation {
 

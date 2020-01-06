@@ -20,7 +20,14 @@
 #ifndef PARTIKLER_WRITER_INCLUDED_H
 #define PARTIKLER_WRITER_INCLUDED_H
 
-#include "Models.hpp"
+#include <string>      // for string
+
+#include "Models.hpp"  // for TimeGraph (ptr only), Model
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class WriterBase: public Model {
 

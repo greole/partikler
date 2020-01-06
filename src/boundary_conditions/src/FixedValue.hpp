@@ -21,9 +21,17 @@
 #ifndef PARTIKLER_FIXEDVALUE_INCLUDED_H
 #define PARTIKLER_FIXEDVALUE_INCLUDED_H
 
-#include "Models.hpp"
+#include <map>         // for map
+#include <string>      // for string
+
+#include "Models.hpp"  // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class FixedValue: public Model {
 

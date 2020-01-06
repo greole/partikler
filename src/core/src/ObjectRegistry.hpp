@@ -20,17 +20,19 @@
 #ifndef SPHOBJECT_REGISTRY_H
 #define SPHOBJECT_REGISTRY_H
 
-#include "Logger.hpp"
-#include "Datastructures.hpp"
-#include "Field.hpp"
-#include "FileIO.hpp"
-
-#include <vector>
-#include <stdio.h>
-#include <iostream>
-#include <memory>
+#include <stdio.h>             // for size_t
+#include <ext/alloc_traits.h>  // for __alloc_traits<>::value_type
+#include <vector>              // for vector<>::iterator, vector
+#include <iostream>            // for operator<<, basic_ostream, endl, char_...
+#include <memory>              // for shared_ptr, __shared_ptr_access, make_...
 #include <map>
-#include <algorithm>
+#include <algorithm>           // for find_if, max
+#include <string>              // for string, operator==, operator<<
+#include <utility>             // for move
+
+#include "Logger.hpp"          // for Logger
+#include "Field.hpp"           // for PointField
+#include "Object.hpp"          // for SPHObject, GenericType, SPHObjectType
 
 class ObjectRegistry {
 
@@ -42,24 +44,25 @@ private:
 
     size_t n_particles_ = 0;
 
+    Logger logger_ = {};
+
 public:
+  template <class T> T &register_object(std::shared_ptr<SPHObject> f) {
+      std::cout << "Register " << f->get_type_str() << " "
+                << f->get_name() << std::endl;
+      int idx = objects_.size();
+      objects_.push_back(std::move(f));
+      return dynamic_cast<T &>(*objects_[idx]);
+  }
 
-    template <class T>
-    T& register_object(std::shared_ptr<SPHObject> f) {
-        std::cout << "Register object " << f->get_name() << std::endl;
-        int idx = objects_.size();
-        objects_.push_back(std::move(f));
-        return dynamic_cast<T &> ( *objects_[idx] );
-    }
-
-    template <class T>
-    std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
-        std::cout << "Register object " << f->get_name() << std::endl;
-        int idx = objects_.size();
-        objects_.push_back(std::move(f));
-        return std::dynamic_pointer_cast<T>( objects_[idx] );
-    }
-
+  template <class T>
+  std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
+      std::cout << "Register " << f->get_type_str() << " "
+                << f->get_name() << std::endl;
+      int idx = objects_.size();
+      objects_.push_back(std::move(f));
+      return std::dynamic_pointer_cast<T>(objects_[idx]);
+  }
 
     // Setter
 

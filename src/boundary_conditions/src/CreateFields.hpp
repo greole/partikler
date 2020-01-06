@@ -21,8 +21,17 @@
 #ifndef PARTIKLER_CREATEFIELDS_INCLUDED_H
 #define PARTIKLER_CREATEFIELDS_INCLUDED_H
 
-#include "Models.hpp"
+#include <string>      // for string
+#include <vector>      // for vector
+
+#include "Models.hpp"  // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "cgal/CGALHelper.hpp"
+#include "Field.hpp"   // for PointField
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class InitFields: public Model {
 

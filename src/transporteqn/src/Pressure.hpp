@@ -21,12 +21,18 @@
 #ifndef Pressure_H
 #define Pressure_H
 
-#include "Models.hpp"
-#include "Field.hpp"
+#include <string>      // for string
+
+#include "Models.hpp"  // for FloatFieldEquation, ModelRegister (ptr only)
+#include "Field.hpp"   // for FloatField, VectorField
 #include "FieldOps.hpp"
 #include "SearchCubes.hpp"
-
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class Pressure : public FloatFieldEquation {
 

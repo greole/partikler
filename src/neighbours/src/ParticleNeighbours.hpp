@@ -20,9 +20,20 @@
 #ifndef PARTICLENEIGHBOURS_H
 #define PARTICLENEIGHBOURS_H
 
-#include "Models.hpp"
-#include "SearchCubes.hpp"
-#include "Field.hpp"
+#include <string>                 // for string
+#include <vector>                 // for vector
+
+#include "Models.hpp"             // for Model, ModelRegister (ptr only)
+#include "SearchCubes.hpp"        // for SearchCube, NeighbourFieldAB, Searc...
+#include "Field.hpp"              // for FieldAB, Field (ptr only), PointField
+#include "cgal/CGALHelper.hpp"    // for STLSurfaceDist
+#include "cgal/CGALTYPEDEFS.hpp"  // for Facet_handle
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
+template <class T> class Generic;
 
 class SPHSTLParticleNeighbours: public Model {
 

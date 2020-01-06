@@ -20,8 +20,10 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include <vector>     /* abort, NULL */
-#include "cgal/CGALTYPEDEFS.hpp"
+#include <stddef.h>               // for size_t
+#include <vector>                 // for vector
+
+#include "cgal/CGALTYPEDEFS.hpp"  // for Point, CGALVector, Facet_handle
 
 
 std::vector<Point> create_uniform_particle_plane(size_t n_particles);

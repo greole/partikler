@@ -20,16 +20,22 @@
 #ifndef PARTIKLER_SUPERSPHWRITER_INCLUDED_H
 #define PARTIKLER_SUPERSPHWRITER_INCLUDED_H
 
-#include "WriterBase.hpp"
-#include "Field.hpp"
-#include "cgal/CGALHelper.hpp"
-
-#include "yaml-cpp/yaml.h"
-
 #include <sys/stat.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <string>          // for string
+
+#include "WriterBase.hpp"  // for WriterBase
+#include "Field.hpp"
+#include "cgal/CGALHelper.hpp"
+#include "yaml-cpp/yaml.h"
+#include "Models.hpp"      // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 class SuperSPHWriter: public WriterBase {
 

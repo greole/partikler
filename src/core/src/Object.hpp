@@ -20,13 +20,17 @@
 #ifndef SPHOBJECT_H
 #define SPHOBJECT_H
 
-#include "Logger.hpp"
-#include "Vec3.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"
-#include <vector>
-#include <stdio.h>
+#include <stdio.h>                // for size_t
+#include <vector>                 // for vector
 #include <iostream>
 #include <memory>
+#include <string>                 // for string
+
+#include "Logger.hpp"             // for Logger
+#include "Vec3.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"  // for Point
+
+struct Vec3;
 
 enum SPHObjectType {
     GenericType,

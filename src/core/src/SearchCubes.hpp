@@ -20,11 +20,14 @@
 #ifndef SEARCHCUBES_H
 #define SEARCHCUBES_H
 
-#include "cgal/CGALHelper.hpp"
-#include "Field.hpp"
-#include "Logger.hpp"
-
 #include <omp.h>      // omp_get_num_threads
+#include <stddef.h>               // for size_t
+#include <vector>                 // for vector
+
+#include "cgal/CGALHelper.hpp"    // for STLSurfaceDist, Point3D
+#include "Field.hpp"              // for FieldAB
+#include "Logger.hpp"
+#include "cgal/CGALTYPEDEFS.hpp"  // for Point, Facet_handle
 
 
 struct NeighbourIdHalfStencil {

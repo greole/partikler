@@ -21,12 +21,18 @@
 #ifndef MOMENTUM_H
 #define MOMENTUM_H
 
-#include "Models.hpp"
-#include "Field.hpp"
+#include <string>      // for string
+
+#include "Models.hpp"  // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Field.hpp"   // for VectorField
 #include "FieldOps.hpp"
 #include "Vec3.hpp"
-
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 
 class Momentum : public VectorFieldEquation {

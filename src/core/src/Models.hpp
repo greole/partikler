@@ -20,14 +20,29 @@
 #ifndef SPHMODEL_H
 #define SPHMODEL_H
 
-#include "Object.hpp"
-#include "ObjectRegistry.hpp"
-#include "FieldOps.hpp"
-
-#include "yaml-cpp/yaml.h"
-#include <map>
-#include <memory>
 #include <stdio.h>
+#include <boost/hana/at.hpp>         // for at_t::operator()
+#include <boost/yap/expression.hpp>  // for as_expr, make_terminal
+#include <map>                       // for map<>::iterator, operator!=, ope...
+#include <memory>                    // for shared_ptr, allocator, __shared_...
+#include <algorithm>                 // for max
+#include <iostream>                  // for operator<<, basic_ostream, endl
+#include <string>                    // for string, operator<<, operator+
+#include <utility>                   // for move, pair, make_pair
+#include <vector>                    // for vector
+
+#include "Object.hpp"                // for SPHObject, ModelType
+#include "ObjectRegistry.hpp"        // for ObjectRegistry
+#include "FieldOps.hpp"              // for sum_AB_impl
+#include "yaml-cpp/yaml.h"
+#include "Field.hpp"                 // for FloatField, KernelGradientField
+#include "Logger.hpp"                // for MSG, Logger
+#include "SearchCubes.hpp"           // for NeighbourFieldAB
+#include "yaml-cpp/node/impl.h"      // for Node::~Node, Node::Node, Node::as
+#include "yaml-cpp/node/node.h"      // for Node
+
+class ModelGraph;
+class TimeGraph;
 
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
 

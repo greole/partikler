@@ -20,9 +20,9 @@
 #ifndef CGALHelper_H
 #define CGALHelper_H
 
-#include "Vec3.hpp"
+#include "Vec3.hpp"                          // for Vec3
 #include "Helper.hpp"
-#include "CGALTYPEDEFS.hpp"
+#include "CGALTYPEDEFS.hpp"                  // for Facet_handle, CGALVector
 
 // A collection of CGAL related functions
 
