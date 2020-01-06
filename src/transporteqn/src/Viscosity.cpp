@@ -21,25 +21,26 @@
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : VectorFieldEquation(model_name, parameter, objReg,
-                          objReg.create_field<VectorField>(
-                              "dnu",
-                              zero<VectorField::value_type>::val,
-    {"dnux", "dnuy", "dnuz"})
+    : VectorFieldEquation(
+          model_name,
+          parameter,
+          objReg,
+          objReg.create_field<VectorField>(
+              "dnu",
+              zero<VectorField::value_type>::val,
+              {"dnux", "dnuy", "dnuz"})
 
-        ),
+              ),
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
       // DIRTY FIX momentum eqn should create u
       // but nu already depends on u
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
       pos_(objReg.get_object<PointField>("Pos")),
-      dnu_(
-          objReg.create_field<VectorField>(
+      dnu_(objReg.create_field<VectorField>(
           "dnu",
           zero<VectorField::value_type>::val,
-      {"dnux", "dnuy", "dnuz"})
-          ) {};
+          {"dnux", "dnuy", "dnuz"})) {}
 
 void Viscosity::execute() {
 
@@ -76,6 +77,6 @@ void Viscosity::execute() {
 
     log().info_end();
 
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);

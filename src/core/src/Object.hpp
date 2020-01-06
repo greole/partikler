@@ -69,7 +69,6 @@ std::string sphObjectType_to_string(SPHObjectType t);
 // Base class for fields and models
 class SPHObject {
 
-
   protected:
 
     const std::string name_;
@@ -97,10 +96,10 @@ class SPHObject {
     SPHObjectType get_type() const { return type_; };
 
     std::string get_type_str() const { return sphObjectType_to_string(type_); };
-    // reorder after particle sorting
-    virtual void reorder(const std::vector<size_t> &idxs) {};
 
-    virtual void write_to_disk(std::string path) {};
+    // reorder after particle sorting
+    // TODO remove and replace by dispatched version
+    virtual void reorder(const std::vector<size_t>) {};
 
 };
 

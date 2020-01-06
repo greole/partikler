@@ -99,16 +99,18 @@ template <class T> class Field : public T, public SPHObject {
         T f,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : comp_names_(comp_names), T(f),
-          SPHObject(name, GetFieldType<T>::value) {};
+        : T(f), SPHObject(name, GetFieldType<T>::value),
+          comp_names_(comp_names) {};
 
     Field(
         int size,
         typename T::value_type val,
         const std::string name = "",
         std::vector<std::string> comp_names = {})
-        : comp_names_(comp_names), T(size, val),
-          SPHObject(name, GetFieldType<T>::value) {};
+        : T(size, val),
+          SPHObject(name, GetFieldType<T>::value),
+          comp_names_(comp_names)
+        {};
 
     void set_io_options(IOOptions ioo) {iooptions_ = ioo;};
 
@@ -119,14 +121,6 @@ template <class T> class Field : public T, public SPHObject {
     void operator=(T &b) { T::operator=(b); }
 
     void operator=(Field<T> &&b) { T::operator=(std::move(b)); }
-
-    // void copy_old() {
-    //     prev_.emplace_back();
-    //     size_t idx = prev_.size();
-    //     for(size_t i=0; i<T::size(); i++) {
-    //         prev_[idx].push_back(T::operator[](i));
-    //     }
-    // }
 
     void set_reorder(bool reorder) { reorder_ = reorder; }
 

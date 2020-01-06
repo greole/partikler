@@ -6,21 +6,3 @@ PointField& operator+=(PointField& a, VectorField& b){
     }
     return a;
 }
-
-// template <> void IntField::write_to_disk(std::string path) {
-//     write_scalar_field_impl(*this, path, get_name(), "int", "32");
-// }
-
-// template <> void FloatField::write_to_disk(std::string path) {
-//     write_scalar_field_impl(*this, path, get_name(), "float", "32");
-// }
-
-// template <> void VectorField::write_to_disk(std::string path) {
-//     write_vector_field_impl(
-//         *this, path, get_name(), get_comp_names(), "float", "32");
-// }
-
-// template <> void PointField::write_to_disk(std::string path) {
-//     write_vector_field_impl(
-//         *this, path, get_name(), get_comp_names(), "float", "32");
-// }

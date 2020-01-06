@@ -55,7 +55,7 @@ bool isInsideEdge(
     else {
         return true;
     }
-};
+}
 
 SurfaceSlide slide_surface(
     Point SP,      // Start position of particle
@@ -79,7 +79,7 @@ SurfaceSlide slide_surface(
         h->next()->next()->vertex()->point(),
     };
 
-    float d = p.d() / std::sqrt(p.orthogonal_vector().squared_length());
+    // float d = p.d() / std::sqrt(p.orthogonal_vector().squared_length());
 
     Point P;
     CGALVector PSP;
@@ -100,7 +100,7 @@ SurfaceSlide slide_surface(
     // frac keeps track of the minimal fraction of S a particle can travel
     // before hitting an edge
     float frac = 1.0;
-    float lambda = 1.0;
+    // float lambda = 1.0;
 
     // If particle slides to next facet the remainder of dx on
     // next facet is needed
@@ -254,7 +254,7 @@ SurfaceSlide slide_surface(
         //   << "  " << surface_slide.u[2]
         //   << std::endl;
 
-        Point N = P + Ss;
+        // Point N = P + Ss;
 
         if (NAB * remVec < 0) {
             // TODO dont project but mirror

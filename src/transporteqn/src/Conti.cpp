@@ -55,6 +55,6 @@ void Conti::execute() {
     sum_AB();
 
     // return sum_ab();
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);

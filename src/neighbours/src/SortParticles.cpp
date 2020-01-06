@@ -55,6 +55,7 @@ void CountingSortParticles::reorder_fields(){
     log().info_begin() << "Reordering particle fields ";
 
     for (auto &f : get_objReg().get_objects()) {
+        f->get_type();
         if (f->get_name() == "Pos" ) continue;
         if (f->get_name() == "KernelW" ) continue;
         if (f->get_name() == "KerneldWdx" ) continue;

@@ -144,7 +144,7 @@ struct ModelFactory {
     static std::shared_ptr<Model> createInstance(
         const std::string &model_type,
         const std::string &model_name,
-        const std::string &objReg_name,
+        const std::string ,//&objReg_name,
         YAML::Node parameter,
         ObjectRegistry &objReg) {
         std::cout << "createInstance" << model_name << std::endl;
@@ -416,8 +416,8 @@ class FloatFieldEquation : public Model {
         return f_;
     }
 
-    VectorField& ddx() {
-    };
+    // VectorField& ddx() {
+    // };
 
     template <class RHS>
     void ddt(RHS rhs) {

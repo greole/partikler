@@ -22,7 +22,11 @@
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : FloatFieldEquation(model_name, parameter, objReg, objReg.create_field<FloatField>("p", p_0_)),
+    : FloatFieldEquation(
+          model_name,
+          parameter,
+          objReg,
+          objReg.create_field<FloatField>("p", p_0_)),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
@@ -31,7 +35,7 @@ Pressure::Pressure(
       rho_(objReg.get_object<FloatField>("rho")),
       p_(objReg.create_field<FloatField>("p", p_0_)),
       dp_(objReg.create_field<VectorField>(
-          "dp", zero<VectorField::value_type>::val, {"dpx", "dpy", "dpz"})) {};
+          "dp", zero<VectorField::value_type>::val, {"dpx", "dpy", "dpz"})) {}
 
 void Pressure::execute() {
 
@@ -60,6 +64,6 @@ void Pressure::execute() {
     // dp_.weighted_sum(np_, tmp_ab, dW_);
 
     log().info_end();
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);

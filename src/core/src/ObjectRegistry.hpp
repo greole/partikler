@@ -29,6 +29,8 @@
 #include <algorithm>           // for find_if, max
 #include <string>              // for string, operator==, operator<<
 #include <utility>             // for move
+#include <stdexcept>
+
 
 #include "Logger.hpp"          // for Logger
 #include "Field.hpp"           // for PointField
@@ -81,6 +83,8 @@ public:
                 return dynamic_cast<T &>(*f);
             };
         }
+        // TODO
+        throw std::invalid_argument( "received negative value" );
     }
 
     // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
@@ -165,9 +169,11 @@ public:
 
     // get field id from name string
     int getId(const std::string name) {
-        for(int i=0; i<fields_.size(); i++) {
+        for(size_t i=0; i<fields_.size(); i++) {
             if(name == fields_[i]) return i;
         }
+        // TODO
+        throw std::invalid_argument( "received negative value" );
     }
 
     int append(std::string field_name) {

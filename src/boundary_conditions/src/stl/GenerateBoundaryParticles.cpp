@@ -142,7 +142,7 @@ void GenerateBoundaryParticles::execute() {
     // Distribute points randomly over cell facets/triangles
     // Returns a vector of initial point packets per facet
     // float kernel_relaxation = 1.0;
-    float noise_relaxation = 1.0;
+    // float noise_relaxation = 1.0;
 
 
     // surface slide particle have type 2

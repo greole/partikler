@@ -30,7 +30,7 @@ STLPosIntegrator::STLPosIntegrator(
       u_(objReg.get_object<VectorField>("u")),
       pos_(objReg.get_object<PointField>("Pos")),
       time_(objReg.get_object<TimeGraph>("TimeGraph"))
-{};
+{}
 
 void STLPosIntegrator::execute() {
 
@@ -59,6 +59,6 @@ void STLPosIntegrator::execute() {
     // time_.set_deltaT(min(time_.get_maxDeltaT(), time_.get_deltaT() * change));
 
     log().info_end();
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
