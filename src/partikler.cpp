@@ -36,6 +36,7 @@
 #include "yaml-cpp/node/node.h"                // for Node
 #include "yaml-cpp/node/parse.h"               // for LoadFile
 
+#include "H5Cpp.h"
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
 // if it doesn't see a call anywere in the executable.
