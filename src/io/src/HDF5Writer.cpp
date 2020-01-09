@@ -19,104 +19,23 @@
 
 #include "HDF5Writer.hpp"
 
-std::string intToStr(int number) {
-    std::stringstream ss; // create a stringstream
-    ss << number;         // add number to the stream
-    return ss.str();      // return a string with the contents of the stream
-}
-
-void createFolder(std::string dirname) {
-    std::string str_processor = dirname;
-#ifdef _WIN32
-    int stat = _mkdir((char *)str_processor.c_str());
-#else /* Annahme: Unix */
-    int stat = mkdir((char *)str_processor.c_str(), 0777);
-    if (stat == 0) {
-        // cout<<"\n\ncreated directory "<<str_processor <<endl;
-    } else {
-        // cout<<"\n\nnot created directory "<<str_processor <<endl;
-    }
-#endif
-}
-
-std::string prepare_data_folder(std::string foldername, int step) {
-
-    // #<{(|* pseudo time, needed for Paraview plugin|)}>#
-    float realtime = (float)step;
-
-    // #<{(|* main result folder |)}>#
-    // //std::cout<<"foldername: "<< foldername<<std::endl;
-    createFolder(foldername);
-
-    // #<{(|* step folders: #0, #1, #2, ... |)}>#
-    std::string stepname = foldername + "/step#" + intToStr(step);
-    createFolder(stepname);
-
-    // #<{(|* times.txt: Time in ascii format|)}>#
-    std::ofstream ftimes;
-    std::string nametimes = stepname + "/times.txt";
-    ftimes.open(nametimes.c_str());
-    ftimes << realtime;
-    ftimes.close();
-
-    // #<{(|* .sph file: Format specifier for Paraview |)}>#
-    std::ofstream fdotfile;
-    std::string dotName = foldername + ".sph";
-    fdotfile.open(dotName.c_str(), std::fstream::out);
-    fdotfile.close();
-
-    return stepname;
-}
-
-std::string field_type_to_str(SPHObjectType t) {
-    switch (t) {
-    case (IntFieldType):
-        return "int";
-    case (SizeTFieldType):
-        return "long";
-    // case (FloatFieldType):
-    //     return "float";
-    // case (PointFieldType):
-    //     return "float";
-    // case (VectorFieldType):
-    //     return "float";
-    default: return "float";
-    }
-}
-
 template <class T>
-void write_to_disk_impl(
-    T const &data,
-    const std::string path,
-    const std::string name,
-    const SPHObjectType type) {
+void HDF5Writer::write_to_disk(T const &data, h5_file_t& fh ) {}
 
-    std::string filename =
-        path + "/" + name + "." + field_type_to_str(type) + "32";
-    std::cout << name << data.size() << std::endl;
-    std::ofstream fh;
-    fh.open(filename.c_str());
-    fh.write(
-        reinterpret_cast<const char *>(&data[0]),
-        data.size() * sizeof(typename T::value_type));
-    fh.close();
+template <>
+void HDF5Writer::write_to_disk(IntField const &data, h5_file_t& fh ) {
+    H5PartWriteDataInt32(fh, data.get_name().c_str(), &data[0]);
 }
 
-template <class T>
-void HDF5Writer::write_to_disk(T const &data, const std::string path) {
-    write_to_disk_impl(data, path, data.get_name(), data.get_type());
+template <>
+void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t& fh ) {
+    H5PartWriteDataFloat32(fh, data.get_name().c_str(), &data[0]);
 }
-
-// Dont write size_t fields since the HDF5Writer cant read them
-// template <>
-// void HDF5Writer::write_to_disk(T const &data, const std::string path) {
-//     write_to_disk_impl(data, path, data.get_name(), data.get_type());
-// }
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk<PointField>(
-    const PointField &data, const std::string path) {
+void HDF5Writer::write_to_disk(
+    const PointField &data, h5_file_t& fh) {
 
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
@@ -124,15 +43,15 @@ void HDF5Writer::write_to_disk<PointField>(
         for (size_t i = 0; i < data.size(); i++) {
             buffer[i] = data[i][j];
         }
-        write_to_disk_impl(buffer, path, comp, data.get_type());
+        H5PartWriteDataFloat32(fh, comp.c_str(), &buffer[0]);
         j++;
     }
 }
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk<VectorField>(
-    const VectorField &data, const std::string path) {
+void HDF5Writer::write_to_disk(
+    const VectorField &data, h5_file_t& fh) {
 
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
@@ -140,7 +59,7 @@ void HDF5Writer::write_to_disk<VectorField>(
         for (size_t i = 0; i < data.size(); i++) {
             buffer[i] = data[i][j];
         }
-        write_to_disk_impl(buffer, path, comp, data.get_type());
+        H5PartWriteDataFloat32(fh, comp.c_str(), &buffer[0]);
         j++;
     }
 }
@@ -152,27 +71,43 @@ HDF5Writer::HDF5Writer(
 
 void HDF5Writer::execute() {
 
+	// cleanup
+
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
-        std::cout << "write" << std::endl;
+        const h5_int64_t h5_verbosity = H5_VERBOSE_DEFAULT;
+
+        int comm_rank = 0;
+        size_t num_particles {1000};
+        const char* fname {(export_name_ + ".h5part").c_str()};
+
+        H5AbortOnError ();
+        H5SetVerbosityLevel (h5_verbosity);
+
+        // open file and create first step
+        h5_prop_t prop = H5CreateFileProp ();
+        H5SetPropFileCoreVFD (prop, 0);
+        h5_file_t file = H5OpenFile (fname, H5_O_WRONLY, prop);
+
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
 
-        auto stepname = prepare_data_folder(export_name_, index_on_dist);
+        H5SetStep(file, index_on_dist );
+        H5PartSetNumParticles(file, get_objReg().get_n_particles());
 
         auto &objReg = get_objReg();
 
         for (auto &obj : objReg.get_objects()) {
-            std::cout << "objects" << std::endl;
 
             auto name = obj->get_name();
             auto type = obj->get_type();
 
             // TODO
             std::shared_ptr<SPHObject> *obj_ptr = &obj;
-            std::cout << "DISPATCH " << name << std::endl;
-            DISPATCH(obj_ptr, write_to_disk, type, stepname);
+            DISPATCH(obj_ptr, write_to_disk, type, file);
         }
+
+        H5CloseFile (file);
     }
 }
 

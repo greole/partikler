@@ -48,5 +48,10 @@ PROJECT:
             model: SuperSPHWriter
             name: Boundary
 
+        - EXPORT:
+            model: HDF5Writer
+            name: Boundary
+
+
     MAIN:
 

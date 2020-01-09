@@ -72,6 +72,12 @@ class ObjectRegistry {
         n_particles_ = get_particle_positions().size();
     }
 
+    size_t get_n_particles() {
+        update_n_particles();
+        return n_particles_;
+    }
+
+
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
             if (f == nullptr) continue;

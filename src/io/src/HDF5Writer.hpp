@@ -26,7 +26,8 @@
 #include <string> // for string
 #include <sys/stat.h>
 
-// #include "H5hut.h"
+#include "H5hut.h"
+
 #include "Field.hpp"
 #include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "WriterBase.hpp" // for WriterBase
@@ -51,7 +52,7 @@ class HDF5Writer : public WriterBase {
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-    template <class T> void write_to_disk(T const &t, const std::string path);
+    template <class T> void write_to_disk(T const &t, h5_file_t& fh);
 
     void execute();
 };
