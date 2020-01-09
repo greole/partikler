@@ -17,8 +17,9 @@ MESSAGE("BUILD TYPE ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC ")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
   -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
   )
@@ -170,70 +171,6 @@ ENDIF()
 OPTION(WITH_H5HUT "With H5Hut" ON)
 OPTION(BUILD_HDF5 "Building hdf5" OFF)
 OPTION(BUILD_H5HUT "Build H5Part data-Format" ON)
-IF(WITH_H5HUT)
-    IF(BUILD_HDF5)
-          BUILD(HDF5)
-
-          add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/HDF5-src
-                          ${CMAKE_CURRENT_BINARY_DIR}/HDF5-build
-                          EXCLUDE_FROM_ALL)
-          # EXTERNALPROJECT_GET_PROPERTY(HDF5-download install_dir)
-          # INCLUDE_DIRECTORIES(SYSTEM ${install_dir}/include)
-          # ADD_LIBRARY(HDF5 STATIC IMPORTED)
-          # SET_TARGET_PROPERTIES(HDF5
-          #     PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libhdf5.a)
-          # SET(HDF5_LIBRARIES hdf5 dl z m)
-          # SET(HDF5_LIBRARY_DIRS  ${CMAKE_BINARY_DIR})
-      ELSE()
-          LIST(APPEND CMAKE_PREFIX_PATH "$ENV{LD_LIBRARY_PATH}")
-          FIND_PACKAGE(HDF5)
-          # IF(NOT HDF5_FOUND)
-          #     MESSAGE("No HDF5 compiled with cmake found")
-          #     FIND_PATH(HDF5_LIBRARY_DIRS libhdf5.a
-          #         HINTS "/usr/lib/x86_64-linux-gnu/hdf5/openmpi" "/usr/lib/" $ENV{LD_LIBRARY_PATH}
-          #       )
-          #   MESSAGE(${HDF5_LIBRARY_DIRS})
-          #   INCLUDE_DIRECTORIES("${HDF5_LIBRARY_DIRS}/../include")
-          #   LINK_DIRECTORIES("${HDF5_LIBRARY_DIRS}/../lib")
-          #   SET(HDF5_LIBRARIES hdf5 dl z m)
-          # ENDIF()
-      SET(H5HutDep "")
-    ENDIF()
-
-    IF(NOT BUILD_H5HUT)
-        FIND_PACKAGE(H5HUT REQUIRED)
-    ENDIF()
-
-    # IF(NOT H5HUT_FOUND)
-    #     MESSAGE("Build H5Hut")
-    #     BUILD(H5Hut)
-
-    #     ADD_CUSTOM_COMMAND(
-    #         OUTPUT ${PROJECT_SOURCE_DIR}/ThirdParty/H5hut/configure
-    #         COMMAND ./autogen.sh
-    #         COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS}/.. --prefix=${CMAKE_BINARY_DIR} --enable-parallel && make && make install
-    #         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ThirdParty/H5hut/"
-    #         DEPENDS ${H5HutDep}
-    #     )
-
-    #     ADD_CUSTOM_TARGET(H5HUTBUILD
-    #         DEPENDS ${PROJECT_SOURCE_DIR}/ThirdParty/H5hut/configure)
-
-    #     EXTERNALPROJECT_GET_PROPERTY(H5HUT-download install_dir)
-    #     INCLUDE_DIRECTORIES(SYSTEM ${HDF5_INCLUDE_DIRS} ${H5Hut_INCLUDE_DIR})
-    #     ADD_LIBRARY(H5Hut STATIC IMPORTED)
-    #     ADD_DEPENDENCIES(H5Hut H5HUTBUILD)
-    #     SET_TARGET_PROPERTIES(H5Hut
-    #         PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libH5hut.a)
-    #     SET(H5Hut_LIBRARY H5Hut)
-    # ENDIF()
-
-    # SET(HDF5_PREFER_PARALLEL TRUE)
-    # ADD_COMPILE_DEFINITIONS(WITH_H5HUT)
-    # IF (HAVE_API2_FUNCTIONS)
-    #     add_compile_definitions(WITH_H5HUT_V2)
-    # ENDIF (HAVE_API2_FUNCTIONS)
-ENDIF()
 
 
 ########################
@@ -289,21 +226,16 @@ add_subdirectory(src/geometry)
 
 add_executable(partikler src/partikler.cpp tags)
 
-#target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
-
-# target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
 target_link_libraries(partikler
-  Core
-  Neighbours
-  BoundaryConditions
-  IO
-  TransportEqn
-  Kernel
-  Integrator
-  Geometry
-  OpenMP::OpenMP_CXX
-  ${YAML_CPP_LIBRARIES}
-  ${HDF5_LIBRARIES}
+  PRIVATE
+    Core
+    Neighbours
+    BoundaryConditions
+    IO
+    TransportEqn
+    Kernel
+    Integrator
+    Geometry
   )
 
 

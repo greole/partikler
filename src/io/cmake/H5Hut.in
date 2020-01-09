@@ -1,0 +1,18 @@
+
+include(ExternalProject)
+
+EXTERNALPROJECT_ADD(H5HUT-download
+        DEPENDS           ${H5HutDep}
+        GIT_REPOSITORY    "https://gitlab.psi.ch/H5hut/src.git"
+        # GIT_TAG           "H5hut-2.0.0rc5"
+        SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/H5Hut-src"
+        BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/H5Hut-src"
+        # CONFIGURE_COMMAND "./autogen.sh"
+        CONFIGURE_COMMAND "./autogen.sh"
+        GIT_SHALLOW       TRUE
+        BUILD_COMMAND     ""
+        INSTALL_COMMAND   ""
+        # CONFIGURE_COMMAND if  ! test -f configure && then ./autogen.sh && ./configure --with-hdf5=${HDF5_LIBRARY_DIRS} --prefix=${CMAKE_BINARY_DIR} --enable-parallel && fi
+    #         COMMAND ./autogen.sh
+    #         COMMAND ./configure --with-hdf5=${HDF5_LIBRARY_DIRS}/.. --prefix=${CMAKE_BINARY_DIR} --enable-parallel && make && make install
+        )

@@ -4,20 +4,42 @@ find_package(yaml-cpp REQUIRED)
 
 # TODO move SearchCubes to neighbours?
 
-add_library(Core SHARED
-  src/Vec3.cpp
-  src/Object.cpp
-  src/Field.cpp
-  src/Models.cpp
-  src/Helper.cpp
-  src/SearchCubes.cpp
-  src/ObjectRegistry.cpp
-  src/cgal/CGALHelper.cpp
+add_library(Core
+  OBJECT
+  src/Vec3.cpp # dummy for CMAKE V3.10
+  )
+
+target_sources(Core
+  PRIVATE
+    src/Object.cpp
+    src/Field.cpp
+    src/Models.cpp
+    src/Helper.cpp
+    src/SearchCubes.cpp
+    src/ObjectRegistry.cpp
+    src/cgal/CGALHelper.cpp
+  PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Object.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Field.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Models.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Helper.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/SearchCubes.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectRegistry.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"
   )
 
 
-target_link_libraries(Core OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES} ${CGAL_LIBRARIES})
+target_link_libraries(Core
+  PUBLIC
+    ${YAML_CPP_LIBRARIES}
+  PRIVATE
+    OpenMP::OpenMP_CXX
+    ${CGAL_LIBRARIES}
+  )
 
-target_include_directories(Core PUBLIC ${PROJECT_SOURCE_DIR}/src ${CGAL_INCLUDE_DIR})
+target_include_directories(Core
+  PUBLIC
+    ${PROJECT_SOURCE_DIR}/src
+  )
 
 add_subdirectory(tests)
