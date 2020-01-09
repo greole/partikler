@@ -154,7 +154,6 @@ void SuperSPHWriter::execute() {
 
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
-        std::cout << "write" << std::endl;
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
 
@@ -163,14 +162,12 @@ void SuperSPHWriter::execute() {
         auto &objReg = get_objReg();
 
         for (auto &obj : objReg.get_objects()) {
-            std::cout << "objects" << std::endl;
 
             auto name = obj->get_name();
             auto type = obj->get_type();
 
             // TODO
             std::shared_ptr<SPHObject> *obj_ptr = &obj;
-            std::cout << "DISPATCH " << name << std::endl;
             DISPATCH(obj_ptr, write_to_disk, type, stepname);
         }
     }
