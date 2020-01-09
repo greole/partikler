@@ -47,6 +47,10 @@ IF(WITH_H5HUT)
     add_dependencies(H5HUT HDF5-download)
 ENDIF()
 
+# FOR CMAKE 3.10
+link_directories(
+  "${CMAKE_CURRENT_BINARY_DIR}/lib"
+  )
 
 add_library(IO
   src/ParticleGenerator.cpp # dummy for CMAKE V3.10
@@ -80,10 +84,12 @@ target_link_libraries(IO
     H5hut
   )
 
-target_link_directories(IO
-  PUBLIC
-  "${CMAKE_CURRENT_BINARY_DIR}/lib"
-  )
+# FOR CMAKE > 3.10
+# target_link_directories(IO
+#   PUBLIC
+#   "${CMAKE_CURRENT_BINARY_DIR}/lib"
+#   )
+
 
 target_include_directories(IO
   PUBLIC
