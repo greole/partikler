@@ -57,7 +57,7 @@ void STLWendland2D::execute() {
         if (q > 2.) {
             log().warn() << "Outside kernel radius";
             W_[pid] = 0.0;
-            dWdx_[pid] = {{0, 0, 0}, {0, 0, 0}};
+            dWdx_[pid] = {{{0, 0, 0}}, {{0, 0, 0}}};
             continue;
         }
 
@@ -78,7 +78,7 @@ void STLWendland2D::execute() {
             }
         } else {
             for (int j = 0; j < 3; j++) {
-                dWdx_[pid] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+                dWdx_[pid] = {{{0.0, 0.0, 0.0}}, {{0.0, 0.0, 0.0}}};
             }
             log().warn() << "Neighbour sum == 0";
         }

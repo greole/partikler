@@ -201,7 +201,7 @@ template <> struct zero<int> { constexpr static int val = 1; };
 
 template <> struct zero<float> { constexpr static float val = 0.0; };
 
-template <> struct zero<Vec3> { constexpr static Vec3 val = {0.0, 0.0, 0.0}; };
+template <> struct zero<Vec3> { constexpr static Vec3 val = {{0.0, 0.0, 0.0}}; };
 
 // Define all the expression-returning numeric operators we need.  Each will
 // accept any std::vector<> as any of its arguments, and then any value in the
