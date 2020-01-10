@@ -11,6 +11,9 @@ IF(WITH_H5HUT)
             SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/HDF5-src"
             BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/HDF5-build"
             CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+                              -DBUILD_TESTING=FALSE
+                              -DHDF5_BUILD_TOOLS=FALSE
+                              -DHDF5_BUILD_EXAMPLES=FALSE
                               #-DALLOW_UNSUPPORTED=TRUE
                               #-DHDF5_ENABLE_PARALLEL=TRUE
           )
