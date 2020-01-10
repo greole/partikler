@@ -76,6 +76,9 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
 #include "SuperSPHWriter.hpp"
 
 REGISTER_DEF_TYPE(EXPORT, SuperSPHWriter);
+
+#include "HDF5Writer.hpp"
+REGISTER_DEF_TYPE(EXPORT, HDF5Writer);
 #include "CreateFields.hpp"
 
 REGISTER_DEF_TYPE(FIELDS, InitFields);
