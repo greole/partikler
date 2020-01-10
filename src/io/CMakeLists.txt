@@ -81,10 +81,10 @@ target_link_libraries(IO
   PUBLIC
     Core
     ${YAML_CPP_LIBRARIES}
-  PRIVATE
-    OpenMP::OpenMP_CXX
     hdf5
     H5hut
+  PRIVATE
+    OpenMP::OpenMP_CXX
   )
 
 # FOR CMAKE > 3.10

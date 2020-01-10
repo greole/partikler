@@ -33,7 +33,6 @@ target_link_libraries(Core
   PUBLIC
     ${YAML_CPP_LIBRARIES}
     ${CGAL_LIBRARIES}
-  PRIVATE
     OpenMP::OpenMP_CXX
   )
 
