@@ -8,6 +8,7 @@ add_library(Core SHARED)
 
 target_sources(Core
   PRIVATE
+    src/Vec3.cpp
     src/Object.cpp
     src/Field.cpp
     src/Models.cpp
@@ -16,6 +17,7 @@ target_sources(Core
     src/ObjectRegistry.cpp
     src/cgal/CGALHelper.cpp
   PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Vec3.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Object.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Field.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Models.hpp"
