@@ -3,9 +3,7 @@ project(TransportEqn LANGUAGES CXX)
 # find_package(GTest REQUIRED)
 # find_package(yaml-cpp REQUIRED)
 
-add_library(TransportEqn SHARED
-  src/Momentum.cpp
-  )
+add_library(TransportEqn SHARED)
 
 target_sources(TransportEqn
   PRIVATE

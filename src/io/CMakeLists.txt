@@ -55,9 +55,7 @@ ENDIF()
 #   "${CMAKE_CURRENT_BINARY_DIR}/lib"
 #   )
 
-add_library(IO
-  src/ParticleGenerator.cpp # dummy for CMAKE V3.10
-  )
+add_library(IO SHARED)
 
 #TODO In CMAKE > 3.10 header path can be simplified
 target_sources(IO

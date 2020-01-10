@@ -4,10 +4,7 @@ find_package(yaml-cpp REQUIRED)
 
 # TODO move SearchCubes to neighbours?
 
-add_library(Core
-  OBJECT
-  src/Vec3.cpp # dummy for CMAKE V3.10
-  )
+add_library(Core SHARED)
 
 target_sources(Core
   PRIVATE
