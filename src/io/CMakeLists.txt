@@ -95,7 +95,6 @@ target_link_directories(IO
 target_include_directories(IO
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
-  PRIVATE
   "${CMAKE_CURRENT_BINARY_DIR}/include"
   )
 
