@@ -18,7 +18,6 @@ addons:
       - llvm-toolchain-bionic-8
     packages:
       - clang-6.0
-      - cmake
       - libboost-all-dev
       - libyaml-cpp-dev
       - libmpfr-dev
