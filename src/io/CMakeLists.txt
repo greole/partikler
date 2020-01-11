@@ -81,6 +81,7 @@ target_link_libraries(IO
     Core
     ${YAML_CPP_LIBRARIES}
     OpenMP::OpenMP_CXX
+    hdf5
     H5hut
   )
 
