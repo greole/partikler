@@ -79,7 +79,7 @@ void HDF5Writer::execute() {
 
         int comm_rank = 0;
         size_t num_particles {1000};
-        const char* fname {(export_name_ + ".h5part").c_str()};
+        std::string fname {(export_name_ + ".h5part").c_str()};
 
         H5AbortOnError ();
         H5SetVerbosityLevel (h5_verbosity);
@@ -87,7 +87,7 @@ void HDF5Writer::execute() {
         // open file and create first step
         h5_prop_t prop = H5CreateFileProp ();
         H5SetPropFileCoreVFD (prop, 0);
-        h5_file_t file = H5OpenFile (fname, H5_O_WRONLY, prop);
+        h5_file_t file = H5OpenFile (fname.c_str(), H5_O_WRONLY, prop);
 
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
