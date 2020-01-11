@@ -3,8 +3,8 @@ include(ExternalProject)
 
 EXTERNALPROJECT_ADD(H5HUT-download
         DEPENDS           ${H5HutDep}
-        GIT_REPOSITORY    "https://gitlab.psi.ch/H5hut/src.git"
-        # GIT_TAG           "H5hut-2.0.0rc5"
+        GIT_REPOSITORY    "https://github.com/greole/H5Hut.git"
+        GIT_TAG           "master"
         SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/H5Hut-src"
         BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/H5Hut-src"
         # CONFIGURE_COMMAND "./autogen.sh"
