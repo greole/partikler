@@ -33,7 +33,7 @@ IF(WITH_H5HUT)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5hut-src/configured
         COMMAND ./autogen.sh
         COMMAND ./configure
-                LDFLAGS=-L${CMAKE_CURRENT_BINARY_DIR}
+                CPPFLAGS=-fPIC
                 --with-hdf5=${CMAKE_CURRENT_BINARY_DIR}
                 --prefix=${CMAKE_CURRENT_BINARY_DIR}
                 #--enable-shared
