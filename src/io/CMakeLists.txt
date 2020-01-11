@@ -33,6 +33,7 @@ IF(WITH_H5HUT)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5hut-src/configured
         COMMAND ./autogen.sh
         COMMAND ./configure
+                LDFLAGS=-L${CMAKE_CURRENT_BINARY_DIR}
                 --with-hdf5=${CMAKE_CURRENT_BINARY_DIR}
                 --prefix=${CMAKE_CURRENT_BINARY_DIR}
                 --enable-shared
@@ -79,9 +80,7 @@ target_link_libraries(IO
   PUBLIC
     Core
     ${YAML_CPP_LIBRARIES}
-  PRIVATE
     OpenMP::OpenMP_CXX
-    hdf5
     H5hut
   )
 
