@@ -36,7 +36,7 @@ IF(WITH_H5HUT)
                 LDFLAGS=-L${CMAKE_CURRENT_BINARY_DIR}
                 --with-hdf5=${CMAKE_CURRENT_BINARY_DIR}
                 --prefix=${CMAKE_CURRENT_BINARY_DIR}
-                --enable-shared
+                #--enable-shared
                 #--enable-parallel
         COMMAND make
         COMMAND make install
