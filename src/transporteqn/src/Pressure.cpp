@@ -26,7 +26,7 @@ Pressure::Pressure(
           model_name,
           parameter,
           objReg,
-          objReg.create_field<FloatField>("p", p_0_)),
+          objReg.create_field<FloatField>("p", 10000)),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),

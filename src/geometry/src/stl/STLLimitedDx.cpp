@@ -101,7 +101,7 @@ SurfaceSlide slide_surface(
     // next facet is needed
     float remainder = 0.0;
 
-    Point upa;
+    Point upa {{0.0, 0.0, 0.0}};
     SkipEdge ske_ {false, upa, upa};
 
     SurfaceSlide surface_slide {0.0, P, S, PN, f, FN, u, ske_};
@@ -341,7 +341,7 @@ void STL_limited_dx(
 
             float rem = 1.0;
             int ctr = 0;
-            Point upa;
+            Point upa {{0,0,0}};
             SkipEdge ske {false, upa, upa};
             do {
                 auto surf_slide = slide_surface(P, PN, facets[i], ske, u[i]);
