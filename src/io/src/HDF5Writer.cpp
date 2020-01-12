@@ -79,7 +79,7 @@ void HDF5Writer::execute() {
 
         int comm_rank = 0;
         size_t num_particles {1000};
-        std::string fname {(export_name_ + ".h5part").c_str()};
+        std::string fname {(export_name_ + ".h5part")};
 
         H5AbortOnError ();
         H5SetVerbosityLevel (h5_verbosity);
@@ -108,6 +108,13 @@ void HDF5Writer::execute() {
         }
 
         H5CloseFile (file);
+
+        // NOTE H5CloseFile seems to miss to free two pointers
+        // hence the clean up here to avoid asan errors
+        h5_prop_file* prop_ptr = (h5_prop_file*) prop;
+
+        free((char*)(prop_ptr->prefix_iteration_name));
+        free((h5_prop_t*) prop);
     }
 }
 

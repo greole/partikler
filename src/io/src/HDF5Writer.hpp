@@ -27,12 +27,37 @@
 #include <sys/stat.h>
 
 #include "H5hut.h"
+#include "h5core/h5_types.h"
 
 #include "Field.hpp"
 #include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "WriterBase.hpp" // for WriterBase
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+
+// NOTE re-declaration of h5_prop_file to do the pointer clean-up.
+//      we cant include the corresponding private/h5_types.h since it is not
+//      in the include directory
+struct h5_prop_file {                   // file property
+        h5_int64_t class_;               // property class == H5_PROP_FILE
+        h5_int64_t flags;               // file access mode (read-write, readonly ...
+        h5_int64_t align;               // HDF5 alignment
+       h5_int64_t increment;           // increment for core vfd
+        h5_int64_t throttle;
+#ifdef H5_HAVE_PARALLEL
+        MPI_Comm comm;
+#endif
+       hid_t   xfer_prop;              // dataset transfer properties
+       hid_t   access_prop;            // file access properties
+       hid_t   create_prop;            // file create properties
+       char*   prefix_iteration_name;  // Prefix of step name
+       int     width_iteration_idx;    // pad iteration index with 0 up to this
+       int     flush;                  // flush iteration after writing dataset
+};
+
+typedef struct h5_prop_file h5_prop_file_t;
+typedef h5_prop_file_t* h5_prop_file_p;
+
 
 class ObjectRegistry;
 namespace YAML {
