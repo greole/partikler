@@ -32,16 +32,16 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       local_objReg_(ObjectRegistry()),
       timeGraph_(local_objReg_.register_object<TimeGraph>(
           std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
-      pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
       boundary_name_(read_coeff<std::string>("name")),
       fieldId_(fieldIdMap_.append(boundary_name_)),
-      dx_(read_coeff<float>("dx")),
+      scale_(read_or_default_coeff<float>("scale", 1.0)),
+      dx_(read_coeff<float>("dx")/scale_),
       translation_vector_(read_translation_vector(parameter)) {}
 
-std::vector<float>
+Vec3
 GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
 
     if (!parameter["translate"]) return {0, 0, 0};
@@ -156,7 +156,21 @@ void GenerateBoundaryParticles::execute() {
 
     timeGraph_.execute_main();
 
+
+
     auto &loc_objs = local_objReg_.get_objects();
+
+
+    logger_.info_begin() << "Scale: " << scale_;
+    auto& pos(local_objReg_.get_object<PointField>("Pos"));
+
+    scalePoints(pos, scale_);
+
+    logger_.info_begin() << "Translate: " << translation_vector_;
+
+    translatePoints(pos, translation_vector_);
+
+    logger_.info_end();
 
     logger_.info_begin() << "Transfering ";
 

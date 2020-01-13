@@ -41,18 +41,22 @@ class GenerateBoundaryParticles : public Model {
     ObjectRegistry local_objReg_;
     TimeGraph &timeGraph_;
 
-    PointField &pos_;
+    // PointField &pos_;
 
     int iterations_;
     int write_freq_;
 
     std::string filename_;
+
     std::string boundary_name_;
+
     int fieldId_;
+
+    float scale_;
 
     float dx_;
 
-    std::vector<float> translation_vector_;
+    Vec3 translation_vector_;
 
   public:
     YAML::Node default_graph();
@@ -62,7 +66,7 @@ class GenerateBoundaryParticles : public Model {
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-    std::vector<float> read_translation_vector(YAML::Node parameter);
+    Vec3 read_translation_vector(YAML::Node parameter);
 
     void execute();
 

@@ -154,6 +154,12 @@ struct movePoint {
     }
 };
 
+void translatePoints (std::vector<Point>& points, Vec3 translate);
+
+void scalePoints (std::vector<Point>& points, Vec3 scale);
+
+void scalePoints (std::vector<Point>& points, float scale);
+
 struct EdgeNormal {
     CGALVector EN;
     CGALVector FN;
