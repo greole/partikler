@@ -175,21 +175,30 @@ void GenerateBoundaryParticles::execute() {
     logger_.info_begin() << "Transfering ";
 
     int num_rem_objs = loc_objs.size();
-    for (int i = 0; i < num_rem_objs; i++) {
-        std::shared_ptr<SPHObject> &obj = loc_objs[i];
-        auto name = obj->get_name();
-        auto type = obj->get_type();
+    // for (int i = 0; i < num_rem_objs; i++) {
+    //     std::shared_ptr<SPHObject> &obj = loc_objs[i];
+    //     auto name = obj->get_name();
+    //     auto type = obj->get_type();
 
-        auto &oreg = get_objReg();
-        // dynamic_cast<B&>(*my_unique_ptr)
-        if (oreg.object_exists(name)) {
-            std::shared_ptr<SPHObject> *obj_ptr = &loc_objs[i];
-            DISPATCH(obj_ptr, append, type, name);
-        } else {
-            // Move the object if it doesn't exist in the main registry yet
-            oreg.get_objects().push_back(std::move(loc_objs[i]));
-        }
+    //     auto &oreg = get_objReg();
+    //     // dynamic_cast<B&>(*my_unique_ptr)
+    //     if (oreg.object_exists(name)) {
+    //         std::shared_ptr<SPHObject> *obj_ptr = &loc_objs[i];
+    //         // DISPATCH(obj_ptr, append, type, name);
+    //     } else {
+    //         // Move the object if it doesn't exist in the main registry yet
+    //         oreg.get_objects().push_back(std::move(loc_objs[i]));
+    //     }
+    // }
+
+    auto &oreg = get_objReg();
+    if (oreg.object_exists("Pos")) {
+        append(pos, "Pos");
+    } else {
+        // Move the object if it doesn't exist in the main registry yet
+        oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
     }
+
 
     get_objReg().update_n_particles();
 

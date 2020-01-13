@@ -24,6 +24,7 @@
 
 #include <string> // for string
 #include <vector> // for vector
+#include <memory> // for vector
 
 #include "Field.hpp" // for PointField
 #include "FieldOps.hpp"
