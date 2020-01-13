@@ -38,10 +38,10 @@
 // NOTE re-declaration of h5_prop_file to do the pointer clean-up.
 //      we cant include the corresponding private/h5_types.h since it is not
 //      in the include directory
-struct h5_prop_file {                   // file property
-        h5_int64_t class_;               // property class == H5_PROP_FILE
-        h5_int64_t flags;               // file access mode (read-write, readonly ...
-        h5_int64_t align;               // HDF5 alignment
+struct h5_prop_file {                  // file property
+        h5_int64_t class_;             // property class == H5_PROP_FILE
+        h5_int64_t flags;              // file access mode (read-write, readonly ...
+        h5_int64_t align;              // HDF5 alignment
        h5_int64_t increment;           // increment for core vfd
         h5_int64_t throttle;
 #ifdef H5_HAVE_PARALLEL
