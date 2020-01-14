@@ -1,5 +1,6 @@
+
 /*  Partikler - A general purpose framework for smoothed particle hydrodynamics
-   simulations Copyright (C) 2019 Gregor Olenik
+    simulations Copyright (C) 2019 Gregor Olenik
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -17,47 +18,32 @@
     contact: go@hpsim.de
 */
 
-// TODO: Add .cpp file to CMakeLists.txt
+#ifndef PARTIKLER_INITSHAPE_INCLUDED_H
+#define PARTIKLER_INITSHAPE_INCLUDED_H
 
-#ifndef GENERATEBOUNDARYPARTICLES_H
-#define GENERATEBOUNDARYPARTICLES_H
-
-#include <string> // for string
-#include <vector> // for vector
-#include <memory> // for vector
-
-#include "Field.hpp" // for PointField
-#include "FieldOps.hpp"
-#include "Models.hpp"           // for Model, ModelRegister (ptr only), REG...
-#include "ObjectRegistry.hpp"   // for FieldIdMap (ptr only), ObjectRegistry
-#include "yaml-cpp/node/node.h" // for Node
+#include "Field.hpp"
+#include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
-class GenerateBoundaryParticles : public ParticleGeneratorBase {
+class InitShape : public ParticleGeneratorBase {
 
-    REGISTER_DEC_TYPE(GenerateBoundaryParticles);
+    REGISTER_DEC_TYPE(InitShape);
 
-  private:
+private:
 
-    TimeGraph &timeGraph_;
+    std::string shape_;
 
-    int iterations_;
+    Vec3 dimensions_;
 
-    int write_freq_;
+    Vec3 position_;
 
-    std::string filename_;
+public:
 
-    float scale_;
-
-  public:
-
-    YAML::Node default_graph();
-
-    GenerateBoundaryParticles(
+    InitShape(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);
-
 
     void execute();
 

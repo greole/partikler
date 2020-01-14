@@ -27,28 +27,14 @@
 
 GenerateBoundaryParticles::GenerateBoundaryParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      fieldIdMap_(objReg.get_object<FieldIdMap>("FieldIdMap")),
-      local_objReg_(ObjectRegistry()),
+    : ParticleGeneratorBase(model_name, parameter, objReg),
       timeGraph_(local_objReg_.register_object<TimeGraph>(
           std::make_unique<TimeGraph>("TimeGraph", parameter, local_objReg_))),
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
-      boundary_name_(read_coeff<std::string>("name")),
-      fieldId_(fieldIdMap_.append(boundary_name_)),
-      scale_(read_or_default_coeff<float>("scale", 1.0)),
-      dx_(read_coeff<float>("dx")/scale_),
-      translation_vector_(read_translation_vector(parameter)) {}
-
-Vec3
-GenerateBoundaryParticles::read_translation_vector(YAML::Node parameter) {
-
-    if (!parameter["translate"]) return {0, 0, 0};
-
-    auto p = parameter["translate"];
-    return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
-}
+      scale_(read_or_default_coeff<float>("scale", 1.0))
+{}
 
 YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node node; // starts out as NULL
@@ -63,19 +49,19 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node generator;
     // Generates the particles at the surface
     generator["GENERATOR"]["model"] = "SPHParticleGenerator";
-    generator["GENERATOR"]["dx"] = dx_;
+    generator["GENERATOR"]["dx"] = dx_/scale_;
     generator["GENERATOR"]["id"] = fieldId_;
     node["pre"].push_back(generator);
 
     YAML::Node neighbours;
     // finds the neighbours
     neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
-    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_ * 1.05;
+    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_/scale_ * 1.05;
     node["main"].push_back(neighbours);
 
     YAML::Node kernel;
     kernel["KERNEL"]["model"] = "STLWendland2D";
-    kernel["KERNEL"]["h"] = dx_ * 1.05;
+    kernel["KERNEL"]["h"] = dx_/scale_ * 1.05;
     node["main"].push_back(kernel);
 
     YAML::Node conti;
@@ -103,11 +89,6 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     return node;
 }
 
-template <class T>
-void GenerateBoundaryParticles::append(T &, std::string name) {
-    auto &oreg = get_objReg();
-    field_append(oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
-}
 
 void GenerateBoundaryParticles::execute() {
 
@@ -156,60 +137,13 @@ void GenerateBoundaryParticles::execute() {
 
     timeGraph_.execute_main();
 
-
-
     auto &loc_objs = local_objReg_.get_objects();
 
-
-    logger_.info_begin() << "Scale: " << scale_;
     auto& pos(local_objReg_.get_object<PointField>("Pos"));
-    // auto& id(local_objReg_.get_object<IntField>("id"));
 
     scalePoints(pos, scale_);
 
-    logger_.info_begin() << "Translate: " << translation_vector_;
-
-    translatePoints(pos, translation_vector_);
-
-    logger_.info_end();
-
-    logger_.info_begin() << "Transfering ";
-
-    int num_rem_objs = loc_objs.size();
-    // for (int i = 0; i < num_rem_objs; i++) {
-    //     std::shared_ptr<SPHObject> &obj = loc_objs[i];
-    //     auto name = obj->get_name();
-    //     auto type = obj->get_type();
-
-    //     auto &oreg = get_objReg();
-    //     // dynamic_cast<B&>(*my_unique_ptr)
-    //     if (oreg.object_exists(name)) {
-    //         std::shared_ptr<SPHObject> *obj_ptr = &loc_objs[i];
-    //         // DISPATCH(obj_ptr, append, type, name);
-    //     } else {
-    //         // Move the object if it doesn't exist in the main registry yet
-    //         oreg.get_objects().push_back(std::move(loc_objs[i]));
-    //     }
-    // }
-
-    auto &oreg = get_objReg();
-    if (oreg.object_exists("Pos")) {
-        append(pos, "Pos");
-    } else {
-        // Move the object if it doesn't exist in the main registry yet
-        oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
-    }
-    // if (oreg.object_exists("id")) {
-    //     append(pos, "id");
-    // } else {
-    //     // Move the object if it doesn't exist in the main registry yet
-    //     oreg.get_objects().push_back(*local_objReg_.get_object_ptr("id"));
-    // }
-
-
-    get_objReg().update_n_particles();
-
-    logger_.info_end();
+    post_execute();
 }
 
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);

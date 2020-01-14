@@ -258,6 +258,88 @@ class TimeGraph : public Model {
     int &get_current_timestep() { return current_timestep_; }
 };
 
+
+// Base Class for particle generating models
+//
+// Base Class for particle generating models
+// handles creation of local object registry
+// and transferring
+class ParticleGeneratorBase : public Model {
+
+protected:
+
+    FieldIdMap &fieldIdMap_;
+
+    ObjectRegistry local_objReg_;
+
+    PointField& pos_;
+
+    IntField& id_;
+
+    std::string name_;
+
+    int fieldId_;
+
+    float dx_;
+
+    Vec3 translation_vector_;
+
+public:
+
+    ParticleGeneratorBase(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
+
+    Vec3 read_vector(YAML::Node parameter, std::string coeff);
+
+    template <class T>
+    void append(T &, std::string name) {
+        auto &oreg = get_objReg();
+        field_append(oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
+    }
+
+    virtual void execute() {};
+
+    void post_execute(){
+
+        logger_.info_begin() << "Translate: " << translation_vector_;
+
+        translatePoints(pos_, translation_vector_);
+
+        logger_.info_end();
+
+        // Transfer particles to main object registry
+        // Here only the position and the boundary id and type id
+        // need to be transferred
+        logger_.info_begin() << "Transfering ";
+
+        auto &oreg = get_objReg();
+        if (oreg.object_exists("Pos")) {
+            append(pos_, "Pos");
+        } else {
+            // Move the object if it doesn't exist in the main registry yet
+            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
+        }
+
+        id_.reserve(pos_.size());
+        for(size_t i=0; i<pos_.size(); i++ ) {
+            id_.push_back(fieldId_);
+        }
+
+        if (oreg.object_exists("id")) {
+            append(id_, "id");
+        } else {
+            // Move the object if it doesn't exist in the main registry yet
+            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("id"));
+        }
+
+        get_objReg().update_n_particles();
+        logger_.info_end();
+    };
+
+};
+
 // TODO TransportedQuantity
 // a class providing field to Equation depedency
 // has an update method that calls the dependend transport eqn
