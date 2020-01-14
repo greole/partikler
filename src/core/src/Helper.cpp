@@ -34,6 +34,30 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
     return points;
 }
 
+std::vector<Point>
+create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx) {
+
+    size_t nx {(dimensions[0]-position[0])/dx};
+    size_t ny {(dimensions[1]-position[1])/dx};
+    size_t nz {(dimensions[2]-position[2])/dx};
+
+    size_t ntot = nx*ny*nz;
+
+    std::vector<Point> points;
+    points.reserve(ntot);
+    for (size_t k = 0; k < nz; k++) {
+        for (size_t j = 0; j < ny; j++) {
+            for (size_t i = 0; i < nx; i++) {
+                float x = ((float)i) * dx;
+                float y = ((float)j) * dx;
+                float z = ((float)k) * dx;
+                points.push_back(Point(x, y, z));
+            }
+        }
+    }
+    return points;
+}
+
 std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
     std::vector<Point> points;
     points.reserve(n_particles);

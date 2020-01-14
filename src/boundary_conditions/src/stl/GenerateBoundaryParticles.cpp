@@ -163,6 +163,7 @@ void GenerateBoundaryParticles::execute() {
 
     logger_.info_begin() << "Scale: " << scale_;
     auto& pos(local_objReg_.get_object<PointField>("Pos"));
+    // auto& id(local_objReg_.get_object<IntField>("id"));
 
     scalePoints(pos, scale_);
 
@@ -198,6 +199,12 @@ void GenerateBoundaryParticles::execute() {
         // Move the object if it doesn't exist in the main registry yet
         oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
     }
+    // if (oreg.object_exists("id")) {
+    //     append(pos, "id");
+    // } else {
+    //     // Move the object if it doesn't exist in the main registry yet
+    //     oreg.get_objects().push_back(*local_objReg_.get_object_ptr("id"));
+    // }
 
 
     get_objReg().update_n_particles();

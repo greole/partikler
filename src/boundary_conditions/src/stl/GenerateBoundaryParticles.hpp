@@ -45,6 +45,7 @@ class GenerateBoundaryParticles : public Model {
     // PointField &pos_;
 
     int iterations_;
+
     int write_freq_;
 
     std::string filename_;
