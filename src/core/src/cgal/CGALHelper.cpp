@@ -624,13 +624,6 @@ void scalePoints (std::vector<Point>& points, float scale) {
             oldPoint.y() * scale,
             oldPoint.z() * scale
         };
-        std::cout << oldPoint.x() << " "
-                  << oldPoint.y() << " "
-                  << oldPoint.z() << " "
-                  << newPoint.x() << " "
-                  << newPoint.y() << " "
-                  << newPoint.z() << " "
-                  << std::endl;
         points[i] = newPoint;
     }
 
