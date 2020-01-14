@@ -37,9 +37,9 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
 std::vector<Point>
 create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx) {
 
-    size_t nx {(dimensions[0]-position[0])/dx};
-    size_t ny {(dimensions[1]-position[1])/dx};
-    size_t nz {(dimensions[2]-position[2])/dx};
+    size_t nx {(size_t)(dimensions[0]-position[0])/dx};
+    size_t ny {(size_t)(dimensions[1]-position[1])/dx};
+    size_t nz {(size_t)(dimensions[2]-position[2])/dx};
 
     size_t ntot = nx*ny*nz;
 
