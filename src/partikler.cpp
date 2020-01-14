@@ -85,6 +85,9 @@ REGISTER_DEF_TYPE(FIELDS, InitFields);
 #include "FixedValue.hpp"
 
 REGISTER_DEF_TYPE(BOUNDARY, FixedValue);
+
+#include "Cubiod.hpp"
+REGISTER_DEF_TYPE(FIELDS, InitShape);
 #endif
 
 void handler(int sig) {
