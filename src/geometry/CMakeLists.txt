@@ -1,15 +1,8 @@
 project(Geometry LANGUAGES CXX)
 
-# find_package(GTest REQUIRED)
-# find_package(yaml-cpp REQUIRED)
+add_library(Geometry SHARED)
 
-add_library(Geometry SHARED
-  # src/stl/computes.cpp
-  # $<TARGET_OBJECTS:Core>
-
-  )
-
-add_dependencies(Geometry Core)
+add_dependencies(Geometry IO Core)
 
 target_sources(Geometry
   PRIVATE
@@ -18,7 +11,6 @@ target_sources(Geometry
   PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/stl/STLLimitedDx.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Cubiod.hpp"
-
   )
 
 target_link_libraries(Geometry

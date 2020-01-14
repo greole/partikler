@@ -36,7 +36,7 @@ void FixedValue::execute() {
 
     // TODO move to constructor use create fields methods
     FieldIdMap &fieldIdMap_(get_objReg().get_object<FieldIdMap>("FieldIdMap"));
-    IntField &boundary_id_(get_objReg().get_object<IntField>("boundary"));
+    IntField &boundary_id_(get_objReg().get_object<IntField>("id"));
 
     for (auto field : float_fields_) {
         for (auto boundary : field.second) {
