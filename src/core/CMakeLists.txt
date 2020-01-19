@@ -4,7 +4,7 @@ find_package(yaml-cpp REQUIRED)
 
 # TODO move SearchCubes to neighbours?
 
-add_library(Core SHARED)
+add_library(Core OBJECT)
 
 target_sources(Core
   PRIVATE
