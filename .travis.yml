@@ -28,7 +28,7 @@ addons:
 before_install:
   - pip install --user cpp-coveralls
 
-install:    
+install:
   # first we create a directory for the CMake binaries
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
@@ -52,5 +52,5 @@ script:
   - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DBUILD_CGAL=ON -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
   - ctest -VV -R "Partikler_Test"
-  - ./partikler --config=../example/SPH.yaml
+  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/SPH.yaml
 
