@@ -54,10 +54,14 @@ class Model : public SPHObject {
 
   private:
     YAML::Node parameter_;   // Parameter of given model
+
     ObjectRegistry &objReg_; // Reference to main runTime
+
     Logger log_;             // Own logger instance for better scoping
 
     std::vector<std::shared_ptr<Model>> submodels_;
+
+    bool debug_;
 
   public:
     Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg);
@@ -88,6 +92,8 @@ class Model : public SPHObject {
     void sub_model_push_back(std::shared_ptr<Model> m);
 
     void execute_submodels();
+
+    bool debug() {return debug_;};
 };
 
 class ModelFactory {
@@ -161,6 +167,7 @@ class ModelGraph : public Model {
     void execute() { execute_submodels(); };
 };
 
+// TODO use std::variant<float,size_t> to
 class TimeGraph : public Model {
 
     // Defines a temporal order for submodels
@@ -350,7 +357,8 @@ public:
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
 
-class FloatFieldEquation : public Model {
+template<class T, class U>
+class FieldEquation : public Model {
 
   protected:
     TimeGraph &time_;
@@ -361,24 +369,37 @@ class FloatFieldEquation : public Model {
 
     KernelGradientField &dW_;
 
-    FloatField &f_;
+    T &f_;
+
+    // decltype(gradient_type<T>::type) &ddxf_; // TODO compute type
+    U &df_;
 
     // store previous results
-    std::map<int, FloatField> prev_;
+    std::map<int, T> prev_;
 
     // the current iteraton
-    int iteration;
+    int iteration_;
 
   public:
-    FloatFieldEquation(
-        const std::string &model_name,
+    FieldEquation(
+        const std::string &field_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        FloatField &f);
+        T &f)
+        : Model(field_name, parameter, objReg),
+          time_(objReg.get_object<TimeGraph>("TimeGraph")),
+          np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
+          W_(objReg.get_object<FloatField>("KernelW")),
+          dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f),
+          df_(objReg.create_field<VectorField>(
+              "d" + f_.get_name(),
+              zero<VectorField::value_type>::val,
+              {"dx" + f_.get_name(),
+               "dy" + f_.get_name(),
+               "dz" + f_.get_name()})) {};
 
     // get result for iteration i
     // if result is not cached solve gets executed
-    FloatField &get(int i);
 
     FloatField &W() { return W_; };
 
@@ -409,45 +430,83 @@ class FloatFieldEquation : public Model {
     // virtual T expression();
 
     // solve();
+
+    // get the result for the given iteration
+    //
+    // get the result for the given iteration
+    // if iteration is larger then cached iteration
+    // equation is solved
+    T &get(int iteration) {
+        if (iteration == iteration_) {
+            std::cout
+                << get_name()
+                << "DEBUG using cached solution for iteration "
+                << iteration
+                << std::endl;
+            return f_;
+        }
+        else {
+            this->execute();
+            return f_;
+        }
+    }
+
+    U &get_dx(int iteration) {
+        if (iteration == iteration_) {
+            std::cout
+                << get_name()
+                << "DEBUG using cached solution for iteration "
+                << iteration
+                << std::endl;
+            return df_;
+        }
+        else {
+            this->execute();
+            return df_;
+        }
+    }
 };
 
-class VectorFieldEquation : public Model {
+using FloatFieldEquation = FieldEquation<FloatField, VectorField>;
+using VectorFieldEquation = FieldEquation<VectorField, VectorField>;
 
-  protected:
-    TimeGraph &time_;
+// class VectorFieldEquation : public Model {
 
-    NeighbourFieldAB &np_;
+//   protected:
+//     TimeGraph &time_;
 
-    FloatField &W_;
+//     NeighbourFieldAB &np_;
 
-    KernelGradientField &dW_;
+//     FloatField &W_;
 
-    VectorField &f_;
+//     KernelGradientField &dW_;
 
-  public:
-    VectorFieldEquation(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg,
-        VectorField &f);
+//     VectorField &f_;
 
-    FloatField &W() { return W_; };
+//   public:
+//     VectorFieldEquation(
+//         const std::string &model_name,
+//         YAML::Node parameter,
+//         ObjectRegistry &objReg,
+//         VectorField &f);
 
-    NeighbourFieldAB &N() { return np_; };
+//     FloatField &W() { return W_; };
 
-    KernelGradientField &dWdx() { return dW_; };
+//     NeighbourFieldAB &N() { return np_; };
 
-    // template<class T>
-    // virtual T expression();
+//     KernelGradientField &dWdx() { return dW_; };
 
-    // template <class RHS, class LHS>
-    // RHS sum_AB(LHS lhs){
-    //     struct sum_AB_s {
+//     // template<class T>
+//     // virtual T expression();
 
-    //     }
-    //    return sum_AB_s
-    // }
+//     // template <class RHS, class LHS>
+//     // RHS sum_AB(LHS lhs){
+//     //     struct sum_AB_s {
 
-    // solve();
-};
+//     //     }
+//     //    return sum_AB_s
+//     // }
+
+//     // solve();
+// };
 #endif

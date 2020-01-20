@@ -86,6 +86,13 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     integ["TRANSPORTEQN"]["model"] = "STLPosIntegrator";
     node["main"].push_back(integ);
 
+    if (debug()){
+        YAML::Node writer;
+        writer["EXPORT"]["model"] = "SuperSPHWriter";
+        writer["EXPORT"]["name"] = name_;
+        node["main"].push_back(writer);
+    }
+
     return node;
 }
 

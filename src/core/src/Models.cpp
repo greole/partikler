@@ -19,16 +19,15 @@
 
 #include "Models.hpp"
 
-
-
-Model::Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg)
+Model::Model(
+    const std::string name, YAML::Node parameter, ObjectRegistry &objReg)
     : SPHObject(name, ModelType), parameter_(parameter), objReg_(objReg),
       // TODO inherit verbosity from main Logger
-      log_(Logger(3)), submodels_(std::vector<std::shared_ptr<Model>>()) {
+      log_(Logger(3)), submodels_(std::vector<std::shared_ptr<Model>>()),
+      debug_(read_or_default_coeff<bool>("debug", false)) {
     logger_.set_scope(this->get_name());
     log().info() << "Creating Model: " << this->get_name();
 }
-
 
 void Model::sub_model_push_back(std::shared_ptr<Model> m) {
 
@@ -109,29 +108,6 @@ ParticleGeneratorBase::read_vector(YAML::Node parameter, std::string coeff) {
     auto p = parameter[coeff];
     return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
 }
-
-FloatFieldEquation::FloatFieldEquation(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg,
-    FloatField &f)
-    : Model(model_name, parameter, objReg),
-      time_(objReg.get_object<TimeGraph>("TimeGraph")),
-      np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-      W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f) {}
-
-VectorFieldEquation::VectorFieldEquation(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg,
-    VectorField &f)
-    : Model(model_name, parameter, objReg),
-      time_(objReg.get_object<TimeGraph>("TimeGraph")),
-      np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-      W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f) {}
-// ModelRegister<SPHModelGraph> SPHModelGraph::reg("Core::SPHModelGraph");
 
 REGISTER_DEF_TYPE(CORE, ModelGraph);
 REGISTER_DEF_TYPE(CORE, TimeGraph);
