@@ -28,6 +28,8 @@
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "Pressure.hpp"
+
 class ObjectRegistry;
 namespace YAML {
 class Node;
@@ -38,15 +40,16 @@ class Viscosity : public VectorFieldEquation {
     REGISTER_DEC_TYPE(Viscosity);
 
   private:
+
+    FloatFieldEquation &conti_;
+
     // Coeffs
     float nu_;
 
     // In
-    const VectorField &u_;
-    const PointField &pos_; // Particle positions
+    VectorField &u_;
 
-    // Out
-    VectorField &dnu_;
+    const PointField &pos_; // Particle positions
 
   public:
     Viscosity(

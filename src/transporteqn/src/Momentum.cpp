@@ -24,18 +24,18 @@ Momentum::Momentum(
 
     : VectorFieldEquation(
           model_name, parameter, objReg, objReg.get_object<VectorField>("u")),
-      dnu_(objReg.get_object<VectorField>("dnu")),
-      dp_(objReg.get_object<VectorField>("dp")),
-      u_(objReg.get_object<VectorField>("u")),
-      du_(objReg.create_field<VectorField>(
-          "du", zero<VectorField::value_type>::val, {"dU", "dV", "dW"})),
-      time_(objReg.get_object<TimeGraph>("TimeGraph")) {}
+      tau_(objReg.get_object<VectorFieldEquation>("Viscosity")),
+      p_(objReg.get_object<FloatFieldEquation>("Pressure"))
+{}
 
 void Momentum::execute() {
 
     log().info_begin() << "Computing du/dt";
 
-    solve(du_, dnu_ - dp_);
+    int it = time_.get_current_timestep();
+
+    // solve(df_, tau_.get_(it) - p_.get_dx(it));
+    solve(df_,  ((float)-1.0)*p_.get_dx(it));
 
     log().info_end();
 
@@ -60,9 +60,18 @@ void Momentum::execute() {
     // std::cout << du_*time_().deltaT << std::endl;
     // std::cout << u_ << std::endl;
 
-    u_ += (du_ * time_.get_deltaT());
+    // f_ += solve(f_, f_+(df_ * time_.get_deltaT()));
+
+    // solve(f_, f_+(df_ * time_.get_deltaT()));
+
+    for(size_t i=0; i<f_.size(); i++) {
+        f_[i] += df_[i]*time_.get_deltaT();
+    }
 
     log().info_end();
+
+    iteration_ = time_.get_current_timestep();
+
 }
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);

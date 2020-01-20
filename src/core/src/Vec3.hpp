@@ -26,6 +26,8 @@
 struct Vec3 : std::array<float, 3> {
 
     Vec3 &operator=(const Vec3 &x);
+
+    Vec3 &operator+=(const Vec3 &x);
 };
 
 // Eager Operators
@@ -36,12 +38,14 @@ struct Vec3 : std::array<float, 3> {
 
 // scalar multiplication
 Vec3 operator*(float a, const Vec3 &x);
+Vec3 operator*(Vec3& x, float a);
 
 // scalar division
 Vec3 operator/(const Vec3 &x, float a);
 
 // dot product
 float operator*(const Vec3 &x, const Vec3 &y);
+
 
 // addition
 Vec3 operator+(const Vec3 &x, const Vec3 &y);

@@ -23,11 +23,15 @@
 #include "Field.hpp"
 #include "SearchCubes.hpp"
 #include <boost/yap/yap.hpp>
+#include <boost/hana/fwd/back.hpp>
+#include <boost/yap/print.hpp>
 
 template <class ValType> struct Pow_Wrapper {
     Pow_Wrapper() {};
     Pow_Wrapper(ValType i) { inner = i; };
-    template <typename T> T operator()(T x) { return std::pow(x, inner); }
+    template <typename T> T operator()(T x) {
+        std::cout << "x" << x << "inner" << inner << std::endl;
+        return std::pow(x, inner); }
     ValType inner;
 };
 
@@ -35,10 +39,27 @@ template <class OpType, class... Inner> struct Terminal_Generator {
     Terminal_Generator(Inner... params) {
         terminal = boost::yap::make_terminal(OpType(params...));
     }
+
+    // copy  expressions
     template <typename T> auto operator()(T x) { return terminal(x); }
+    // but take Fields by reference
+    template <typename U> auto operator()(Field<U>& x) { return terminal(x); }
 
     decltype(boost::yap::make_terminal(OpType())) terminal;
 };
+
+template <class OpType> struct Terminal_Generator_NoArg {
+    Terminal_Generator_NoArg() {
+        terminal = boost::yap::make_terminal(OpType());
+    }
+    // copy  expressions
+    template <typename T> auto operator()(T x) { return terminal(x); }
+    // but take Fields by reference
+    template <typename U> auto operator()(Field<U>& x) { return terminal(x); }
+
+    decltype(boost::yap::make_terminal(OpType())) terminal;
+};
+
 
 template <class... ValType>
 using Pow = Terminal_Generator<Pow_Wrapper<ValType...>, ValType...>;
@@ -50,8 +71,7 @@ struct Norm_Wrapper {
     }
 };
 
-template <class... ValType>
-using Norm = Terminal_Generator<Norm_Wrapper, ValType...>;
+using Norm = Terminal_Generator_NoArg<Norm_Wrapper>;
 
 template <class ValType> struct Set_Wrapper {
     Set_Wrapper() {};
@@ -81,12 +101,69 @@ template <class T, class I> T solve(I terminal) {
     return res;
 }
 
+
+// template <class Expr> auto pow(Expr const& e, double exponent, size_t elems) {
+//     std::cout << __PRETTY_FUNCTION__ << std::endl;
+//     decltype(auto) expr = boost::yap::as_expr(e);
+//     FloatField tmp(elems,0);
+//     solve(tmp, expr);
+//     std::cout << tmp << std::endl;
+//     auto pow_impl = Pow<float>(exponent);
+//     std::cout << "2" << std::endl;
+//     auto ret = pow_impl(tmp);
+//     std::cout << "3" << std::endl;
+//     return ret;
+// }
+
 // struct to access field elements
 //
 // This struct implements several operator() versions
 // dependent on the passed typed it either uses the
-// a-th, b-th, or ab-th index
+// a-th, b-th, or ab-th index or simply makes a terminal
 struct take_nth {
+
+    // template <typename Arg>
+    // auto operator()(
+    //     boost::yap::expr_tag<boost::yap::expr_kind::call>,
+    //     Pow_Wrapper<float> callable,
+    //     Arg && arg) {
+    //     // boost::yap::print(std::cout, boost::yap::as_expr(arg));
+    //     // std::cout << "call subexpr " <<  a << __PRETTY_FUNCTION__ << std::endl;
+    //     // std::cout << "call subexpr " <<  callable.inner  << std::endl;
+
+
+
+    //     // auto arg_expr = boost::yap::as_expr(arg);
+    //     // std::cout << "done transform 1 " <<  callable.inner  << std::endl;
+
+    //     // auto inner = boost::yap::transform(arg_expr, take_nth{a,b,ab});
+    //     // // auto inner = boost::yap::transform(boost::yap::as_expr(arg), take_nth{a,0,0});
+    //     // std::cout << "done transform 2" <<  callable.inner  << std::endl;
+
+    //     // float retII = boost::yap::evaluate(inner);
+    //     // std::cout << retII << std::endl;
+    //     // std::cout << " Done " << std::endl;
+    //     return  boost::yap::make_terminal(
+    //         callable(boost::yap::evaluate(boost::yap::transform(boost::yap::as_expr(arg), *this))));
+
+
+    //     // auto ret = boost::yap::make_terminal(2.0);
+
+    //     // return ret;
+    //     // return
+    //     //     boost::yap::make_expression<boost::yap::expr_kind::call>(
+    //     //     boost::yap::as_expr(callable),
+    //     //     boost::yap::transform(boost::yap::as_expr(arg),
+    //     //     take_nth{a,0,0}));
+    // }
+
+    template <typename T>
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        float const s) {
+        return boost::yap::make_terminal(s);
+    }
+
     template <typename T>
     auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
@@ -137,6 +214,18 @@ std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
     }
     return vec;
 }
+
+// template <typename T, typename A, typename Expr>
+// std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
+//     decltype(auto) expr = boost::yap::as_expr(e);
+//     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
+//         std::cout << "i" << i << std::endl;
+//         auto vec_i_expr = boost::yap::transform(
+//             boost::yap::as_expr(expr), take_nth {i, 0, 0});
+//         vec[i] = boost::yap::evaluate(vec_i_expr);
+//     }
+//     return vec;
+// }
 
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.

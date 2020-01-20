@@ -37,11 +37,6 @@ class Conti : public FloatFieldEquation {
     REGISTER_DEC_TYPE(Conti);
 
   private:
-    // In
-    const PointField &pos_; // Particle positions
-
-    // Out
-    FloatField &rho_;
 
     // Coeffs
     const float lower_limit_;
@@ -53,6 +48,8 @@ class Conti : public FloatFieldEquation {
         ObjectRegistry &objReg);
 
     void execute();
+
+
 };
 
 #endif

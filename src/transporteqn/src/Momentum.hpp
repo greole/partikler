@@ -39,14 +39,12 @@ class Momentum : public VectorFieldEquation {
 
   private:
     // In
-    const VectorField &dnu_;
-    const VectorField &dp_;
+    VectorFieldEquation &tau_;
+    FloatFieldEquation &p_;
 
     // Out
-    VectorField &u_;
-    VectorField &du_;
-
-    TimeGraph &time_;
+    // VectorField &u_;
+    // VectorField &du_;
 
   public:
     Momentum(

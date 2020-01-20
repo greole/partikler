@@ -35,6 +35,8 @@
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
+#define ab(field) ( A(field) - B(field) )
+
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
     switch (type_enum) {                                                       \
@@ -81,6 +83,7 @@ template <class T> class Field : public T, public SPHObject {
     bool reorder_ = true;
 
   public:
+
     Field() {};
 
     Field(
@@ -191,6 +194,9 @@ struct is_field<FieldAB<std::vector<T, A>>> : std::true_type {};
 
 template <typename T, typename Alloc>
 struct is_field<A<std::vector<T, Alloc>>> : std::true_type {};
+
+template <typename T, typename Alloc>
+struct is_field<B<std::vector<T, Alloc>>> : std::true_type {};
 
 // template <>
 // struct is_field<Field<std::vector<Vec3>>> : std::true_type {};

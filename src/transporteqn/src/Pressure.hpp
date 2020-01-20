@@ -28,6 +28,10 @@
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include <boost/yap/yap.hpp>
+#include <boost/yap/print.hpp>
+
+#include "Conti.hpp"
 class ObjectRegistry;
 namespace YAML {
 class Node;
@@ -38,21 +42,16 @@ class Pressure : public FloatFieldEquation {
     REGISTER_DEC_TYPE(Pressure);
 
   private:
+    // In
+    // Density
+    FloatFieldEquation &conti_;
+
     // Coeffs
     const float c_;
     const float rho_0_;
     const float gamma_;
     const float p_0_;
     const float prefac_;
-
-    // In
-    // Density
-    const FloatField &rho_;
-
-    // Out
-    // Pressure
-    FloatField &p_;
-    VectorField &dp_;
 
   public:
     Pressure(

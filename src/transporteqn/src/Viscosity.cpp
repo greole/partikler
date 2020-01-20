@@ -20,31 +20,34 @@
 
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-
     : VectorFieldEquation(
           model_name,
           parameter,
           objReg,
           objReg.create_field<VectorField>(
-              "dnu",
+              "tau",
               zero<VectorField::value_type>::val,
-              {"dnux", "dnuy", "dnuz"})
-
+              {"taux", "tauy", "tauz"})
               ),
+      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
-      // DIRTY FIX momentum eqn should create u
-      // but nu already depends on u
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
-      pos_(objReg.get_object<PointField>("Pos")),
-      dnu_(objReg.create_field<VectorField>(
-          "dnu",
-          zero<VectorField::value_type>::val,
-          {"dnux", "dnuy", "dnuz"})) {}
+      pos_(objReg.get_object<PointField>("Pos"))
+{}
 
 void Viscosity::execute() {
 
     log().info_begin() << "Computing dnu";
+
+    // auto& u = momentum_.get();
+    FloatField& rho = conti_.get(time_.get_current_timestep());
+
+    // sum_AB_dW(f_, np_, dW_,
+    //       ( A(u_) + B(u_) )/( A(rho) + B(rho) )
+    //           *  ((ab(u_) * ab(pos_))/ (ab(pos_))*(ab(pos_))
+    //     );
+
 
     // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
 
@@ -76,6 +79,7 @@ void Viscosity::execute() {
     // dnu_ *= nu_;
 
     log().info_end();
+    iteration_ = time_.get_current_timestep();
 }
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);

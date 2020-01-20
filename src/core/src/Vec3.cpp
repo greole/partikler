@@ -27,7 +27,18 @@ Vec3 &Vec3::operator=(const Vec3 &x) {
     return *this;
 }
 
+Vec3& Vec3::operator+=(const Vec3 &x) {
+    operator[](0) += x[0];
+    operator[](1) += x[1];
+    operator[](2) += x[2];
+    return *this;
+}
+
 Vec3 operator*(float a, const Vec3 &x) {
+    return {{a * x[0], a * x[1], a * x[2]}};
+}
+
+Vec3 operator*(Vec3& x, float a) {
     return {{a * x[0], a * x[1], a * x[2]}};
 }
 
@@ -42,10 +53,16 @@ float operator*(Vec3 &x, Vec3 &y) {
     return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
 }
 
+// dot product
+float operator*(Vec3 const &x, Vec3 const &y) {
+    return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
+}
+
 // addition
 Vec3 operator+(const Vec3 &x, const Vec3 &y) {
     return {{x[0] + y[0], x[1] + y[1], x[2] + y[2]}};
 }
+
 
 Vec3 operator-(const Vec3 &x, const Vec3 &y) {
     return {{x[0] - y[0], x[1] - y[1], x[2] - y[2]}};

@@ -26,13 +26,11 @@ Conti::Conti(
           parameter,
           objReg,
           objReg.create_field<FloatField>("rho", 0.0)),
-      pos_(objReg.get_particle_positions()),
-      rho_(objReg.create_field<FloatField>("rho", 0.0)),
       lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0)) {}
 
 void Conti::execute() {
 
-    // log().info_begin() << "Computing density";
+    log().info_begin() << "Computing density";
 
     // auto rho = set(rho_, 0.0).weighted_sum();
 
@@ -54,10 +52,20 @@ void Conti::execute() {
 
     // rho_ = solve<floatfield>(rho_eqn);
 
-    // TODO needs reset of rho_;
+    // TODO needs lazy reset of rho_;
+    for(auto & el: f_){ el = 0;}
     sum_AB();
+    // TODO do it lazyly
+    for (auto &el : f_) {
+        if (el < lower_limit_) {
+            el = lower_limit_;
+        }
+    }
 
-    // return sum_ab();
+    // set iteration
+    iteration_ = time_.get_current_timestep();
+
+    log().info_end();
 }
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
