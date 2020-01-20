@@ -34,6 +34,7 @@
 #include "Field.hpp"  // for PointField
 #include "Logger.hpp" // for Logger
 #include "Object.hpp" // for SPHObject, GenericType, SPHObjectType
+#include "yaml-cpp/yaml.h" // for Node
 
 class ObjectRegistry {
 
@@ -85,8 +86,8 @@ class ObjectRegistry {
                 return dynamic_cast<T &>(*f);
             };
         }
-        // TODO
-        throw std::invalid_argument("received negative value");
+        std::string error_str = "no object " + name + " found in object registry";
+        throw std::runtime_error(error_str);
     }
 
     // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
@@ -150,6 +151,16 @@ class ObjectRegistry {
         return register_object<T>(std::make_unique<T>(
             std::vector<typename T::value_type>(n_particles_), name));
     }
+
+    template <class T>
+    T &get_or_create_model(
+        const std::string model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg) {
+        if (object_exists(model_name)) return get_object<T>(model_name);
+        return register_object<T>(
+            std::make_unique<T>(model_name, parameter, objReg));
+    }
 };
 
 class FieldIdMap : public SPHObject {
@@ -166,8 +177,8 @@ class FieldIdMap : public SPHObject {
         for (size_t i = 0; i < fields_.size(); i++) {
             if (name == fields_[i]) return i;
         }
-        // TODO
-        throw std::invalid_argument("received negative value");
+        std::string error_str = "no field " + name + " found in fieldIdMap";
+        throw std::runtime_error(error_str);
     }
 
     int append(std::string field_name) {
