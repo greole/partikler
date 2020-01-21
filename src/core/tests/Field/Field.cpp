@@ -89,6 +89,7 @@ TEST(FloatField, aTest) {
     FloatField res_f(2, 0);
 
     sum_AB_impl(res_v, n, A(a) + A(b));
+    sum_AB_impl(res_f, n, (a + b)*a);
     sum_AB_impl(res_f, n, A(a)*A(b) + A(b)*A(b));
 
     ASSERT_EQ(res_f[0], 0.0);
@@ -99,17 +100,32 @@ TEST(FloatField, abTest) {
 
     VectorField a(2, {0,0,0});
     VectorField b(2, {0,0,0});
+    FloatField  c(2, 0);
 
     NeighbourFieldAB n(1, {0, 1});
 
-    VectorField res(2, {0,0,0});
+    VectorField res_v(2, {0,0,0});
+    FloatField res_f(2, 0);
 
-    sum_AB_impl(res, n, A(a) + A(b));
+    sum_AB_impl(res_v, n, A(a) + A(b));
+    sum_AB_impl(res_v, n, A(a) + (A(a) + A(b)));
+    // sum_AB_impl(res, n, (A(a) + A(b)) + A(a)); // doesn't work
+    // sum_AB_impl(res, n, ab(A(a)) + A(a));      // doesn't work
+    // sum_AB_impl(res, n, A(a) + ab(A(a)));      // doesn't work
+    // sum_AB_impl(res, n, (A(a) + A(b))*A(b));   // doesn't work
 
     // sum_AB_impl(res, n, ab(a) + ab(b));
 
-    ASSERT_EQ(res[0][0], 0.0);
-    ASSERT_EQ(res[1][0], 0.0);
+    sum_AB_impl(res_f, n, A(a) * (A(a) + A(b)));
+    sum_AB_impl(res_f, n, A(a) * (A(a) + B(b)));
+    sum_AB_impl(res_f, n, A(a) * (A(a) + B(a)));
+    sum_AB_impl(res_f, n, B(a) * (A(a) + B(a)));
+    sum_AB_impl(res_f, n, B(a) * ab(a)) ;
+    sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ; // fails with gcc
+    // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ;
+
+    // ASSERT_EQ(res[0][0], 0.0);
+    // ASSERT_EQ(res[1][0], 0.0);
 }
 
 TEST(FloatField, abMacroTest) {
