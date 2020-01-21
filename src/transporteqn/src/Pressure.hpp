@@ -53,6 +53,9 @@ class Pressure : public FloatFieldEquation {
     const float p_0_;
     const float prefac_;
 
+    FloatField& p;
+    VectorField& dp;
+
   public:
     Pressure(
         const std::string &model_name,

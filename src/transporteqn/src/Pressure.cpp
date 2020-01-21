@@ -32,7 +32,8 @@ Pressure::Pressure(
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
-      prefac_(c_ * c_ * rho_0_ / gamma_)
+      prefac_(c_ * c_ * rho_0_ / gamma_),
+      p(f_), dp(df_)
 {}
 
 void Pressure::execute() {
@@ -40,19 +41,19 @@ void Pressure::execute() {
 
     auto& rho = conti_.get(time_.get_current_timestep());
 
-    // auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(gamma_));
+    auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(gamma_));
 
-    auto pow& = Pow<float>(gamma_);
+    // auto pow = Pow<float>(gamma_);
 
     log().info_begin() << "Computing pressure";
 
-    solve(f_, prefac_ * (  pow(rho/rho_0_ ) - 1.0) + p_0_);
+    solve(p, prefac_ * (  pow(rho/rho_0_ ) - 1.0) + p_0_);
 
     log().info_end();
 
     log().info_begin() << "Computing gradient";
 
-    sum_AB_dW(df_, np_, dW_, (A(f_) + B(f_))/B(rho));
+    sum_AB_dW(dp, np_, dW_, (A(p) + B(p))/B(rho));
 
     log().info_end();
 

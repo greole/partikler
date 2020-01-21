@@ -121,7 +121,9 @@ TEST(FloatField, abTest) {
     sum_AB_impl(res_f, n, A(a) * (A(a) + B(a)));
     sum_AB_impl(res_f, n, B(a) * (A(a) + B(a)));
     sum_AB_impl(res_f, n, B(a) * ab(a)) ;
-    sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ; // fails with gcc
+    // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ; // fails with gcc
+    sum_AB_impl(res_f, n, B(a) * ab_v(a) + c) ;
+    sum_AB_impl(res_f, n, ab_v(b) * ab_v(a) + ab_f(c));
     // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ;
 
     // ASSERT_EQ(res[0][0], 0.0);
@@ -255,7 +257,7 @@ TEST(FloatField, PowFloatFieldExpr) {
 
     FloatField res(1, 0.0);
 
-    auto pow = Pow<float>(2.0);
+    auto pow = boost::yap::make_terminal( Pow_Wrapper<float>(2.0));
 
     solve(res, pow(a+b) );
 

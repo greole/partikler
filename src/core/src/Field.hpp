@@ -36,6 +36,9 @@
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
 #define ab(field) ( A(field) - B(field) )
+#define ab_v(field) ( A<VectorField>(field) - B<VectorField>(field) )
+#define ab_f(field) ( A<FloatField>(field) - B<FloatField>(field) )
+#define ab_p(field) ( A<PointField>(field) - B<PointField>(field) )
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
@@ -136,8 +139,8 @@ template <class T> class Field : public T, public SPHObject {
 // A FieldAB is an alias to Field, however, using inheritance
 // disallows using Field and FieldAB in binary operators of
 // type operator(T a, T b)
-template <class T> class FieldAB : public Field<T> {
-    using F = Field<T>;
+template <class T> class FieldAB : public T {
+    using F = T;
     using F::F;
 };
 
@@ -148,25 +151,25 @@ template <class T> class FieldAB : public Field<T> {
 // index
 template <class T> class A {
   private:
-    Field<T> &f_;
+    T &f_;
 
   public:
-    A(Field<T> &f) : f_(f) {};
+    A(T &f) : f_(f) {};
 
-    Field<T> &operator()() { return f_; };
+    T &operator()() { return f_; };
 
-    Field<T> &operator()() const { return f_; };
+    T &operator()() const { return f_; };
 };
 
 template <class T> class B {
 
   private:
-    Field<T> &f_;
+    T &f_;
 
   public:
-    B(Field<T> &f) : f_(f) {};
+    B(T &f) : f_(f) {};
 
-    Field<T> &operator()() const { return f_; };
+    T &operator()() const { return f_; };
 };
 
 // free function re-oders the vector by the idx vector
@@ -186,17 +189,17 @@ void reorder_vector(std::vector<T> &vec, const std::vector<size_t> &idxs) {
 // Define a type trait that identifies std::vectors.
 template <typename T> struct is_field : std::false_type {};
 
-template <typename T, typename A>
-struct is_field<Field<std::vector<T, A>>> : std::true_type {};
-
-template <typename T, typename A>
-struct is_field<FieldAB<std::vector<T, A>>> : std::true_type {};
+template <typename T, typename Alloc>
+struct is_field<Field<std::vector<T, Alloc>>> : std::true_type {};
 
 template <typename T, typename Alloc>
-struct is_field<A<std::vector<T, Alloc>>> : std::true_type {};
+struct is_field<FieldAB<Field<std::vector<T, Alloc>>>> : std::true_type {};
 
 template <typename T, typename Alloc>
-struct is_field<B<std::vector<T, Alloc>>> : std::true_type {};
+struct is_field<A<Field<std::vector<T, Alloc>>>> : std::true_type {};
+
+template <typename T, typename Alloc>
+struct is_field<B<Field<std::vector<T, Alloc>>>> : std::true_type {};
 
 // template <>
 // struct is_field<Field<std::vector<Vec3>>> : std::true_type {};
@@ -279,10 +282,10 @@ using FloatField = Field<std::vector<float>>;
 using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
 
-using FloatFieldAB = FieldAB<std::vector<float>>;
-using IntFieldAB = FieldAB<std::vector<int>>;
-using SizeTFieldAB = FieldAB<std::vector<size_t>>;
-using KernelGradientField = FieldAB<std::vector<VectorPair>>;
+using FloatFieldAB = FieldAB<Field<std::vector<float>>>;
+using IntFieldAB = FieldAB<Field<std::vector<int>>>;
+using SizeTFieldAB = FieldAB<Field<std::vector<size_t>>>;
+using KernelGradientField = FieldAB<Field<std::vector<VectorPair>>>;
 
 using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 

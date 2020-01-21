@@ -49,7 +49,7 @@ class Viscosity : public VectorFieldEquation {
     // In
     VectorField &u_;
 
-    const PointField &pos_; // Particle positions
+    PointField &pos_; // Particle positions
 
   public:
     Viscosity(

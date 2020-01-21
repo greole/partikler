@@ -30,7 +30,6 @@ template <class ValType> struct Pow_Wrapper {
     Pow_Wrapper() {};
     Pow_Wrapper(ValType i) { inner = i; };
     template <typename T> T operator()(T x) {
-        std::cout << "x" << x << "inner" << inner << std::endl;
         return std::pow(x, inner); }
     ValType inner;
 };
@@ -174,7 +173,7 @@ struct take_nth {
     template <typename T>
     auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        FieldAB<std::vector<T>> const &f) {
+        FieldAB<Field<std::vector<T>>> const &f) {
         return boost::yap::make_terminal(f[ab]);
     }
 
@@ -252,6 +251,7 @@ sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
 
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
+// NOTE sum_AB generally assumes nb to be sorted
 template <typename T, typename Expr>
 std::vector<T> &sum_AB_dW(
     std::vector<T> &vec,

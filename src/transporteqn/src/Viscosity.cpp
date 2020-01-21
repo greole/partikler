@@ -43,10 +43,11 @@ void Viscosity::execute() {
     // auto& u = momentum_.get();
     FloatField& rho = conti_.get(time_.get_current_timestep());
 
-    // sum_AB_dW(f_, np_, dW_,
-    //       ( A(u_) + B(u_) )/( A(rho) + B(rho) )
-    //           *  ((ab(u_) * ab(pos_))/ (ab(pos_))*(ab(pos_))
-    //     );
+    sum_AB_dW(f_, np_, dW_,
+        rho*( A<VectorField>(u_) + B<VectorField>(u_) )
+       / ( A<FloatField>(rho) + B<FloatField>(rho) )
+       * ( (ab_v(u_) * ab_p(pos_)) / (ab_p(pos_)) * (ab_p(pos_)))
+        );
 
 
     // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
