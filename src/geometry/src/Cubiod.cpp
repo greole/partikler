@@ -32,7 +32,7 @@ void InitShape::execute() {
 
     auto cube_pos = create_uniform_particle_cube(dimensions_, position_, dx_);
     // pos_.insert(points_.end(), cube_pos.begin(), cube_pos.end());
-    for (auto p: cube_pos)  pos_.push_back({p[0], p[1], p[2]});
+    for (auto p: cube_pos)  pos_.push_back({(float)p[0], (float)p[1], (float)p[2]});
 
     post_execute();
 
