@@ -107,14 +107,10 @@ void SPHParticleGenerator::execute() {
 
     float volume = surface_area * dx_;
     log().info_end() << "Total Surface Area" << surface_area;
-    // END REFACTOR THIS
-    float *mass_particle_ptr = new float;
-    *mass_particle_ptr = volume/n;
-    log().info() << "particle mass " << *mass_particle_ptr;
 
     get_objReg().register_object<Generic<float>>(
         std::make_unique<Generic<float>>(
-            "specific_particle_mass", GenericType, *mass_particle_ptr
+            "specific_particle_mass", GenericType, volume/n
             ));
 
     for (size_t i = 0; i < (n - n_0); i++) {
