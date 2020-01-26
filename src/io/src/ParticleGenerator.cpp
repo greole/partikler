@@ -87,7 +87,7 @@ void SPHParticleGenerator::execute() {
 
     // TODO find a better solution
     for (auto &p: points_) {
-        pos_.push_back({p[0], p[1], p[2]});
+        pos_.push_back({(float)p[0], (float)p[1], (float)p[2]});
     }
 
     log().info_end() << "Generated " << n << " Particles";
