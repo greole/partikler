@@ -41,6 +41,8 @@ class Conti : public FloatFieldEquation {
     // Coeffs
     const float lower_limit_;
 
+    const float particle_mass_;
+
   public:
     Conti(
         const std::string &model_name,

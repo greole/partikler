@@ -33,7 +33,11 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       iterations_(read_coeff<int>("iterations")),
       write_freq_(read_or_default_coeff<int>("writeout", -1)),
       filename_(read_coeff<std::string>("file")),
-      scale_(read_or_default_coeff<float>("scale", 1.0))
+      scale_(read_or_default_coeff<float>("scale", 1.0)),
+      nu_(read_or_default_coeff<float>("nu", 1e-05)),
+      rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
+      p_0_(read_or_default_coeff<float>("p_0", 1e-05)),
+      dxhratio_(read_or_default_coeff<float>("dxhratio", 1.05))
 {}
 
 YAML::Node GenerateBoundaryParticles::default_graph() {
@@ -56,12 +60,12 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node neighbours;
     // finds the neighbours
     neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
-    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_/scale_ * 1.05;
+    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_/scale_ * dxhratio_;
     node["main"].push_back(neighbours);
 
     YAML::Node kernel;
     kernel["KERNEL"]["model"] = "STLWendland2D";
-    kernel["KERNEL"]["h"] = dx_/scale_ * 1.05;
+    kernel["KERNEL"]["h"] = dx_/scale_ * dxhratio_;
     node["main"].push_back(kernel);
 
     YAML::Node conti;
@@ -71,11 +75,13 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
 
     YAML::Node pressure;
     pressure["TRANSPORTEQN"]["model"] = "Pressure";
+    pressure["TRANSPORTEQN"]["rho_0"] = rho_0_ ;
+    pressure["TRANSPORTEQN"]["p_0"] = p_0_;
     node["main"].push_back(pressure);
 
     YAML::Node visc;
     visc["TRANSPORTEQN"]["model"] = "Viscosity";
-    visc["TRANSPORTEQN"]["nu"] = 100;
+    visc["TRANSPORTEQN"]["nu"] = nu_;
     node["main"].push_back(visc);
 
     YAML::Node mom;
@@ -129,6 +135,10 @@ void GenerateBoundaryParticles::execute() {
     // IntField &type = get_objReg().create_field<IntField>("type", 2);
     // SizeTField &idx = obj_reg.create_idx_field();
 
+    // Set particle mass to match rho_0
+    auto& spm = local_objReg_.get_object<Generic<float>>("specific_particle_mass");
+    spm() = spm()*rho_0_;
+
     // Register Models
     for (auto el : node["main"]) {
 
@@ -146,7 +156,7 @@ void GenerateBoundaryParticles::execute() {
 
     auto &loc_objs = local_objReg_.get_objects();
 
-    auto& pos(local_objReg_.get_object<PointField>("Pos"));
+    auto& pos(local_objReg_.get_object<VectorField>("Pos"));
 
     scalePoints(pos, scale_);
 

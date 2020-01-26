@@ -70,7 +70,7 @@ class ObjectRegistry {
     void set_n_particles(size_t n_particles) { n_particles_ = n_particles; }
 
     void update_n_particles() {
-        n_particles_ = get_particle_positions().size();
+        n_particles_ = get_pos().size();
     }
 
     size_t get_n_particles() {
@@ -110,8 +110,12 @@ class ObjectRegistry {
         return false;
     }
 
-    PointField &get_particle_positions() {
-        return get_object<PointField &>("Pos");
+    PointField &get_points() {
+        return get_object<PointField &>("Points");
+    }
+
+    VectorField &get_pos() {
+        return get_object<VectorField &>("Pos");
     }
 
     // create an generic with default val

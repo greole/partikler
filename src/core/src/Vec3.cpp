@@ -34,6 +34,20 @@ Vec3& Vec3::operator+=(const Vec3 &x) {
     return *this;
 }
 
+Vec3& Vec3::operator-=(const Vec3 &x) {
+    operator[](0) -= x[0];
+    operator[](1) -= x[1];
+    operator[](2) -= x[2];
+    return *this;
+}
+
+Vec3& Vec3::operator*=(const float x) {
+    operator[](0) *= x;
+    operator[](1) *= x;
+    operator[](2) *= x;
+    return *this;
+}
+
 Vec3 operator*(float a, const Vec3 &x) {
     return {{a * x[0], a * x[1], a * x[2]}};
 }
@@ -71,4 +85,29 @@ Vec3 operator-(const Vec3 &x, const Vec3 &y) {
 std::ostream &operator<<(std::ostream &os, Vec3 const &f) {
     os << "[" << f[0] << ", " << f[1] << ", " << f[2] << "]";
     return os;
+}
+
+void scalePoints (std::vector<Vec3>& points, Vec3 scale) {
+
+    for(size_t i=0; i<points.size(); i++) {
+        auto& oldPoint = points[i];
+        // Vec3 newPoint {
+        // };
+        points[i] = Vec3 {
+            oldPoint[0] * scale[0],
+            oldPoint[1] * scale[1],
+            oldPoint[2] * scale[2],
+        };
+    }
+
+}
+
+void scalePoints (std::vector<Vec3>& points, float scale) {
+    for(size_t i=0; i<points.size(); i++) {
+        points[i]*= scale;
+    }
+}
+
+void translatePoints (std::vector<Vec3>& points, Vec3 translate) {
+    for(auto& pos: points)  pos += translate;
 }

@@ -47,7 +47,8 @@ class STLPosIntegrator : public Model {
 
     // Out
     VectorField &u_;
-    PointField &pos_;
+    PointField &points_;
+    VectorField &pos_;
     TimeGraph &time_;
 
   public:

@@ -154,12 +154,6 @@ struct movePoint {
     }
 };
 
-void translatePoints (std::vector<Point>& points, Vec3 translate);
-
-void scalePoints (std::vector<Point>& points, Vec3 scale);
-
-void scalePoints (std::vector<Point>& points, float scale);
-
 struct EdgeNormal {
     CGALVector EN;
     CGALVector FN;
@@ -205,5 +199,7 @@ std::ostream &operator<<(std::ostream &os, Point const &p);
 
 STLSurfaceDist compute_STLSurface_dist(
     Point opos, Point npos, Facet_handle start, Facet_handle end);
+
+float operator*(Vec3 &x, CGALVector &y);
 
 #endif

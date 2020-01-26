@@ -22,12 +22,17 @@
 
 #include <array>
 #include <iostream>
+#include <vector>
 
 struct Vec3 : std::array<float, 3> {
 
     Vec3 &operator=(const Vec3 &x);
 
     Vec3 &operator+=(const Vec3 &x);
+
+    Vec3 &operator-=(const Vec3 &x);
+
+    Vec3 &operator*=(const float x);
 };
 
 // Eager Operators
@@ -59,5 +64,12 @@ struct VectorPair {
     Vec3 on;
     Vec3 no;
 };
+
+void translatePoints (std::vector<Vec3>& points, Vec3 translate);
+
+void scalePoints (std::vector<Vec3>& points, Vec3 scale);
+
+void scalePoints (std::vector<Vec3>& points, float scale);
+
 
 #endif

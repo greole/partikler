@@ -22,11 +22,13 @@
 Conti::Conti(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : FloatFieldEquation(
-          model_name,
-          parameter,
-          objReg,
-          objReg.create_field<FloatField>("rho", 0.0)),
-      lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0)) {}
+        model_name,
+        parameter,
+        objReg,
+        objReg.create_field<FloatField>("rho", 0.0)),
+      lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0)),
+      particle_mass_(objReg.get_object<Generic<float>>("specific_particle_mass")())
+{}
 
 void Conti::execute() {
 
@@ -54,8 +56,8 @@ void Conti::execute() {
 
     // TODO needs lazy reset of rho_;
     for(auto & el: f_){ el = 0;}
-    sum_AB();
-    // TODO do it lazyly
+    sum_AB(particle_mass_);
+    // TODO do it lazily
     for (auto &el : f_) {
         if (el < lower_limit_) {
             el = lower_limit_;

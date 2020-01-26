@@ -45,7 +45,7 @@ TEST(FloatField, eagerCopy) {
     ASSERT_EQ(res[1], 2.0);
 }
 
-TEST(FloatField, sumABTest) {
+TEST(FloatField, sumABFloatTest) {
 
     FloatField a(2, 1.0);
 
@@ -61,6 +61,28 @@ TEST(FloatField, sumABTest) {
     ASSERT_EQ(res[1], 3.0);
 
     sum_AB_impl(res, n, A(a)*B(a) + A(b)*B(b));
+}
+
+TEST(FloatField, sumABVectorTest) {
+
+    VectorField a(2, {1.0, 0, 0});
+
+    VectorField b(2, {2.0, 0, 0});
+
+    NeighbourFieldAB n(1, {0, 1});
+
+    VectorField res(2, {0.0,0.0,0.0});
+
+    sum_AB_impl(res, n, A(a) + B(b));
+
+    ASSERT_EQ(res[0][0], 3.0);
+    ASSERT_EQ(res[1][0], 3.0);
+
+    sum_AB_impl(res, n, ab_v(a));
+
+    ASSERT_EQ(res[0][0], 3.0); // A(a) - B(a) = 0
+    ASSERT_EQ(res[1][0], 3.0);
+
 }
 
 TEST(FloatField, ParenthesisTest) {
@@ -102,6 +124,7 @@ TEST(FloatField, abTest) {
     VectorField b(2, {0,0,0});
     FloatField  c(2, 0);
 
+    PointField p(2, {0,0,0});
     NeighbourFieldAB n(1, {0, 1});
 
     VectorField res_v(2, {0,0,0});
@@ -124,11 +147,14 @@ TEST(FloatField, abTest) {
     // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ; // fails with gcc
     sum_AB_impl(res_f, n, B(a) * ab_v(a) + c) ;
     sum_AB_impl(res_f, n, ab_v(b) * ab_v(a) + ab_f(c));
+
+    // sum_AB_impl(res_v, n, ab_v(b) * ab_p(p) );
     // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ;
 
     // ASSERT_EQ(res[0][0], 0.0);
     // ASSERT_EQ(res[1][0], 0.0);
 }
+
 
 TEST(FloatField, abMacroTest) {
 

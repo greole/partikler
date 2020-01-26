@@ -29,7 +29,7 @@ Wendland::Wendland(
     : Model(model_name, parameter, objReg),
       h_(read_or_default_coeff<float>("h", 1.0)), ih_(1.0 / h_),
       W_fak2_(hfact / (h_ * h_)), dW_fak2_(hfact / (h_ * h_ * h_)),
-      pos_(objReg.get_particle_positions()),
+      pos_(objReg.get_points()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<FloatField>("KernelW")),

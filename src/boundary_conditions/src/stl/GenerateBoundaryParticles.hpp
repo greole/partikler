@@ -49,6 +49,14 @@ class GenerateBoundaryParticles : public ParticleGeneratorBase {
 
     float scale_;
 
+    float nu_;
+
+    float rho_0_;
+
+    float p_0_;
+
+    float dxhratio_;
+
   public:
 
     YAML::Node default_graph();

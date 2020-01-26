@@ -5,9 +5,10 @@
 
 #include <vector>
 
-bool found_particle_pair(size_t i, size_t j, size_t k, SortedNeighbours &ret) {
-    bool found_i = (ret.ids[k].ownId == i);
-    bool found_j = (ret.ids[k].neighId == j);
+bool found_particle_pair(
+    size_t i, size_t j, size_t k, std::vector<STLUnsortedNeighbour> &ret) {
+    bool found_i = (ret[k].ids.ownId == i);
+    bool found_j = (ret[k].ids.neighId == j);
     return (found_i and found_j);
 }
 
@@ -19,8 +20,8 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
-    SortedNeighbours ret {};
-    ret.ids.reserve(tot_n_particles * points.size() / 2);
+    std::vector<STLUnsortedNeighbour> ret {};
+    ret.reserve(tot_n_particles * points.size() / 2);
 
     // Assume all particles on same facet
     const std::vector<Facet_handle> facets(points.size(), NULL);
@@ -29,14 +30,14 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
     owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);
 
     // Should find at least some neighbours
-    ASSERT_GT(ret.ids.size(), 0);
+    ASSERT_GT(ret.size(), 0);
 
     // Neighbourhood should be found once at max
-    ASSERT_LT(ret.ids.size(), tot_n_particles * tot_n_particles);
+    ASSERT_LT(ret.size(), tot_n_particles * tot_n_particles);
 
     // When each particle has all particles as neighbour
     // the number of particle pairs is n-1+n-2+...
-    ASSERT_EQ(ret.ids.size(), (tot_n_particles - 1) / 2 * tot_n_particles);
+    ASSERT_EQ(ret.size(), (tot_n_particles - 1) / 2 * tot_n_particles);
 
     // Every particle needs to be found either as owner or neighbour
     // TODO Refactor
@@ -54,7 +55,7 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
     for (size_t i = 0; i < tot_n_particles; i++) {
         size_t present = 0;
         for (size_t j = i + 1; j < tot_n_particles; j++) {
-            for (size_t k = 0; k < ret.ids.size(); k++) {
+            for (size_t k = 0; k < ret.size(); k++) {
 
                 if (found_particle_pair(i, j, k, ret) or
                     found_particle_pair(j, i, k, ret)) {
@@ -90,8 +91,8 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
-    SortedNeighbours ret {};
-    ret.ids.reserve(tot_n_particles * points.size() / 2);
+    std::vector<STLUnsortedNeighbour> ret {};
+    ret.reserve(tot_n_particles * points.size() / 2);
 
     // Assume all particles on same facet
     const std::vector<Facet_handle> facets(points.size(), NULL);
@@ -107,11 +108,11 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
         ret);
 
     // Should find at least some neighbours
-    ASSERT_GT(ret.ids.size(), 0);
+    ASSERT_GT(ret.size(), 0);
 
     // When each particle has all particles as neighbour
     // the number of particle pairs is n_particles**2
-    ASSERT_EQ(ret.ids.size(), tot_n_particles * tot_n_particles);
+    ASSERT_EQ(ret.size(), tot_n_particles * tot_n_particles);
 
     // Every particle needs to be found either as owner or neighbour
     // TODO refactor
@@ -129,7 +130,7 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
     for (size_t i = 0; i < tot_n_particles; i++) {
         size_t present = 0;
         for (size_t j = tot_n_particles; j < 2 * tot_n_particles; j++) {
-            for (size_t k = 0; k < ret.ids.size(); k++) {
+            for (size_t k = 0; k < ret.size(); k++) {
 
                 if (found_particle_pair(i, j, k, ret) or
                     found_particle_pair(j, i, k, ret)) {
@@ -168,7 +169,7 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
     // TODO searchCubes are created by counting sort
     std::vector<SearchCube> searchCubes(1, {0, points.size()});
 
-    SortedNeighbours ret =
+    STLSortedNeighbours ret =
         createSTLNeighbours(scd, sp.particles, sp.searchCubes, facets);
 
     // Should find at least some neighbours

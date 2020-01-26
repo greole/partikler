@@ -39,15 +39,15 @@ class SPHSTLParticleNeighbours : public Model {
 
     REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
 
-    using SearchCubeFieldAB = FieldAB<std::vector<SearchCube>>;
-    using STLSurfaceDistAB = FieldAB<std::vector<STLSurfaceDist>>;
+    using SearchCubeFieldAB = FieldAB<Field<std::vector<SearchCube>>>;
+    using STLSurfaceDistAB = FieldAB<Field<std::vector<STLSurfaceDist>>>;
 
   private:
     // Coeffs
     float dx_;
 
     // In
-    PointField &pos_;
+    PointField &points_;
 
     Field<std::vector<Facet_handle>> &facets_;
 

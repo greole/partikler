@@ -39,7 +39,6 @@ void Momentum::execute() {
     FloatField& rho = conti_.get(time_.get_current_timestep());
 
     solve(df_, tau_.get(it)/rho - p_.get_dx(it)/rho);
-    // solve(df_,  ((float)-1.0)*p_.get_dx(it));
 
     log().info_end();
 
@@ -69,6 +68,7 @@ void Momentum::execute() {
     // solve(f_, f_+(df_ * time_.get_deltaT()));
 
     for(size_t i=0; i<f_.size(); i++) {
+        f_[i] = f_[i]/1.3;
         f_[i] += df_[i]*time_.get_deltaT();
     }
 

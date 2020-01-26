@@ -66,7 +66,8 @@ SPHParticleGenerator::SPHParticleGenerator(
     : Model(model_name, parameter, objReg), boundary_id_(read_coeff<int>("id")),
       polyhedron_(objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
       facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
-      pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})),
+      points_(objReg.create_field<PointField>("Points", {}, {"X", "Y", "Z"})),
+      pos_(objReg.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
       idx_(objReg.create_field<SizeTField>("idx")),
       type_(objReg.create_field<IntField>("type")),
       boundary_(objReg.create_field<IntField>("boundary")),
@@ -75,18 +76,46 @@ SPHParticleGenerator::SPHParticleGenerator(
 void SPHParticleGenerator::execute() {
 
     log().info_begin() << "Generating initial particles ";
-    Generate_Points_at_Facets gpf(dx_, pos_, facets_);
+    Generate_Points_at_Facets gpf(dx_, points_, facets_);
 
-    size_t n_0 = pos_.size();
+    size_t n_0 = points_.size();
 
     std::for_each(
         polyhedron_().facets_begin(), polyhedron_().facets_end(), gpf);
 
-    size_t n = pos_.size();
+    size_t n = points_.size();
+
+    // TODO find a better solution
+    for (auto &p: points_) {
+        pos_.push_back({p[0], p[1], p[2]});
+    }
 
     log().info_end() << "Generated " << n << " Particles";
 
     get_objReg().set_n_particles(n);
+
+    // TODO START REFACTOR THIS
+    Compute_Facet_Area ca;
+
+    log().info_begin() << "Computing Surface Area";
+
+    float surface_area = (float) std::accumulate(
+        boost::make_transform_iterator(polyhedron_().facets_begin(), ca),
+        boost::make_transform_iterator(polyhedron_().facets_end(), ca),
+        0.);
+
+
+    float volume = surface_area * dx_;
+    log().info_end() << "Total Surface Area" << surface_area;
+    // END REFACTOR THIS
+    float *mass_particle_ptr = new float;
+    *mass_particle_ptr = volume/n;
+    log().info() << "particle mass " << *mass_particle_ptr;
+
+    get_objReg().register_object<Generic<float>>(
+        std::make_unique<Generic<float>>(
+            "specific_particle_mass", GenericType, *mass_particle_ptr
+            ));
 
     for (size_t i = 0; i < (n - n_0); i++) {
         idx_.push_back(n_0 + i);

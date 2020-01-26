@@ -21,8 +21,8 @@
 
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      pos_(objReg.create_field<PointField>("Pos", {}, {"X", "Y", "Z"})) {
+    : Model(model_name, parameter, objReg)
+{
     if (parameter["FloatFields"]) {
         for (auto p : parameter["FloatFields"])
             float_fields_.push_back(p.as<std::string>());

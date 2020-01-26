@@ -587,44 +587,6 @@ std::ostream &operator<<(std::ostream &os, Point const &p) {
     return os;
 }
 
-void translatePoints (std::vector<Point>& points, Vec3 translate) {
-
-    for(size_t i=0; i<points.size(); i++) {
-        auto& oldPoint = points[i];
-        Point newPoint {
-            oldPoint.x() + translate[0],
-            oldPoint.y() + translate[1],
-            oldPoint.z() + translate[2],
-        };
-        points[i] = newPoint;
-    }
-
-}
-
-void scalePoints (std::vector<Point>& points, Vec3 scale) {
-
-    for(size_t i=0; i<points.size(); i++) {
-        auto& oldPoint = points[i];
-        Point newPoint {
-            oldPoint.x() * scale[0],
-            oldPoint.y() * scale[1],
-            oldPoint.z() * scale[2],
-        };
-        points[i] = newPoint;
-    }
-
-}
-
-void scalePoints (std::vector<Point>& points, float scale) {
-
-    for(size_t i=0; i<points.size(); i++) {
-        auto& oldPoint = points[i];
-        Point newPoint {
-            oldPoint.x() * scale,
-            oldPoint.y() * scale,
-            oldPoint.z() * scale
-        };
-        points[i] = newPoint;
-    }
-
+float operator*(Vec3 &x, CGALVector &y){
+    return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
 }

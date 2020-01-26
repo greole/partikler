@@ -279,7 +279,9 @@ protected:
 
     ObjectRegistry local_objReg_;
 
-    PointField& pos_;
+    PointField& points_;
+
+    VectorField& pos_;
 
     IntField& id_;
 
@@ -321,6 +323,7 @@ public:
         // need to be transferred
         logger_.info_begin() << "Transfering ";
 
+        // TODO transfer the Vec3 version of Pos
         auto &oreg = get_objReg();
         if (oreg.object_exists("Pos")) {
             append(pos_, "Pos");
@@ -407,8 +410,8 @@ class FieldEquation : public Model {
 
     KernelGradientField &dWdx() { return dW_; };
 
-    FloatField &sum_AB() {
-        sum_AB_impl(f_, np_, W_);
+    FloatField &sum_AB(float particle_mass) {
+        sum_AB_impl(particle_mass, f_, np_, W_);
         return f_;
     };
 

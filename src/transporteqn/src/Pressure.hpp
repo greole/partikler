@@ -52,6 +52,7 @@ class Pressure : public FloatFieldEquation {
     const float gamma_;
     const float p_0_;
     const float prefac_;
+    const float mp_;
 
     FloatField& p;
     VectorField& dp;

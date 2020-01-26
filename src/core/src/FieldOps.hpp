@@ -72,6 +72,16 @@ struct Norm_Wrapper {
 
 using Norm = Terminal_Generator_NoArg<Norm_Wrapper>;
 
+struct NormSqr_Wrapper {
+    NormSqr_Wrapper() {};
+    template <typename T> float operator()(T x) {
+        return x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
+    }
+};
+
+using NormSqr = Terminal_Generator_NoArg<NormSqr_Wrapper>;
+
+
 template <class ValType> struct Set_Wrapper {
     Set_Wrapper() {};
     Set_Wrapper(ValType i) { inner = i; }
@@ -180,15 +190,15 @@ struct take_nth {
     template <typename T>
     auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        A<std::vector<T>> const &f) {
+        A<Field<std::vector<T>>> const &f) {
         return boost::yap::make_terminal(f()[a]);
     }
 
     template <typename T>
     auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        B<std::vector<T>> const &f) {
-        return boost::yap::make_terminal(f()[a]);
+        B<Field<std::vector<T>>> const &f) {
+        return boost::yap::make_terminal(f()[b]);
     }
 
     // owner particle index a
@@ -228,6 +238,28 @@ std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
 
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
+template <typename T, typename Expr>
+std::vector<T> &
+sum_AB_impl(float particle_mass, std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
+        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
+            auto nb_pair = nb[ab_index];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec[a] += res;
+            vec[b] += res;
+            ab_index++;
+        }
+        vec[a] *= particle_mass;
+    }
+    return vec;
+}
+
 template <typename T, typename Expr>
 std::vector<T> &
 sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
@@ -275,6 +307,40 @@ std::vector<T> &sum_AB_dW(
     }
     return vec;
 }
+
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_dW_res(
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    KernelGradientField &dW,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    // reset field
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+
+    return sum_AB_dW(vec, nb, dW, e);
+}
+
+// NOTE the unsorted variant could look something like this
+// while (n_index < nb[ab_index].count) {
+
+
+//     // own ids are not consecutive since first all own cube neighbours
+//     // are collected, than all neighbour cube neighbours.
+//     // Hence ab_end is at maximum
+//     // max_particles_per_cube**2/2 + max_particles_per_cube * n_neighbour_cubes
+//     // away
+//     for(size_t ab_index=ab_start; ab_index<ab_end; ab_index++) {
+//         auto nb_pair = nb[ab_index];
+//         size_t b = nb_pair.neighId;
+//         auto vec_ij_expr = boost::yap::transform(
+//             boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+//         auto res = boost::yap::evaluate(vec_ij_expr);
+//         vec[a] += res * dW[ab_index].on;
+//         vec[b] += res * dW[ab_index].no;
+//         ab_index++;
 
 // appends the values of b to a inplace
 template <class T> void field_append(T &a, T &b) {

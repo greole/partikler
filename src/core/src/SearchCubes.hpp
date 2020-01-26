@@ -29,6 +29,8 @@
 #include "cgal/CGALHelper.hpp"   // for STLSurfaceDist, Point3D
 #include "cgal/CGALTYPEDEFS.hpp" // for Point, Facet_handle
 
+#include <algorithm> // for std::sort
+
 struct NeighbourIdHalfStencil {
     // Stores the stride of a domain, ie the difference of search cubes ids
     // for the 26 neighbour cubes. Since the stride is symmetric
@@ -108,13 +110,23 @@ struct NeighbourPair {
     size_t neighId;
 };
 
-struct SortedNeighbours {
+struct STLSortedNeighbours {
     std::vector<NeighbourPair> ids;
 
     // since computation of neighbouring particles
     // on different STL is expensive a vector holding
     // the STLSurfaceDist is stored here
     std::vector<STLSurfaceDist> dist;
+};
+
+struct STLUnsortedNeighbour {
+
+    NeighbourPair ids;
+
+    // since computation of neighbouring particles
+    // on different STL is expensive a vector holding
+    // the STLSurfaceDist is stored here
+    STLSurfaceDist dist;
 };
 
 void neighbour_cube_search(
@@ -125,7 +137,7 @@ void neighbour_cube_search(
     const size_t last_nc,
     const float maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
-    SortedNeighbours &ret);
+    std::vector<STLUnsortedNeighbour> &ret);
 
 void owner_cube_search(
     const std::vector<Point> &pos,
@@ -133,7 +145,7 @@ void owner_cube_search(
     const size_t last,
     const float maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
-    SortedNeighbours &ret);
+    std::vector<STLUnsortedNeighbour> &ret);
 
 // A search cube stores first and last particle ids
 struct SearchCube {
@@ -141,16 +153,16 @@ struct SearchCube {
     size_t last;
 };
 
-SortedNeighbours createSTLNeighbours(
+STLSortedNeighbours createSTLNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Point> &pos,
     std::vector<SearchCube> &searchCubes,
     const std::vector<Facet_handle> &facets);
 
-SortedNeighbours createNeighbours(
-    const SearchCubeDomain scd,
-    const std::vector<Point> &pos,
-    std::vector<SearchCube> &searchCubes);
+// SortedNeighbours createNeighbours(
+//     const SearchCubeDomain scd,
+//     const std::vector<Point> &pos,
+//     std::vector<SearchCube> &searchCubes);
 
 struct SortedParticles {
     std::vector<SearchCube> searchCubes;
@@ -161,5 +173,5 @@ struct SortedParticles {
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
 
-using NeighbourFieldAB = FieldAB<std::vector<NeighbourPair>>;
+using NeighbourFieldAB = FieldAB<Field<std::vector<NeighbourPair>>>;
 #endif

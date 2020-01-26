@@ -6,3 +6,17 @@ PointField &operator+=(PointField &a, VectorField &b) {
     }
     return a;
 }
+
+VectorField &operator+=(VectorField &a, VectorField &b) {
+    for (size_t i = 0; i < a.size(); i++) {
+        a[i] += b[i];
+    }
+    return a;
+}
+
+VectorField &operator-=(VectorField &a, VectorField &b) {
+    for (size_t i = 0; i < a.size(); i++) {
+        a[i] -= b[i];
+    }
+    return a;
+}

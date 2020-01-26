@@ -37,6 +37,7 @@
 
 #define ab(field) ( A(field) - B(field) )
 #define ab_v(field) ( A<VectorField>(field) - B<VectorField>(field) )
+// #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) - B<Field<std::vector<CGALVector>>>(field) )
 #define ab_f(field) ( A<FloatField>(field) - B<FloatField>(field) )
 #define ab_p(field) ( A<PointField>(field) - B<PointField>(field) )
 
@@ -293,6 +294,9 @@ using VectorField = Field<std::vector<Vec3>>;
 using PointField = Field<std::vector<Point>>;
 
 PointField &operator+=(PointField &a, VectorField &b);
+VectorField &operator+=(VectorField &a, VectorField &b);
+VectorField &operator-=(VectorField &a, VectorField &b);
+
 
 // Template meta function to get SPHObjectType from std::vector<T>
 template <enum SPHObjectType T> struct GetField {};

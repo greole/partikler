@@ -22,7 +22,7 @@
 CountingSortParticles::CountingSortParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
-      pos_(objReg.get_particle_positions()),
+      pos_(objReg.get_points()),
       sc_(objReg.get_object<Field<std::vector<SearchCube>>>("search_cubes")),
       si_(objReg.create_field<SizeTField>("sorting_idxs")),
       scd_(objReg.get_object<Generic<SearchCubeDomain>>("search_cube_domain")) {

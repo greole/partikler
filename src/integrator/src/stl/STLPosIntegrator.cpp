@@ -27,7 +27,8 @@ STLPosIntegrator::STLPosIntegrator(
       facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
       idx_(objReg.get_object<SizeTField>("idx")),
       u_(objReg.get_object<VectorField>("u")),
-      pos_(objReg.get_object<PointField>("Pos")),
+      points_(objReg.get_object<PointField>("Points")),
+      pos_(objReg.get_object<VectorField>("Pos")),
       time_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 void STLPosIntegrator::execute() {
@@ -37,12 +38,16 @@ void STLPosIntegrator::execute() {
 
     // PointField old_pos(pos_);
 
-    std::cout << u_.size() << " " << facets_.size() << " " << type_.size()
-              << " " << idx_.size() << std::endl;
-
     VectorField dx(u_.size(), {0.0, 0.0, 0.0});
 
-    STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, pos_, dx);
+    STL_limited_dx(u_, time_.get_deltaT(), facets_, type_, idx_, points_, dx);
+
+    // update pos_
+    for (size_t idx = 0; idx < pos_.size(); idx++) {
+        pos_[idx] = Vec3 {points_[idx][0], points_[idx][1], points_[idx][2]};
+    }
+
+    points_ += dx;
 
     pos_ += dx;
 

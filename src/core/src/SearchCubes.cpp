@@ -64,7 +64,7 @@ void owner_cube_search(
     const size_t last,
     const float maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
-    SortedNeighbours &ret) {
+    std::vector<STLUnsortedNeighbour> &ret) {
 
     for (size_t oid = first; oid < last; oid++) {
         const Point &opos = pos[oid];
@@ -85,8 +85,7 @@ void owner_cube_search(
             const float distanceSqr = sd.len * sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
-                ret.ids.push_back({oid, nid});
-                ret.dist.push_back(sd);
+                ret.push_back({{oid, nid}, sd});
             };
         }
     }
@@ -125,7 +124,7 @@ void neighbour_cube_search(
     const size_t last_nc,
     const float maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
-    SortedNeighbours &ret) {
+    std::vector<STLUnsortedNeighbour> &ret) {
 
     // Step 3.1. set pivot particle
     for (size_t oid = first; oid < last; oid++) {
@@ -141,8 +140,7 @@ void neighbour_cube_search(
             const float distanceSqr = sd.len * sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
-                ret.ids.push_back({oid, nid});
-                ret.dist.push_back(sd);
+                ret.push_back({{oid, nid}, sd});
             };
         }
     }
@@ -348,18 +346,23 @@ SortedParticles countingSortParticles(
     return {retc, rets, retp};
 }
 
-SortedNeighbours createSTLNeighbours(
+STLSortedNeighbours createSTLNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Point> &pos,
     std::vector<SearchCube> &searchCubes,
     const std::vector<Facet_handle> &facets) {
     // Step 0 initialise return values
 
-    SortedNeighbours ret {std::vector<NeighbourPair>(0),
-                          std::vector<STLSurfaceDist>(0)};
+    STLSortedNeighbours ret {
+        std::vector<NeighbourPair>(0),
+        std::vector<STLSurfaceDist>(0)};
 
-    ret.ids.reserve(40 * pos.size());
-    ret.dist.reserve(40 * pos.size());
+
+    // own_id_min and size
+    std::vector<std::pair<size_t, size_t>> order (omp_get_max_threads(), {0,0});
+
+    size_t tot_pairs {0};
+
 
 #pragma omp parallel
     {
@@ -369,11 +372,12 @@ SortedNeighbours createSTLNeighbours(
         SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
 
         // Step 1. get parent search cube
-        SortedNeighbours ret_tmp {std::vector<NeighbourPair>(0),
-                                  std::vector<STLSurfaceDist>(0)};
+        std::vector<STLUnsortedNeighbour> ret_tmp (0);
+            // std::vector<NeighbourPair>(0),
+            // std::vector<STLSurfaceDist>(0)};
 
-        ret_tmp.ids.reserve(40 * pos.size() / omp_get_num_threads());
-        ret_tmp.dist.reserve(40 * pos.size() / omp_get_num_threads());
+        ret_tmp.reserve(40 * pos.size() / omp_get_num_threads());
+        // ret_tmp.dist.reserve(40 * pos.size() / omp_get_num_threads());
         // // serial
         // ret_tmp.ids.reserve(40 * pos.size());
         // ret_tmp.dist.reserve(40 * pos.size());
@@ -410,14 +414,83 @@ SortedNeighbours createSTLNeighbours(
             }
         }
 
+        // sort ret_tmp
+        std::sort(
+            ret_tmp.begin(),
+            ret_tmp.end(),
+            [](const auto &lhs, const auto &rhs) {
+                    return lhs.ids.ownId < rhs.ids.ownId;
+            });
+
+        // figure out the position at which the sorted ret_tmps are to be inserted
+        // 1. get total number of neighbour pairs
+        // 2. push min to a vector and compute offsets
+        // 3. resize the ret vector and insert according to offsets
+
+
+        // after sorting this is the lowest owner id;
+        int thread_num = omp_get_thread_num();
+
+        size_t own_id_min = ret_tmp[0].ids.ownId;
+
+        size_t particle_pairs_thread = ret_tmp.size();
+
+        order[thread_num].first = own_id_min;       // use this for start
+        order[thread_num].second = particle_pairs_thread; // use this for offsets
+
+// #pragma omp critical
+//         {
+//             // for (auto& el: ret_tmp) {
+//             //     std::cout << omp_get_thread_num() << ": " << el.ids.ownId << " "
+//             //               << el.ids.neighId << std::endl;
+//             // }
+//         }
+
+        // wait till all done
+#pragma omp barrier
+#pragma omp single
+        {
+            // sort thread ids by lowest owner id
+            std::sort(
+                order.begin(), order.end(), [](const auto &a, const auto &b) {
+                    return a.first < b.first;
+                }
+            );
+
+            // compute start index for each thread
+            for (auto &start : order) {
+                tot_pairs += start.second;
+                start.second = tot_pairs;
+            }
+
+            ret.ids.resize(tot_pairs);
+            ret.dist.resize(tot_pairs);
+
+        }
+
 #pragma omp critical
         {
-            ret.ids.insert(
-                ret.ids.end(), ret_tmp.ids.begin(), ret_tmp.ids.end());
-            ret.dist.insert(
-                ret.dist.end(), ret_tmp.dist.begin(), ret_tmp.dist.end());
+            // ret_tmp_item are presorted
+
+            // get start
+            size_t id {0};
+
+            // find reordered thread id by lowest owner id
+            for (size_t id_ = 0; id_<order.size(); id_++) {
+                if (order[id_].first == own_id_min ) id = id_;
+            }
+
+
+            // copy elements from ret_tmp to final ret struct
+            size_t start_idx = order[id].second - particle_pairs_thread;
+            size_t end_idx = order[id].second;
+            for (size_t idx = 0; idx<particle_pairs_thread; idx++) {
+                size_t target_idx = idx + start_idx;
+                ret.ids[target_idx] = ret_tmp[idx].ids;
+                ret.dist[target_idx] = ret_tmp[idx].dist;
+            }
         }
-    }
+     }
 
     return ret;
 }

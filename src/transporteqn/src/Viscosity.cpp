@@ -33,7 +33,8 @@ Viscosity::Viscosity(
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
-      pos_(objReg.get_object<PointField>("Pos"))
+      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
+      pos_(objReg.get_object<VectorField>("Pos"))
 {}
 
 void Viscosity::execute() {
@@ -43,14 +44,15 @@ void Viscosity::execute() {
     // auto& u = momentum_.get();
     FloatField& rho = conti_.get(time_.get_current_timestep());
 
-    sum_AB_dW(f_, np_, dW_,
-        rho*( A<VectorField>(u_) + B<VectorField>(u_) )
-       / ( A<FloatField>(rho) + B<FloatField>(rho) )
-       * ( (ab_v(u_) * ab_p(pos_)) / (ab_p(pos_)) * (ab_p(pos_)))
+    // clang-format off
+    auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    sum_AB_dW_res(df_, np_, dW_,
+        mp_* 10.* rho * nu_ *  (ab_v(u_) * ab_v(pos_))
+      / (
+          ( A<FloatField>(rho) + B<FloatField>(rho) )
+          * ( normSqr(ab_v(pos_)) )
+          )
         );
-
-
-    // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
 
     // const VectorField dxp = particle_distance_vec(pos_, np_);
 

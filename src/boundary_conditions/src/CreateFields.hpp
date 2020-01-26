@@ -37,7 +37,6 @@ class InitFields : public Model {
     REGISTER_DEC_TYPE(InitFields);
 
   private:
-    PointField &pos_;
 
     std::vector<std::string> float_fields_ {};
 

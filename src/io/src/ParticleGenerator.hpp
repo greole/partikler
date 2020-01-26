@@ -74,7 +74,9 @@ class SPHParticleGenerator : public Model {
     Field<std::vector<Facet_handle>> &facets_;
 
     // Reference to positions field
-    PointField &pos_;
+    PointField &points_;
+
+    VectorField &pos_;
 
     SizeTField &idx_;
 
