@@ -17,7 +17,6 @@
     contact: go@hpsim.de
 */
 
-
 #include "ParticleGenerator.hpp"
 
 SPHSTLReader::SPHSTLReader(
@@ -25,14 +24,13 @@ SPHSTLReader::SPHSTLReader(
     : Model(model_name, parameter, objReg),
       fn_(parameter["file"].as<std::string>()) {
 
+    log().info_begin() << "Reading input file: " << fn_;
 
-    log().info_begin() << "Reading input file: " <<  fn_;
-
-    std::ifstream * istream= new std::ifstream(fn_);
+    std::ifstream *istream = new std::ifstream(fn_);
 
     // read_STL(istream, points, facets, false);
-    Polyhedron_builder_from_STL<HalfedgeDS> * builder = new
-        Polyhedron_builder_from_STL<HalfedgeDS>  (*istream);
+    Polyhedron_builder_from_STL<HalfedgeDS> *builder =
+        new Polyhedron_builder_from_STL<HalfedgeDS>(*istream);
 
     // objReg.register_object<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
     //     std::make_unique<Generic<Polyhedron_builder_from_STL<HalfedgeDS>>>(
@@ -52,28 +50,24 @@ SPHSTLReader::SPHSTLReader(
 
     objReg.register_object<Generic<CGALPolyhedron>>(
         std::make_unique<Generic<CGALPolyhedron>>(
-            "polyhedron", "generic", *polyhedron
-            )
-        );
+            "polyhedron", GenericType, *polyhedron));
 
-    delete(polyhedron);
-    delete(builder);
-    delete(istream);
+    delete (polyhedron);
+    delete (builder);
+    delete (istream);
 
     log().info_end();
 }
 
-void SPHSTLReader::execute() {
-    log().info() << "Doing nothing";
-}
+void SPHSTLReader::execute() { log().info() << "Doing nothing"; }
 
 SPHParticleGenerator::SPHParticleGenerator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      polyhedron_(
-          objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
-      facets_(objReg.create_field<Field<Facet_handle>>("facets")),
-      pos_(objReg.create_field<PointField>("Pos")),
+    : Model(model_name, parameter, objReg), boundary_id_(read_coeff<int>("id")),
+      polyhedron_(objReg.get_object<Generic<CGALPolyhedron>>("polyhedron")),
+      facets_(objReg.create_field<Field<std::vector<Facet_handle>>>("facets")),
+      points_(objReg.create_field<PointField>("Points", {}, {"X", "Y", "Z"})),
+      pos_(objReg.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
       idx_(objReg.create_field<SizeTField>("idx")),
       type_(objReg.create_field<IntField>("type")),
       boundary_(objReg.create_field<IntField>("boundary")),
@@ -82,23 +76,47 @@ SPHParticleGenerator::SPHParticleGenerator(
 void SPHParticleGenerator::execute() {
 
     log().info_begin() << "Generating initial particles ";
-    Generate_Points_at_Facets gpf(dx_, pos_.get_field(), facets_.get_field());
+    Generate_Points_at_Facets gpf(dx_, points_, facets_);
 
-    size_t n_0 = pos_.size();
+    size_t n_0 = points_.size();
 
     std::for_each(
         polyhedron_().facets_begin(), polyhedron_().facets_end(), gpf);
 
-    size_t n = pos_.size();
+    size_t n = points_.size();
+
+    // TODO find a better solution
+    for (auto &p: points_) {
+        pos_.push_back({(float)p[0], (float)p[1], (float)p[2]});
+    }
 
     log().info_end() << "Generated " << n << " Particles";
 
     get_objReg().set_n_particles(n);
 
-    for (size_t i=0; i<(n-n_0); i++){
-        idx_.get_field().push_back(n_0+i);
-        type_.get_field().push_back(2);
-        boundary_.get_field().push_back(0);
+    // TODO START REFACTOR THIS
+    Compute_Facet_Area ca;
+
+    log().info_begin() << "Computing Surface Area";
+
+    float surface_area = (float) std::accumulate(
+        boost::make_transform_iterator(polyhedron_().facets_begin(), ca),
+        boost::make_transform_iterator(polyhedron_().facets_end(), ca),
+        0.);
+
+
+    float volume = surface_area * dx_;
+    log().info_end() << "Total Surface Area" << surface_area;
+
+    get_objReg().register_object<Generic<float>>(
+        std::make_unique<Generic<float>>(
+            "specific_particle_mass", GenericType, volume/n
+            ));
+
+    for (size_t i = 0; i < (n - n_0); i++) {
+        idx_.push_back(n_0 + i);
+        type_.push_back(2);
+        boundary_.push_back(boundary_id_);
     }
 }
 

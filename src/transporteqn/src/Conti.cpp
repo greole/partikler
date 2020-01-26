@@ -19,27 +19,55 @@
 
 #include "Conti.hpp"
 
-Conti::Conti (
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    pos_(objReg.get_particle_positions()),
-    np_(objReg.get_object<Field<searchcubes::NeighbourPair>>("neighbour_pairs")),
-    W_(objReg.get_object<FloatField>("KernelW")),
-    rho_(objReg.create_field<FloatField>("rho", 0.0)),
-    lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0))
-{};
+Conti::Conti(
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+    : FloatFieldEquation(
+        model_name,
+        parameter,
+        objReg,
+        objReg.create_field<FloatField>("rho", 0.0)),
+      lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0)),
+      particle_mass_(objReg.get_object<Generic<float>>("specific_particle_mass")())
+{}
 
 void Conti::execute() {
 
     log().info_begin() << "Computing density";
 
-    rho_.set_uniform(0.0);
+    // auto rho = set(rho_, 0.0).weighted_sum();
 
-    rho_.weighted_sum(np_, W_);
+    // auto rho_eqn = sum_AB(rho_.size(), np_, W_);
 
-    rho_.lower_limit(lower_limit_);
+    // solve(rho_, rho_eqn);
+
+    // rho_.set_uniform(0.0);
+
+    // rho_.weighted_sum(np_, W_);
+
+    // rho_.lower_limit(lower_limit_);
+
+    // log().info_end();
+
+    // auto rho_eqn = boost::yap::make_terminal(
+    //     sum_ab<float>(rho_.size(), np_, W_)
+    //     );
+
+    // rho_ = solve<floatfield>(rho_eqn);
+
+    // TODO needs lazy reset of rho_;
+    for(auto & el: f_){ el = 0;}
+    sum_AB(particle_mass_);
+    // TODO do it lazily
+    for (auto &el : f_) {
+        if (el < lower_limit_) {
+            el = lower_limit_;
+        }
+    }
+
+    // set iteration
+    iteration_ = time_.get_current_timestep();
 
     log().info_end();
-};
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);

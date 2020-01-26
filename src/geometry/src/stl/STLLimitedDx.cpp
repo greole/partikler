@@ -33,37 +33,32 @@ struct SurfaceSlide {
     CGALVector dx;          // Slide vector on current facet
     Facet_handle new_facet; // new facet of particle
     CGALVector new_facet_N;
-    Vector u;
+    Vec3 u;
     SkipEdge ske;
 };
 
 // TODO Move to CGAL helpers
-bool isInsideEdge(
-    Point P,
-    Point A,
-    Point B,
-    Facet f
-    ) {
+bool isInsideEdge(Point P, Point A, Point B, Facet f) {
     // A point is inside a triangle if all shortest connections to edges
     // have negative scalar product with inside pointing edge normal
     EdgeNormal en = inwardPointingEdgeNormal(A, B, f);
 
     CGALVector X = Line(A, B).projection(P) - P;
 
-    if (en.EN * X > 0)
-    {return false;}
-    else {
+    if (en.EN * X > 0) {
+        return false;
+    } else {
         return true;
     }
-};
+}
 
 SurfaceSlide slide_surface(
-    Point SP,      // Start position of particle
-    CGALVector PN, // original slide vector
+    Point SP,       // Start position of particle
+    CGALVector PN,  // original slide vector
     Facet_handle f, // Handle to facet on which particle slides
-    SkipEdge ske, // Skip the edgeHit detection for given edge after edge has
-                  // been crossed
-    Vector u) {
+    SkipEdge ske,   // Skip the edgeHit detection for given edge after edge has
+                    // been crossed
+    Vec3 u) {
 
     Facet facet = Facet(*f);
     CGALVector FN = facet_normal(facet);
@@ -79,7 +74,7 @@ SurfaceSlide slide_surface(
         h->next()->next()->vertex()->point(),
     };
 
-    float d = p.d() / std::sqrt(p.orthogonal_vector().squared_length());
+    // float d = p.d() / std::sqrt(p.orthogonal_vector().squared_length());
 
     Point P;
     CGALVector PSP;
@@ -100,13 +95,13 @@ SurfaceSlide slide_surface(
     // frac keeps track of the minimal fraction of S a particle can travel
     // before hitting an edge
     float frac = 1.0;
-    float lambda = 1.0;
+    // float lambda = 1.0;
 
     // If particle slides to next facet the remainder of dx on
     // next facet is needed
     float remainder = 0.0;
 
-    Point upa;
+    Point upa {0.0, 0.0, 0.0};
     SkipEdge ske_ {false, upa, upa};
 
     SurfaceSlide surface_slide {0.0, P, S, PN, f, FN, u, ske_};
@@ -137,8 +132,8 @@ SurfaceSlide slide_surface(
         //   << " B " << B
         //   << std::endl;
 
-        CGALVector PB = B - P;
-        CGALVector AP = P - A;
+        // CGALVector PB = B - P;
+        // CGALVector AP = P - A;
 
         if (!approachesEdge(A, B, P, S)) {
             // std::cout
@@ -216,7 +211,7 @@ SurfaceSlide slide_surface(
 
         // Rotation angles around Cartesian coordinates
         // Matrix R =  createRotationMatrix(D, ON);
-        Matrix R = createRotationMatrix(next_facet, facet);
+        // Matrix R = createRotationMatrix(next_facet, facet);
         Matrix R2 = createRotationMatrix(FN, ON);
 
         // std::cout
@@ -235,7 +230,7 @@ SurfaceSlide slide_surface(
         //   << "  " << surface_slide.u[2]
         //   << std::endl;
 
-        CGALVector remVecOrig = remVec;
+        // CGALVector remVecOrig = remVec;
         if (ON != -FN) {
             // std::cout
             //   << "[DEBUG SLIDE] Rotate "
@@ -254,7 +249,7 @@ SurfaceSlide slide_surface(
         //   << "  " << surface_slide.u[2]
         //   << std::endl;
 
-        Point N = P + Ss;
+        // Point N = P + Ss;
 
         if (NAB * remVec < 0) {
             // TODO dont project but mirror
@@ -306,26 +301,28 @@ SurfaceSlide slide_surface(
 
     return surface_slide;
 }
-VectorField STL_limited_dx(
+
+void STL_limited_dx(
     VectorField &u,
     float dt,
-    Field<Facet_handle> &facets,
+    Field<std::vector<Facet_handle>> &facets,
     const IntField &type,
-    const SizeTField &idx,
-    const PointField &pos
-    ) {
+    const SizeTField &, //&idx,
+    const PointField &pos,
+    VectorField &ret) {
 
-    VectorField dx = u*dt;
-    // TODO relax dt by CFL criterion
+    // VectorField dx = u*dt;
+    // // TODO relax dt by CFL criterion
 
-    std::vector<Vector> &ret = dx.get_field();
+    // std::vector<Vector> &ret = dx.get_field();
+    // VectorField ret(u.size(), {0.0,0.0,0.0});
 
 #pragma omp for nowait
     for (size_t i = 0; i < pos.size(); i++) {
         int mType = type[i];
         // Point O = pos[fdp.fixId[i]];
         Point P = pos[i];
-        CGALVector PN = {dx[i][0], dx[i][1], dx[i][2]};
+        CGALVector PN = {dt * u[i][0], dt * u[i][1], dt * u[i][2]};
         // CGALVector D = fdp.dir[i];
         // float maxDx = fdp.maxDx[i];
 
@@ -342,35 +339,35 @@ VectorField STL_limited_dx(
 
         if (mType == 2) {
 
-          float rem = 1.0;
-          int ctr=0;
-          Point upa;
-          SkipEdge ske {false, upa, upa};
-          do {
-              auto surf_slide =
-                slide_surface(P, PN, facets[i], ske, u[i]);
-              P = surf_slide.P;
-              PN = surf_slide.dx;
-              rem = surf_slide.rem;
-              // std::cout
-              //   << "[DEBUG SLIDE]"
-              //   << " remainder " << rem
-              //   << "\n[DEBUG SLIDE]"
-              //   << " u " << u[i][0]
-              //   << "  " <<  u[i][1]
-              //   << "  " <<  u[i][2]
-              //   << std::endl;
-              facets[i] = surf_slide.new_facet;
-              frac += surf_slide.vec;
-              // D = surf_slide.new_facet_N;
-              // fdp.dir[i] = D;
-              u[i] = surf_slide.u;
-              ske = surf_slide.ske;
-              ctr++;
-              // Hard break after 10 iterations
-              // TODO use a distance/fraction based check
-              if (ctr>100) break;
-          } while (rem > 0.0);
+            float rem = 1.0;
+            int ctr = 0;
+            // Point upa;
+            Point upa {0.0, 0.0, 0.0};
+            SkipEdge ske {false, upa, upa};
+            do {
+                auto surf_slide = slide_surface(P, PN, facets[i], ske, u[i]);
+                P = surf_slide.P;
+                PN = surf_slide.dx;
+                rem = surf_slide.rem;
+                // std::cout
+                //   << "[DEBUG SLIDE]"
+                //   << " remainder " << rem
+                //   << "\n[DEBUG SLIDE]"
+                //   << " u " << u[i][0]
+                //   << "  " <<  u[i][1]
+                //   << "  " <<  u[i][2]
+                //   << std::endl;
+                facets[i] = surf_slide.new_facet;
+                frac += surf_slide.vec;
+                // D = surf_slide.new_facet_N;
+                // fdp.dir[i] = D;
+                u[i] = surf_slide.u;
+                ske = surf_slide.ske;
+                ctr++;
+                // Hard break after 10 iterations
+                // TODO use a distance/fraction based check
+                if (ctr > 100) break;
+            } while (rem > 0.0);
         };
 
         // if (mType == 3) {
@@ -379,14 +376,14 @@ VectorField STL_limited_dx(
 
         // Set correct velocity for fixed particles
         // TODO modify velocity for face modified particles
-        if (frac[0]==0) {
-          u[i][0] = 0.0;
+        if (frac[0] == 0) {
+            u[i][0] = 0.0;
         }
-        if (frac[1]==0) {
-          u[i][1] = 0.0;
+        if (frac[1] == 0) {
+            u[i][1] = 0.0;
         }
-        if (frac[2]==0) {
-          u[i][2] = 0.0;
+        if (frac[2] == 0) {
+            u[i][2] = 0.0;
         }
 
         ret[i][0] = frac.x();
@@ -400,5 +397,6 @@ VectorField STL_limited_dx(
         //   << std::endl;
     }
 
-    return VectorField (ret, {"tmpx", "tmpy", "tmpz"}, "tmp", true);
+    // return std::move(ret); // VectorField (ret, {"tmpx", "tmpy", "tmpz"},
+    // "tmp", true);
 }

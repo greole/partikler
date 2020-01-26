@@ -5,6 +5,8 @@ project(BoundaryConditions LANGUAGES CXX)
 
 add_library(BoundaryConditions SHARED
   src/stl/GenerateBoundaryParticles.cpp
+  src/FixedValue.cpp
+  src/CreateFields.cpp
   )
 
 add_dependencies(BoundaryConditions Core)

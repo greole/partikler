@@ -22,46 +22,53 @@
 #ifndef GENERATEBOUNDARYPARTICLES_H
 #define GENERATEBOUNDARYPARTICLES_H
 
-#include "Datastructures.hpp"
-#include "Models.hpp"
+#include <string> // for string
+#include <vector> // for vector
+#include <memory> // for vector
+
+#include "Field.hpp" // for PointField
+#include "FieldOps.hpp"
+#include "Models.hpp"           // for Model, ModelRegister (ptr only), REG...
+#include "ObjectRegistry.hpp"   // for FieldIdMap (ptr only), ObjectRegistry
+#include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
 
-class GenerateBoundaryParticles : public Model {
+class GenerateBoundaryParticles : public ParticleGeneratorBase {
 
     REGISTER_DEC_TYPE(GenerateBoundaryParticles);
 
   private:
 
-    ObjectRegistry local_objReg_;
-    TimeGraph& timeGraph_;
-
-    IntField &boundaryIds_;
-    IntField &typeIds_;
-    SizeTField &idx_;
-    PointField &pos_;
+    TimeGraph &timeGraph_;
 
     int iterations_;
+
     int write_freq_;
 
     std::string filename_;
-    std::string boundary_name_;
 
-    float dx_;
+    float scale_;
 
-    std::vector<float> translation_vector_;
+    float nu_;
 
+    float rho_0_;
 
+    float p_0_;
+
+    float dxhratio_;
 
   public:
 
     YAML::Node default_graph();
 
     GenerateBoundaryParticles(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
-    std::vector<float> read_translation_vector(YAML::Node parameter);
 
     void execute();
+
 };
 
 #endif

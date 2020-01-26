@@ -20,47 +20,58 @@
 #ifndef PARTICLENEIGHBOURS_H
 #define PARTICLENEIGHBOURS_H
 
-#include "Models.hpp"
-#include "SearchCubes.hpp"
-#include "Datastructures.hpp"
+#include <string> // for string
+#include <vector> // for vector
 
+#include "Field.hpp"             // for FieldAB, Field (ptr only), PointField
+#include "Models.hpp"            // for Model, ModelRegister (ptr only)
+#include "SearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
+#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist
+#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 
-class SPHSTLParticleNeighbours: public Model {
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
+template <class T> class Generic;
+
+class SPHSTLParticleNeighbours : public Model {
 
     REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
 
-private:
+    using SearchCubeFieldAB = FieldAB<Field<std::vector<SearchCube>>>;
+    using STLSurfaceDistAB = FieldAB<Field<std::vector<STLSurfaceDist>>>;
 
+  private:
     // Coeffs
     float dx_;
 
     // In
-    PointField &pos_;
+    PointField &points_;
 
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> &facets_;
 
-    Field<searchcubes::SearchCube> & sc_;
+    SearchCubeFieldAB &sc_;
 
     // Out
-    Field<searchcubes::NeighbourPair> &np_;
+    NeighbourFieldAB &np_;
 
-    Field<STLSurfaceDist> &sd_;
+    STLSurfaceDistAB &sd_;
 
     // Regular data member
-    Generic<searchcubes::SearchCubeDomain> & scd_;
+    Generic<SearchCubeDomain> &scd_;
 
     float search_cube_size_ = 1.0;
-public:
 
+  public:
     SPHSTLParticleNeighbours(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
+        ObjectRegistry &objReg);
 
     void execute();
 
     void update_search_cube_domain();
-
 };
 
 #endif

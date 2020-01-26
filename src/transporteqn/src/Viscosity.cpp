@@ -16,40 +16,54 @@
 
     contact: go@hpsim.de
 */
-# include "Viscosity.hpp"
+#include "Viscosity.hpp"
 
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-
-    : Model(model_name, parameter, objReg),
+    : VectorFieldEquation(
+          model_name,
+          parameter,
+          objReg,
+          objReg.create_field<VectorField>(
+              "tau",
+              zero<VectorField::value_type>::val,
+              {"taux", "tauy", "tauz"})
+              ),
+      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
-      np_(objReg.get_object<Field<searchcubes::NeighbourPair>>(
-          "neighbour_pairs")),
-      dW_(objReg.get_object<Field<VectorPair>>("KerneldWdx")),
-      // DIRTY FIX momentum eqn should create u
-      // but nu already depends on u
       u_(objReg.create_field<VectorField>(
-             "u", zeroVec, {"U", "V", "W"})),
-      pos_(objReg.get_object<PointField>("Pos")),
-      dnu_(objReg.create_field<VectorField>(
-          "dnu", zeroVec, {"dnux", "dnuy", "dnuz"})) {};
+          "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
+      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
+      pos_(objReg.get_object<VectorField>("Pos"))
+{}
 
 void Viscosity::execute() {
 
     log().info_begin() << "Computing dnu";
 
-    // const SPHFloatField tmp0 = nu.add_ab(pn) / rho.mult_ab(pn);
+    // auto& u = momentum_.get();
+    FloatField& rho = conti_.get(time_.get_current_timestep());
 
-    const VectorField dxp = particle_distance_vec(pos_, np_);
+    // clang-format off
+    auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    sum_AB_dW_res(df_, np_, dW_,
+        mp_* 10.* rho * nu_ *  (ab_v(u_) * ab_v(pos_))
+      / (
+          ( A<FloatField>(rho) + B<FloatField>(rho) )
+          * ( normSqr(ab_v(pos_)) )
+          )
+        );
 
-    // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
+    // const VectorField dxp = particle_distance_vec(pos_, np_);
 
-    // const SPHFloatField tmp = tmp0*tmp1;
+    // // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
 
-    const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
+    // // const SPHFloatField tmp = tmp0*tmp1;
 
-    // TODO Reset 
-    dnu_.set(Vector {0,0,0});
+    // const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
+
+    // // TODO Reset
+    // dnu_.set(Vector {0,0,0});
 
     // // weighted sum
     // const size_t size = pn.ids.size();
@@ -63,12 +77,12 @@ void Viscosity::execute() {
     //     }
     // }
 
-    dnu_.weighted_sum(np_, tmp, dW_);
+    // dnu_.weighted_sum(np_, tmp, dW_);
 
-    dnu_ *= nu_;
+    // dnu_ *= nu_;
 
     log().info_end();
-
-};
+    iteration_ = time_.get_current_timestep();
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);

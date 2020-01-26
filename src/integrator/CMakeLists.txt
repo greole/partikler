@@ -11,7 +11,13 @@ add_dependencies(Integrator Core)
 add_dependencies(Integrator Geometry)
 
 
-target_link_libraries(Integrator Core Geometry OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+target_link_libraries(Integrator
+  Core
+  Geometry
+  OpenMP::OpenMP_CXX
+  ${YAML_CPP_LIBRARIES}
+  )
+
 target_include_directories(Integrator PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
 #add_subdirectory(tests/SPHCore)

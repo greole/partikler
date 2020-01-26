@@ -7,6 +7,10 @@ compiler:
 dist: bionic
 os: linux
 
+env:
+    - BUILD_TYPE=Debug
+    - BUILD_TYPE=Release
+
 addons:
   apt:
     update: true
@@ -14,17 +18,39 @@ addons:
       - llvm-toolchain-bionic-8
     packages:
       - clang-6.0
-      - cmake
       - libboost-all-dev
       - libyaml-cpp-dev
       - libmpfr-dev
       - libgmp-dev
       - libomp-dev
+      - lcov
+
+before_install:
+  - pip install --user cpp-coveralls
+
+install:
+  # first we create a directory for the CMake binaries
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+  # we use wget to fetch the cmake binaries
+  - travis_retry wget --no-check-certificate https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.tar.gz
+  # extract the binaries; the output here is quite lengthy,
+  # so we swallow it to not clutter up the travis console
+  - tar -xvf cmake-3.13.0-Linux-x86_64.tar.gz > /dev/null
+  - mv cmake-3.13.0-Linux-x86_64 cmake-install
+  # add both the top-level directory and the bin directory from the archive
+  # to the system PATH. By adding it to the front of the path we hide the
+  # preinstalled CMake with our own.
+  - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
+  # don't forget to switch back to the main build directory once you are done
+  - cd ${TRAVIS_BUILD_DIR}
 
 script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake -DBUILD_GOOGLE_TEST=ON  -DBUILD_CGAL=ON ..
+  - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DBUILD_CGAL=ON -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
-  - ./partikler --config=../example/SPH.yaml
+  - ctest -VV -R "Partikler_Test"
+  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/SPH.yaml
+

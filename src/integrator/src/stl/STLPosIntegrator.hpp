@@ -20,30 +20,42 @@
 #ifndef STLPOSINTEGRATOR_H
 #define STLPOSINTEGRATOR_H
 
-#include "Models.hpp"
-#include "yaml-cpp/yaml.h"
-#include "Datastructures.hpp"
+#include <string> // for string
+#include <vector> // for vector
+
+#include "Field.hpp" // for Field (ptr only), IntField, PointField
+#include "FieldOps.hpp"
+#include "Models.hpp"            // for Model, ModelRegister (ptr only)
+#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 #include "stl/STLLimitedDx.hpp"
+#include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
 
 class STLPosIntegrator : public Model {
 
     REGISTER_DEC_TYPE(STLPosIntegrator);
 
-private:
-
+  private:
     // const std::vector<Point> opoints_;
     const IntField &type_;
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> &facets_;
     const SizeTField &idx_;
 
     // Out
     VectorField &u_;
-    PointField& pos_;
-    TimeGraph& time_;
+    PointField &points_;
+    VectorField &pos_;
+    TimeGraph &time_;
 
-public:
+  public:
     STLPosIntegrator(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };

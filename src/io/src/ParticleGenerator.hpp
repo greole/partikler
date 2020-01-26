@@ -20,37 +20,41 @@
 #ifndef PARTICLE_GENERATOR_H
 #define PARTICLE_GENERATOR_H
 
-#include "Models.hpp"
-#include "Datastructures.hpp"
-#include "cgal/CGALHelper.hpp"
-
+#include <fstream>
 #include <memory>
+#include <string> // for string
+#include <vector> // for vector
+
+#include "Field.hpp"  // for IntField, Field (ptr only), PointField
+#include "Models.hpp" // for Model, ModelRegister (ptr only)
+#include "cgal/CGALHelper.hpp"
+#include "cgal/CGALTYPEDEFS.hpp" // for CGALPolyhedron, Facet_handle
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
+template <class T> class Generic;
 // TODO needs a polyhedron generator
 
-class SPHSTLReader: public Model {
+class SPHSTLReader : public Model {
 
     // Reads an stl file and creates a Polyhedron representation
     REGISTER_DEC_TYPE(SPHSTLReader);
 
-private:
-
+  private:
     std::string fn_;
 
-
-public:
-
-   SPHSTLReader(
+  public:
+    SPHSTLReader(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
+        ObjectRegistry &objReg);
 
     void execute();
-
 };
 
-
-class SPHParticleGenerator: public Model {
-
+class SPHParticleGenerator : public Model {
 
     // A Polyhedron particle generator
     //
@@ -58,35 +62,37 @@ class SPHParticleGenerator: public Model {
     //
     REGISTER_DEC_TYPE(SPHParticleGenerator);
 
-private:
+  private:
+    // FieldIdMap& fieldIdMap_;
+
+    // id of the boundary
+    int boundary_id_;
 
     // The base polyhedron on which particles are created
-    Generic<CGALPolyhedron>& polyhedron_;
+    Generic<CGALPolyhedron> &polyhedron_;
 
-    Field<Facet_handle> & facets_;
+    Field<std::vector<Facet_handle>> &facets_;
 
     // Reference to positions field
-    PointField& pos_;
+    PointField &points_;
 
-    SizeTField& idx_;
+    VectorField &pos_;
 
-    IntField& type_;
+    SizeTField &idx_;
 
-    IntField& boundary_;
+    IntField &type_;
+
+    IntField &boundary_;
 
     const float dx_;
 
-
-public:
-
+  public:
     SPHParticleGenerator(
         const std::string &model_name,
         YAML::Node parameter,
-        ObjectRegistry & objReg);
-
+        ObjectRegistry &objReg);
 
     void execute();
-
 };
 
 #endif

@@ -20,15 +20,35 @@
 #ifndef STLLIMITEDDX_H
 #define STLLIMITEDDX_H
 
-#include "Datastructures.hpp"
+#include <vector> // for vector
 
-VectorField STL_limited_dx(
+#include "Vec3.hpp"                         // for Vec3
+#include "cgal/CGALHelper.hpp"              // for inwardPointingEdgeNormal
+#include <CGAL/Cartesian/Vector_3.h>        // for operator==
+#include <CGAL/HalfedgeDS_iterator.h>       // for I_HalfedgeDS_facet_circ
+#include <CGAL/HalfedgeDS_list.h>           // for HalfedgeDS_in_place_list...
+#include <CGAL/In_place_list.h>             // for In_place_list_iterator
+#include <CGAL/Kernel/global_functions_3.h> // for operator*, operator==
+#include <CGAL/Line_3.h>                    // for Line_3<>::Point_3
+#include <CGAL/Point_3.h>                   // for Point_3
+#include <CGAL/Simple_cartesian.h>          // for Simple_cartesian, Cartes...
+#include <CGAL/Vector_3.h>                  // for Vector_3
+#include <array>                            // for array
+#include <ext/alloc_traits.h>               // for __alloc_traits<>::value_...
+#include <math.h>                           // for sqrt
+#include <stddef.h>                         // for size_t
+
+#include "Field.hpp" // for VectorField, Field (ptr only), IntF...
+#include "cgal/CGALHelper.hpp"
+#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
+
+void STL_limited_dx(
     VectorField &u,
     float dt,
-    // const std::vector<Point> &opoints,
-    Field<Facet_handle> &facets,
+    Field<std::vector<Facet_handle>> &facets,
     const IntField &type,
     const SizeTField &idx,
-    const PointField &pos);
+    const PointField &pos,
+    VectorField &ret);
 
 #endif

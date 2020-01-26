@@ -20,10 +20,20 @@
 #ifndef SORTPARTRICLES_H
 #define SORTPARTRICLES_H
 
-#include "Datastructures.hpp"
-#include "Models.hpp"
+#include <string> // for string
+#include <vector> // for vector
 
+#include "Field.hpp"  // for Field (ptr only), PointField, SizeTField
+#include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "SearchCubes.hpp"
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
+struct SearchCube;
+struct SearchCubeDomain;
+template <class T> class Generic;
 
 class CountingSortParticles : public Model {
 
@@ -33,16 +43,18 @@ class CountingSortParticles : public Model {
     // In
     PointField &pos_;
 
-    Field<searchcubes::SearchCube> &sc_;
+    Field<std::vector<SearchCube>> &sc_;
 
     //  Sorting indexes
     SizeTField &si_;
 
-    Generic<searchcubes::SearchCubeDomain> &scd_;
+    Generic<SearchCubeDomain> &scd_;
 
   public:
     CountingSortParticles(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 

@@ -17,30 +17,27 @@
     contact: go@hpsim.de
 */
 
-# include "BrownianMotion.hpp"
-
+#include "BrownianMotion.hpp"
 
 BrownianMotion::BrownianMotion(
     const std::string &model_name, YAML::Node parameter, RunTime &runTime)
 
     : SPHModel(model_name, parameter, runTime),
       u_(get_runTime().get_obj<SPHVectorField>("u")),
-      dx_(read_or_default_coeff<float>("dx", 1.0))
-{};
+      dx_(read_or_default_coeff<float>("dx", 1.0)) {};
 
 void BrownianMotion::execute() {
     srand(time(NULL));
     FOR_ALL(u_, ctr) {
-        float x = ((float)(rand() % 100))/100.0 - 0.5;
-        float y = ((float)(rand() % 100))/100.0 - 0.5;
-        float z = ((float)(rand() % 100))/100.0 - 0.5;
+        float x = ((float)(rand() % 100)) / 100.0 - 0.5;
+        float y = ((float)(rand() % 100)) / 100.0 - 0.5;
+        float z = ((float)(rand() % 100)) / 100.0 - 0.5;
 
         Vector uv = u_[ctr];
 
         Vector rv {uv[0] + x * dx_, uv[1] + y * dx_, uv[2] + z * dx_};
         u_[ctr] = rv;
     }
-
 };
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, BrownianMotion);

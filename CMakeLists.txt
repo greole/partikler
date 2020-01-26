@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 
 ########################
@@ -7,25 +7,35 @@ cmake_minimum_required(VERSION 3.10)
 
 project(PARTIKLER LANGUAGES CXX)
 
-find_package(OpenMP REQUIRED)
+set(default_build_type "Release")
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "${default_build_type}")
+endif()
+
+MESSAGE("BUILD TYPE ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "RELEASE")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-    -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
-    )
+  -Wall -Wpedantic -Wextra -march=native -fopenmp -fPIC"
+  )
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
       -fno-omit-frame-pointer \
-      -Rpass=loop-vectorize \
+      -fsanitize=address"
+    )
+
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
+    -fno-omit-frame-pointer \
+    -Rpass=loop-vectorize \
       -ffast-math \
-      -fsanitize=address \
       "
       #-Rpass-analysis=loop-vectorize \
       #-Rpass-missed=loop-vectorize \
@@ -33,12 +43,20 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
-    add_compile_definitions(WITH_GNU)
+    add_definitions(-DWITH_GNU)
+
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+      --coverage\
+      -fprofile-arcs \
+      -fsanitize=address \
+      -ftest-coverage"
+)
 
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
+        -g -rdynamic \
         "
         # -fopt-info-vec-missed"
         )
@@ -48,82 +66,29 @@ endif()
 ########################
 # 3rd Party Libraries  #
 ########################
-#add_subdirectory(3rdParty/cgal)
+
+set(CMAKE_ARGS "${CMAKE_ARGS} \
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR} \
+        -DYAP_BUILD_TESTS=OFF \
+        -DYAP_BUILD_PERF=OFF  \
+        -DYAP_BUILD_DOC=OFF   \
+        -DYAML_CPP_BUILD_TESTS=OFF \
+        -DYAML_CPP_BUILD_TOOLS=OFF \
+        -DYAML_CPP_BUILD_CONTRIB=OFF "
+  )
+
+find_package(OpenMP REQUIRED)
 
 include(ExternalProject)
 
+include(cmake/build_3rd_party.cmake)
+
 OPTION(BUILD_CGAL "Building CGAL" OFF)
 IF(BUILD_CGAL)
-    message("BUILDING CGAL")
-    # Download and unpack googletest at configure time
-    configure_file(cmake/CGAL.in cgal-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-download )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND mkdir -p build
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND cmake  -DCGAL_HEADER_ONLY=ON -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build ..
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    execute_process(COMMAND make install
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build )
-    if(result)
-      message(FATAL_ERROR "Build step for cgal failed: ${result}")
-    endif()
-
-    # add_compile_definitions(CGAL_HEADER_ONLY)
-    #SET_TARGET_PROPERTIES(CGAL
-    #    PROPERTIES
-    #    CGAL_HEADER_ONLY TRUE)
-
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
-    set(CGAL_DIR  ${CMAKE_CURRENT_BINARY_DIR}/cgal-src)
-    find_package(CGAL  REQUIRED)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/cgal-src/build/include)
+    BUILD(CGAL)
 ENDIF()
 
-
-# find_package(CGAL  REQUIRED)
-
-# MESSAGE("Found CGAL CONFIG UNDER" ${CGAL_DIR})
-# include( ${CGAL_USE_FILE} )  # needed for the linker
-
-
-OPTION(GENERATE_TAGS "Generating tags" OFF)
-
-IF(GENERATE_TAGS)
-    add_custom_command ( OUTPUT tags
-        COMMAND ctags -R ${CMAKE_SOURCE_DIR}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-ELSE()
-    add_custom_command ( OUTPUT tags
-        COMMAND touch tags
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-ENDIF()
+find_package(CGAL CONFIG REQUIRED)
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
@@ -136,51 +101,28 @@ IF(NOT BUILD_GOOGLE_TEST)
     FIND_PACKAGE(GTest REQUIRED)
 ENDIF()
 
+
 IF(BUILD_GOOGLE_TEST)
-    # Download and unpack googletest at configure time
-    configure_file(cmake/GTest.in googletest-download/CMakeLists.txt)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-    endif()
-
-    message("BUILDING GTEST")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
+    BUILD(googletest)
 
     # Prevent overriding the parent project's compiler/linker
     # settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # Add googletest directly to our build. This defines
-    # the gtest and gtest_main targets.
+    # # Add googletest directly to our build. This defines
+    # # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                      EXCLUDE_FROM_ALL)
 
-     message("BUILDING GTEST DONE")
+    #  message("BUILDING GTEST DONE")
 
-    execute_process(COMMAND make
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-      )
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/googletest-build/lib/cmake/GTest/")
 ENDIF()
 
-#FIND_PACKAGE(GTest REQUIRED)
+find_package(GTest)
 
-# add_subdirectory(3rdParty/benchmark)
 
-# build tests (targets: gtest_main, gtest)
-#set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
-
-INCLUDE(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 OPTION(BUILD_YAML_CPP "Building yaml-cpp parser" OFF)
 
 IF(NOT BUILD_YAML_CPP)
@@ -192,80 +134,125 @@ IF(NOT BUILD_YAML_CPP)
 ENDIF()
 
 IF(BUILD_YAML_CPP)
-    MESSAGE("BUILDING YAML_CPP ")
-      EXTERNALPROJECT_ADD(yaml-cpp-download
-          GIT_REPOSITORY    "https://github.com/jbeder/yaml-cpp"
-          # GIT_TAG           "0.6.2"
-          DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
-          PREFIX            "${CMAKE_BINARY_DIR}"
-          SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/yaml-cpp"
-          CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-                            -DYAML_CPP_BUILD_TESTS=OFF
-                            -DYAML_CPP_BUILD_TOOLS=OFF
-                            -DYAML_CPP_BUILD_CONTRIB=OFF
-                            -DYAML_CPP_INSTALL=ON
-                            -DBUILD_SHARED_LIBS=ON
-        )
 
-      EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
-      INCLUDE_DIRECTORIES(${install_dir}/include)
-
-      ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
-      SET_TARGET_PROPERTIES(yaml-cpp
-          PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
-      SET(YAML_CPP_LIBRARY yaml-cpp)
-      MESSAGE("SET YAML_CPP_LIBRARY " ${YAML_CPP_LIBRARY})
+    SET(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    SET(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+    SET(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+    BUILD(YAML)
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
+                     ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
+                     EXCLUDE_FROM_ALL)
 ENDIF()
 
 
+OPTION(BUILD_YAP "Building YAP" ON)
+IF(NOT BUILD_YAP)
+    MESSAGE("Searching for YAP")
+    FIND_PACKAGE(yap REQUIRED)
+ENDIF()
+
+IF(BUILD_YAP)
+    SET(YAP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    SET(YAP_BUILD_PERF OFF CACHE BOOL "" FORCE)
+    SET(YAP_BUILD_DOC OFF CACHE BOOL  "" FORCE)
+    BUILD(YAP)
+
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    # add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yap-src
+    #                  ${CMAKE_CURRENT_BINARY_DIR}/yap-build
+    #                  EXCLUDE_FROM_ALL)
+
+    include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/yap-src/include)
+    message("BUILDING YAP DONE")
+ENDIF()
+
+
+OPTION(WITH_H5HUT "With H5Hut" ON)
+OPTION(BUILD_HDF5 "Building hdf5" OFF)
+OPTION(BUILD_H5HUT "Build H5Part data-Format" ON)
+
+
 ########################
-# boost proto          #
+# gcov                 #
 ########################
-# OPTION(BUILD_BOOST "Building boost" ON)
-#
-# IF(BUILD_YAML_CPP)
-#       EXTERNALPROJECT_ADD(boost-download
-#           GIT_REPOSITORY    "https://github.com/boostorg/bost.git"
-#           DOWNLOAD_DIR      "${PROJECT_SOURCE_DIR}/3rdParty/"
-#           PREFIX            "${CMAKE_BINARY_DIR}"
-#           SOURCE_DIR        "${PROJECT_SOURCE_DIR}/3rdParty/boost"
-#           CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-#                             -DYAML_CPP_BUILD_TESTS=OFF
-#                             -DYAML_CPP_BUILD_TOOLS=OFF
-#                             -DYAML_CPP_BUILD_CONTRIB=OFF
-#                             -DYAML_CPP_INSTALL=ON
-#                             -DBUILD_SHARED_LIBS=ON
-#         )
-#
-#       EXTERNALPROJECT_GET_PROPERTY(yaml-cpp-download install_dir)
-#       INCLUDE_DIRECTORIES(${install_dir}/include)
-#
-#       ADD_LIBRARY(yaml-cpp SHARED IMPORTED)
-#       SET_TARGET_PROPERTIES(yaml-cpp
-#           PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/lib/libyaml-cpp.so)
-#       SET(YAML_CPP_LIBRARY yaml-cpp)
-# ENDIF()
+
+IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+include (cmake/CodeCoverage.cmake)
+
+append_coverage_compiler_flags()
+
+setup_target_for_coverage_lcov(
+  NAME coverage
+  EXECUTABLE ./src/core/tests/Field/Partikler_Test_Field
+  BASE_DIRECTORY "${PROJECT_SOURCE_DIR}/src"
+  EXCLUDE "build/*" "/usr/*"
+  )
+
+# setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
+# target_link_libraries(${PROJECT_TEST_NAME} gcov)
+
+ENDIF()
+########################
+# ctags                #
+########################
+
+
+OPTION(GENERATE_TAGS "Generating tags" OFF)
+IF(GENERATE_TAGS)
+    add_custom_command ( OUTPUT tags
+        COMMAND ctags -R ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ELSE()
+    add_custom_command ( OUTPUT tags
+        COMMAND touch tags
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ENDIF()
 
 ########################
 # own Libraries        #
 ########################
 
-# add_subdirectory(src/SPHRuntime)
 add_subdirectory(src/core)
-# add_subdirectory(src/SPHDatastructures)
-add_subdirectory(src/kernel)
+add_subdirectory(src/boundary_conditions)
 add_subdirectory(src/neighbours)
+add_subdirectory(src/io)
+add_subdirectory(src/kernel)
 add_subdirectory(src/transporteqn)
 add_subdirectory(src/integrator)
 add_subdirectory(src/geometry)
-add_subdirectory(src/io)
-add_subdirectory(src/boundary_conditions)
 
 add_executable(partikler src/partikler.cpp tags)
 
-#target_link_libraries(partikler SPHDatastructures ${YAML_CPP_LIBRARIES})
+target_link_libraries(partikler
+  PRIVATE
+    Core
+    Neighbours
+    BoundaryConditions
+    IO
+    TransportEqn
+    Kernel
+    Integrator
+    Geometry
+  )
 
-target_link_libraries(partikler BoundaryConditions Geometry Integrator Neighbours Core TransportEqn Kernel IO OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
+
+OPTION(COVERALLS "Calling Coveralls" OFF)
+
+IF(COVERALLS AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+      add_custom_command ( OUTPUT covered
+          COMMAND coveralls && touch covered
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      )
+ELSE()
+    add_custom_command ( OUTPUT covered
+        COMMAND touch covered
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ENDIF()
+
 # add_test(BuildBunny0.5 time ./partikler ../example/bunny.stl bunny 0.5)
 # add_test(BuildBunny0.25 time ./partikler ../example/bunny.stl bunny 0.25)
 #

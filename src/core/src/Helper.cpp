@@ -17,21 +17,44 @@
     contact: go@hpsim.de
 */
 
-
 #include "Helper.hpp"
 // #include <stdlib.h>     /* abort, NULL */
 
 std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
     std::vector<Point> points;
     points.reserve(n_particles);
-        for (size_t j = 0; j < n_particles; j++) {
-            for (size_t i = 0; i < n_particles; i++) {
-                float x = ((float)i) / ((float)n_particles);
-                float y = ((float)j) / ((float)n_particles);
-                float z = 0.0;
+    for (size_t j = 0; j < n_particles; j++) {
+        for (size_t i = 0; i < n_particles; i++) {
+            float x = ((float)i) / ((float)n_particles);
+            float y = ((float)j) / ((float)n_particles);
+            float z = 0.0;
+            points.push_back(Point(x, y, z));
+        }
+    }
+    return points;
+}
+
+std::vector<Point>
+create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx) {
+
+    size_t nx {(size_t)((dimensions[0]-position[0])/dx)};
+    size_t ny {(size_t)((dimensions[1]-position[1])/dx)};
+    size_t nz {(size_t)((dimensions[2]-position[2])/dx)};
+
+    size_t ntot = nx*ny*nz;
+
+    std::vector<Point> points;
+    points.reserve(ntot);
+    for (size_t k = 0; k < nz; k++) {
+        for (size_t j = 0; j < ny; j++) {
+            for (size_t i = 0; i < nx; i++) {
+                float x = ((float)i) * dx;
+                float y = ((float)j) * dx;
+                float z = ((float)k) * dx;
                 points.push_back(Point(x, y, z));
             }
         }
+    }
     return points;
 }
 
@@ -53,16 +76,13 @@ std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
 
 float rand01() { return ((float)rand() / (RAND_MAX)); }
 
-std::vector<Point> disperse_particles(
-        std::vector<Point>& points,
-        float dx)
-{
-    for (size_t piter=0; piter<points.size(); piter++) {
+std::vector<Point> disperse_particles(std::vector<Point> &points, float dx) {
+    for (size_t piter = 0; piter < points.size(); piter++) {
 
-        float x = points[piter].x() + rand01()*dx;
-        float y = points[piter].x() + rand01()*dx;
-        float z = points[piter].x() + rand01()*dx;
-        points[piter] = Point(x,y,z);
+        float x = points[piter].x() + rand01() * dx;
+        float y = points[piter].x() + rand01() * dx;
+        float z = points[piter].x() + rand01() * dx;
+        points[piter] = Point(x, y, z);
     }
     return points;
 }

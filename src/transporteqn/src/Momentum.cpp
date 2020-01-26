@@ -17,35 +17,39 @@
     contact: go@hpsim.de
 */
 
-# include "Momentum.hpp"
+#include "Conti.hpp"
+#include "Momentum.hpp"
 
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Model(model_name, parameter, objReg),
-      dnu_(objReg.get_object<VectorField>("dnu")),
-      dp_(objReg.get_object<VectorField>("dp")),
-      u_(objReg.get_object<VectorField>("u")),
-      du_(objReg.create_field<VectorField>(
-              "du", zeroVec, {"dU", "dV", "dW"})),
-      time_(objReg.get_object<TimeGraph>("TimeGraph")) {};
+    : VectorFieldEquation(
+          model_name, parameter, objReg, objReg.get_object<VectorField>("u")),
+      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
+      tau_(objReg.get_object<VectorFieldEquation>("Viscosity")),
+      p_(objReg.get_object<FloatFieldEquation>("Pressure"))
+{}
 
 void Momentum::execute() {
 
     log().info_begin() << "Computing du/dt";
 
-    du_ = dnu_ - dp_;
+    int it = time_.get_current_timestep();
+
+    FloatField& rho = conti_.get(time_.get_current_timestep());
+
+    solve(df_, tau_.get(it)/rho - p_.get_dx(it)/rho);
 
     log().info_end();
 
     log().info_begin() << "Computing velocity";
 
     // TODO implement time integrator
-     u_ = u_/1.3;
+    // u_ = u_/1.3;
 
     // CFL = max(u)*deltaT/dx
 
-    float maxU = u_.norm().get_max();
+    // float maxU = u_.norm().get_max();
 
     // std::cout << "maxU"
     //           << maxU
@@ -59,9 +63,19 @@ void Momentum::execute() {
     // std::cout << du_*time_().deltaT << std::endl;
     // std::cout << u_ << std::endl;
 
-    u_ += (du_ * time_.get_deltaT());
+    // f_ += solve(f_, f_+(df_ * time_.get_deltaT()));
+
+    // solve(f_, f_+(df_ * time_.get_deltaT()));
+
+    for(size_t i=0; i<f_.size(); i++) {
+        f_[i] = f_[i]/1.3;
+        f_[i] += df_[i]*time_.get_deltaT();
+    }
 
     log().info_end();
-};
+
+    iteration_ = time_.get_current_timestep();
+
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);

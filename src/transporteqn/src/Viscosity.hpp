@@ -20,32 +20,44 @@
 #ifndef VISCOSITY_H
 #define VISCOSITY_H
 
-#include "Models.hpp"
+#include <string> // for string
+
+#include "Field.hpp" // for VectorField, PointField
+#include "FieldOps.hpp"
+#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
-#include "Datastructures.hpp"
 
+#include "Pressure.hpp"
 
-class Viscosity : public Model {
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
+
+class Viscosity : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Viscosity);
 
-private:
+  private:
+
+    FloatFieldEquation &conti_;
 
     // Coeffs
     float nu_;
 
     // In
-    const Field<searchcubes::NeighbourPair> &np_;
-    const Field<VectorPair> &dW_;
-    const VectorField &u_;
-    const PointField &pos_; // Particle positions
+    VectorField &u_;
 
-    // Out
-    VectorField &dnu_;
+    float mp_;
 
-public:
+    VectorField &pos_; // Particle positions
+
+  public:
     Viscosity(
-        const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg);
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };

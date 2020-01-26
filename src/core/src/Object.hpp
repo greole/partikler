@@ -20,61 +20,118 @@
 #ifndef SPHOBJECT_H
 #define SPHOBJECT_H
 
-#include "Logger.hpp"
-#include <vector>
-#include <stdio.h>
 #include <iostream>
 #include <memory>
+#include <stdio.h> // for size_t
+#include <string>  // for string
+#include <vector>  // for vector
 
+#include "Logger.hpp" // for Logger
+#include "Vec3.hpp"
+#include "cgal/CGALTYPEDEFS.hpp" // for Point
+
+struct Vec3;
+
+enum SPHObjectType {
+    GenericType,
+    FieldType,
+    IntFieldType,
+    SizeTFieldType,
+    FloatFieldType,
+    VectorFieldType,
+    PointFieldType,
+    KernelGradientFieldType,
+    EquationType,
+    ModelType,
+};
+
+// Template meta function to get SPHObjectType from std::vector<T>
+template <class T> struct GetFieldType {
+    constexpr static SPHObjectType value = GenericType;
+};
+
+template <> struct GetFieldType<std::vector<float>> {
+    constexpr static SPHObjectType value = FloatFieldType;
+};
+
+template <> struct GetFieldType<std::vector<int>> {
+    constexpr static SPHObjectType value = IntFieldType;
+};
+
+template <> struct GetFieldType<std::vector<size_t>> {
+    constexpr static SPHObjectType value = SizeTFieldType;
+};
+
+template <> struct GetFieldType<std::vector<Vec3>> {
+    constexpr static SPHObjectType value = VectorFieldType;
+};
+
+template <> struct GetFieldType<std::vector<Point>> {
+    constexpr static SPHObjectType value = PointFieldType;
+};
+
+std::string sphObjectType_to_string(SPHObjectType t);
+
+// Base class for fields and models
 class SPHObject {
 
-    // Base class for fields and models
-
   protected:
-
     const std::string name_;
 
-    const std::string type_;
-
-    // marks an object as temporary and thus avoids
-    // registration
-    // const bool tmp_;
-
-    bool active_;
+    const SPHObjectType type_;
 
     //  use a copy or default here
     Logger logger_ = Logger(1);
 
-    static std::vector<SPHObject*> objects_;
-
   public:
-    SPHObject(
-        const std::string name,
-        const std::string type,
-        const bool active = true)
-        : name_(name), type_(type), active_(active) {
-        // TODO dont register tmp objects
-        // if (!tmp_) this->register_object(*this);
-    };
+    SPHObject() : name_(), type_(GenericType) {};
+
+    SPHObject(const std::string name, const SPHObjectType type)
+        : name_(name), type_(type) {};
 
     virtual ~SPHObject() = default;
 
-    // activate or deactivate object
-    void set_active(bool active) { active_ = active; };
-
-    // get status
-    bool active() const { return active_; };
-
     std::string get_name() const { return name_; };
 
-    std::string get_type() const { return type_; };
+    SPHObjectType get_type() const { return type_; };
 
+    std::string get_type_str() const { return sphObjectType_to_string(type_); };
 
     // reorder after particle sorting
-    virtual void reorder(const std::vector<size_t> &idxs) {};
+    // TODO remove and replace by dispatched version
+    virtual void reorder(const std::vector<size_t>) {};
+};
 
-    virtual void write_to_disk(std::string path) {};
+template <class T> class Generic : public SPHObject {
 
+  protected:
+    T obj_;
+
+  public:
+    typedef T value_type;
+
+    Generic(const std::string name, const SPHObjectType, T obj)
+        : SPHObject(name, GenericType), obj_(obj) {};
+
+    T &operator()() { return obj_; };
+};
+
+template <class T> class EquationBase : SPHObject {
+    // Base class for equations
+
+    // TODO Separate object registry and runTime
+
+  private:
+    T &result_;
+
+  public:
+    EquationBase(std::string name, bool active, T &result)
+        : SPHObject(name, EquationType), result_(result) {
+
+        logger_.info() << " Created Equation: " << name_;
+    };
+
+    void compute();
 };
 
 #endif

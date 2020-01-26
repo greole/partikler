@@ -17,32 +17,29 @@
     contact: go@hpsim.de
 */
 
-
 #ifndef TEMPLATE_H
 #define TEMPLATE_H
 
+#include "SPHDatastructures.hpp"
 #include "SPHModels.hpp"
 #include "yaml-cpp/yaml.h"
-#include "SPHDatastructures.hpp"
-
 
 class BrownianMotion : public SPHModel {
 
     REGISTER_DEC_TYPE(BrownianMotion);
 
-private:
-
+  private:
     SPHVectorField &u_;
 
     float dx_;
 
-public:
+  public:
     BrownianMotion(
         const std::string &model_name, YAML::Node parameter, RunTime &runTime);
 
     void execute();
 
-    void update_dx(){};
+    void update_dx() {};
 };
 
 #endif

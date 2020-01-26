@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(yap-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(yap
+  GIT_REPOSITORY    https://github.com/greole/yap.git
+  GIT_TAG           develop
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yap-build"
+  PREFIX            "${CMAKE_BINARY_DIR}"
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  )

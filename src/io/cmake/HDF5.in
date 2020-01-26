@@ -1,0 +1,11 @@
+include(ExternalProject)
+
+EXTERNALPROJECT_ADD(HDF5-download
+  DOWNLOAD_NAME     "hdf5-1-10-5.tar.gz"
+  URL_HASH          "MD5=7c19d6b81ee2a3ba7d36f6922b2f90d3"
+  URL               "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-bz2/?wpdmdl=13570&refresh=5c88e0ec5645e1552474348%"
+  PREFIX            "${CMAKE_CURRENT_BINARY_DIR}"
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/HDF5-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/HDF5-build"
+  CMAKE
+)

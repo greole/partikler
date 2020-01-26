@@ -17,77 +17,80 @@
     contact: go@hpsim.de
 */
 
-#include "Datastructures.hpp"
-#include <algorithm>    // std::min
+#include "Field.hpp"
+#include "Logger.hpp"
+#include "SearchCubes.hpp"
+
+#include <algorithm> // std::min
 #include <math.h>    // std::min
+#include <stdlib.h>  // std::min
 #include <time.h>    // std::min
-#include <stdlib.h>    // std::min
 
-void compute_forces(
-    Logger logger,
-    const searchcubes::SortedNeighbours &particle_neighbours,
-    const PointField &particles,
-    const std::vector<Facet_handle> & facets,
-    const float dx,
-    VectorField &f)
-{
-  // TODO runtime.submodels("force").calculate()
-  // Lennard Jones Potential
-  logger.info_begin() << "Computing forces";
-  f.set(zeroVec);
+// TODO Refactor to proper model
+// void compute_forces(
+//     Logger logger,
+//     const SortedNeighbours &particle_neighbours,
+//     const PointField &particles,
+//     const std::vector<Facet_handle> & facets,
+//     const float dx,
+//     VectorField &f)
+// {
+//   // // TODO runtime.submodels("force").calculate()
+//   // // Lennard Jones Potential
+//   // logger.info_begin() << "Computing forces";
+//   // f.set(zeroVec);
 
-  const size_t size {particle_neighbours.ids.size()};
-  const float sigma = dx;
-  const float epsilon = 1e-06;
+//   // const size_t size {particle_neighbours.ids.size()};
+//   // const float sigma = dx;
+//   // const float epsilon = 1e-06;
 
-  for (size_t pid = 0; pid < size; pid++) {
+//   // for (size_t pid = 0; pid < size; pid++) {
 
-    size_t oid = particle_neighbours.ids[pid].ownId;
-    size_t nid = particle_neighbours.ids[pid].neighId;
-    const Point &opos = particles[oid];
-    const Point &npos = particles[nid];
+//   //   size_t oid = particle_neighbours.ids[pid].ownId;
+//   //   size_t nid = particle_neighbours.ids[pid].neighId;
+//   //   const Point &opos = particles[oid];
+//   //   const Point &npos = particles[nid];
 
-    Facet F1 = Facet(*facets[oid]);
-    Facet F2 = Facet(*facets[nid]);
+//   //   Facet F1 = Facet(*facets[oid]);
+//   //   Facet F2 = Facet(*facets[nid]);
 
-    CGALVector lenVo = particle_neighbours.dist[pid].on;
-    CGALVector lenVn = particle_neighbours.dist[pid].no;
+//   //   CGALVector lenVo = particle_neighbours.dist[pid].on;
+//   //   CGALVector lenVn = particle_neighbours.dist[pid].no;
 
-    double len = (double) particle_neighbours.dist[pid].len;
+//   //   double len = (double) particle_neighbours.dist[pid].len;
 
-    double rat = min(4.0, max(0.01, sigma/len));
-    double fi = 4.*epsilon*(pow(rat, 12.) - pow(rat, 6.) );
+//   //   double rat = min(4.0, max(0.01, sigma/len));
+//   //   double fi = 4.*epsilon*(pow(rat, 12.) - pow(rat, 6.) );
 
-      for(int j=0;j<3;j++) {
-        if (lenVo[j] != 0.0) {
-          f[oid][j] -= (float) fi/lenVo[j];
-        }
-        if (lenVn[j] != 0.0) {
-          f[nid][j] -= (float) fi/lenVn[j];
-        }
-    }
-  }
-  logger.info_end();
-};
+//   //     for(int j=0;j<3;j++) {
+//   //       if (lenVo[j] != 0.0) {
+//   //         f[oid][j] -= (float) fi/lenVo[j];
+//   //       }
+//   //       if (lenVn[j] != 0.0) {
+//   //         f[nid][j] -= (float) fi/lenVn[j];
+//   //       }
+//   //   }
+//   // }
+//   // logger.info_end();
+// };
 
-void add_random_noise(Logger logger, VectorField &u, const float dx) {
-}
+void add_random_noise(Logger logger, VectorField &u, const float dx) {}
 
-void limit_dt_du(
-         const VectorField &du,
-         const float maxDx,
-         float & dt
-         ) {
-  const float maxCFL = 0.5; // DONT HARDCODE
-  float maxDu = du.norm().get_max();
-  std::cout << "maxDu " << maxDu << std::endl;
-  float CFL = maxDu*dt*dt/maxDx;
-  std::cout << "maxCFL " << CFL << std::endl;
-  // max double timestep
-  float two = 2.0;
-  float change = min(two, maxCFL/CFL);
-  dt = dt * change;
-}
+// void limit_dt_du(
+//          const VectorField &du,
+//          const float maxDx,
+//          float & dt
+//          ) {
+//   const float maxCFL = 0.5; // DONT HARDCODE
+//   float maxDu = du.norm().get_max();
+//   std::cout << "maxDu " << maxDu << std::endl;
+//   float CFL = maxDu*dt*dt/maxDx;
+//   std::cout << "maxCFL " << CFL << std::endl;
+//   // max double timestep
+//   float two = 2.0;
+//   float change = min(two, maxCFL/CFL);
+//   dt = dt * change;
+// }
 
 float limit_sphere_frac(CGALVector OP, CGALVector PN, float maxDx2) {
     float a = PN.squared_length();
@@ -142,47 +145,46 @@ half_sphere(Point O, Point P, CGALVector PN, CGALVector D, float maxDx) {
     return PN * frac;
 }
 
+// void snap_to_surface(
+//   std::vector<Facet_handle>& facets,
+//   PointField& pos
+//                      ){
 
-void snap_to_surface(
-  std::vector<Facet_handle>& facets,
-  PointField& pos
-                     ){
+//   std::vector<Vec3> corrector(pos.size(), {0,0,0});
 
-  std::vector<Vector> corrector(pos.size(), {0,0,0});
+//   for (size_t i = 0; i < pos.size(); i++) {
+//   // compute distance to facet
+//     // Facet facet = Facet(*facets[i]);
+//     // CGALVector N = facet_normal(facet);
+//     // float d = facet.plane().d();
+//     // CGALVector P = pos[i]-Point(0, 0, 0);
+//     // float dist = (N*P+d)/std::sqrt(N.squared_length());
 
-  for (size_t i = 0; i < pos.size(); i++) {
-  // compute distance to facet
-    // Facet facet = Facet(*facets[i]);
-    // CGALVector N = facet_normal(facet);
-    // float d = facet.plane().d();
-    // CGALVector P = pos[i]-Point(0, 0, 0);
-    // float dist = (N*P+d)/std::sqrt(N.squared_length());
+//     Facet facet = Facet(*facets[i]);
+//     auto h = facet.facet_begin();
 
-    Facet facet = Facet(*facets[i]);
-    auto h = facet.facet_begin();
+//     Plane p {
+//              h->vertex()->point(),
+//              h->next()->vertex()->point(),
+//              h->next()->next()->vertex()->point(),
+//     };
 
-    Plane p {
-             h->vertex()->point(),
-             h->next()->vertex()->point(),
-             h->next()->next()->vertex()->point(),
-    };
+//     Point P = p.projection(pos[i]);
+//     CGALVector dx = P - pos[i];
 
-    Point P = p.projection(pos[i]);
-    CGALVector dx = P - pos[i];
+//     // if (dist != 0.0) {
+//     //   std::cout
+//     //     << "[DEBUG SLIDE] Snap to STL"
+//     //     << " Particle Id " << i
+//     //     << " Pos " << P
+//     //     << " dist " << dist
+//     //     << " N " << N
+//     //     << " d*N" << d*N
+//     //     << " p-d*N " << pos[i] - d*N
+//     //     << " DONE "
+//     //     << std::endl;
+//         corrector[i] = Vector{(float)dx.x(), (float)dx.y(), (float)dx.z()};
+//   }
 
-    // if (dist != 0.0) {
-    //   std::cout
-    //     << "[DEBUG SLIDE] Snap to STL"
-    //     << " Particle Id " << i
-    //     << " Pos " << P
-    //     << " dist " << dist
-    //     << " N " << N
-    //     << " d*N" << d*N
-    //     << " p-d*N " << pos[i] - d*N
-    //     << " DONE "
-    //     << std::endl;
-        corrector[i] = Vector{(float)dx.x(), (float)dx.y(), (float)dx.z()};
-  }
-
-  VectorField cor = VectorField(corrector, {"tmpx", "tmpy", "tmpz"}, "tmp");
-}
+//   VectorField cor = VectorField(corrector, {"tmpx", "tmpy", "tmpz"}, "tmp");
+// }

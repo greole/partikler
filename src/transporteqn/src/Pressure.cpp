@@ -17,47 +17,59 @@
     contact: go@hpsim.de
 */
 
-# include "Pressure.hpp"
+#include "Pressure.hpp"
 
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Model(model_name, parameter, objReg),
+    : FloatFieldEquation(
+          model_name,
+          parameter,
+          objReg,
+          objReg.create_field<FloatField>("p", 10000)),
+      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
       prefac_(c_ * c_ * rho_0_ / gamma_),
-      rho_(objReg.get_object<FloatField>("rho")),
-      np_(objReg.get_object<Field<searchcubes::NeighbourPair>>(
-          "neighbour_pairs")),
-      W_(objReg.get_object<FloatField>("KernelW")),
-      dW_(objReg.get_object<Field<VectorPair>>("KerneldWdx")),
-      p_(objReg.create_field<FloatField>("p", p_0_)),
-      dp_(objReg.create_field<VectorField>(
-          "dp", zeroVec, {"dpx", "dpy", "dpz"})) {};
+      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
+      p(f_), dp(df_)
+{}
 
 void Pressure::execute() {
 
+
+    auto& rho = conti_.get(time_.get_current_timestep());
+
+    auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(gamma_));
+
+    // auto pow = Pow<float>(gamma_);
+
     log().info_begin() << "Computing pressure";
 
-    const ScalarField tmp0 = (rho_/rho_0_).pow(gamma_);
-    const ScalarField tmp1 = ((tmp0 - 1.0)*prefac_)+p_0_;
+    solve(p, (prefac_ * (  pow(rho/rho_0_ ) - 1.0) + p_0_));
 
-    p_ = tmp1;
     log().info_end();
 
     log().info_begin() << "Computing gradient";
 
-    const FloatField prho = p_/(rho_*rho_);
-    const FloatField tmp_ab = prho.add_ab(np_);
+    // sum_AB_dW_res(dp, np_, dW_,
+    //           mp_ * ( A<FloatField>(p) + B<FloatField>(p) )
+    //               *  A<FloatField>(rho) / B<FloatField>(rho)
+    //     );
 
-    // reset
-    dp_.set_uniform({0,0,0});
+    sum_AB_dW_res(dp, np_, dW_,
+              mp_ * mp_ * (
+                  B<FloatField>(p)/ ( B<FloatField>(rho) * B<FloatField>(rho) )
+                + A<FloatField>(p)/ ( A<FloatField>(rho) * A<FloatField>(rho) )
+                  )
+        );
 
-    dp_.weighted_sum(np_, tmp_ab, dW_);
 
     log().info_end();
-};
+
+    iteration_ = time_.get_current_timestep();
+}
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
