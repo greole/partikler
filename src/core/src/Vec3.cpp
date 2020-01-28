@@ -27,21 +27,21 @@ Vec3 &Vec3::operator=(const Vec3 &x) {
     return *this;
 }
 
-Vec3& Vec3::operator+=(const Vec3 &x) {
+Vec3 &Vec3::operator+=(const Vec3 &x) {
     operator[](0) += x[0];
     operator[](1) += x[1];
     operator[](2) += x[2];
     return *this;
 }
 
-Vec3& Vec3::operator-=(const Vec3 &x) {
+Vec3 &Vec3::operator-=(const Vec3 &x) {
     operator[](0) -= x[0];
     operator[](1) -= x[1];
     operator[](2) -= x[2];
     return *this;
 }
 
-Vec3& Vec3::operator*=(const float x) {
+Vec3 &Vec3::operator*=(const float x) {
     operator[](0) *= x;
     operator[](1) *= x;
     operator[](2) *= x;
@@ -52,9 +52,7 @@ Vec3 operator*(float a, const Vec3 &x) {
     return {{a * x[0], a * x[1], a * x[2]}};
 }
 
-Vec3 operator*(Vec3& x, float a) {
-    return {{a * x[0], a * x[1], a * x[2]}};
-}
+Vec3 operator*(Vec3 &x, float a) { return {{a * x[0], a * x[1], a * x[2]}}; }
 
 // scalar division
 Vec3 operator/(const Vec3 &x, float a) {
@@ -77,7 +75,6 @@ Vec3 operator+(const Vec3 &x, const Vec3 &y) {
     return {{x[0] + y[0], x[1] + y[1], x[2] + y[2]}};
 }
 
-
 Vec3 operator-(const Vec3 &x, const Vec3 &y) {
     return {{x[0] - y[0], x[1] - y[1], x[2] - y[2]}};
 }
@@ -87,10 +84,10 @@ std::ostream &operator<<(std::ostream &os, Vec3 const &f) {
     return os;
 }
 
-void scalePoints (std::vector<Vec3>& points, Vec3 scale) {
+void scalePoints(std::vector<Vec3> &points, Vec3 scale) {
 
-    for(size_t i=0; i<points.size(); i++) {
-        auto& oldPoint = points[i];
+    for (size_t i = 0; i < points.size(); i++) {
+        auto &oldPoint = points[i];
         // Vec3 newPoint {
         // };
         points[i] = Vec3 {
@@ -99,15 +96,14 @@ void scalePoints (std::vector<Vec3>& points, Vec3 scale) {
             oldPoint[2] * scale[2],
         };
     }
-
 }
 
-void scalePoints (std::vector<Vec3>& points, float scale) {
-    for(size_t i=0; i<points.size(); i++) {
-        points[i]*= scale;
+void scalePoints(std::vector<Vec3> &points, float scale) {
+    for (size_t i = 0; i < points.size(); i++) {
+        points[i] *= scale;
     }
 }
 
-void translatePoints (std::vector<Vec3>& points, Vec3 translate) {
-    for(auto& pos: points)  pos += translate;
+void translatePoints(std::vector<Vec3> &points, Vec3 translate) {
+    for (auto &pos : points) pos += translate;
 }

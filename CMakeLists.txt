@@ -174,6 +174,11 @@ OPTION(BUILD_H5HUT "Build H5Part data-Format" ON)
 
 
 ########################
+# TOOLING              #
+########################
+
+
+########################
 # gcov                 #
 ########################
 
@@ -210,6 +215,16 @@ ELSE()
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 ENDIF()
+
+########################
+# clang-format         #
+########################
+
+add_custom_target(
+        autoformat
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/autoformat.sh ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 
 ########################
 # own Libraries        #

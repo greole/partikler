@@ -46,7 +46,9 @@ void STLPosIntegrator::execute() {
 
     // update pos_
     for (size_t idx = 0; idx < pos_.size(); idx++) {
-        pos_[idx] = Vec3 {(float)points_[idx][0], (float)points_[idx][1], (float)points_[idx][2]};
+        pos_[idx] = Vec3 {(float)points_[idx][0],
+                          (float)points_[idx][1],
+                          (float)points_[idx][2]};
     }
 
     points_ += dx;

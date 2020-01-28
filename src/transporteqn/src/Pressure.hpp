@@ -25,11 +25,12 @@
 #include "Field.hpp" // for FloatField, VectorField
 #include "FieldOps.hpp"
 #include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
+#include "Equation.hpp"
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include <boost/yap/yap.hpp>
 #include <boost/yap/print.hpp>
+#include <boost/yap/yap.hpp>
 
 #include "Conti.hpp"
 class ObjectRegistry;
@@ -54,8 +55,8 @@ class Pressure : public FloatFieldEquation {
     const float prefac_;
     const float mp_;
 
-    FloatField& p;
-    VectorField& dp;
+    FloatField &p;
+    VectorField &dp;
 
   public:
     Pressure(

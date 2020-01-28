@@ -88,8 +88,7 @@ HitPoint approximateEdgeHit(
     Point &P,      // Particle start position
     CGALVector &S, // Slide vector
     // float tolerance
-    float
-    ) {
+    float) {
     // Given a tolerance this function checks if the Vector S from point P hits
     // the edge AB
     Line G1 = Line(A, B);
@@ -587,6 +586,6 @@ std::ostream &operator<<(std::ostream &os, Point const &p) {
     return os;
 }
 
-float operator*(Vec3 &x, CGALVector &y){
-    return (float) (x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
+float operator*(Vec3 &x, CGALVector &y) {
+    return (float)(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }

@@ -35,6 +35,8 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
+class TimeGraph;
+
 class STLPosIntegrator : public Model {
 
     REGISTER_DEC_TYPE(STLPosIntegrator);

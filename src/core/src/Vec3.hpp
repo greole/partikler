@@ -43,14 +43,13 @@ struct Vec3 : std::array<float, 3> {
 
 // scalar multiplication
 Vec3 operator*(float a, const Vec3 &x);
-Vec3 operator*(Vec3& x, float a);
+Vec3 operator*(Vec3 &x, float a);
 
 // scalar division
 Vec3 operator/(const Vec3 &x, float a);
 
 // dot product
 float operator*(const Vec3 &x, const Vec3 &y);
-
 
 // addition
 Vec3 operator+(const Vec3 &x, const Vec3 &y);
@@ -65,11 +64,10 @@ struct VectorPair {
     Vec3 no;
 };
 
-void translatePoints (std::vector<Vec3>& points, Vec3 translate);
+void translatePoints(std::vector<Vec3> &points, Vec3 translate);
 
-void scalePoints (std::vector<Vec3>& points, Vec3 scale);
+void scalePoints(std::vector<Vec3> &points, Vec3 scale);
 
-void scalePoints (std::vector<Vec3>& points, float scale);
-
+void scalePoints(std::vector<Vec3> &points, float scale);
 
 #endif

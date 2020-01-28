@@ -86,7 +86,7 @@ void SPHParticleGenerator::execute() {
     size_t n = points_.size();
 
     // TODO find a better solution
-    for (auto &p: points_) {
+    for (auto &p : points_) {
         pos_.push_back({(float)p[0], (float)p[1], (float)p[2]});
     }
 
@@ -99,19 +99,17 @@ void SPHParticleGenerator::execute() {
 
     log().info_begin() << "Computing Surface Area";
 
-    float surface_area = (float) std::accumulate(
+    float surface_area = (float)std::accumulate(
         boost::make_transform_iterator(polyhedron_().facets_begin(), ca),
         boost::make_transform_iterator(polyhedron_().facets_end(), ca),
         0.);
-
 
     float volume = surface_area * dx_;
     log().info_end() << "Total Surface Area" << surface_area;
 
     get_objReg().register_object<Generic<float>>(
         std::make_unique<Generic<float>>(
-            "specific_particle_mass", GenericType, volume/n
-            ));
+            "specific_particle_mass", GenericType, volume / n));
 
     for (size_t i = 0; i < (n - n_0); i++) {
         idx_.push_back(n_0 + i);

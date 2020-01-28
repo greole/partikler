@@ -41,9 +41,6 @@
 #include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
 
-class ModelGraph;
-class TimeGraph;
-
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
 
 #define REGISTER_DEF_TYPE(CLASS, NAME)                                         \
@@ -53,11 +50,11 @@ class TimeGraph;
 class Model : public SPHObject {
 
   private:
-    YAML::Node parameter_;   // Parameter of given model
+    YAML::Node parameter_; // Parameter of given model
 
     ObjectRegistry &objReg_; // Reference to main runTime
 
-    Logger log_;             // Own logger instance for better scoping
+    Logger log_; // Own logger instance for better scoping
 
     std::vector<std::shared_ptr<Model>> submodels_;
 
@@ -93,7 +90,7 @@ class Model : public SPHObject {
 
     void execute_submodels();
 
-    bool debug() {return debug_;};
+    bool debug() { return debug_; };
 };
 
 class ModelFactory {
@@ -167,7 +164,6 @@ class ModelGraph : public Model {
     void execute() { execute_submodels(); };
 };
 
-
 // Base Class for particle generating models
 //
 // Base Class for particle generating models
@@ -175,17 +171,16 @@ class ModelGraph : public Model {
 // and transferring
 class ParticleGeneratorBase : public Model {
 
-protected:
-
+  protected:
     FieldIdMap &fieldIdMap_;
 
     ObjectRegistry local_objReg_;
 
-    PointField& points_;
+    PointField &points_;
 
-    VectorField& pos_;
+    VectorField &pos_;
 
-    IntField& id_;
+    IntField &id_;
 
     std::string name_;
 
@@ -195,8 +190,7 @@ protected:
 
     Vec3 translation_vector_;
 
-public:
-
+  public:
     ParticleGeneratorBase(
         const std::string &model_name,
         YAML::Node parameter,
@@ -204,15 +198,15 @@ public:
 
     Vec3 read_vector(YAML::Node parameter, std::string coeff);
 
-    template <class T>
-    void append(T &, std::string name) {
+    template <class T> void append(T &, std::string name) {
         auto &oreg = get_objReg();
-        field_append(oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
+        field_append(
+            oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
     }
 
     virtual void execute() {};
 
-    void post_execute(){
+    void post_execute() {
 
         logger_.info_begin() << "Translate: " << translation_vector_;
 
@@ -235,7 +229,7 @@ public:
         }
 
         id_.reserve(pos_.size());
-        for(size_t i=0; i<pos_.size(); i++ ) {
+        for (size_t i = 0; i < pos_.size(); i++) {
             id_.push_back(fieldId_);
         }
 
@@ -249,169 +243,5 @@ public:
         get_objReg().update_n_particles();
         logger_.info_end();
     };
-
 };
-
-// TODO TransportedQuantity
-// a class providing field to Equation depedency
-// has an update method that calls the dependend transport eqn
-
-// TODO TransportEqn Base class
-// - Access previous timestep result if activated
-// - has an update method
-// - allows other TransportEqn as dependencies
-// - Computes a d(...)
-
-template<class T, class U>
-class FieldEquation : public Model {
-
-  protected:
-    TimeGraph &time_;
-
-    NeighbourFieldAB &np_;
-
-    FloatField &W_;
-
-    KernelGradientField &dW_;
-
-    T &f_;
-
-    // decltype(gradient_type<T>::type) &ddxf_; // TODO compute type
-    U &df_;
-
-    // store previous results
-    std::map<int, T> prev_;
-
-    // the current iteraton
-    int iteration_;
-
-  public:
-    FieldEquation(
-        const std::string &field_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg,
-        T &f)
-        : Model(field_name, parameter, objReg),
-          time_(objReg.get_object<TimeGraph>("TimeGraph")),
-          np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          W_(objReg.get_object<FloatField>("KernelW")),
-          dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f),
-          df_(objReg.create_field<VectorField>(
-              "d" + f_.get_name(),
-              zero<VectorField::value_type>::val,
-              {"dx" + f_.get_name(),
-               "dy" + f_.get_name(),
-               "dz" + f_.get_name()})) {};
-
-    // get result for iteration i
-    // if result is not cached solve gets executed
-
-    FloatField &W() { return W_; };
-
-    NeighbourFieldAB &N() { return np_; };
-
-    KernelGradientField &dWdx() { return dW_; };
-
-    FloatField &sum_AB(float particle_mass) {
-        sum_AB_impl(particle_mass, f_, np_, W_);
-        return f_;
-    };
-
-    template <class RHS> FloatField &sum_AB(RHS rhs) {
-        sum_AB_impl(f_, np_, rhs * W_);
-        return f_;
-    }
-
-    // VectorField& ddx() {
-    // };
-
-    template <class RHS> void ddt(RHS rhs) {
-
-        // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1)
-        // ...
-    }
-
-    // template<class T>
-    // virtual T expression();
-
-    // solve();
-
-    // get the result for the given iteration
-    //
-    // get the result for the given iteration
-    // if iteration is larger then cached iteration
-    // equation is solved
-    T &get(int iteration) {
-        if (iteration == iteration_) {
-            std::cout
-                << get_name()
-                << "DEBUG using cached solution for iteration "
-                << iteration
-                << std::endl;
-            return f_;
-        }
-        else {
-            this->execute();
-            return f_;
-        }
-    }
-
-    U &get_dx(int iteration) {
-        if (iteration == iteration_) {
-            std::cout
-                << get_name()
-                << "DEBUG using cached solution for iteration "
-                << iteration
-                << std::endl;
-            return df_;
-        }
-        else {
-            this->execute();
-            return df_;
-        }
-    }
-};
-
-using FloatFieldEquation = FieldEquation<FloatField, VectorField>;
-using VectorFieldEquation = FieldEquation<VectorField, VectorField>;
-
-// class VectorFieldEquation : public Model {
-
-//   protected:
-//     TimeGraph &time_;
-
-//     NeighbourFieldAB &np_;
-
-//     FloatField &W_;
-
-//     KernelGradientField &dW_;
-
-//     VectorField &f_;
-
-//   public:
-//     VectorFieldEquation(
-//         const std::string &model_name,
-//         YAML::Node parameter,
-//         ObjectRegistry &objReg,
-//         VectorField &f);
-
-//     FloatField &W() { return W_; };
-
-//     NeighbourFieldAB &N() { return np_; };
-
-//     KernelGradientField &dWdx() { return dW_; };
-
-//     // template<class T>
-//     // virtual T expression();
-
-//     // template <class RHS, class LHS>
-//     // RHS sum_AB(LHS lhs){
-//     //     struct sum_AB_s {
-
-//     //     }
-//     //    return sum_AB_s
-//     // }
-
-//     // solve();
-// };
 #endif

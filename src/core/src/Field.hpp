@@ -35,11 +35,12 @@
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
-#define ab(field) ( A(field) - B(field) )
-#define ab_v(field) ( A<VectorField>(field) - B<VectorField>(field) )
-// #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) - B<Field<std::vector<CGALVector>>>(field) )
-#define ab_f(field) ( A<FloatField>(field) - B<FloatField>(field) )
-#define ab_p(field) ( A<PointField>(field) - B<PointField>(field) )
+#define ab(field) (A(field) - B(field))
+#define ab_v(field) (A<VectorField>(field) - B<VectorField>(field))
+// #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) -
+// B<Field<std::vector<CGALVector>>>(field) )
+#define ab_f(field) (A<FloatField>(field) - B<FloatField>(field))
+#define ab_p(field) (A<PointField>(field) - B<PointField>(field))
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
@@ -87,7 +88,6 @@ template <class T> class Field : public T, public SPHObject {
     bool reorder_ = true;
 
   public:
-
     Field() {};
 
     Field(
@@ -211,7 +211,9 @@ template <> struct zero<int> { constexpr static int val = 1; };
 
 template <> struct zero<float> { constexpr static float val = 0.0; };
 
-template <> struct zero<Vec3> { constexpr static Vec3 val = {{0.0, 0.0, 0.0}}; };
+template <> struct zero<Vec3> {
+    constexpr static Vec3 val = {{0.0, 0.0, 0.0}};
+};
 
 // Define all the expression-returning numeric operators we need.  Each will
 // accept any std::vector<> as any of its arguments, and then any value in the
@@ -296,7 +298,6 @@ using PointField = Field<std::vector<Point>>;
 PointField &operator+=(PointField &a, VectorField &b);
 VectorField &operator+=(VectorField &a, VectorField &b);
 VectorField &operator-=(VectorField &a, VectorField &b);
-
 
 // Template meta function to get SPHObjectType from std::vector<T>
 template <enum SPHObjectType T> struct GetField {};

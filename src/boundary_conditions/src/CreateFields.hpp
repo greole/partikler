@@ -37,7 +37,6 @@ class InitFields : public Model {
     REGISTER_DEC_TYPE(InitFields);
 
   private:
-
     std::vector<std::string> float_fields_ {};
 
     std::vector<std::string> vec_fields_ {};

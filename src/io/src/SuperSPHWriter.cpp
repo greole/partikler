@@ -82,7 +82,8 @@ std::string field_type_to_str(SPHObjectType t) {
     //     return "float";
     // case (VectorFieldType):
     //     return "float";
-    default: return "float";
+    default:
+        return "float";
     }
 }
 

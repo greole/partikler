@@ -22,22 +22,21 @@
 #include "Time.hpp"
 
 template <class T>
-void HDF5Writer::write_to_disk(T const &data, h5_file_t& fh ) {}
+void HDF5Writer::write_to_disk(T const &data, h5_file_t &fh) {}
 
 template <>
-void HDF5Writer::write_to_disk(IntField const &data, h5_file_t& fh ) {
+void HDF5Writer::write_to_disk(IntField const &data, h5_file_t &fh) {
     H5PartWriteDataInt32(fh, data.get_name().c_str(), &data[0]);
 }
 
 template <>
-void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t& fh ) {
+void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
     H5PartWriteDataFloat32(fh, data.get_name().c_str(), &data[0]);
 }
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk(
-    const PointField &data, h5_file_t& fh) {
+void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {
 
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
@@ -52,8 +51,7 @@ void HDF5Writer::write_to_disk(
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk(
-    const VectorField &data, h5_file_t& fh) {
+void HDF5Writer::write_to_disk(const VectorField &data, h5_file_t &fh) {
 
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
@@ -73,7 +71,7 @@ HDF5Writer::HDF5Writer(
 
 void HDF5Writer::execute() {
 
-	// cleanup
+    // cleanup
 
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
@@ -83,18 +81,18 @@ void HDF5Writer::execute() {
         size_t num_particles {1000};
         std::string fname {(export_name_ + ".h5part")};
 
-        H5AbortOnError ();
-        H5SetVerbosityLevel (h5_verbosity);
+        H5AbortOnError();
+        H5SetVerbosityLevel(h5_verbosity);
 
         // open file and create first step
-        h5_prop_t prop = H5CreateFileProp ();
-        H5SetPropFileCoreVFD (prop, 0);
-        h5_file_t file = H5OpenFile (fname.c_str(), H5_O_WRONLY, prop);
+        h5_prop_t prop = H5CreateFileProp();
+        H5SetPropFileCoreVFD(prop, 0);
+        h5_file_t file = H5OpenFile(fname.c_str(), H5_O_WRONLY, prop);
 
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
 
-        H5SetStep(file, index_on_dist );
+        H5SetStep(file, index_on_dist);
         H5PartSetNumParticles(file, get_objReg().get_n_particles());
 
         auto &objReg = get_objReg();
@@ -109,14 +107,14 @@ void HDF5Writer::execute() {
             DISPATCH(obj_ptr, write_to_disk, type, file);
         }
 
-        H5CloseFile (file);
+        H5CloseFile(file);
 
         // NOTE H5CloseFile seems to miss to free two pointers
         // hence the clean up here to avoid asan errors
-        h5_prop_file* prop_ptr = (h5_prop_file*) prop;
+        h5_prop_file *prop_ptr = (h5_prop_file *)prop;
 
-        free((char*)(prop_ptr->prefix_iteration_name));
-        free((h5_prop_t*) prop);
+        free((char *)(prop_ptr->prefix_iteration_name));
+        free((h5_prop_t *)prop);
     }
 }
 

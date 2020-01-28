@@ -23,6 +23,7 @@
 #include <string> // for string
 
 #include "Models.hpp" // for TimeGraph (ptr only), Model
+#include "Time.hpp" // for TimeGraph (ptr only), Model
 
 class ObjectRegistry;
 namespace YAML {
@@ -45,7 +46,7 @@ class WriterBase : public Model {
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-    TimeGraph &get_timeGraph() { return time_graph_; };
+    TimeGraph &get_timeGraph() { return time_graph_; }
 
     int get_write_freq() { return write_freq_; };
 

@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <string> // for string, operator<<
 
-#include  "Time.hpp"
-#include "Models.hpp"                          // for TimeGraph, ModelFactory
+#include "Time.hpp"
+#include "Models.hpp"                          // for ModelFactory
 #include "Object.hpp"                          // for GenericType
 #include "ObjectRegistry.hpp"                  // for FieldIdMap, ObjectReg...
 #include "yaml-cpp/node/detail/iterator.h"     // for iterator_base, iterat...
@@ -91,7 +91,6 @@ REGISTER_DEF_TYPE(BOUNDARY, FixedValue);
 #include "Cubiod.hpp"
 REGISTER_DEF_TYPE(FIELDS, InitShape);
 
-REGISTER_DEF_TYPE(CORE, TimeGraph);
 #endif
 
 void handler(int sig) {

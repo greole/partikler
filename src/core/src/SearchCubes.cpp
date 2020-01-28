@@ -353,16 +353,13 @@ STLSortedNeighbours createSTLNeighbours(
     const std::vector<Facet_handle> &facets) {
     // Step 0 initialise return values
 
-    STLSortedNeighbours ret {
-        std::vector<NeighbourPair>(0),
-        std::vector<STLSurfaceDist>(0)};
-
+    STLSortedNeighbours ret {std::vector<NeighbourPair>(0),
+                             std::vector<STLSurfaceDist>(0)};
 
     // own_id_min and size
-    std::vector<std::pair<size_t, size_t>> order (omp_get_max_threads(), {0,0});
+    std::vector<std::pair<size_t, size_t>> order(omp_get_max_threads(), {0, 0});
 
     size_t tot_pairs {0};
-
 
 #pragma omp parallel
     {
@@ -372,9 +369,9 @@ STLSortedNeighbours createSTLNeighbours(
         SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
 
         // Step 1. get parent search cube
-        std::vector<STLUnsortedNeighbour> ret_tmp (0);
-            // std::vector<NeighbourPair>(0),
-            // std::vector<STLSurfaceDist>(0)};
+        std::vector<STLUnsortedNeighbour> ret_tmp(0);
+        // std::vector<NeighbourPair>(0),
+        // std::vector<STLSurfaceDist>(0)};
 
         ret_tmp.reserve(40 * pos.size() / omp_get_num_threads());
         // ret_tmp.dist.reserve(40 * pos.size() / omp_get_num_threads());
@@ -419,14 +416,14 @@ STLSortedNeighbours createSTLNeighbours(
             ret_tmp.begin(),
             ret_tmp.end(),
             [](const auto &lhs, const auto &rhs) {
-                    return lhs.ids.ownId < rhs.ids.ownId;
+                return lhs.ids.ownId < rhs.ids.ownId;
             });
 
-        // figure out the position at which the sorted ret_tmps are to be inserted
+        // figure out the position at which the sorted ret_tmps are to be
+        // inserted
         // 1. get total number of neighbour pairs
         // 2. push min to a vector and compute offsets
         // 3. resize the ret vector and insert according to offsets
-
 
         // after sorting this is the lowest owner id;
         int thread_num = omp_get_thread_num();
@@ -435,16 +432,18 @@ STLSortedNeighbours createSTLNeighbours(
 
         size_t particle_pairs_thread = ret_tmp.size();
 
-        order[thread_num].first = own_id_min;       // use this for start
-        order[thread_num].second = particle_pairs_thread; // use this for offsets
+        order[thread_num].first = own_id_min; // use this for start
+        order[thread_num].second =
+            particle_pairs_thread; // use this for offsets
 
-// #pragma omp critical
-//         {
-//             // for (auto& el: ret_tmp) {
-//             //     std::cout << omp_get_thread_num() << ": " << el.ids.ownId << " "
-//             //               << el.ids.neighId << std::endl;
-//             // }
-//         }
+        // #pragma omp critical
+        //         {
+        //             // for (auto& el: ret_tmp) {
+        //             //     std::cout << omp_get_thread_num() << ": " <<
+        //             el.ids.ownId << " "
+        //             //               << el.ids.neighId << std::endl;
+        //             // }
+        //         }
 
         // wait till all done
 #pragma omp barrier
@@ -454,8 +453,7 @@ STLSortedNeighbours createSTLNeighbours(
             std::sort(
                 order.begin(), order.end(), [](const auto &a, const auto &b) {
                     return a.first < b.first;
-                }
-            );
+                });
 
             // compute start index for each thread
             for (auto &start : order) {
@@ -465,7 +463,6 @@ STLSortedNeighbours createSTLNeighbours(
 
             ret.ids.resize(tot_pairs);
             ret.dist.resize(tot_pairs);
-
         }
 
 #pragma omp critical
@@ -476,21 +473,20 @@ STLSortedNeighbours createSTLNeighbours(
             size_t id {0};
 
             // find reordered thread id by lowest owner id
-            for (size_t id_ = 0; id_<order.size(); id_++) {
-                if (order[id_].first == own_id_min ) id = id_;
+            for (size_t id_ = 0; id_ < order.size(); id_++) {
+                if (order[id_].first == own_id_min) id = id_;
             }
-
 
             // copy elements from ret_tmp to final ret struct
             size_t start_idx = order[id].second - particle_pairs_thread;
             size_t end_idx = order[id].second;
-            for (size_t idx = 0; idx<particle_pairs_thread; idx++) {
+            for (size_t idx = 0; idx < particle_pairs_thread; idx++) {
                 size_t target_idx = idx + start_idx;
                 ret.ids[target_idx] = ret_tmp[idx].ids;
                 ret.dist[target_idx] = ret_tmp[idx].dist;
             }
         }
-     }
+    }
 
     return ret;
 }

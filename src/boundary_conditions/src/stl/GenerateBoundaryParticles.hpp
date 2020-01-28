@@ -22,13 +22,14 @@
 #ifndef GENERATEBOUNDARYPARTICLES_H
 #define GENERATEBOUNDARYPARTICLES_H
 
+#include <memory> // for vector
 #include <string> // for string
 #include <vector> // for vector
-#include <memory> // for vector
 
 #include "Field.hpp" // for PointField
 #include "FieldOps.hpp"
 #include "Models.hpp"           // for Model, ModelRegister (ptr only), REG...
+#include "Time.hpp"           // for Model, ModelRegister (ptr only), REG...
 #include "ObjectRegistry.hpp"   // for FieldIdMap (ptr only), ObjectRegistry
 #include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
@@ -38,7 +39,6 @@ class GenerateBoundaryParticles : public ParticleGeneratorBase {
     REGISTER_DEC_TYPE(GenerateBoundaryParticles);
 
   private:
-
     TimeGraph &timeGraph_;
 
     int iterations_;
@@ -58,7 +58,6 @@ class GenerateBoundaryParticles : public ParticleGeneratorBase {
     float dxhratio_;
 
   public:
-
     YAML::Node default_graph();
 
     GenerateBoundaryParticles(
@@ -66,9 +65,7 @@ class GenerateBoundaryParticles : public ParticleGeneratorBase {
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-
     void execute();
-
 };
 
 #endif

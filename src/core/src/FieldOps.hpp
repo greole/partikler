@@ -22,15 +22,14 @@
 
 #include "Field.hpp"
 #include "SearchCubes.hpp"
-#include <boost/yap/yap.hpp>
 #include <boost/hana/fwd/back.hpp>
 #include <boost/yap/print.hpp>
+#include <boost/yap/yap.hpp>
 
 template <class ValType> struct Pow_Wrapper {
     Pow_Wrapper() {};
     Pow_Wrapper(ValType i) { inner = i; };
-    template <typename T> T operator()(T x) {
-        return std::pow(x, inner); }
+    template <typename T> T operator()(T x) { return std::pow(x, inner); }
     ValType inner;
 };
 
@@ -42,7 +41,7 @@ template <class OpType, class... Inner> struct Terminal_Generator {
     // copy  expressions
     template <typename T> auto operator()(T x) { return terminal(x); }
     // but take Fields by reference
-    template <typename U> auto operator()(Field<U>& x) { return terminal(x); }
+    template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
 
     decltype(boost::yap::make_terminal(OpType())) terminal;
 };
@@ -54,11 +53,10 @@ template <class OpType> struct Terminal_Generator_NoArg {
     // copy  expressions
     template <typename T> auto operator()(T x) { return terminal(x); }
     // but take Fields by reference
-    template <typename U> auto operator()(Field<U>& x) { return terminal(x); }
+    template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
 
     decltype(boost::yap::make_terminal(OpType())) terminal;
 };
-
 
 template <class... ValType>
 using Pow = Terminal_Generator<Pow_Wrapper<ValType...>, ValType...>;
@@ -80,7 +78,6 @@ struct NormSqr_Wrapper {
 };
 
 using NormSqr = Terminal_Generator_NoArg<NormSqr_Wrapper>;
-
 
 template <class ValType> struct Set_Wrapper {
     Set_Wrapper() {};
@@ -110,8 +107,8 @@ template <class T, class I> T solve(I terminal) {
     return res;
 }
 
-
-// template <class Expr> auto pow(Expr const& e, double exponent, size_t elems) {
+// template <class Expr> auto pow(Expr const& e, double exponent, size_t elems)
+// {
 //     std::cout << __PRETTY_FUNCTION__ << std::endl;
 //     decltype(auto) expr = boost::yap::as_expr(e);
 //     FloatField tmp(elems,0);
@@ -137,24 +134,24 @@ struct take_nth {
     //     Pow_Wrapper<float> callable,
     //     Arg && arg) {
     //     // boost::yap::print(std::cout, boost::yap::as_expr(arg));
-    //     // std::cout << "call subexpr " <<  a << __PRETTY_FUNCTION__ << std::endl;
+    //     // std::cout << "call subexpr " <<  a << __PRETTY_FUNCTION__ <<
+    //     std::endl;
     //     // std::cout << "call subexpr " <<  callable.inner  << std::endl;
-
-
 
     //     // auto arg_expr = boost::yap::as_expr(arg);
     //     // std::cout << "done transform 1 " <<  callable.inner  << std::endl;
 
     //     // auto inner = boost::yap::transform(arg_expr, take_nth{a,b,ab});
-    //     // // auto inner = boost::yap::transform(boost::yap::as_expr(arg), take_nth{a,0,0});
+    //     // // auto inner = boost::yap::transform(boost::yap::as_expr(arg),
+    //     take_nth{a,0,0});
     //     // std::cout << "done transform 2" <<  callable.inner  << std::endl;
 
     //     // float retII = boost::yap::evaluate(inner);
     //     // std::cout << retII << std::endl;
     //     // std::cout << " Done " << std::endl;
     //     return  boost::yap::make_terminal(
-    //         callable(boost::yap::evaluate(boost::yap::transform(boost::yap::as_expr(arg), *this))));
-
+    //         callable(boost::yap::evaluate(boost::yap::transform(boost::yap::as_expr(arg),
+    //         *this))));
 
     //     // auto ret = boost::yap::make_terminal(2.0);
 
@@ -168,8 +165,7 @@ struct take_nth {
 
     template <typename T>
     auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        float const s) {
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>, float const s) {
         return boost::yap::make_terminal(s);
     }
 
@@ -239,8 +235,11 @@ std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
-std::vector<T> &
-sum_AB_impl(float particle_mass, std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
+std::vector<T> &sum_AB_impl(
+    float particle_mass,
+    std::vector<T> &vec,
+    const NeighbourFieldAB &nb,
+    Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     // Iterate particle index a
     size_t ab_index = 0;
@@ -326,11 +325,11 @@ std::vector<T> &sum_AB_dW_res(
 // NOTE the unsorted variant could look something like this
 // while (n_index < nb[ab_index].count) {
 
-
 //     // own ids are not consecutive since first all own cube neighbours
 //     // are collected, than all neighbour cube neighbours.
 //     // Hence ab_end is at maximum
-//     // max_particles_per_cube**2/2 + max_particles_per_cube * n_neighbour_cubes
+//     // max_particles_per_cube**2/2 + max_particles_per_cube *
+//     n_neighbour_cubes
 //     // away
 //     for(size_t ab_index=ab_start; ab_index<ab_end; ab_index++) {
 //         auto nb_pair = nb[ab_index];

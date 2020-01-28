@@ -60,7 +60,7 @@ TEST(FloatField, sumABFloatTest) {
     ASSERT_EQ(res[0], 3.0);
     ASSERT_EQ(res[1], 3.0);
 
-    sum_AB_impl(res, n, A(a)*B(a) + A(b)*B(b));
+    sum_AB_impl(res, n, A(a) * B(a) + A(b) * B(b));
 }
 
 TEST(FloatField, sumABVectorTest) {
@@ -71,7 +71,7 @@ TEST(FloatField, sumABVectorTest) {
 
     NeighbourFieldAB n(1, {0, 1});
 
-    VectorField res(2, {0.0,0.0,0.0});
+    VectorField res(2, {0.0, 0.0, 0.0});
 
     sum_AB_impl(res, n, A(a) + B(b));
 
@@ -82,7 +82,6 @@ TEST(FloatField, sumABVectorTest) {
 
     ASSERT_EQ(res[0][0], 3.0); // A(a) - B(a) = 0
     ASSERT_EQ(res[1][0], 3.0);
-
 }
 
 TEST(FloatField, ParenthesisTest) {
@@ -91,10 +90,9 @@ TEST(FloatField, ParenthesisTest) {
     FloatField b(2, 2);
     FloatField c(2, 3);
 
-
     FloatField res(2, 0.0);
 
-    solve(res, (a+b)*c);
+    solve(res, (a + b) * c);
 
     ASSERT_EQ(res[0], 9.0);
     ASSERT_EQ(res[1], 9.0);
@@ -102,17 +100,17 @@ TEST(FloatField, ParenthesisTest) {
 
 TEST(FloatField, aTest) {
 
-    VectorField a(2, {0,0,0});
-    VectorField b(2, {0,0,0});
+    VectorField a(2, {0, 0, 0});
+    VectorField b(2, {0, 0, 0});
 
     NeighbourFieldAB n(1, {0, 1});
 
-    VectorField res_v(2, {0,0,0});
+    VectorField res_v(2, {0, 0, 0});
     FloatField res_f(2, 0);
 
     sum_AB_impl(res_v, n, A(a) + A(b));
-    sum_AB_impl(res_f, n, (a + b)*a);
-    sum_AB_impl(res_f, n, A(a)*A(b) + A(b)*A(b));
+    sum_AB_impl(res_f, n, (a + b) * a);
+    sum_AB_impl(res_f, n, A(a) * A(b) + A(b) * A(b));
 
     ASSERT_EQ(res_f[0], 0.0);
     ASSERT_EQ(res_f[1], 0.0);
@@ -120,14 +118,14 @@ TEST(FloatField, aTest) {
 
 TEST(FloatField, abTest) {
 
-    VectorField a(2, {0,0,0});
-    VectorField b(2, {0,0,0});
-    FloatField  c(2, 0);
+    VectorField a(2, {0, 0, 0});
+    VectorField b(2, {0, 0, 0});
+    FloatField c(2, 0);
 
-    PointField p(2, {0,0,0});
+    PointField p(2, {0, 0, 0});
     NeighbourFieldAB n(1, {0, 1});
 
-    VectorField res_v(2, {0,0,0});
+    VectorField res_v(2, {0, 0, 0});
     FloatField res_f(2, 0);
 
     sum_AB_impl(res_v, n, A(a) + A(b));
@@ -143,9 +141,9 @@ TEST(FloatField, abTest) {
     sum_AB_impl(res_f, n, A(a) * (A(a) + B(b)));
     sum_AB_impl(res_f, n, A(a) * (A(a) + B(a)));
     sum_AB_impl(res_f, n, B(a) * (A(a) + B(a)));
-    sum_AB_impl(res_f, n, B(a) * ab(a)) ;
+    sum_AB_impl(res_f, n, B(a) * ab(a));
     // sum_AB_impl(res_f, n, B(a) * (A(a) - B(a)) + c) ; // fails with gcc
-    sum_AB_impl(res_f, n, B(a) * ab_v(a) + c) ;
+    sum_AB_impl(res_f, n, B(a) * ab_v(a) + c);
     sum_AB_impl(res_f, n, ab_v(b) * ab_v(a) + ab_f(c));
 
     // sum_AB_impl(res_v, n, ab_v(b) * ab_p(p) );
@@ -154,7 +152,6 @@ TEST(FloatField, abTest) {
     // ASSERT_EQ(res[0][0], 0.0);
     // ASSERT_EQ(res[1][0], 0.0);
 }
-
 
 TEST(FloatField, abMacroTest) {
 
@@ -204,7 +201,7 @@ TEST(FloatField, NormFloatFields) {
 
     auto norm = Norm();
 
-    solve(res, norm(a) );
+    solve(res, norm(a));
 
     ASSERT_EQ(res[0], 6.0);
 }
@@ -217,7 +214,7 @@ TEST(FloatField, PowFloatFields) {
 
     auto pow_t = Pow<float>(2.0);
 
-    solve(res, pow_t(a) );
+    solve(res, pow_t(a));
 
     ASSERT_EQ(res[0], 4.0);
 }
@@ -230,13 +227,12 @@ TEST(FloatField, ManualPowFloatFields) {
 
     auto pow_t = Pow<float>(2.0);
 
-    solve(res, a+a);
+    solve(res, a + a);
 
-    solve(res, pow_t(res) );
+    solve(res, pow_t(res));
 
     ASSERT_EQ(res[0], 4.0);
 }
-
 
 // TEST(FloatField, PowFloatFields2) {
 
@@ -283,14 +279,12 @@ TEST(FloatField, PowFloatFieldExpr) {
 
     FloatField res(1, 0.0);
 
-    auto pow = boost::yap::make_terminal( Pow_Wrapper<float>(2.0));
+    auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(2.0));
 
-    solve(res, pow(a+b) );
+    solve(res, pow(a + b));
 
     ASSERT_EQ(res[0], 4.0);
 }
-
-
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

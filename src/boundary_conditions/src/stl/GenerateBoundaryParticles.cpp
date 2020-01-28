@@ -25,8 +25,6 @@
 
 #include "GenerateBoundaryParticles.hpp"
 
-#include "Time.hpp"
-
 GenerateBoundaryParticles::GenerateBoundaryParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ParticleGeneratorBase(model_name, parameter, objReg),
@@ -39,8 +37,7 @@ GenerateBoundaryParticles::GenerateBoundaryParticles(
       nu_(read_or_default_coeff<float>("nu", 1e-05)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       p_0_(read_or_default_coeff<float>("p_0", 1e-05)),
-      dxhratio_(read_or_default_coeff<float>("dxhratio", 1.05))
-{}
+      dxhratio_(read_or_default_coeff<float>("dxhratio", 1.05)) {}
 
 YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node node; // starts out as NULL
@@ -55,19 +52,19 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node generator;
     // Generates the particles at the surface
     generator["GENERATOR"]["model"] = "SPHParticleGenerator";
-    generator["GENERATOR"]["dx"] = dx_/scale_;
+    generator["GENERATOR"]["dx"] = dx_ / scale_;
     generator["GENERATOR"]["id"] = fieldId_;
     node["pre"].push_back(generator);
 
     YAML::Node neighbours;
     // finds the neighbours
     neighbours["PARTICLENEIGHBOURS"]["model"] = "SPHSTLParticleNeighbours";
-    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_/scale_ * dxhratio_;
+    neighbours["PARTICLENEIGHBOURS"]["dx"] = dx_ / scale_ * dxhratio_;
     node["main"].push_back(neighbours);
 
     YAML::Node kernel;
     kernel["KERNEL"]["model"] = "STLWendland2D";
-    kernel["KERNEL"]["h"] = dx_/scale_ * dxhratio_;
+    kernel["KERNEL"]["h"] = dx_ / scale_ * dxhratio_;
     node["main"].push_back(kernel);
 
     YAML::Node conti;
@@ -77,7 +74,7 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
 
     YAML::Node pressure;
     pressure["TRANSPORTEQN"]["model"] = "Pressure";
-    pressure["TRANSPORTEQN"]["rho_0"] = rho_0_ ;
+    pressure["TRANSPORTEQN"]["rho_0"] = rho_0_;
     pressure["TRANSPORTEQN"]["p_0"] = p_0_;
     node["main"].push_back(pressure);
 
@@ -94,7 +91,7 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     integ["TRANSPORTEQN"]["model"] = "STLPosIntegrator";
     node["main"].push_back(integ);
 
-    if (debug()){
+    if (debug()) {
         YAML::Node writer;
         writer["EXPORT"]["model"] = "SuperSPHWriter";
         writer["EXPORT"]["name"] = name_;
@@ -104,7 +101,6 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
 
     return node;
 }
-
 
 void GenerateBoundaryParticles::execute() {
 
@@ -139,8 +135,9 @@ void GenerateBoundaryParticles::execute() {
     // SizeTField &idx = obj_reg.create_idx_field();
 
     // Set particle mass to match rho_0
-    auto& spm = local_objReg_.get_object<Generic<float>>("specific_particle_mass");
-    spm() = spm()*rho_0_;
+    auto &spm =
+        local_objReg_.get_object<Generic<float>>("specific_particle_mass");
+    spm() = spm() * rho_0_;
 
     // Register Models
     for (auto el : node["main"]) {
@@ -159,7 +156,7 @@ void GenerateBoundaryParticles::execute() {
 
     auto &loc_objs = local_objReg_.get_objects();
 
-    auto& pos(local_objReg_.get_object<VectorField>("Pos"));
+    auto &pos(local_objReg_.get_object<VectorField>("Pos"));
 
     scalePoints(pos, scale_);
 

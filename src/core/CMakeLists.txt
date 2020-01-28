@@ -8,6 +8,7 @@ add_library(Core OBJECT)
 
 target_sources(Core
   PRIVATE
+    src/Scalar.cpp
     src/Vec3.cpp
     src/Object.cpp
     src/Field.cpp
@@ -15,15 +16,18 @@ target_sources(Core
     src/Helper.cpp
     src/SearchCubes.cpp
     src/Time.cpp
+    src/Equation.cpp
     src/ObjectRegistry.cpp
     src/cgal/CGALHelper.cpp
   PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Scalar.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Vec3.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Object.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Field.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Models.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Helper.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Time.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Equation.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/SearchCubes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectRegistry.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"

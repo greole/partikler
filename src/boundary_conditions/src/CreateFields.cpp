@@ -21,8 +21,7 @@
 
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg)
-{
+    : Model(model_name, parameter, objReg) {
     if (parameter["FloatFields"]) {
         for (auto p : parameter["FloatFields"])
             float_fields_.push_back(p.as<std::string>());

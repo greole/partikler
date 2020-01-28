@@ -31,9 +31,9 @@
 #include <utility> // for move
 #include <vector>  // for vector<>::iterator, vector
 
-#include "Field.hpp"  // for PointField
-#include "Logger.hpp" // for Logger
-#include "Object.hpp" // for SPHObject, GenericType, SPHObjectType
+#include "Field.hpp"       // for PointField
+#include "Logger.hpp"      // for Logger
+#include "Object.hpp"      // for SPHObject, GenericType, SPHObjectType
 #include "yaml-cpp/yaml.h" // for Node
 
 class ObjectRegistry {
@@ -69,15 +69,12 @@ class ObjectRegistry {
 
     void set_n_particles(size_t n_particles) { n_particles_ = n_particles; }
 
-    void update_n_particles() {
-        n_particles_ = get_pos().size();
-    }
+    void update_n_particles() { n_particles_ = get_pos().size(); }
 
     size_t get_n_particles() {
         update_n_particles();
         return n_particles_;
     }
-
 
     template <class T> T &get_object(const std::string name) {
         for (auto &&f : objects_) {
@@ -86,7 +83,8 @@ class ObjectRegistry {
                 return dynamic_cast<T &>(*f);
             };
         }
-        std::string error_str = "no object " + name + " found in object registry";
+        std::string error_str =
+            "no object " + name + " found in object registry";
         throw std::runtime_error(error_str);
     }
 
@@ -110,13 +108,9 @@ class ObjectRegistry {
         return false;
     }
 
-    PointField &get_points() {
-        return get_object<PointField &>("Points");
-    }
+    PointField &get_points() { return get_object<PointField &>("Points"); }
 
-    VectorField &get_pos() {
-        return get_object<VectorField &>("Pos");
-    }
+    VectorField &get_pos() { return get_object<VectorField &>("Pos"); }
 
     // create an generic with default val
     template <class T> T &create_generic(const std::string name) {

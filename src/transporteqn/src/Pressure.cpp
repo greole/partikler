@@ -35,14 +35,12 @@ Pressure::Pressure(
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
       prefac_(c_ * c_ * rho_0_ / gamma_),
-      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
-      p(f_), dp(df_)
-{}
+      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()), p(f_),
+      dp(df_) {}
 
 void Pressure::execute() {
 
-
-    auto& rho = conti_.get(time_.get_current_timestep());
+    auto &rho = conti_.get(time_.get_current_timestep());
 
     auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(gamma_));
 
@@ -50,7 +48,7 @@ void Pressure::execute() {
 
     log().info_begin() << "Computing pressure";
 
-    solve(p, (prefac_ * (  pow(rho/rho_0_ ) - 1.0) + p_0_));
+    solve(p, (prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_));
 
     log().info_end();
 
@@ -61,13 +59,13 @@ void Pressure::execute() {
     //               *  A<FloatField>(rho) / B<FloatField>(rho)
     //     );
 
-    sum_AB_dW_res(dp, np_, dW_,
-              mp_ * mp_ * (
-                  B<FloatField>(p)/ ( B<FloatField>(rho) * B<FloatField>(rho) )
-                + A<FloatField>(p)/ ( A<FloatField>(rho) * A<FloatField>(rho) )
-                  )
-        );
-
+    sum_AB_dW_res(
+        dp,
+        np_,
+        dW_,
+        mp_ * mp_ *
+            (B<FloatField>(p) / (B<FloatField>(rho) * B<FloatField>(rho)) +
+             A<FloatField>(p) / (A<FloatField>(rho) * A<FloatField>(rho))));
 
     log().info_end();
 

@@ -17,42 +17,9 @@
     contact: go@hpsim.de
 */
 
-#ifndef CONTI_H
-#define CONTI_H
+#ifndef PARTIKLER_SCALAR_INCLUDED_H
+#define PARTIKLER_SCALAR_INCLUDED_H
 
-#include <string> // for string
-
-#include "Field.hpp" // for FloatField, PointField
-#include "FieldOps.hpp"
-#include "Equation.hpp"
-#include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
-#include "SearchCubes.hpp"
-
-class ObjectRegistry;
-namespace YAML {
-class Node;
-} // namespace YAML
-
-class Conti : public FloatFieldEquation {
-
-    REGISTER_DEC_TYPE(Conti);
-
-  private:
-
-    // Coeffs
-    const float lower_limit_;
-
-    const float particle_mass_;
-
-  public:
-    Conti(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg);
-
-    void execute();
-
-
-};
+typedef  float Scalar;
 
 #endif

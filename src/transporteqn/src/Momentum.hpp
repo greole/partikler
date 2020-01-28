@@ -25,6 +25,7 @@
 #include "Field.hpp" // for VectorField
 #include "FieldOps.hpp"
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Equation.hpp"
 #include "Vec3.hpp"
 #include "yaml-cpp/yaml.h"
 
