@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string> // for string, operator<<
 
+#include  "Time.hpp"
 #include "Models.hpp"                          // for TimeGraph, ModelFactory
 #include "Object.hpp"                          // for GenericType
 #include "ObjectRegistry.hpp"                  // for FieldIdMap, ObjectReg...
