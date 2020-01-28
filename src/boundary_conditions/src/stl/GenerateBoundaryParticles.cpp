@@ -96,6 +96,7 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
         YAML::Node writer;
         writer["EXPORT"]["model"] = "SuperSPHWriter";
         writer["EXPORT"]["name"] = name_;
+        writer["EXPORT"]["writeout"] = write_freq_;
         node["main"].push_back(writer);
     }
 
