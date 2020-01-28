@@ -19,6 +19,8 @@
 
 #include "STLPosIntegrator.hpp"
 
+#include "Time.hpp"
+
 STLPosIntegrator::STLPosIntegrator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 

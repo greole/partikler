@@ -19,6 +19,8 @@
 
 #include "SuperSPHWriter.hpp"
 
+#include "Time.hpp"
+
 std::string intToStr(int number) {
     std::stringstream ss; // create a stringstream
     ss << number;         // add number to the stream

@@ -36,6 +36,7 @@
 #include "yaml-cpp/node/node.h"                // for Node
 #include "yaml-cpp/node/parse.h"               // for LoadFile
 
+
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
 // if it doesn't see a call anywere in the executable.
@@ -88,6 +89,8 @@ REGISTER_DEF_TYPE(BOUNDARY, FixedValue);
 
 #include "Cubiod.hpp"
 REGISTER_DEF_TYPE(FIELDS, InitShape);
+
+REGISTER_DEF_TYPE(CORE, TimeGraph);
 #endif
 
 void handler(int sig) {

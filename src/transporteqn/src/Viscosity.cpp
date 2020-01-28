@@ -18,6 +18,8 @@
 */
 #include "Viscosity.hpp"
 
+#include "Time.hpp"
+
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : VectorFieldEquation(

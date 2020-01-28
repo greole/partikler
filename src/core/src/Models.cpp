@@ -111,4 +111,3 @@ ParticleGeneratorBase::read_vector(YAML::Node parameter, std::string coeff) {
 }
 
 REGISTER_DEF_TYPE(CORE, ModelGraph);
-REGISTER_DEF_TYPE(CORE, TimeGraph);

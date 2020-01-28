@@ -19,6 +19,8 @@
 
 #include "Conti.hpp"
 
+#include "Time.hpp"
+
 Conti::Conti(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : FloatFieldEquation(

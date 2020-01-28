@@ -19,6 +19,8 @@
 
 #include "HDF5Writer.hpp"
 
+#include "Time.hpp"
+
 template <class T>
 void HDF5Writer::write_to_disk(T const &data, h5_file_t& fh ) {}
 

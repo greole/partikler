@@ -14,6 +14,7 @@ target_sources(Core
     src/Models.cpp
     src/Helper.cpp
     src/SearchCubes.cpp
+    src/Time.cpp
     src/ObjectRegistry.cpp
     src/cgal/CGALHelper.cpp
   PUBLIC
@@ -22,6 +23,7 @@ target_sources(Core
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Field.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Models.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Helper.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/Time.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/SearchCubes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectRegistry.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"

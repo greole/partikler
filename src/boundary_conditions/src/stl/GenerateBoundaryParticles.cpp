@@ -25,6 +25,8 @@
 
 #include "GenerateBoundaryParticles.hpp"
 
+#include "Time.hpp"
+
 GenerateBoundaryParticles::GenerateBoundaryParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ParticleGeneratorBase(model_name, parameter, objReg),
