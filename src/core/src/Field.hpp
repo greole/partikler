@@ -19,19 +19,14 @@
 #ifndef PARTIKLER_FIELD_INCLUDED
 #define PARTIKLER_FIELD_INCLUDED
 
-#include <boost/yap/expression.hpp>  // for expression
-#include <boost/yap/user_macros.hpp> // for BOOST_YAP_USER_UDT_ANY_BINARY_O...
 #include <boost/yap/yap.hpp>
-#include <iostream> // for operator<<, ostream, basic_ostream
-#include <math.h>
-#include <memory>
 #include <stddef.h>    // for size_t
 #include <string>      // for string, operator<<
 #include <type_traits> // for true_type, false_type
 #include <vector>      // for vector, allocator
 
-#include "Logger.hpp"            // for Logger
 #include "Object.hpp"            // for SPHObject, GetFieldType, FloatF...
+#include "Scalar.hpp"              // for Vec3, VectorPair (ptr only)
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
@@ -77,6 +72,45 @@ struct IOOptions {
     WriteOptions w;
 };
 
+// A derived field to distinguish AB fields from normal fields
+//
+// A FieldAB is an alias to Field, however, using inheritance
+// disallows using Field and FieldAB in binary operators of
+// type operator(T a, T b)
+template <class T> class FieldAB : public T {
+    using F = T;
+    using F::F;
+};
+
+// A Field wrapper for Field<T>
+//
+// This field wrapper allows take_nth to dispatch to
+// different operator() implementations and select correct
+// index
+template <class T> class A {
+private:
+    T &f_;
+
+public:
+    A(T &f) : f_(f) {};
+
+    T &operator()() { return f_; };
+
+    T &operator()() const { return f_; };
+};
+
+template <class T> class B {
+
+private:
+    T &f_;
+
+public:
+    B(T &f) : f_(f) {};
+
+    T &operator()() const { return f_; };
+};
+
+
 template <class T> class Field : public T, public SPHObject {
 
   private:
@@ -117,6 +151,10 @@ template <class T> class Field : public T, public SPHObject {
 
     void set_reorder(bool reorder) { reorder_ = reorder; }
 
+    A<Field<T>> a() {return A(*this);}
+
+    B<Field<T>> b() {return B(*this);}
+
     // reoder the vector by the idx vector
     void reorder(const std::vector<size_t> &idx) {
         // // TODO refactor with better error handling system
@@ -133,44 +171,6 @@ template <class T> class Field : public T, public SPHObject {
     }
 
     std::vector<std::string> get_comp_names() const { return comp_names_; };
-};
-
-// A derived field to distinguish AB fields from normal fields
-//
-// A FieldAB is an alias to Field, however, using inheritance
-// disallows using Field and FieldAB in binary operators of
-// type operator(T a, T b)
-template <class T> class FieldAB : public T {
-    using F = T;
-    using F::F;
-};
-
-// A Field wrapper for Field<T>
-//
-// This field wrapper allows take_nth to dispatch to
-// different operator() implementations and select correct
-// index
-template <class T> class A {
-  private:
-    T &f_;
-
-  public:
-    A(T &f) : f_(f) {};
-
-    T &operator()() { return f_; };
-
-    T &operator()() const { return f_; };
-};
-
-template <class T> class B {
-
-  private:
-    T &f_;
-
-  public:
-    B(T &f) : f_(f) {};
-
-    T &operator()() const { return f_; };
 };
 
 // free function re-oders the vector by the idx vector
@@ -209,7 +209,7 @@ template <typename T> struct zero {};
 
 template <> struct zero<int> { constexpr static int val = 1; };
 
-template <> struct zero<float> { constexpr static float val = 0.0; };
+template <> struct zero<Scalar> { constexpr static Scalar val = 0.0; };
 
 template <> struct zero<Vec3> {
     constexpr static Vec3 val = {{0.0, 0.0, 0.0}};
@@ -281,11 +281,11 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     return os;
 }
 
-using ScalarField = Field<std::vector<float>>;
+using ScalarField = Field<std::vector<Scalar>>;
 using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
 
-using ScalarFieldAB = FieldAB<Field<std::vector<float>>>;
+using ScalarFieldAB = FieldAB<Field<std::vector<Scalar>>>;
 using IntFieldAB = FieldAB<Field<std::vector<int>>>;
 using SizeTFieldAB = FieldAB<Field<std::vector<size_t>>>;
 using KernelGradientField = FieldAB<Field<std::vector<VectorPair>>>;
