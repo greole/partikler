@@ -12,8 +12,20 @@ set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "${default_build_type}")
 endif()
+MESSAGE("Build type: ${CMAKE_BUILD_TYPE}")
 
-MESSAGE("BUILD TYPE ${CMAKE_BUILD_TYPE}")
+set(PRECISION "SINGLEPRECISION" CACHE STRING "Set the precision")
+MESSAGE("Precision: ${PRECISION}")
+
+if(${PRECISION} STREQUAL "DOUBLEPRECISION")
+  set(SINGLEPRESIONVAL 0)
+  set(DOUBLEPRESINVAL 1)
+else ()
+  set(SINGLEPRESIONVAL 1)
+  set(DOUBLEPRESINVAL 0)
+endif()
+
+set(default_build_type "Release")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

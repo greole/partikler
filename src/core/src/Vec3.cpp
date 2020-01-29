@@ -41,32 +41,32 @@ Vec3 &Vec3::operator-=(const Vec3 &x) {
     return *this;
 }
 
-Vec3 &Vec3::operator*=(const float x) {
+Vec3 &Vec3::operator*=(const Scalar x) {
     operator[](0) *= x;
     operator[](1) *= x;
     operator[](2) *= x;
     return *this;
 }
 
-Vec3 operator*(float a, const Vec3 &x) {
+Vec3 operator*(Scalar a, const Vec3 &x) {
     return {{a * x[0], a * x[1], a * x[2]}};
 }
 
-Vec3 operator*(Vec3 &x, float a) { return {{a * x[0], a * x[1], a * x[2]}}; }
+Vec3 operator*(Vec3 &x, Scalar a) { return {{a * x[0], a * x[1], a * x[2]}}; }
 
 // scalar division
-Vec3 operator/(const Vec3 &x, float a) {
-    float ia = 1. / a;
+Vec3 operator/(const Vec3 &x, Scalar a) {
+    Scalar ia = 1. / a;
     return {{ia * x[0], ia * x[1], ia * x[2]}};
 }
 
 // dot product
-float operator*(Vec3 &x, Vec3 &y) {
+Scalar operator*(Vec3 &x, Vec3 &y) {
     return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
 }
 
 // dot product
-float operator*(Vec3 const &x, Vec3 const &y) {
+Scalar operator*(Vec3 const &x, Vec3 const &y) {
     return {x[0] * y[0] + x[1] * y[1] + x[2] * y[2]};
 }
 
@@ -98,7 +98,7 @@ void scalePoints(std::vector<Vec3> &points, Vec3 scale) {
     }
 }
 
-void scalePoints(std::vector<Vec3> &points, float scale) {
+void scalePoints(std::vector<Vec3> &points, Scalar scale) {
     for (size_t i = 0; i < points.size(); i++) {
         points[i] *= scale;
     }

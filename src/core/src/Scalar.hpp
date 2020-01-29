@@ -20,6 +20,12 @@
 #ifndef PARTIKLER_SCALAR_INCLUDED_H
 #define PARTIKLER_SCALAR_INCLUDED_H
 
-typedef  float Scalar;
+#ifdef SINGLEPRECISION
+typedef float Scalar;
+#endif
+#ifdef DOUBLEPRECISION
+typedef double Scalar;
+#endif
+
 
 #endif

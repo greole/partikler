@@ -33,6 +33,11 @@ target_sources(Core
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"
   )
 
+target_compile_definitions(Core
+  PUBLIC
+  SINGLEPRECISION=${SINGLEPRECISIONVAL}
+  SINGLEPRECISION=${DOUBLEPRECISIONVAL}
+  )
 
 target_link_libraries(Core
   PUBLIC
@@ -47,3 +52,4 @@ target_include_directories(Core
   )
 
 add_subdirectory(tests)
+
