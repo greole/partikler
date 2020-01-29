@@ -18,14 +18,14 @@
 */
 
 #ifndef SEARCHCUBES_H
+
 #define SEARCHCUBES_H
 
 #include <omp.h>    // omp_get_num_threads
 #include <stddef.h> // for size_t
 #include <vector>   // for vector
 
-#include "Field.hpp" // for FieldAB
-#include "Logger.hpp"
+// #include "Field.hpp" // for FieldAB
 #include "cgal/CGALHelper.hpp"   // for STLSurfaceDist, Point3D
 #include "cgal/CGALTYPEDEFS.hpp" // for Point, Facet_handle
 
@@ -172,6 +172,13 @@ struct SortedParticles {
 
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
+
+
+template<class A>
+class Field;
+
+template<class A>
+class FieldAB;
 
 using NeighbourFieldAB = FieldAB<Field<std::vector<NeighbourPair>>>;
 #endif

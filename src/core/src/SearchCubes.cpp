@@ -19,6 +19,8 @@
 
 #include "SearchCubes.hpp"
 
+#include "Logger.hpp"           // for MSG, Logger
+
 SearchCubeDomain
 initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
     auto bound_box = bounding_box(particles.begin(), particles.end());
