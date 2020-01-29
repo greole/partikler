@@ -22,9 +22,9 @@
 
 #include <string> // for string
 
-#include "Field.hpp" // for FloatField, VectorField
+#include "Field.hpp" // for ScalarField, VectorField
 #include "FieldOps.hpp"
-#include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
+#include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
 #include "Equation.hpp"
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
@@ -38,14 +38,14 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Pressure : public FloatFieldEquation {
+class Pressure : public ScalarFieldEquation {
 
     REGISTER_DEC_TYPE(Pressure);
 
   private:
     // In
     // Density
-    FloatFieldEquation &conti_;
+    ScalarFieldEquation &conti_;
 
     // Coeffs
     const float c_;
@@ -55,7 +55,7 @@ class Pressure : public FloatFieldEquation {
     const float prefac_;
     const float mp_;
 
-    FloatField &p;
+    ScalarField &p;
     VectorField &dp;
 
   public:

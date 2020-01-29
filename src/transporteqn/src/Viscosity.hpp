@@ -40,7 +40,7 @@ class Viscosity : public VectorFieldEquation {
     REGISTER_DEC_TYPE(Viscosity);
 
   private:
-    FloatFieldEquation &conti_;
+    ScalarFieldEquation &conti_;
 
     // Coeffs
     float nu_;

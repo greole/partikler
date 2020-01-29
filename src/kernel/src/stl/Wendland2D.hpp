@@ -23,7 +23,7 @@
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp"       // for Field (ptr only), FloatField, KernelGradi...
+#include "Field.hpp"       // for Field (ptr only), ScalarField, KernelGradi...
 #include "Models.hpp"      // for Model, ModelRegister (ptr only), REGISTER...
 #include "SearchCubes.hpp" // for NeighbourFieldAB
 #include "cgal/CGALHelper.hpp"
@@ -54,7 +54,7 @@ class STLWendland2D : public Model {
 
     // Out
     // Kernel &kernel                               // Kernel field
-    FloatField &W_;
+    ScalarField &W_;
     KernelGradientField &dWdx_;
 
   public:

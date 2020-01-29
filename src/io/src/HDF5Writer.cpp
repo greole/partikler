@@ -30,7 +30,7 @@ void HDF5Writer::write_to_disk(IntField const &data, h5_file_t &fh) {
 }
 
 template <>
-void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
+void HDF5Writer::write_to_disk(ScalarField const &data, h5_file_t &fh) {
     H5PartWriteDataFloat32(fh, data.get_name().c_str(), &data[0]);
 }
 

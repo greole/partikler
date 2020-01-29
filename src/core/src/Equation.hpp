@@ -32,7 +32,7 @@
 #include <vector>  // for vector
 
 #include "Models.hpp"
-#include "Field.hpp"            // for FloatField, KernelGradientField
+#include "Field.hpp"            // for ScalarField, KernelGradientField
 #include "FieldOps.hpp"         // for sum_AB_impl
 #include "Time.hpp"
 #include "Logger.hpp"           // for MSG, Logger
@@ -60,7 +60,7 @@ template <class T, class U> class FieldEquation : public Model {
 
     NeighbourFieldAB &np_;
 
-    FloatField &W_;
+    ScalarField &W_;
 
     KernelGradientField &dW_;
 
@@ -84,7 +84,7 @@ template <class T, class U> class FieldEquation : public Model {
         : Model(field_name, parameter, objReg),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          W_(objReg.get_object<FloatField>("KernelW")),
+          W_(objReg.get_object<ScalarField>("KernelW")),
           dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f),
           df_(objReg.create_field<VectorField>(
               "d" + f_.get_name(),
@@ -96,18 +96,18 @@ template <class T, class U> class FieldEquation : public Model {
     // get result for iteration i
     // if result is not cached solve gets executed
 
-    FloatField &W() { return W_; };
+    ScalarField &W() { return W_; };
 
     NeighbourFieldAB &N() { return np_; };
 
     KernelGradientField &dWdx() { return dW_; };
 
-    FloatField &sum_AB(float particle_mass) {
+    ScalarField &sum_AB(float particle_mass) {
         sum_AB_impl(particle_mass, f_, np_, W_);
         return f_;
     };
 
-    template <class RHS> FloatField &sum_AB(RHS rhs) {
+    template <class RHS> ScalarField &sum_AB(RHS rhs) {
         sum_AB_impl(f_, np_, rhs * W_);
         return f_;
     }
@@ -156,7 +156,7 @@ template <class T, class U> class FieldEquation : public Model {
     }
 };
 
-using FloatFieldEquation = FieldEquation<FloatField, VectorField>;
+using ScalarFieldEquation = FieldEquation<ScalarField, VectorField>;
 using VectorFieldEquation = FieldEquation<VectorField, VectorField>;
 
 #endif

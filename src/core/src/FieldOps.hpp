@@ -111,7 +111,7 @@ template <class T, class I> T solve(I terminal) {
 // {
 //     std::cout << __PRETTY_FUNCTION__ << std::endl;
 //     decltype(auto) expr = boost::yap::as_expr(e);
-//     FloatField tmp(elems,0);
+//     ScalarField tmp(elems,0);
 //     solve(tmp, expr);
 //     std::cout << tmp << std::endl;
 //     auto pow_impl = Pow<float>(exponent);

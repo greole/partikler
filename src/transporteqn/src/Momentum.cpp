@@ -29,7 +29,7 @@ Momentum::Momentum(
           model_name, parameter, objReg, objReg.get_object<VectorField>("u")),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       tau_(objReg.get_object<VectorFieldEquation>("Viscosity")),
-      p_(objReg.get_object<FloatFieldEquation>("Pressure")) {}
+      p_(objReg.get_object<ScalarFieldEquation>("Pressure")) {}
 
 void Momentum::execute() {
 
@@ -37,7 +37,7 @@ void Momentum::execute() {
 
     int it = time_.get_current_timestep();
 
-    FloatField &rho = conti_.get(time_.get_current_timestep());
+    ScalarField &rho = conti_.get(time_.get_current_timestep());
 
     solve(df_, tau_.get(it) / rho - p_.get_dx(it) / rho);
 

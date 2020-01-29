@@ -42,25 +42,25 @@ void Viscosity::execute() {
     log().info_begin() << "Computing dnu";
 
     // auto& u = momentum_.get();
-    FloatField &rho = conti_.get(time_.get_current_timestep());
+    ScalarField &rho = conti_.get(time_.get_current_timestep());
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
     sum_AB_dW_res(df_, np_, dW_,
         mp_* 10.* rho * nu_ *  (ab_v(u_) * ab_v(pos_))
       / (
-          ( A<FloatField>(rho) + B<FloatField>(rho) )
+          ( A<ScalarField>(rho) + B<ScalarField>(rho) )
           * ( normSqr(ab_v(pos_)) )
           )
         );
 
     // const VectorField dxp = particle_distance_vec(pos_, np_);
 
-    // // const SPHFloatField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
+    // // const SPHScalarField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
 
-    // // const SPHFloatField tmp = tmp0*tmp1;
+    // // const SPHScalarField tmp = tmp0*tmp1;
 
-    // const FloatField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
+    // const ScalarField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
 
     // // TODO Reset
     // dnu_.set(Vector {0,0,0});

@@ -23,7 +23,7 @@
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp"  // for Field (ptr only), FloatField, PointField
+#include "Field.hpp"  // for Field (ptr only), ScalarField, PointField
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
 #include "cgal/CGALHelper.hpp"
@@ -57,7 +57,7 @@ class Wendland : public Model {
 
     // Out
     // Kernel &kernel                               // Kernel field
-    FloatField &W_;
+    ScalarField &W_;
     Field<std::vector<Vec3>> &dWdx_;
 
   public:

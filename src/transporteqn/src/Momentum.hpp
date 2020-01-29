@@ -40,9 +40,9 @@ class Momentum : public VectorFieldEquation {
 
   private:
     // In
-    FloatFieldEquation &conti_;
+    ScalarFieldEquation &conti_;
     VectorFieldEquation &tau_;
-    FloatFieldEquation &p_;
+    ScalarFieldEquation &p_;
 
     // Out
     // VectorField &u_;

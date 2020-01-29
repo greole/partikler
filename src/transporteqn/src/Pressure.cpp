@@ -24,11 +24,11 @@
 Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : FloatFieldEquation(
+    : ScalarFieldEquation(
           model_name,
           parameter,
           objReg,
-          objReg.create_field<FloatField>("p", 10000)),
+          objReg.create_field<ScalarField>("p", 10000)),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       c_(read_or_default_coeff<float>("c", 300.0)),
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
@@ -55,8 +55,8 @@ void Pressure::execute() {
     log().info_begin() << "Computing gradient";
 
     // sum_AB_dW_res(dp, np_, dW_,
-    //           mp_ * ( A<FloatField>(p) + B<FloatField>(p) )
-    //               *  A<FloatField>(rho) / B<FloatField>(rho)
+    //           mp_ * ( A<ScalarField>(p) + B<ScalarField>(p) )
+    //               *  A<ScalarField>(rho) / B<ScalarField>(rho)
     //     );
 
     sum_AB_dW_res(
@@ -64,8 +64,8 @@ void Pressure::execute() {
         np_,
         dW_,
         mp_ * mp_ *
-            (B<FloatField>(p) / (B<FloatField>(rho) * B<FloatField>(rho)) +
-             A<FloatField>(p) / (A<FloatField>(rho) * A<FloatField>(rho))));
+            (B<ScalarField>(p) / (B<ScalarField>(rho) * B<ScalarField>(rho)) +
+             A<ScalarField>(p) / (A<ScalarField>(rho) * A<ScalarField>(rho))));
 
     log().info_end();
 

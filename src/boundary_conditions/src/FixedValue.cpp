@@ -42,7 +42,7 @@ void FixedValue::execute() {
         for (auto boundary : field.second) {
             int fieldId = fieldIdMap_.getId(boundary.first);
 
-            auto &target = get_objReg().get_object<FloatField>(field.first);
+            auto &target = get_objReg().get_object<ScalarField>(field.first);
             std::cout << target.get_name() << target.size() << std::endl;
             for (size_t idx = 0; idx < target.size(); idx++) {
                 if (boundary_id_[idx] == fieldId) {

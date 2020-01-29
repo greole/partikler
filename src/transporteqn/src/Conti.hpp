@@ -22,10 +22,10 @@
 
 #include <string> // for string
 
-#include "Field.hpp" // for FloatField, PointField
+#include "Field.hpp" // for ScalarField, PointField
 #include "FieldOps.hpp"
 #include "Equation.hpp"
-#include "Models.hpp" // for FloatFieldEquation, ModelRegister (ptr only)
+#include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
 #include "SearchCubes.hpp"
 
 class ObjectRegistry;
@@ -33,7 +33,7 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Conti : public FloatFieldEquation {
+class Conti : public ScalarFieldEquation {
 
     REGISTER_DEC_TYPE(Conti);
 

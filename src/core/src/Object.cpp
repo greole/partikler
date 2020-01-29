@@ -27,8 +27,8 @@ std::string sphObjectType_to_string(SPHObjectType t) {
         return "IntFieldType";
     case (SizeTFieldType):
         return "SizeTFieldType";
-    case (FloatFieldType):
-        return "FloatFieldType";
+    case (ScalarFieldType):
+        return "ScalarFieldType";
     case (VectorFieldType):
         return "VectorFieldType";
     case (PointFieldType):

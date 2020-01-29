@@ -4,11 +4,11 @@
 #include "gtest/gtest.h"
 #include <vector>
 
-TEST(FloatField, reoderVector) {
+TEST(ScalarField, reoderVector) {
 
     std::vector<size_t> idx {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
-    FloatField v(10, 0.0);
+    ScalarField v(10, 0.0);
 
     for (size_t i = 0; i < idx.size(); i++) {
         v[i] = float(i);
@@ -21,11 +21,11 @@ TEST(FloatField, reoderVector) {
     }
 }
 
-TEST(FloatField, copyStdVector) {
+TEST(ScalarField, copyStdVector) {
 
     std::vector<float> a(2, 2.0);
 
-    FloatField res(2, 0.0);
+    ScalarField res(2, 0.0);
 
     res = a;
 
@@ -33,11 +33,11 @@ TEST(FloatField, copyStdVector) {
     ASSERT_EQ(res[1], 2.0);
 }
 
-TEST(FloatField, eagerCopy) {
+TEST(ScalarField, eagerCopy) {
 
-    FloatField a(2, 2.0);
+    ScalarField a(2, 2.0);
 
-    FloatField res(2, 0.0);
+    ScalarField res(2, 0.0);
 
     res = a;
 
@@ -45,15 +45,15 @@ TEST(FloatField, eagerCopy) {
     ASSERT_EQ(res[1], 2.0);
 }
 
-TEST(FloatField, sumABFloatTest) {
+TEST(ScalarField, sumABFloatTest) {
 
-    FloatField a(2, 1.0);
+    ScalarField a(2, 1.0);
 
-    FloatField b(2, 2.0);
+    ScalarField b(2, 2.0);
 
     NeighbourFieldAB n(1, {0, 1});
 
-    FloatField res(2, 0.0);
+    ScalarField res(2, 0.0);
 
     sum_AB_impl(res, n, A(a) + B(b));
 
@@ -63,7 +63,7 @@ TEST(FloatField, sumABFloatTest) {
     sum_AB_impl(res, n, A(a) * B(a) + A(b) * B(b));
 }
 
-TEST(FloatField, sumABVectorTest) {
+TEST(ScalarField, sumABVectorTest) {
 
     VectorField a(2, {1.0, 0, 0});
 
@@ -84,13 +84,13 @@ TEST(FloatField, sumABVectorTest) {
     ASSERT_EQ(res[1][0], 3.0);
 }
 
-TEST(FloatField, ParenthesisTest) {
+TEST(ScalarField, ParenthesisTest) {
 
-    FloatField a(2, 1);
-    FloatField b(2, 2);
-    FloatField c(2, 3);
+    ScalarField a(2, 1);
+    ScalarField b(2, 2);
+    ScalarField c(2, 3);
 
-    FloatField res(2, 0.0);
+    ScalarField res(2, 0.0);
 
     solve(res, (a + b) * c);
 
@@ -98,7 +98,7 @@ TEST(FloatField, ParenthesisTest) {
     ASSERT_EQ(res[1], 9.0);
 }
 
-TEST(FloatField, aTest) {
+TEST(ScalarField, aTest) {
 
     VectorField a(2, {0, 0, 0});
     VectorField b(2, {0, 0, 0});
@@ -106,7 +106,7 @@ TEST(FloatField, aTest) {
     NeighbourFieldAB n(1, {0, 1});
 
     VectorField res_v(2, {0, 0, 0});
-    FloatField res_f(2, 0);
+    ScalarField res_f(2, 0);
 
     sum_AB_impl(res_v, n, A(a) + A(b));
     sum_AB_impl(res_f, n, (a + b) * a);
@@ -116,17 +116,17 @@ TEST(FloatField, aTest) {
     ASSERT_EQ(res_f[1], 0.0);
 }
 
-TEST(FloatField, abTest) {
+TEST(ScalarField, abTest) {
 
     VectorField a(2, {0, 0, 0});
     VectorField b(2, {0, 0, 0});
-    FloatField c(2, 0);
+    ScalarField c(2, 0);
 
     PointField p(2, {0, 0, 0});
     NeighbourFieldAB n(1, {0, 1});
 
     VectorField res_v(2, {0, 0, 0});
-    FloatField res_f(2, 0);
+    ScalarField res_f(2, 0);
 
     sum_AB_impl(res_v, n, A(a) + A(b));
     sum_AB_impl(res_v, n, A(a) + (A(a) + A(b)));
@@ -153,13 +153,13 @@ TEST(FloatField, abTest) {
     // ASSERT_EQ(res[1][0], 0.0);
 }
 
-TEST(FloatField, abMacroTest) {
+TEST(ScalarField, abMacroTest) {
 
-    FloatField a(2, 1.0);
+    ScalarField a(2, 1.0);
 
     NeighbourFieldAB n(1, {0, 1});
 
-    FloatField res(2, 0.0);
+    ScalarField res(2, 0.0);
 
     sum_AB_impl(res, n, ab(a));
 
@@ -167,37 +167,37 @@ TEST(FloatField, abMacroTest) {
     ASSERT_EQ(res[1], 0.0);
 }
 
-TEST(FloatField, ComplexArithmeticFields) {
+TEST(ScalarField, ComplexArithmeticFields) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField b(1, 2.0);
+    ScalarField b(1, 2.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     solve(res, (a + b) / b);
 
     ASSERT_EQ(res[0], 1.5);
 }
 
-TEST(FloatField, MultFloatFields) {
+TEST(ScalarField, MultScalarFields) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField b(1, 2.0);
+    ScalarField b(1, 2.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     solve(res, a * b);
 
     ASSERT_EQ(res[0], 2.0);
 }
 
-TEST(FloatField, NormFloatFields) {
+TEST(ScalarField, NormScalarFields) {
 
     VectorField a(1, {4.0, 4.0, 2.0});
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     auto norm = Norm();
 
@@ -206,11 +206,11 @@ TEST(FloatField, NormFloatFields) {
     ASSERT_EQ(res[0], 6.0);
 }
 
-TEST(FloatField, PowFloatFields) {
+TEST(ScalarField, PowScalarFields) {
 
-    FloatField a(1, 2.0);
+    ScalarField a(1, 2.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     auto pow_t = Pow<float>(2.0);
 
@@ -219,11 +219,11 @@ TEST(FloatField, PowFloatFields) {
     ASSERT_EQ(res[0], 4.0);
 }
 
-TEST(FloatField, ManualPowFloatFields) {
+TEST(ScalarField, ManualPowScalarFields) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     auto pow_t = Pow<float>(2.0);
 
@@ -234,11 +234,11 @@ TEST(FloatField, ManualPowFloatFields) {
     ASSERT_EQ(res[0], 4.0);
 }
 
-// TEST(FloatField, PowFloatFields2) {
+// TEST(ScalarField, PowScalarFields2) {
 
-//     FloatField a(1, 2.0);
+//     ScalarField a(1, 2.0);
 
-//     FloatField res(1, 0.0);
+//     ScalarField res(1, 0.0);
 
 //     // auto pow = Pow<float>(2.0);
 
@@ -247,37 +247,37 @@ TEST(FloatField, ManualPowFloatFields) {
 //     ASSERT_EQ(res[0], 4.0);
 // }
 
-TEST(FloatField, AddFloatFields) {
+TEST(ScalarField, AddScalarFields) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField b(1, 2.0);
+    ScalarField b(1, 2.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     solve(res, a + b);
 
     ASSERT_EQ(res[0], 3.0);
 }
 
-TEST(FloatField, AddScalarToFloatFields) {
+TEST(ScalarField, AddScalarToScalarFields) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     solve(res, a + 1.0);
 
     ASSERT_EQ(res[0], 2.0);
 }
 
-TEST(FloatField, PowFloatFieldExpr) {
+TEST(ScalarField, PowScalarFieldExpr) {
 
-    FloatField a(1, 1.0);
+    ScalarField a(1, 1.0);
 
-    FloatField b(1, 1.0);
+    ScalarField b(1, 1.0);
 
-    FloatField res(1, 0.0);
+    ScalarField res(1, 0.0);
 
     auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(2.0));
 

@@ -76,7 +76,7 @@ std::string field_type_to_str(SPHObjectType t) {
         return "int";
     case (SizeTFieldType):
         return "long";
-    // case (FloatFieldType):
+    // case (ScalarFieldType):
     //     return "float";
     // case (PointFieldType):
     //     return "float";

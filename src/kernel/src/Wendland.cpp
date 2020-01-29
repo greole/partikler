@@ -32,7 +32,7 @@ Wendland::Wendland(
       pos_(objReg.get_points()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
-      W_(objReg.create_field<FloatField>("KernelW")),
+      W_(objReg.create_field<ScalarField>("KernelW")),
       dWdx_(objReg.create_field<Field<std::vector<Vec3>>>("KerneldWdx")) {}
 
 void Wendland::execute() {

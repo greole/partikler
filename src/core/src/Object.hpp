@@ -37,7 +37,7 @@ enum SPHObjectType {
     FieldType,
     IntFieldType,
     SizeTFieldType,
-    FloatFieldType,
+    ScalarFieldType,
     VectorFieldType,
     PointFieldType,
     KernelGradientFieldType,
@@ -51,7 +51,7 @@ template <class T> struct GetFieldType {
 };
 
 template <> struct GetFieldType<std::vector<float>> {
-    constexpr static SPHObjectType value = FloatFieldType;
+    constexpr static SPHObjectType value = ScalarFieldType;
 };
 
 template <> struct GetFieldType<std::vector<int>> {

@@ -31,7 +31,7 @@
 #include <utility> // for move, pair, make_pair
 #include <vector>  // for vector
 
-#include "Field.hpp"            // for FloatField, KernelGradientField
+#include "Field.hpp"            // for ScalarField, KernelGradientField
 #include "FieldOps.hpp"         // for sum_AB_impl
 #include "Logger.hpp"           // for MSG, Logger
 #include "Object.hpp"           // for SPHObject, ModelType

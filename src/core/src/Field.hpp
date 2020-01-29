@@ -39,7 +39,7 @@
 #define ab_v(field) (A<VectorField>(field) - B<VectorField>(field))
 // #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) -
 // B<Field<std::vector<CGALVector>>>(field) )
-#define ab_f(field) (A<FloatField>(field) - B<FloatField>(field))
+#define ab_f(field) (A<ScalarField>(field) - B<ScalarField>(field))
 #define ab_p(field) (A<PointField>(field) - B<PointField>(field))
 
 // Dynamically dispatches func based on its kind
@@ -52,9 +52,9 @@
         func<SizeTField>(                                                      \
             dynamic_cast<SizeTField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
-    case FloatFieldType:                                                       \
-        func<FloatField>(                                                      \
-            dynamic_cast<FloatField &>(*obj->get()), __VA_ARGS__);             \
+    case ScalarFieldType:                                                       \
+        func<ScalarField>(                                                      \
+            dynamic_cast<ScalarField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
     case VectorFieldType:                                                      \
         func<VectorField>(                                                     \
@@ -281,11 +281,11 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     return os;
 }
 
-using FloatField = Field<std::vector<float>>;
+using ScalarField = Field<std::vector<float>>;
 using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
 
-using FloatFieldAB = FieldAB<Field<std::vector<float>>>;
+using ScalarFieldAB = FieldAB<Field<std::vector<float>>>;
 using IntFieldAB = FieldAB<Field<std::vector<int>>>;
 using SizeTFieldAB = FieldAB<Field<std::vector<size_t>>>;
 using KernelGradientField = FieldAB<Field<std::vector<VectorPair>>>;
@@ -302,6 +302,6 @@ VectorField &operator-=(VectorField &a, VectorField &b);
 // Template meta function to get SPHObjectType from std::vector<T>
 template <enum SPHObjectType T> struct GetField {};
 
-template <> struct GetField<FloatFieldType> { using type = FloatField; };
+template <> struct GetField<ScalarFieldType> { using type = ScalarField; };
 
 #endif

@@ -28,7 +28,7 @@ STLWendland2D::STLWendland2D(
       np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
       sd_(objReg.get_object<Field<std::vector<STLSurfaceDist>>>(
           "surface_dist")),
-      W_(objReg.create_field<FloatField>("KernelW")),
+      W_(objReg.create_field<ScalarField>("KernelW")),
       dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {}
 
 void STLWendland2D::execute() {
