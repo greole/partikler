@@ -35,7 +35,6 @@
 #include "FieldOps.hpp"         // for sum_AB_impl
 #include "Logger.hpp"           // for MSG, Logger
 #include "Object.hpp"           // for SPHObject, ModelType
-#include "SearchCubes.hpp"      // for NeighbourFieldAB
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
