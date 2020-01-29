@@ -7,9 +7,11 @@ add_dependencies(Geometry IO Core)
 target_sources(Geometry
   PRIVATE
     src/stl/STLLimitedDx.cpp
+    src/ParticleGeneratorBase.cpp
     src/Cubiod.cpp
   PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/stl/STLLimitedDx.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ParticleGeneratorBase.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Cubiod.hpp"
   )
 

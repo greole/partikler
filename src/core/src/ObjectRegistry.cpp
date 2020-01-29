@@ -18,3 +18,30 @@
 */
 
 #include "ObjectRegistry.hpp"
+
+
+bool ObjectRegistry::object_exists(const std::string name) const {
+    for (auto &&f : objects_) {
+        if (f->get_name() == name) {
+            return true;
+        };
+    }
+
+    return false;
+}
+
+int FieldIdMap::getId(const std::string name) {
+    for (size_t i = 0; i < fields_.size(); i++) {
+        if (name == fields_[i]) return i;
+    }
+    std::string error_str = "no field " + name + " found in fieldIdMap";
+    throw std::runtime_error(error_str);
+}
+
+int FieldIdMap::append(std::string field_name) {
+    int id = fields_.size();
+    fields_.push_back(field_name);
+    return id;
+}
+
+

@@ -31,6 +31,7 @@
 #include "cgal/CGALTYPEDEFS.hpp" // for CGALPolyhedron, Facet_handle
 
 class ObjectRegistry;
+
 namespace YAML {
 class Node;
 } // namespace YAML

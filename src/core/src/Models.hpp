@@ -35,11 +35,10 @@
 #include "FieldOps.hpp"         // for sum_AB_impl
 #include "Logger.hpp"           // for MSG, Logger
 #include "Object.hpp"           // for SPHObject, ModelType
-#include "ObjectRegistry.hpp"   // for ObjectRegistry
 #include "SearchCubes.hpp"      // for NeighbourFieldAB
-#include "yaml-cpp/node/impl.h" // for Node::~Node, Node::Node, Node::as
-#include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
+
+class ObjectRegistry;
 
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
 
@@ -169,79 +168,4 @@ class ModelGraph : public Model {
 // Base Class for particle generating models
 // handles creation of local object registry
 // and transferring
-class ParticleGeneratorBase : public Model {
-
-  protected:
-    FieldIdMap &fieldIdMap_;
-
-    ObjectRegistry local_objReg_;
-
-    PointField &points_;
-
-    VectorField &pos_;
-
-    IntField &id_;
-
-    std::string name_;
-
-    int fieldId_;
-
-    float dx_;
-
-    Vec3 translation_vector_;
-
-  public:
-    ParticleGeneratorBase(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg);
-
-    Vec3 read_vector(YAML::Node parameter, std::string coeff);
-
-    template <class T> void append(T &, std::string name) {
-        auto &oreg = get_objReg();
-        field_append(
-            oreg.get_object<T>(name), local_objReg_.get_object<T>(name));
-    }
-
-    virtual void execute() {};
-
-    void post_execute() {
-
-        logger_.info_begin() << "Translate: " << translation_vector_;
-
-        translatePoints(pos_, translation_vector_);
-
-        logger_.info_end();
-
-        // Transfer particles to main object registry
-        // Here only the position and the boundary id and type id
-        // need to be transferred
-        logger_.info_begin() << "Transfering ";
-
-        // TODO transfer the Vec3 version of Pos
-        auto &oreg = get_objReg();
-        if (oreg.object_exists("Pos")) {
-            append(pos_, "Pos");
-        } else {
-            // Move the object if it doesn't exist in the main registry yet
-            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
-        }
-
-        id_.reserve(pos_.size());
-        for (size_t i = 0; i < pos_.size(); i++) {
-            id_.push_back(fieldId_);
-        }
-
-        if (oreg.object_exists("id")) {
-            append(id_, "id");
-        } else {
-            // Move the object if it doesn't exist in the main registry yet
-            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("id"));
-        }
-
-        get_objReg().update_n_particles();
-        logger_.info_end();
-    };
-};
 #endif

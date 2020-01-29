@@ -19,6 +19,8 @@
 
 #include "ParticleNeighbours.hpp"
 
+#include "ObjectRegistry.hpp"
+
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg), dx_(parameter["dx"].as<float>()),

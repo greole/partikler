@@ -19,6 +19,8 @@
 
 #include "ParticleGenerator.hpp"
 
+#include "ObjectRegistry.hpp"   // for ObjectRegistry
+
 SPHSTLReader::SPHSTLReader(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),

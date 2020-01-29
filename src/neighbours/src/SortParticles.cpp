@@ -19,6 +19,8 @@
 
 #include "SortParticles.hpp"
 
+#include "ObjectRegistry.hpp"
+
 CountingSortParticles::CountingSortParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg), pos_(objReg.get_points()),

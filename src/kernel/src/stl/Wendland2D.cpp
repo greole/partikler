@@ -19,6 +19,8 @@
 
 #include "Wendland2D.hpp"
 
+#include "ObjectRegistry.hpp"
+
 STLWendland2D::STLWendland2D(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),

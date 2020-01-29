@@ -19,6 +19,8 @@
 
 #include "Wendland.hpp"
 
+#include "ObjectRegistry.hpp"
+
 // TODO Implement 2d and 3d kernel by deriving from base class
 
 Wendland::Wendland(

@@ -25,6 +25,7 @@
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+#include "ParticleGeneratorBase.hpp"
 
 class InitShape : public ParticleGeneratorBase {
 

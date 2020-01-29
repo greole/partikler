@@ -30,8 +30,8 @@
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
-#define ab(field) (A(field) - B(field))
-#define ab_v(field) (A<VectorField>(field) - B<VectorField>(field))
+#define ab(field) (field.a() - field.b())
+#define ab_v(field) (ab(field))
 // #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) -
 // B<Field<std::vector<CGALVector>>>(field) )
 #define ab_f(field) (A<ScalarField>(field) - B<ScalarField>(field))

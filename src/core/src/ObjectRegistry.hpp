@@ -89,6 +89,7 @@ class ObjectRegistry {
     }
 
     // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
+
     auto get_object_ptr(const std::string name) {
         return std::find_if(
             objects_.begin(), objects_.end(), [&](const auto &val) {
@@ -98,15 +99,7 @@ class ObjectRegistry {
 
     ObjReg &get_objects() { return objects_; }
 
-    bool object_exists(const std::string name) const {
-        for (auto &&f : objects_) {
-            if (f->get_name() == name) {
-                return true;
-            };
-        }
-
-        return false;
-    }
+    bool object_exists(const std::string name) const;
 
     PointField &get_points() { return get_object<PointField &>("Points"); }
 
@@ -171,19 +164,9 @@ class FieldIdMap : public SPHObject {
         : SPHObject(name, type), fields_({}) {};
 
     // get field id from name string
-    int getId(const std::string name) {
-        for (size_t i = 0; i < fields_.size(); i++) {
-            if (name == fields_[i]) return i;
-        }
-        std::string error_str = "no field " + name + " found in fieldIdMap";
-        throw std::runtime_error(error_str);
-    }
+    int getId(const std::string name);
 
-    int append(std::string field_name) {
-        int id = fields_.size();
-        fields_.push_back(field_name);
-        return id;
-    };
+    int append(std::string field_name);
 };
 
 #endif
