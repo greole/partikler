@@ -20,6 +20,7 @@
 #include "ParticleGenerator.hpp"
 
 #include "ObjectRegistry.hpp"   // for ObjectRegistry
+#include "Scalar.hpp"
 
 SPHSTLReader::SPHSTLReader(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -109,8 +110,8 @@ void SPHParticleGenerator::execute() {
     float volume = surface_area * dx_;
     log().info_end() << "Total Surface Area" << surface_area;
 
-    get_objReg().register_object<Generic<float>>(
-        std::make_unique<Generic<float>>(
+    get_objReg().register_object<Generic<Scalar>>(
+        std::make_unique<Generic<Scalar>>(
             "specific_particle_mass", GenericType, volume / n));
 
     for (size_t i = 0; i < (n - n_0); i++) {
