@@ -27,7 +27,7 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
     const std::vector<Facet_handle> facets(points.size(), NULL);
 
     // TODO needs facets, create facets with test data
-    owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);
+    stl_owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);
 
     // Should find at least some neighbours
     ASSERT_GT(ret.size(), 0);
@@ -97,7 +97,7 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
     // Assume all particles on same facet
     const std::vector<Facet_handle> facets(points.size(), NULL);
 
-    neighbour_cube_search(
+    stl_neighbour_cube_search(
         points,
         0,
         tot_n_particles,
@@ -161,7 +161,7 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
 
     const SearchCubeDomain scd = initSearchCubeDomain(points, 0.25);
 
-    SortedParticles sp = countingSortParticles(scd, points);
+    STLSortedParticles sp = countingSortParticles(scd, points);
 
     // Assume all particles on same facet
     const std::vector<Facet_handle> facets(points.size(), NULL);
