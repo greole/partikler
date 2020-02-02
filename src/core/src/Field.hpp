@@ -174,9 +174,22 @@ template <class T> class Field : public T, public SPHObject {
 };
 
 // free function re-oders the vector by the idx vector
+// if it is anything ie generic or models do nothing
+// partial template specialisation takes care of the fields
 template <class T>
-void reorder_vector(std::vector<T> &vec, const std::vector<size_t> &idxs) {
-    std::vector<T> tmp(vec.size());
+void reorder_vector(Field<T> &vec, const std::vector<size_t> &idxs) {
+    T tmp(vec.size());
+    for (size_t i = 0; i < idxs.size(); i++) {
+        tmp[idxs[i]] = vec[i];
+    }
+
+    vec = tmp;
+}
+
+template <class T>
+void reorder_vector(
+    std::vector<typename T::value_type> &vec, const std::vector<size_t> &idxs) {
+    std::vector<typename T::value_type> tmp(vec.size());
 
     for (size_t i = 0; i < idxs.size(); i++) {
         tmp[idxs[i]] = vec[i];
@@ -281,19 +294,29 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     return os;
 }
 
+// Kind tag to distinguish between symmetric kernels
+// ie dW between particle a and b is -dW between b and a
+// and non-symmetric kernels as used for the stl surfaces
+// where a rotation between surfaces could be necessary
+enum KernelGradientType {Symmetric, NonSymmetric};
+
+using FloatField = Field<std::vector<float>>;
+using DoubleField = Field<std::vector<double>>;
 using ScalarField = Field<std::vector<Scalar>>;
 using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
+using VectorField = Field<std::vector<Vec3>>;
+using DoubleVectorField = Field<std::vector<VectorPair>>;
+using PointField = Field<std::vector<Point>>;
 
-using ScalarFieldAB = FieldAB<Field<std::vector<Scalar>>>;
-using IntFieldAB = FieldAB<Field<std::vector<int>>>;
-using SizeTFieldAB = FieldAB<Field<std::vector<size_t>>>;
-using KernelGradientField = FieldAB<Field<std::vector<VectorPair>>>;
+using ScalarFieldAB = FieldAB<ScalarField>;
+using VectorFieldAB = FieldAB<Field<std::vector<Vec3>>>;
+using IntFieldAB = FieldAB<IntField>;
+using SizeTFieldAB = FieldAB<SizeTField>;
+using KernelGradientField = FieldAB<VectorField>;
+using DoubleKernelGradientField = FieldAB<DoubleVectorField>;
 
 using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
-
-using VectorField = Field<std::vector<Vec3>>;
-using PointField = Field<std::vector<Point>>;
 
 PointField &operator+=(PointField &a, VectorField &b);
 VectorField &operator+=(VectorField &a, VectorField &b);
