@@ -37,6 +37,7 @@
 #include "yaml-cpp/node/node.h"                // for Node
 #include "yaml-cpp/node/parse.h"               // for LoadFile
 
+#include "Scalar.hpp"
 
 // Currently under ubuntu the gcc compiler optimises
 // the register to call to the model register away
@@ -50,9 +51,11 @@ REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
 #include "stl/Wendland2D.hpp"
 
 REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
+#include "stl/STLParticleNeighbours.hpp"
 #include "ParticleNeighbours.hpp"
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
+REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHParticleNeighbours);
 #include "SortParticles.hpp"
 
 REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
@@ -151,6 +154,11 @@ int main(int argc, char *argv[]) {
 
     ObjectRegistry obj_reg {};
 
+    obj_reg.register_object<Generic<Scalar>>(
+        std::make_unique<Generic<Scalar>>(
+            "specific_particle_mass", GenericType, 1.0));
+
+
     TimeGraph &timeGraph = obj_reg.register_object<TimeGraph>(
         std::make_unique<TimeGraph>("TimeGraph", config["PROJECT"], obj_reg));
 
@@ -187,6 +195,8 @@ int main(int argc, char *argv[]) {
 
         auto model = ModelFactory::createInstance(
             model_namespace, model_name, model_name, params, obj_reg);
+
+
 
         timeGraph.push_back_main(model);
     }
