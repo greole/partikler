@@ -59,13 +59,9 @@ void Pressure::execute() {
     //               *  A<ScalarField>(rho) / B<ScalarField>(rho)
     //     );
 
-    sum_AB_dW_res(
-        dp,
-        np_,
-        dW_,
+    sum_AB_dW(
         mp_ * mp_ *
-            (B<ScalarField>(p) / (B<ScalarField>(rho) * B<ScalarField>(rho)) +
-             A<ScalarField>(p) / (A<ScalarField>(rho) * A<ScalarField>(rho))));
+            (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
 
     log().info_end();
 
