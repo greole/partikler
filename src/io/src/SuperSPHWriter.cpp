@@ -20,6 +20,7 @@
 #include "SuperSPHWriter.hpp"
 
 #include "Time.hpp"
+#include "Scalar.hpp"
 
 std::string intToStr(int number) {
     std::stringstream ss; // create a stringstream
@@ -96,7 +97,6 @@ void write_to_disk_impl(
 
     std::string filename =
         path + "/" + name + "." + field_type_to_str(type) + "32";
-    std::cout << name << data.size() << std::endl;
     std::ofstream fh;
     fh.open(filename.c_str());
     fh.write(
@@ -116,30 +116,17 @@ void SuperSPHWriter::write_to_disk(T const &data, const std::string path) {
 //     write_to_disk_impl(data, path, data.get_name(), data.get_type());
 // }
 
-// TODO use SFINAE here
 template <>
 void SuperSPHWriter::write_to_disk<PointField>(
-    const PointField &data, const std::string path) {
+    const PointField &data, const std::string path) {}
 
-    size_t j = 0;
-    for (std::string comp : data.get_comp_names()) {
-        std::vector<float> buffer(data.size());
-        for (size_t i = 0; i < data.size(); i++) {
-            buffer[i] = data[i][j];
-        }
-        write_to_disk_impl(buffer, path, comp, data.get_type());
-        j++;
-    }
-}
-
-// TODO use SFINAE here
 template <>
 void SuperSPHWriter::write_to_disk<VectorField>(
     const VectorField &data, const std::string path) {
 
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
-        std::vector<float> buffer(data.size());
+        std::vector<Scalar> buffer(data.size());
         for (size_t i = 0; i < data.size(); i++) {
             buffer[i] = data[i][j];
         }
@@ -155,7 +142,6 @@ SuperSPHWriter::SuperSPHWriter(
 
 void SuperSPHWriter::execute() {
 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
