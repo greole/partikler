@@ -20,7 +20,7 @@
 #include "CreateFields.hpp"
 
 #include "ObjectRegistry.hpp"
-
+#include "Field.hpp"  // for PointField
 
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
