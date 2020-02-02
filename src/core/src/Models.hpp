@@ -37,12 +37,28 @@
 #include "Object.hpp"           // for SPHObject, ModelType
 #include "yaml-cpp/yaml.h"
 
+#include "Scalar.hpp"
+#include "Vec3.hpp"
+
 class ObjectRegistry;
 
 #define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
 
 #define REGISTER_DEF_TYPE(CLASS, NAME)                                         \
     ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME)
+
+template <class T>
+T read_coeff_impl(YAML::Node const &parameter, std::string coeff_name) {
+    T coeff = parameter[coeff_name].as<T>();
+    return coeff;
+}
+
+template <class T>
+T read_or_default_coeff_impl(
+    YAML::Node const &parameter, std::string coeff_name, T default_val) {
+    if (parameter[coeff_name]) return read_coeff_impl<T>(parameter, coeff_name);
+    return default_val;
+}
 
 // Abstract base class for Models
 class Model : public SPHObject {
@@ -64,7 +80,7 @@ class Model : public SPHObject {
     YAML::Node get_parameter() { return parameter_; }
 
     template <class T> T read_coeff(std::string coeff_name) {
-        T coeff = parameter_[coeff_name].as<T>();
+        T coeff = read_coeff_impl<T>(parameter_, coeff_name);
         log().info() << "Reading coefficient " << coeff_name << " " << coeff;
         return coeff;
     }
@@ -76,6 +92,24 @@ class Model : public SPHObject {
                      << default_val;
         return default_val;
     }
+
+    Vec3 read_vec3(std::string coeff_name) {
+        Scalar x  = parameter_[coeff_name][0].as<Scalar>();
+        Scalar y  = parameter_[coeff_name][1].as<Scalar>();
+        Scalar z  = parameter_[coeff_name][2].as<Scalar>();
+        Vec3 ret {x, y, z};
+        log().info() << "Reading coefficient " << coeff_name << " " << ret;
+        return ret;
+    }
+
+
+    Vec3 read_or_default_vec3(std::string coeff_name, Vec3 default_val) {
+        if (parameter_[coeff_name]) return read_vec3(coeff_name);
+        log().info() << "Using default coefficient " << coeff_name << " "
+                     << default_val;
+        return default_val;
+    }
+
 
     ObjectRegistry &get_objReg() { return objReg_; };
 
