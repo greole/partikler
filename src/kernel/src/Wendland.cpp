@@ -29,13 +29,13 @@ Wendland::Wendland(
     ObjectRegistry &objReg,
     float hfact)
     : Model(model_name, parameter, objReg),
-      h_(read_or_default_coeff<float>("h", 1.0)), ih_(1.0 / h_),
+      h_(read_or_default_coeff<Scalar>("h", 1.0)), ih_(1.0 / h_),
       W_fak2_(hfact / (h_ * h_)), dW_fak2_(hfact / (h_ * h_ * h_)),
-      pos_(objReg.get_points()),
+      pos_(objReg.get_pos()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<ScalarField>("KernelW")),
-      dWdx_(objReg.create_field<Field<std::vector<Vec3>>>("KerneldWdx")) {}
+      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {}
 
 void Wendland::execute() {
 
@@ -52,15 +52,15 @@ void Wendland::execute() {
 
         auto [oid, nid] = np_[pid];
 
-        const Point &opos = pos_[oid];
-        const Point &npos = pos_[nid];
+        Vec3 const &opos = pos_[oid];
+        Vec3 const &npos = pos_[nid];
 
         // auto [len, lenVo, lenVn] = sd_[pid];
 
         const auto len = opos - npos;
-        const float maglen = std::sqrt(len.squared_length());
+        Scalar const maglen = std::sqrt(squared_length(len));
 
-        const float q {maglen * ih_};
+        const Scalar q {maglen * ih_};
 
         if (q > 2.) {
             log().warn() << "Outside kernel radius";
@@ -69,19 +69,19 @@ void Wendland::execute() {
             continue;
         }
 
-        const float q3 = (q - 2.);
-        const float qfac2 = q3 * q3;
-        const float qfac4 = qfac2 * qfac2;
+        const Scalar q3 = (q - 2.);
+        const Scalar qfac2 = q3 * q3;
+        const Scalar qfac4 = qfac2 * qfac2;
 
-        float q2 = 2. * q;
+        Scalar q2 = 2. * q;
         q2 += 1.;
 
         W_[pid] = qfac4 * q2 * W_fak2_;
 
-        const float prefact = 10. * qfac2 * q * dW_fak2_;
+        const Scalar prefact = 10. * qfac2 * q * dW_fak2_;
         if (maglen > 0.0) {
             for (int j = 0; j < 3; j++) {
-                dWdx_[pid][j] = (float)len[j] / maglen * prefact;
+                dWdx_[pid][j] = (Scalar)len[j] / maglen * prefact;
             }
         } else {
             for (int j = 0; j < 3; j++) {
@@ -104,7 +104,7 @@ Wendland3D::Wendland3D(
           model_name,
           parameter,
           objReg,
-          21. / (256. * read_or_default_coeff<float>("h", 1.0))) {}
+          21. / (256. * read_or_default_coeff_impl<Scalar>(parameter, "h", 1.0))) {}
 
 REGISTER_DEF_TYPE(KERNEL, Wendland2D);
 REGISTER_DEF_TYPE(KERNEL, Wendland3D);

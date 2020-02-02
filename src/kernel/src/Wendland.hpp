@@ -29,6 +29,8 @@
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "Scalar.hpp"
+
 class ObjectRegistry;
 namespace YAML {
 class Node;
@@ -40,8 +42,8 @@ class Wendland : public Model {
 
   private:
     // Coeffs
-    const float h_;  // Smoothing length
-    const float ih_; // Inverse Smoothing length
+    const Scalar h_;  // Smoothing length
+    const Scalar ih_; // Inverse Smoothing length
     // // 3d
     // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
     // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
@@ -50,7 +52,7 @@ class Wendland : public Model {
     const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
 
     // In
-    const PointField &pos_; // Particle positions
+    const VectorField &pos_; // Particle positions
 
     const Field<std::vector<NeighbourPair>> &np_;
     // const Field<STLSurfaceDist> &sd_;
