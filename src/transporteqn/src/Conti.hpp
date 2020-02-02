@@ -27,6 +27,7 @@
 #include "Equation.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
 #include "SearchCubes.hpp"
+#include "Scalar.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -40,9 +41,13 @@ class Conti : public ScalarFieldEquation {
   private:
 
     // Coeffs
-    const float lower_limit_;
+    const Scalar rho_0_;
 
-    const float particle_mass_;
+    const Scalar lower_limit_;
+
+    const Scalar dx_;
+
+    Scalar mp_;
 
   public:
     Conti(

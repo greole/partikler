@@ -20,6 +20,7 @@
 #include "Conti.hpp"
 
 #include "Time.hpp"
+#include <math.h>
 
 Conti::Conti(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -28,39 +29,33 @@ Conti::Conti(
           parameter,
           objReg,
           objReg.create_field<ScalarField>("rho", 0.0)),
-      lower_limit_(read_or_default_coeff<float>("lower_limit", 0.0)),
-      particle_mass_(
-          objReg.get_object<Generic<float>>("specific_particle_mass")()) {}
+      rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
+      lower_limit_(read_or_default_coeff<Scalar>("lower_limit", 0.0)),
+      dx_(read_or_default_coeff<Scalar>("dx", 1.0)),
+      mp_(
+          objReg.get_object<Generic<Scalar>>("specific_particle_mass")()
+          ) {
+
+    log().info_begin() << "Updating specific particle mass";
+
+    Scalar pi = (Scalar) M_PI;
+    Scalar r= dx_/2.0;
+    mp_ = rho_0_*4.0/3.0*r*r*r*pi;
+
+    log().info_end();
+}
 
 void Conti::execute() {
 
+
     log().info_begin() << "Computing density";
-
-    // auto rho = set(rho_, 0.0).weighted_sum();
-
-    // auto rho_eqn = sum_AB(rho_.size(), np_, W_);
-
-    // solve(rho_, rho_eqn);
-
-    // rho_.set_uniform(0.0);
-
-    // rho_.weighted_sum(np_, W_);
-
-    // rho_.lower_limit(lower_limit_);
-
-    // log().info_end();
-
-    // auto rho_eqn = boost::yap::make_terminal(
-    //     sum_ab<float>(rho_.size(), np_, W_)
-    //     );
-
-    // rho_ = solve<floatfield>(rho_eqn);
 
     // TODO needs lazy reset of rho_;
     for (auto &el : f_) {
         el = 0;
     }
-    sum_AB(particle_mass_);
+
+    m_sum_AB(mp_);
     // TODO do it lazily
     for (auto &el : f_) {
         if (el < lower_limit_) {
