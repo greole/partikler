@@ -69,7 +69,11 @@ class TimeGraph : public Model {
     void execute_main() {
         // TODO register some kind of call back
         while (current_timestep_ < iterations_) {
+
+            log().info_begin() << "Start Timestep " << current_timestep_;
+
             main_.execute();
+            log().info_end() << "Timestep " << current_timestep_;
             // TODO dont write via objReg, write via Writer SubModel
             // get_objReg().write_to_disk(current_timestep_, name_);
             current_timestep_++;
