@@ -78,7 +78,7 @@ TEST(ScalarField, sumABVectorTest) {
     ASSERT_EQ(res[0][0], 3.0);
     ASSERT_EQ(res[1][0], 3.0);
 
-    sum_AB_impl(res, n, ab_v(a));
+    sum_AB_impl(res, n, ab(a));
 
     ASSERT_EQ(res[0][0], 3.0); // A(a) - B(a) = 0
     ASSERT_EQ(res[1][0], 3.0);
