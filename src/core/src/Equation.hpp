@@ -53,7 +53,43 @@
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
 
-template <class T, class U> class FieldEquation : public Model {
+// class EmptyFieldEquation {
+
+// };
+
+template <class FieldGradientType> class FieldGradientEquation {
+
+  protected:
+    FieldGradientType &df_;
+
+  public:
+    typedef FieldGradientType value_type;
+
+    template <class FieldType>
+    FieldGradientEquation(ObjectRegistry &objReg, FieldType &f)
+        : df_(objReg.create_field<FieldGradientType>(
+              "d" + f.get_name(),
+              zero<typename FieldGradientType::value_type>::val,
+              {"dx" + f.get_name(),
+               "dy" + f.get_name(),
+               "dz" + f.get_name()})) {}
+};
+
+template <class FieldType> class FieldValueEquation {
+
+  protected:
+    FieldType &f_;
+
+  public:
+    typedef FieldType value_type;
+
+    FieldValueEquation(ObjectRegistry &objReg, FieldType &f) : f_(f) {};
+};
+
+template <class FieldValueType, class FieldGradientType>
+class FieldEquationBase : public Model,
+                          public FieldValueType,
+                          public FieldGradientType {
 
   protected:
     TimeGraph &time_;
@@ -62,36 +98,34 @@ template <class T, class U> class FieldEquation : public Model {
 
     ScalarField &W_;
 
-    KernelGradientField &dW_;
-
-    T &f_;
-
-    // decltype(gradient_type<T>::type) &ddxf_; // TODO compute type
-    U &df_;
-
     // store previous results
-    std::map<int, T> prev_;
+    // std::map<int, T> prev_;
 
     // the current iteraton
     int iteration_;
 
   public:
-    FieldEquation(
+    KernelGradientType kernelGradientType_;
+
+    template<class FieldType>
+    FieldEquationBase(
         const std::string &field_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        T &f)
+        FieldType &f
+        )
         : Model(field_name, parameter, objReg),
+          FieldValueType(objReg, f),
+          FieldGradientType(objReg, f),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
           W_(objReg.get_object<ScalarField>("KernelW")),
-          dW_(objReg.get_object<KernelGradientField>("KerneldWdx")), f_(f),
-          df_(objReg.create_field<VectorField>(
-              "d" + f_.get_name(),
-              zero<VectorField::value_type>::val,
-              {"dx" + f_.get_name(),
-               "dy" + f_.get_name(),
-               "dz" + f_.get_name()})) {};
+          // TODO refactor kernelGradientType to FieldGradientType
+          kernelGradientType_(
+              (read_or_default_coeff_impl<std::string>(
+                   parameter, "KernelType", "Symmetric") == "Symmetric")
+                  ? KernelGradientType::Symmetric
+                  : KernelGradientType::NonSymmetric) {}
 
     // get result for iteration i
     // if result is not cached solve gets executed
@@ -100,17 +134,34 @@ template <class T, class U> class FieldEquation : public Model {
 
     NeighbourFieldAB &N() { return np_; };
 
-    KernelGradientField &dWdx() { return dW_; };
+    template <class Expr>
+    typename FieldGradientType::value_type &sum_AB_dW(Expr const &e) {
+        // dispatch on KernelGradientType
+        if (kernelGradientType_ == KernelGradientType::Symmetric) {
+            auto &dW =
+                get_objReg().get_object<KernelGradientField>("KerneldWdx");
+            decltype(auto) expr = boost::yap::as_expr(e);
+            sum_AB_dW_res_impl(this->df_, np_, dW, expr);
+        } else {
+            auto &dW = get_objReg().get_object<DoubleKernelGradientField>(
+                "KerneldWdx");
+            decltype(auto) expr = boost::yap::as_expr(e);
+            sum_AB_dW_res_impl(this->df_, np_, dW, expr);
+        }
 
-    ScalarField &sum_AB(float particle_mass) {
-        sum_AB_impl(particle_mass, f_, np_, W_);
-        return f_;
+        return this->df_;
+    }
+
+    template <class RHS> typename FieldValueType::value_type &sum_AB(RHS rhs) {
+        sum_AB_impl(this->f_, np_, rhs * W_);
+        return this->f_;
+    }
+
+    typename FieldValueType::value_type &m_sum_AB(float particle_mass) {
+        sum_AB_impl(particle_mass, this->f_, np_, W_);
+        return this->f_;
     };
 
-    template <class RHS> ScalarField &sum_AB(RHS rhs) {
-        sum_AB_impl(f_, np_, rhs * W_);
-        return f_;
-    }
 
     // VectorField& ddx() {
     // };
@@ -131,32 +182,42 @@ template <class T, class U> class FieldEquation : public Model {
     // get the result for the given iteration
     // if iteration is larger then cached iteration
     // equation is solved
-    T &get(int iteration) {
+    typename FieldValueType::value_type &get(int iteration) {
         if (iteration == iteration_) {
             std::cout << get_name()
                       << "DEBUG using cached solution for iteration "
                       << iteration << std::endl;
-            return f_;
+            return this->f_;
         } else {
             this->execute();
-            return f_;
+            return this->f_;
         }
     }
 
-    U &get_dx(int iteration) {
+    typename FieldGradientType::value_type &get_dx(int iteration) {
         if (iteration == iteration_) {
             std::cout << get_name()
                       << "DEBUG using cached solution for iteration "
                       << iteration << std::endl;
-            return df_;
+            return this->df_;
         } else {
             this->execute();
-            return df_;
+            return this->df_;
         }
     }
 };
 
-using ScalarFieldEquation = FieldEquation<ScalarField, VectorField>;
-using VectorFieldEquation = FieldEquation<VectorField, VectorField>;
+using ScalarFieldEquation = FieldEquationBase<
+    FieldValueEquation<ScalarField>,
+    FieldGradientEquation<VectorField>>;
+
+using VectorFieldEquation = FieldEquationBase<
+    FieldValueEquation<VectorField>,
+    FieldGradientEquation<VectorField>>;
+
+// TODO implement this
+// using ABVectorFieldEquation =
+//         FieldEquation<VectorFieldAB, VectorFieldAB>;
+
 
 #endif
