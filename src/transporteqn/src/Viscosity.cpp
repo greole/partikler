@@ -35,7 +35,8 @@ Viscosity::Viscosity(
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
       mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
-      pos_(objReg.get_object<VectorField>("Pos")) {}
+      pos_(objReg.get_object<VectorField>("Pos"))
+{}
 
 void Viscosity::execute() {
 
@@ -46,40 +47,11 @@ void Viscosity::execute() {
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
-    sum_AB_dW_res(df_, np_, dW_,
-        mp_* 10.* rho * nu_ *  (ab_v(u_) * ab_v(pos_))
-      / (
-          ( A<ScalarField>(rho) + B<ScalarField>(rho) )
-          * ( normSqr(ab_v(pos_)) )
-          )
+    sum_AB_dW(
+        mp_* 10.* rho * nu_ *  (ab(u_) * ab(pos_))
+      / ( ( rho.a() + rho.b() ) * ( normSqr(ab(pos_)) ) )
         );
-
-    // const VectorField dxp = particle_distance_vec(pos_, np_);
-
-    // // const SPHScalarField tmp1 = (u.sub_ab(pn) * dxp) / dxp.norm();
-
-    // // const SPHScalarField tmp = tmp0*tmp1;
-
-    // const ScalarField tmp = (u_.sub_ab(np_) * dxp)/dxp.norm();
-
-    // // TODO Reset
-    // dnu_.set(Vector {0,0,0});
-
-    // // weighted sum
-    // const size_t size = pn.ids.size();
-    // for (size_t i = 0; i < size; i++) {
-    //     size_t ownId = pn.ids[i].ownId;
-    //     size_t neighId = pn.ids[i].neighId;
-
-    //     for (int j = 0; j < 3; j++) {
-    //         dnu[ownId][j]   -= tmp[i]  * kernel.dWdxo[i][j];
-    //         dnu[neighId][j] -= tmp[i]  * kernel.dWdxn[i][j];
-    //     }
-    // }
-
-    // dnu_.weighted_sum(np_, tmp, dW_);
-
-    // dnu_ *= nu_;
+    // clang-format on
 
     log().info_end();
     iteration_ = time_.get_current_timestep();
