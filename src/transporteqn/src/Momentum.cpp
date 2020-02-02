@@ -26,10 +26,17 @@ Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : VectorFieldEquation(
-          model_name, parameter, objReg, objReg.get_object<VectorField>("u")),
+          model_name,
+          parameter,
+          objReg,
+          objReg.create_field<VectorField>(
+              "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       tau_(objReg.get_object<VectorFieldEquation>("Viscosity")),
-      p_(objReg.get_object<ScalarFieldEquation>("Pressure")) {}
+      p_(objReg.get_object<ScalarFieldEquation>("Pressure")),
+      g_(objReg.get_object<VectorFieldEquation>("Gravity")),
+      fc_(objReg.get_object<VectorFieldEquation>("CohesionAkinci"))
+{}
 
 void Momentum::execute() {
 
@@ -39,37 +46,15 @@ void Momentum::execute() {
 
     ScalarField &rho = conti_.get(time_.get_current_timestep());
 
-    solve(df_, tau_.get(it) / rho - p_.get_dx(it) / rho);
+    solve(df_, tau_.get(it) / rho - p_.get_dx(it) / rho + g_.get(it) + fc_.get(it));
 
     log().info_end();
 
     log().info_begin() << "Computing velocity";
 
-    // TODO implement time integrator
-    // u_ = u_/1.3;
-
-    // CFL = max(u)*deltaT/dx
-
-    // float maxU = u_.norm().get_max();
-
-    // std::cout << "maxU"
-    //           << maxU
-    //           << "deltaT" <<  time_().deltaT
-    //           << "maxCFL"
-    //           << maxU * time_().deltaT /
-    //                  std::any_cast<float>(get_runTime().get_dict("dx"))
-    //           << std::endl;
-
-    // std::cout << du_ << std::endl;
-    // std::cout << du_*time_().deltaT << std::endl;
-    // std::cout << u_ << std::endl;
-
-    // f_ += solve(f_, f_+(df_ * time_.get_deltaT()));
-
-    // solve(f_, f_+(df_ * time_.get_deltaT()));
 
     for (size_t i = 0; i < f_.size(); i++) {
-        f_[i] = f_[i] / 1.3;
+        // f_[i] = f_[i] / 1.3;
         f_[i] += df_[i] * time_.get_deltaT();
     }
 

@@ -34,19 +34,17 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Momentum : public VectorFieldEquation {
+class Momentum: public VectorFieldEquation {
 
-    REGISTER_DEC_TYPE(Momentum);
+  REGISTER_DEC_TYPE(Momentum);
 
-  private:
+  protected:
     // In
     ScalarFieldEquation &conti_;
     VectorFieldEquation &tau_;
     ScalarFieldEquation &p_;
-
-    // Out
-    // VectorField &u_;
-    // VectorField &du_;
+    VectorFieldEquation &g_;
+    VectorFieldEquation &fc_;
 
   public:
     Momentum(
