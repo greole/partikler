@@ -35,8 +35,7 @@ Viscosity::Viscosity(
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
       mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
-      pos_(objReg.get_object<VectorField>("Pos"))
-{}
+      pos_(objReg.get_object<VectorField>("Pos")) {}
 
 void Viscosity::execute() {
 

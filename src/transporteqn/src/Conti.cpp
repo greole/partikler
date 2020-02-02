@@ -32,21 +32,18 @@ Conti::Conti(
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
       lower_limit_(read_or_default_coeff<Scalar>("lower_limit", 0.0)),
       dx_(read_or_default_coeff<Scalar>("dx", 1.0)),
-      mp_(
-          objReg.get_object<Generic<Scalar>>("specific_particle_mass")()
-          ) {
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {
 
     log().info_begin() << "Updating specific particle mass";
 
-    Scalar pi = (Scalar) M_PI;
-    Scalar r= dx_/2.0;
-    mp_ = rho_0_*4.0/3.0*r*r*r*pi;
+    Scalar pi = (Scalar)M_PI;
+    Scalar r = dx_ / 2.0;
+    mp_ = rho_0_ * 4.0 / 3.0 * r * r * r * pi;
 
     log().info_end();
 }
 
 void Conti::execute() {
-
 
     log().info_begin() << "Computing density";
 

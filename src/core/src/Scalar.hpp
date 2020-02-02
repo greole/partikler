@@ -27,5 +27,4 @@ typedef float Scalar;
 typedef double Scalar;
 #endif
 
-
 #endif

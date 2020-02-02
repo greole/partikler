@@ -26,7 +26,7 @@
 #include <vector>      // for vector, allocator
 
 #include "Object.hpp"            // for SPHObject, GetFieldType, FloatF...
-#include "Scalar.hpp"              // for Vec3, VectorPair (ptr only)
+#include "Scalar.hpp"            // for Vec3, VectorPair (ptr only)
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 #include "cgal/CGALTYPEDEFS.hpp" // for Point
 
@@ -47,9 +47,9 @@
         func<SizeTField>(                                                      \
             dynamic_cast<SizeTField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
-    case ScalarFieldType:                                                       \
-        func<ScalarField>(                                                      \
-            dynamic_cast<ScalarField &>(*obj->get()), __VA_ARGS__);             \
+    case ScalarFieldType:                                                      \
+        func<ScalarField>(                                                     \
+            dynamic_cast<ScalarField &>(*obj->get()), __VA_ARGS__);            \
         break;                                                                 \
     case VectorFieldType:                                                      \
         func<VectorField>(                                                     \
@@ -88,10 +88,10 @@ template <class T> class FieldAB : public T {
 // different operator() implementations and select correct
 // index
 template <class T> class A {
-private:
+  private:
     T &f_;
 
-public:
+  public:
     A(T &f) : f_(f) {};
 
     T &operator()() { return f_; };
@@ -101,15 +101,14 @@ public:
 
 template <class T> class B {
 
-private:
+  private:
     T &f_;
 
-public:
+  public:
     B(T &f) : f_(f) {};
 
     T &operator()() const { return f_; };
 };
-
 
 template <class T> class Field : public T, public SPHObject {
 
@@ -151,9 +150,9 @@ template <class T> class Field : public T, public SPHObject {
 
     void set_reorder(bool reorder) { reorder_ = reorder; }
 
-    A<Field<T>> a() {return A(*this);}
+    A<Field<T>> a() { return A(*this); }
 
-    B<Field<T>> b() {return B(*this);}
+    B<Field<T>> b() { return B(*this); }
 
     // reoder the vector by the idx vector
     void reorder(const std::vector<size_t> &idx) {
@@ -298,7 +297,7 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
 // ie dW between particle a and b is -dW between b and a
 // and non-symmetric kernels as used for the stl surfaces
 // where a rotation between surfaces could be necessary
-enum KernelGradientType {Symmetric, NonSymmetric};
+enum KernelGradientType { Symmetric, NonSymmetric };
 
 using FloatField = Field<std::vector<float>>;
 using DoubleField = Field<std::vector<double>>;

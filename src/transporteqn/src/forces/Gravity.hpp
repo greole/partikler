@@ -22,9 +22,9 @@
 
 #include <string> // for string
 
+#include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, PointField
 #include "FieldOps.hpp"
-#include "Equation.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
 #include "SearchCubes.hpp"
 
@@ -38,7 +38,6 @@ class Gravity : public VectorFieldEquation {
     REGISTER_DEC_TYPE(Gravity);
 
   private:
-
     // Coeffs
     const Vec3 gravity_;
 
@@ -49,8 +48,6 @@ class Gravity : public VectorFieldEquation {
         ObjectRegistry &objReg);
 
     void execute();
-
-
 };
 
 #endif

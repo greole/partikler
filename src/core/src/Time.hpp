@@ -56,7 +56,6 @@ class TimeGraph : public Model {
     bool iter_mode = false;
 
   public:
-
     TimeGraph(
         const std::string &model_name,
         YAML::Node parameter,

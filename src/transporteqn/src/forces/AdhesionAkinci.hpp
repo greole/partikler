@@ -22,12 +22,12 @@
 
 #include <string> // for string
 
+#include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, PointField
 #include "FieldOps.hpp"
-#include "Equation.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
-#include "SearchCubes.hpp"
 #include "Scalar.hpp"
+#include "SearchCubes.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -39,7 +39,6 @@ class CohesionAkinci : public VectorFieldEquation {
     REGISTER_DEC_TYPE(CohesionAkinci);
 
   private:
-
     ScalarFieldEquation &conti_;
 
     Scalar mp_;
@@ -52,7 +51,6 @@ class CohesionAkinci : public VectorFieldEquation {
 
     VectorField &pos_; // Particle positions
 
-
   public:
     CohesionAkinci(
         const std::string &model_name,
@@ -60,8 +58,6 @@ class CohesionAkinci : public VectorFieldEquation {
         ObjectRegistry &objReg);
 
     void execute();
-
-
 };
 
 #endif

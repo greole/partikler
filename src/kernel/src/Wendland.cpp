@@ -104,7 +104,8 @@ Wendland3D::Wendland3D(
           model_name,
           parameter,
           objReg,
-          21. / (256. * read_or_default_coeff_impl<Scalar>(parameter, "h", 1.0))) {}
+          21. / (256. *
+                 read_or_default_coeff_impl<Scalar>(parameter, "h", 1.0))) {}
 
 REGISTER_DEF_TYPE(KERNEL, Wendland2D);
 REGISTER_DEF_TYPE(KERNEL, Wendland3D);

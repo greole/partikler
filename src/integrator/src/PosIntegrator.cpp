@@ -43,7 +43,7 @@ void PosIntegrator::execute() {
             u_[i][1] = 0.0;
             u_[i][2] = 0.0;
         }
-        dx[i] =  u_[i] * time_.get_deltaT();
+        dx[i] = u_[i] * time_.get_deltaT();
     }
 
     pos_ += dx;

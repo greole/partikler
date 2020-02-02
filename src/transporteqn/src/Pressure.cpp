@@ -61,7 +61,7 @@ void Pressure::execute() {
 
     sum_AB_dW(
         mp_ * mp_ *
-            (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
+        (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
 
     log().info_end();
 

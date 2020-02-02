@@ -22,12 +22,12 @@
 
 #include <string> // for string
 
+#include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, PointField
 #include "FieldOps.hpp"
-#include "Equation.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
-#include "SearchCubes.hpp"
 #include "Scalar.hpp"
+#include "SearchCubes.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -39,7 +39,6 @@ class Conti : public ScalarFieldEquation {
     REGISTER_DEC_TYPE(Conti);
 
   private:
-
     // Coeffs
     const Scalar rho_0_;
 
@@ -56,8 +55,6 @@ class Conti : public ScalarFieldEquation {
         ObjectRegistry &objReg);
 
     void execute();
-
-
 };
 
 #endif

@@ -18,11 +18,8 @@
 */
 #include "Time.hpp"
 
-TimeGraph::TimeGraph
-(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg)
+TimeGraph::TimeGraph(
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
       init_(ModelGraph("pre", parameter, objReg)),
       main_(ModelGraph("main", parameter, objReg)),

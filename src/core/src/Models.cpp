@@ -19,7 +19,7 @@
 
 #include "Models.hpp"
 
-#include "ObjectRegistry.hpp"   // for ObjectRegistry
+#include "ObjectRegistry.hpp" // for ObjectRegistry
 
 Model::Model(
     const std::string name, YAML::Node parameter, ObjectRegistry &objReg)

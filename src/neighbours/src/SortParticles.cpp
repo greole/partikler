@@ -64,7 +64,6 @@ void CountingSortParticles::reorder_fields() {
         auto type = f->get_type();
         std::shared_ptr<SPHObject> *obj_ptr = &f;
         DISPATCH(obj_ptr, reorder_vector, type, si_);
-
     }
 
     log().info_end();
@@ -112,7 +111,6 @@ void CountingSortParticlesVec3::reorder_fields() {
         auto type = f->get_type();
         std::shared_ptr<SPHObject> *obj_ptr = &f;
         DISPATCH(obj_ptr, reorder_vector, type, si_);
-
     }
 
     log().info_end();

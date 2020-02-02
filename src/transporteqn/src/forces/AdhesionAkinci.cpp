@@ -19,8 +19,8 @@
 
 #include "AdhesionAkinci.hpp"
 
-#include "Time.hpp"
 #include "Conti.hpp"
+#include "Time.hpp"
 #include <math.h>
 
 struct SplineFunc {
@@ -28,22 +28,22 @@ struct SplineFunc {
     Scalar operator()(Scalar r) {
         Scalar ret;
 
-        Scalar h2 = h*h;
-        Scalar h3 = h2*h;
-        Scalar h6 = h3*h3;
-        Scalar h9 = h6*h3;
+        Scalar h2 = h * h;
+        Scalar h3 = h2 * h;
+        Scalar h6 = h3 * h3;
+        Scalar h9 = h6 * h3;
 
-        Scalar pi = (Scalar) M_PI;
+        Scalar pi = (Scalar)M_PI;
 
-        if ( 2.0*r > h && r <= h) {
-            ret = (h-r)*(h-r)*(h-r)*r*r*r;
+        if (2.0 * r > h && r <= h) {
+            ret = (h - r) * (h - r) * (h - r) * r * r * r;
 
-            return 32.0/pi*h9*ret;
+            return 32.0 / pi * h9 * ret;
         }
-        if ( r > 0 && 2*r <= h) {
-            ret = 2.0*(h-r)*(h-r)*(h-r)*r*r*r-h6/64.0;
+        if (r > 0 && 2 * r <= h) {
+            ret = 2.0 * (h - r) * (h - r) * (h - r) * r * r * r - h6 / 64.0;
 
-            return 32.0/pi*h9*ret;
+            return 32.0 / pi * h9 * ret;
         }
 
         return 0.0;
@@ -52,46 +52,41 @@ struct SplineFunc {
     Scalar h;
 };
 
-
 CohesionAkinci::CohesionAkinci(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : VectorFieldEquation(
           model_name,
           parameter,
           objReg,
-          objReg.create_field<VectorField>("fCohesion", {}, {"fCx", "fCy", "fCz"} )),
+          objReg.create_field<VectorField>(
+              "fCohesion", {}, {"fCx", "fCy", "fCz"})),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
       h_(read_or_default_coeff<Scalar>("h_", 1.0)),
       n_(objReg.create_field<VectorField>("normal", {}, {"nx", "ny", "nz"})),
-      pos_(objReg.get_object<VectorField>("Pos"))
-{}
+      pos_(objReg.get_object<VectorField>("Pos")) {}
 
 void CohesionAkinci::execute() {
-
 
     log().info_begin() << "Computing surface normals";
     ScalarField &rho = conti_.get(time_.get_current_timestep());
 
-    auto& dW = get_objReg().get_object<KernelGradientField>("KerneldWdx");
-    sum_AB_dW_res_impl(n_, np_, dW, mp_/rho.b() );
+    auto &dW = get_objReg().get_object<KernelGradientField>("KerneldWdx");
+    sum_AB_dW_res_impl(n_, np_, dW, mp_ / rho.b());
     log().info_end();
 
     log().info_begin() << "Computing coehesive forces";
     iteration_ = time_.get_current_timestep();
 
-    Scalar gamma = -1.0*gamma_;
+    Scalar gamma = -1.0 * gamma_;
 
     auto norm = boost::yap::make_terminal(Norm_Wrapper());
     auto C = boost::yap::make_terminal(SplineFunc(h_));
 
     sum_AB(
-        mp_*mp_*gamma * C(norm(ab(pos_))) * ab(pos_) / norm(ab(pos_))
-        + mp_ *  gamma * ab(n_)
-        );
-
-
+        mp_ * mp_ * gamma * C(norm(ab(pos_))) * ab(pos_) / norm(ab(pos_)) +
+        mp_ * gamma * ab(n_));
 
     log().info_end();
 

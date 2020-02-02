@@ -22,10 +22,10 @@
 
 #include <string> // for string
 
+#include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, VectorField
 #include "FieldOps.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
-#include "Equation.hpp"
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 

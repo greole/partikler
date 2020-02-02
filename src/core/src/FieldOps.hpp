@@ -295,7 +295,6 @@ std::vector<T> &sum_AB_dW_res_impl(
     return sum_AB_dW_impl(vec, nb, dW, e);
 }
 
-
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 // NOTE sum_AB generally assumes nb to be sorted

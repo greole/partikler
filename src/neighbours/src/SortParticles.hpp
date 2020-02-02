@@ -65,7 +65,7 @@ class CountingSortParticlesVec3 : public Model {
 
     REGISTER_DEC_TYPE(CountingSortParticlesVec3);
 
-private:
+  private:
     // In
     VectorField &pos_;
 
@@ -76,7 +76,7 @@ private:
 
     Generic<SearchCubeDomain> &scd_;
 
-public:
+  public:
     CountingSortParticlesVec3(
         const std::string &model_name,
         YAML::Node parameter,
@@ -86,6 +86,5 @@ public:
 
     void reorder_fields();
 };
-
 
 #endif

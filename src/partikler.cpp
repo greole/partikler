@@ -17,19 +17,19 @@
     contact: go@hpsim.de
 */
 
-#include <getopt.h> // for getopt_long, no_argument
 #include <bits/getopt_core.h> // for optarg
 #include <execinfo.h>
+#include <getopt.h> // for getopt_long, no_argument
 #include <iostream> // for endl, operator<<, cout
 #include <memory>   // for make_unique, allocator
 #include <signal.h>
 #include <stdlib.h>
 #include <string> // for string, operator<<
 
+#include "Models.hpp"         // for ModelFactory
+#include "Object.hpp"         // for GenericType
+#include "ObjectRegistry.hpp" // for FieldIdMap, ObjectReg...
 #include "Time.hpp"
-#include "Models.hpp"                          // for ModelFactory
-#include "Object.hpp"                          // for GenericType
-#include "ObjectRegistry.hpp"                  // for FieldIdMap, ObjectReg...
 #include "yaml-cpp/node/detail/iterator.h"     // for iterator_base, iterat...
 #include "yaml-cpp/node/detail/iterator_fwd.h" // for const_iterator
 #include "yaml-cpp/node/impl.h"                // for Node::operator[], Nod...
@@ -51,8 +51,8 @@ REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
 #include "stl/Wendland2D.hpp"
 
 REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
-#include "stl/STLParticleNeighbours.hpp"
 #include "ParticleNeighbours.hpp"
+#include "stl/STLParticleNeighbours.hpp"
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHParticleNeighbours);
@@ -154,10 +154,8 @@ int main(int argc, char *argv[]) {
 
     ObjectRegistry obj_reg {};
 
-    obj_reg.register_object<Generic<Scalar>>(
-        std::make_unique<Generic<Scalar>>(
-            "specific_particle_mass", GenericType, 1.0));
-
+    obj_reg.register_object<Generic<Scalar>>(std::make_unique<Generic<Scalar>>(
+        "specific_particle_mass", GenericType, 1.0));
 
     TimeGraph &timeGraph = obj_reg.register_object<TimeGraph>(
         std::make_unique<TimeGraph>("TimeGraph", config["PROJECT"], obj_reg));
@@ -195,8 +193,6 @@ int main(int argc, char *argv[]) {
 
         auto model = ModelFactory::createInstance(
             model_namespace, model_name, model_name, params, obj_reg);
-
-
 
         timeGraph.push_back_main(model);
     }

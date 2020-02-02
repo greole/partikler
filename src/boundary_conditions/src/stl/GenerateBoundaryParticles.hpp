@@ -28,12 +28,12 @@
 
 #include "Field.hpp" // for PointField
 #include "FieldOps.hpp"
-#include "Models.hpp"           // for Model, ModelRegister (ptr only), REG...
-#include "Time.hpp"           // for Model, ModelRegister (ptr only), REG...
-#include "ObjectRegistry.hpp"   // for FieldIdMap (ptr only), ObjectRegistry
+#include "Models.hpp"         // for Model, ModelRegister (ptr only), REG...
+#include "ObjectRegistry.hpp" // for FieldIdMap (ptr only), ObjectRegistry
+#include "ParticleGeneratorBase.hpp"
+#include "Time.hpp"             // for Model, ModelRegister (ptr only), REG...
 #include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
-#include "ParticleGeneratorBase.hpp"
 
 class GenerateBoundaryParticles : public ParticleGeneratorBase {
 

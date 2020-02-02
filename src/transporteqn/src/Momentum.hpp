@@ -22,10 +22,10 @@
 
 #include <string> // for string
 
+#include "Equation.hpp"
 #include "Field.hpp" // for VectorField
 #include "FieldOps.hpp"
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
-#include "Equation.hpp"
 #include "Vec3.hpp"
 #include "yaml-cpp/yaml.h"
 
@@ -34,9 +34,9 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Momentum: public VectorFieldEquation {
+class Momentum : public VectorFieldEquation {
 
-  REGISTER_DEC_TYPE(Momentum);
+    REGISTER_DEC_TYPE(Momentum);
 
   protected:
     // In

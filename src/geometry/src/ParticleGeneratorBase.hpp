@@ -22,10 +22,10 @@
 #define PARTIKLER_PARTICLEGENERATORBASE_INCLUDED_H
 
 #include "Field.hpp"
-#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Models.hpp"         // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "ObjectRegistry.hpp" // for ObjectRegistry
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
-#include "ObjectRegistry.hpp"   // for ObjectRegistry
 
 class ParticleGeneratorBase : public Model {
 

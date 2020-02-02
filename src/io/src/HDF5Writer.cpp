@@ -19,17 +19,18 @@
 
 #include "HDF5Writer.hpp"
 
-#include "Time.hpp"
 #include "Scalar.hpp"
+#include "Time.hpp"
 
-void H5PartWriteWrapper(h5_file_t &fh, std::string comp_name, std::vector<float>& f) {
+void H5PartWriteWrapper(
+    h5_file_t &fh, std::string comp_name, std::vector<float> &f) {
     H5PartWriteDataFloat32(fh, comp_name.c_str(), &f[0]);
 }
 
-void H5PartWriteWrapper(h5_file_t &fh, std::string comp_name, std::vector<double>& f) {
+void H5PartWriteWrapper(
+    h5_file_t &fh, std::string comp_name, std::vector<double> &f) {
     H5PartWriteDataFloat64(fh, comp_name.c_str(), &f[0]);
 }
-
 
 template <class T>
 void HDF5Writer::write_to_disk(T const &data, h5_file_t &fh) {}
@@ -50,7 +51,6 @@ void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
     H5PartWriteDataFloat32(fh, data.get_name().c_str(), &data[0]);
 }
 
-
 // TODO use SFINAE here
 template <>
 void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {
@@ -65,7 +65,6 @@ void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {
         j++;
     }
 }
-
 
 // TODO use SFINAE here
 template <>

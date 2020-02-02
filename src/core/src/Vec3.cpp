@@ -101,7 +101,7 @@ void scalePoints(std::vector<Vec3> &points, Vec3 scale) {
 }
 
 Scalar squared_length(Vec3 v) {
-    return v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+    return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
 }
 
 void scalePoints(std::vector<Vec3> &points, Scalar scale) {

@@ -19,7 +19,7 @@
 
 #include "ParticleGenerator.hpp"
 
-#include "ObjectRegistry.hpp"   // for ObjectRegistry
+#include "ObjectRegistry.hpp" // for ObjectRegistry
 #include "Scalar.hpp"
 
 SPHSTLReader::SPHSTLReader(

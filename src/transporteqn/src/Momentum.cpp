@@ -35,8 +35,7 @@ Momentum::Momentum(
       tau_(objReg.get_object<VectorFieldEquation>("Viscosity")),
       p_(objReg.get_object<ScalarFieldEquation>("Pressure")),
       g_(objReg.get_object<VectorFieldEquation>("Gravity")),
-      fc_(objReg.get_object<VectorFieldEquation>("CohesionAkinci"))
-{}
+      fc_(objReg.get_object<VectorFieldEquation>("CohesionAkinci")) {}
 
 void Momentum::execute() {
 
@@ -46,12 +45,13 @@ void Momentum::execute() {
 
     ScalarField &rho = conti_.get(time_.get_current_timestep());
 
-    solve(df_, tau_.get(it) / rho - p_.get_dx(it) / rho + g_.get(it) + fc_.get(it));
+    solve(
+        df_,
+        tau_.get(it) / rho - p_.get_dx(it) / rho + g_.get(it) + fc_.get(it));
 
     log().info_end();
 
     log().info_begin() << "Computing velocity";
-
 
     for (size_t i = 0; i < f_.size(); i++) {
         // f_[i] = f_[i] / 1.3;

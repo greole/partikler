@@ -19,7 +19,6 @@
 
 #include "ObjectRegistry.hpp"
 
-
 bool ObjectRegistry::object_exists(const std::string name) const {
     for (auto &&f : objects_) {
         if (f->get_name() == name) {
@@ -43,5 +42,3 @@ int FieldIdMap::append(std::string field_name) {
     fields_.push_back(field_name);
     return id;
 }
-
-

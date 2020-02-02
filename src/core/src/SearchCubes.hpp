@@ -129,7 +129,6 @@ struct SortedNeighbours {
     std::vector<Vec3> dist;
 };
 
-
 struct STLUnsortedNeighbour {
 
     NeighbourPair ids;
@@ -168,7 +167,6 @@ void stl_owner_cube_search(
     const std::vector<Facet_handle> &facets,
     std::vector<STLUnsortedNeighbour> &ret);
 
-
 void neighbour_cube_search(
     const std::vector<Vec3> &pos,
     const size_t first,
@@ -200,9 +198,7 @@ STLSortedNeighbours createSTLNeighbours(
 SortedNeighbours createNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Vec3> &pos,
-    std::vector<SearchCube> &searchCubes
-    );
-
+    std::vector<SearchCube> &searchCubes);
 
 // SortedNeighbours createNeighbours(
 //     const SearchCubeDomain scd,
@@ -221,19 +217,15 @@ struct SortedParticles {
     std::vector<Vec3> particles;
 };
 
-
 STLSortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
 
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Vec3> &unsorted_particles);
 
+template <class A> class Field;
 
-template<class A>
-class Field;
-
-template<class A>
-class FieldAB;
+template <class A> class FieldAB;
 
 using NeighbourFieldAB = FieldAB<Field<std::vector<NeighbourPair>>>;
 #endif

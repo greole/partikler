@@ -31,14 +31,14 @@
 #include <utility> // for move, pair, make_pair
 #include <vector>  // for vector
 
+#include "Field.hpp"    // for ScalarField, KernelGradientField
+#include "FieldOps.hpp" // for sum_AB_impl
+#include "Logger.hpp"   // for MSG, Logger
 #include "Models.hpp"
-#include "Field.hpp"            // for ScalarField, KernelGradientField
-#include "FieldOps.hpp"         // for sum_AB_impl
+#include "Object.hpp"         // for SPHObject, ModelType
+#include "ObjectRegistry.hpp" // for ObjectRegistry
+#include "SearchCubes.hpp"    // for NeighbourFieldAB
 #include "Time.hpp"
-#include "Logger.hpp"           // for MSG, Logger
-#include "Object.hpp"           // for SPHObject, ModelType
-#include "ObjectRegistry.hpp"   // for ObjectRegistry
-#include "SearchCubes.hpp"      // for NeighbourFieldAB
 #include "yaml-cpp/node/impl.h" // for Node::~Node, Node::Node, Node::as
 #include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
@@ -107,15 +107,13 @@ class FieldEquationBase : public Model,
   public:
     KernelGradientType kernelGradientType_;
 
-    template<class FieldType>
+    template <class FieldType>
     FieldEquationBase(
         const std::string &field_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        FieldType &f
-        )
-        : Model(field_name, parameter, objReg),
-          FieldValueType(objReg, f),
+        FieldType &f)
+        : Model(field_name, parameter, objReg), FieldValueType(objReg, f),
           FieldGradientType(objReg, f),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
@@ -161,7 +159,6 @@ class FieldEquationBase : public Model,
         sum_AB_impl(particle_mass, this->f_, np_, W_);
         return this->f_;
     };
-
 
     // VectorField& ddx() {
     // };
@@ -218,6 +215,5 @@ using VectorFieldEquation = FieldEquationBase<
 // TODO implement this
 // using ABVectorFieldEquation =
 //         FieldEquation<VectorFieldAB, VectorFieldAB>;
-
 
 #endif

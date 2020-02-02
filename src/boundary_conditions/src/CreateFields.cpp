@@ -19,8 +19,8 @@
 
 #include "CreateFields.hpp"
 
+#include "Field.hpp" // for PointField
 #include "ObjectRegistry.hpp"
-#include "Field.hpp"  // for PointField
 
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)

@@ -23,7 +23,7 @@
 #include <string> // for string
 
 #include "Models.hpp" // for TimeGraph (ptr only), Model
-#include "Time.hpp" // for TimeGraph (ptr only), Model
+#include "Time.hpp"   // for TimeGraph (ptr only), Model
 
 class ObjectRegistry;
 namespace YAML {

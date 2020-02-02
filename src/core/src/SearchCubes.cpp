@@ -19,7 +19,7 @@
 
 #include "SearchCubes.hpp"
 
-#include "Logger.hpp"           // for MSG, Logger
+#include "Logger.hpp" // for MSG, Logger
 
 SearchCubeDomain
 initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
@@ -82,8 +82,8 @@ SearchCubeDomain
 initSearchCubeDomain(const std::vector<Vec3> &particles, float dx) {
     auto bound_box = bounding_box(particles);
 
-    std::cout << __PRETTY_FUNCTION__ << bound_box.first << bound_box.second << std::endl;
-
+    std::cout << __PRETTY_FUNCTION__ << bound_box.first << bound_box.second
+              << std::endl;
 
     // bounds are scaled a bit to avoid particles on exact boundary
     const Scalar domain_extrusion = 0.01 * dx; // in dx
@@ -270,7 +270,6 @@ void neighbour_cube_search(
     }
 }
 
-
 size_t position_to_cube_id_vec3(SearchCubeDomain scd, const Vec3 &p) {
     // TODO test if speed up n_cubes are copied to a const size_t nx ...
 
@@ -296,7 +295,6 @@ size_t position_to_cube_id(SearchCubeDomain scd, const Point &p) {
 
     return position_to_cube_id_vec3(scd, Vec3 {p[0], p[1], p[2]});
 }
-
 
 SubDivision id_to_i_j_k(const size_t id, const SubDivision sub) {
     // TODO the nz-1 limiter seems unnecessary
@@ -456,7 +454,8 @@ SortedParticles countingSortParticles(
     std::vector<Vec3> retp(n_particles);
     for (size_t uid = 0; uid < n_particles; uid++) {
         // copy particle to new position in sorted array
-        const size_t sid = position_to_cube_id_vec3(scd, unsorted_particles[uid]);
+        const size_t sid =
+            position_to_cube_id_vec3(scd, unsorted_particles[uid]);
 
         // std::cout
         //   << "[DEBUG] SearchCubes.cpp::countingSortParticles"
@@ -477,7 +476,6 @@ SortedParticles countingSortParticles(
 
     return {retc, rets, retp};
 }
-
 
 STLSortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles) {
@@ -685,12 +683,10 @@ STLSortedNeighbours createSTLNeighbours(
 SortedNeighbours createNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Vec3> &pos,
-    std::vector<SearchCube> &searchCubes
-    ) {
+    std::vector<SearchCube> &searchCubes) {
     // Step 0 initialise return values
 
-    SortedNeighbours ret {std::vector<NeighbourPair>(0),
-                          std::vector<Vec3>(0)};
+    SortedNeighbours ret {std::vector<NeighbourPair>(0), std::vector<Vec3>(0)};
 
     // own_id_min and size
     std::vector<std::pair<size_t, size_t>> order(omp_get_max_threads(), {0, 0});
@@ -723,8 +719,7 @@ SortedNeighbours createNeighbours(
             const size_t first = searchCubes[sid].first;
             const size_t last = searchCubes[sid].last;
 
-            owner_cube_search(
-                pos, first, last, maxDistanceSqr, ret_tmp);
+            owner_cube_search(pos, first, last, maxDistanceSqr, ret_tmp);
 
             const auto ncids = upper_neighbour_cubes(sub, ncidsten, sid);
 

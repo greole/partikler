@@ -31,10 +31,10 @@
 #include <utility> // for move, pair, make_pair
 #include <vector>  // for vector
 
-#include "Field.hpp"            // for ScalarField, KernelGradientField
-#include "FieldOps.hpp"         // for sum_AB_impl
-#include "Logger.hpp"           // for MSG, Logger
-#include "Object.hpp"           // for SPHObject, ModelType
+#include "Field.hpp"    // for ScalarField, KernelGradientField
+#include "FieldOps.hpp" // for sum_AB_impl
+#include "Logger.hpp"   // for MSG, Logger
+#include "Object.hpp"   // for SPHObject, ModelType
 #include "yaml-cpp/yaml.h"
 
 #include "Scalar.hpp"
@@ -94,14 +94,13 @@ class Model : public SPHObject {
     }
 
     Vec3 read_vec3(std::string coeff_name) {
-        Scalar x  = parameter_[coeff_name][0].as<Scalar>();
-        Scalar y  = parameter_[coeff_name][1].as<Scalar>();
-        Scalar z  = parameter_[coeff_name][2].as<Scalar>();
+        Scalar x = parameter_[coeff_name][0].as<Scalar>();
+        Scalar y = parameter_[coeff_name][1].as<Scalar>();
+        Scalar z = parameter_[coeff_name][2].as<Scalar>();
         Vec3 ret {x, y, z};
         log().info() << "Reading coefficient " << coeff_name << " " << ret;
         return ret;
     }
-
 
     Vec3 read_or_default_vec3(std::string coeff_name, Vec3 default_val) {
         if (parameter_[coeff_name]) return read_vec3(coeff_name);
@@ -109,7 +108,6 @@ class Model : public SPHObject {
                      << default_val;
         return default_val;
     }
-
 
     ObjectRegistry &get_objReg() { return objReg_; };
 
