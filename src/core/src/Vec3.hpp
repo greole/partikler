@@ -43,8 +43,8 @@ struct Vec3 : std::array<Scalar, 3> {
 // inner type for the lazy field functions
 
 // scalar multiplication
-Vec3 operator*(Scalar a, const Vec3 &x);
-Vec3 operator*(Vec3 &x, Scalar a);
+Vec3 operator*(Scalar const a, Vec3 const &x);
+Vec3 operator*(Vec3 const &x, Scalar const a);
 
 // scalar division
 Vec3 operator/(const Vec3 &x, Scalar a);
@@ -64,6 +64,8 @@ struct VectorPair {
     Vec3 on;
     Vec3 no;
 };
+
+Scalar squared_length(Vec3 v);
 
 void translatePoints(std::vector<Vec3> &points, Vec3 translate);
 

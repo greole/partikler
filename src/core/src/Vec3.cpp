@@ -48,11 +48,13 @@ Vec3 &Vec3::operator*=(const Scalar x) {
     return *this;
 }
 
-Vec3 operator*(Scalar a, const Vec3 &x) {
+Vec3 operator*(Scalar const a, Vec3 const &x) {
     return {{a * x[0], a * x[1], a * x[2]}};
 }
 
-Vec3 operator*(Vec3 &x, Scalar a) { return {{a * x[0], a * x[1], a * x[2]}}; }
+Vec3 operator*(Vec3 const &x, Scalar const a) {
+    return {{a * x[0], a * x[1], a * x[2]}};
+}
 
 // scalar division
 Vec3 operator/(const Vec3 &x, Scalar a) {
@@ -98,6 +100,10 @@ void scalePoints(std::vector<Vec3> &points, Vec3 scale) {
     }
 }
 
+Scalar squared_length(Vec3 v) {
+    return v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+}
+
 void scalePoints(std::vector<Vec3> &points, Scalar scale) {
     for (size_t i = 0; i < points.size(); i++) {
         points[i] *= scale;
@@ -105,5 +111,7 @@ void scalePoints(std::vector<Vec3> &points, Scalar scale) {
 }
 
 void translatePoints(std::vector<Vec3> &points, Vec3 translate) {
-    for (auto &pos : points) pos += translate;
+    for (auto &pos : points) {
+        pos += translate;
+    }
 }
