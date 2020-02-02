@@ -55,7 +55,7 @@ class STLWendland2D : public Model {
     // Out
     // Kernel &kernel                               // Kernel field
     ScalarField &W_;
-    KernelGradientField &dWdx_;
+    DoubleKernelGradientField &dWdx_;
 
   public:
     STLWendland2D(

@@ -31,7 +31,7 @@ STLWendland2D::STLWendland2D(
       sd_(objReg.get_object<Field<std::vector<STLSurfaceDist>>>(
           "surface_dist")),
       W_(objReg.create_field<ScalarField>("KernelW")),
-      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {}
+      dWdx_(objReg.create_field<DoubleKernelGradientField>("KerneldWdx")) {}
 
 void STLWendland2D::execute() {
 
