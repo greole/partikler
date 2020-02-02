@@ -92,10 +92,6 @@ class SPHObject {
     SPHObjectType get_type() const { return type_; };
 
     std::string get_type_str() const { return sphObjectType_to_string(type_); };
-
-    // reorder after particle sorting
-    // TODO remove and replace by dispatched version
-    virtual void reorder(const std::vector<size_t>) {};
 };
 
 template <class T> class Generic : public SPHObject {

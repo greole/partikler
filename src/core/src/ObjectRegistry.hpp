@@ -49,8 +49,6 @@ class ObjectRegistry {
 
   public:
     template <class T> T &register_object(std::shared_ptr<SPHObject> f) {
-        std::cout << "Register " << f->get_type_str() << " " << f->get_name()
-                  << std::endl;
         int idx = objects_.size();
         objects_.push_back(std::move(f));
         return dynamic_cast<T &>(*objects_[idx]);
@@ -58,8 +56,6 @@ class ObjectRegistry {
 
     template <class T>
     std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
-        std::cout << "Register " << f->get_type_str() << " " << f->get_name()
-                  << std::endl;
         int idx = objects_.size();
         objects_.push_back(std::move(f));
         return std::dynamic_pointer_cast<T>(objects_[idx]);

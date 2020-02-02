@@ -57,7 +57,6 @@ std::shared_ptr<Model> ModelFactory::createInstance(
     const std::string, //&objReg_name,
     YAML::Node parameter,
     ObjectRegistry &objReg) {
-    std::cout << "createInstance" << model_name << std::endl;
     const std::string delim = "::";
     map_type::iterator it = getMap()->find(model_type + delim + model_name);
     if (it == getMap()->end()) {

@@ -77,7 +77,6 @@ class ParticleGeneratorBase : public Model {
         // need to be transferred
         logger_.info_begin() << "Transfering ";
 
-        // TODO transfer the Vec3 version of Pos
         auto &oreg = get_objReg();
         if (oreg.object_exists("Pos")) {
             append(pos_, "Pos");

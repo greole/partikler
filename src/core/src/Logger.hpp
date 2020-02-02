@@ -156,13 +156,5 @@ class Logger {
     };
 };
 
-// // Free functions
-// template <class T>
-// MSG& operator<<(MSG& obj, T& b)
-// {
-//     auto state = obj.get_state();
-//     state << b;
-//     return obj;
-// }
 
 #endif
