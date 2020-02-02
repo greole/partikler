@@ -70,21 +70,29 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     YAML::Node conti;
     conti["TRANSPORTEQN"]["model"] = "Conti";
     conti["TRANSPORTEQN"]["lower_limit"] = 0.001;
+    conti["TRANSPORTEQN"]["KernelType"] = "NonSymmetric";
     node["main"].push_back(conti);
 
     YAML::Node pressure;
     pressure["TRANSPORTEQN"]["model"] = "Pressure";
     pressure["TRANSPORTEQN"]["rho_0"] = rho_0_;
     pressure["TRANSPORTEQN"]["p_0"] = p_0_;
+    pressure["TRANSPORTEQN"]["KernelType"] = "NonSymmetric";
     node["main"].push_back(pressure);
 
     YAML::Node visc;
     visc["TRANSPORTEQN"]["model"] = "Viscosity";
     visc["TRANSPORTEQN"]["nu"] = nu_;
+    visc["TRANSPORTEQN"]["KernelType"] = "NonSymmetric";
     node["main"].push_back(visc);
+
+    YAML::Node gravity;
+    gravity["TRANSPORTEQN"]["model"] = "Gravity";
+    node["main"].push_back(gravity);
 
     YAML::Node mom;
     mom["TRANSPORTEQN"]["model"] = "Momentum";
+    mom["TRANSPORTEQN"]["KernelType"] = "NonSymmetric";
     node["main"].push_back(mom);
 
     YAML::Node integ;
