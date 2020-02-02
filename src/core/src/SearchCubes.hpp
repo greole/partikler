@@ -31,6 +31,8 @@
 
 #include <algorithm> // for std::sort
 
+#include "Vec3.hpp"
+
 struct NeighbourIdHalfStencil {
     // Stores the stride of a domain, ie the difference of search cubes ids
     // for the 26 neighbour cubes. Since the stride is symmetric
@@ -105,6 +107,9 @@ struct SearchCubeDomain {
 SearchCubeDomain
 initSearchCubeDomain(const std::vector<Point> &particles, float dx);
 
+SearchCubeDomain
+initSearchCubeDomain(const std::vector<Vec3> &particles, float dx);
+
 struct NeighbourPair {
     size_t ownId;
     size_t neighId;
@@ -119,6 +124,12 @@ struct STLSortedNeighbours {
     std::vector<STLSurfaceDist> dist;
 };
 
+struct SortedNeighbours {
+    std::vector<NeighbourPair> ids;
+    std::vector<Vec3> dist;
+};
+
+
 struct STLUnsortedNeighbour {
 
     NeighbourPair ids;
@@ -129,7 +140,17 @@ struct STLUnsortedNeighbour {
     STLSurfaceDist dist;
 };
 
-void neighbour_cube_search(
+struct UnsortedNeighbour {
+
+    NeighbourPair ids;
+
+    // since computation of neighbouring particles
+    // on different STL is expensive a vector holding
+    // the STLSurfaceDist is stored here
+    Vec3 dist;
+};
+
+void stl_neighbour_cube_search(
     const std::vector<Point> &pos,
     const size_t first,
     const size_t last,
@@ -139,13 +160,30 @@ void neighbour_cube_search(
     const std::vector<Facet_handle> &facets,
     std::vector<STLUnsortedNeighbour> &ret);
 
-void owner_cube_search(
+void stl_owner_cube_search(
     const std::vector<Point> &pos,
     const size_t first,
     const size_t last,
     const float maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
     std::vector<STLUnsortedNeighbour> &ret);
+
+
+void neighbour_cube_search(
+    const std::vector<Vec3> &pos,
+    const size_t first,
+    const size_t last,
+    const size_t first_nc,
+    const size_t last_nc,
+    const float maxDistanceSqr,
+    std::vector<UnsortedNeighbour> &ret);
+
+void owner_cube_search(
+    const std::vector<Vec3> &pos,
+    const size_t first,
+    const size_t last,
+    const float maxDistanceSqr,
+    std::vector<UnsortedNeighbour> &ret);
 
 // A search cube stores first and last particle ids
 struct SearchCube {
@@ -159,19 +197,36 @@ STLSortedNeighbours createSTLNeighbours(
     std::vector<SearchCube> &searchCubes,
     const std::vector<Facet_handle> &facets);
 
+SortedNeighbours createNeighbours(
+    const SearchCubeDomain scd,
+    const std::vector<Vec3> &pos,
+    std::vector<SearchCube> &searchCubes
+    );
+
+
 // SortedNeighbours createNeighbours(
 //     const SearchCubeDomain scd,
 //     const std::vector<Point> &pos,
 //     std::vector<SearchCube> &searchCubes);
 
-struct SortedParticles {
+struct STLSortedParticles {
     std::vector<SearchCube> searchCubes;
     std::vector<size_t> sorting_idxs;
     std::vector<Point> particles;
 };
 
-SortedParticles countingSortParticles(
+struct SortedParticles {
+    std::vector<SearchCube> searchCubes;
+    std::vector<size_t> sorting_idxs;
+    std::vector<Vec3> particles;
+};
+
+
+STLSortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
+
+SortedParticles countingSortParticles(
+    const SearchCubeDomain scd, const std::vector<Vec3> &unsorted_particles);
 
 
 template<class A>
