@@ -61,4 +61,31 @@ class CountingSortParticles : public Model {
     void reorder_fields();
 };
 
+class CountingSortParticlesVec3 : public Model {
+
+    REGISTER_DEC_TYPE(CountingSortParticlesVec3);
+
+private:
+    // In
+    VectorField &pos_;
+
+    Field<std::vector<SearchCube>> &sc_;
+
+    //  Sorting indexes
+    SizeTField &si_;
+
+    Generic<SearchCubeDomain> &scd_;
+
+public:
+    CountingSortParticlesVec3(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
+
+    void execute();
+
+    void reorder_fields();
+};
+
+
 #endif
