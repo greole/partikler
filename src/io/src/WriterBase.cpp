@@ -29,7 +29,6 @@ WriterBase::WriterBase(
 bool WriterBase::write() {
 
     int ct = time_graph_.get_current_timestep();
-    std::cout << __PRETTY_FUNCTION__ << ct << std::endl;
     if (ct % write_freq_ == 0) return true;
     return false;
 }
