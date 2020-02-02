@@ -280,14 +280,30 @@ sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
     return vec;
 }
 
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_dW_res_impl(
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    DoubleKernelGradientField &dW,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    // reset field
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+
+    return sum_AB_dW_impl(vec, nb, dW, e);
+}
+
+
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 // NOTE sum_AB generally assumes nb to be sorted
 template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW(
+std::vector<T> &sum_AB_dW_impl(
     std::vector<T> &vec,
     NeighbourFieldAB &nb,
-    KernelGradientField &dW,
+    DoubleKernelGradientField &dW,
     Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     // Iterate particle index a
@@ -308,7 +324,31 @@ std::vector<T> &sum_AB_dW(
 }
 
 template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_res(
+std::vector<T> &sum_AB_dW_impl(
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    KernelGradientField &dW,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
+        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
+            auto nb_pair = nb[ab_index];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec[a] += res * dW[ab_index];
+            vec[b] -= res * dW[ab_index];
+            ab_index++;
+        }
+    }
+    return vec;
+}
+
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_dW_res_impl(
     std::vector<T> &vec,
     NeighbourFieldAB &nb,
     KernelGradientField &dW,
@@ -319,7 +359,7 @@ std::vector<T> &sum_AB_dW_res(
     // reset field
     std::fill(vec.begin(), vec.end(), zero<T>::val);
 
-    return sum_AB_dW(vec, nb, dW, e);
+    return sum_AB_dW_impl(vec, nb, dW, e);
 }
 
 // NOTE the unsorted variant could look something like this
