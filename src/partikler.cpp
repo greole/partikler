@@ -17,7 +17,6 @@
     contact: go@hpsim.de
 */
 
-#include <bits/getopt_core.h> // for optarg
 #include <execinfo.h>
 #include <getopt.h> // for getopt_long, no_argument
 #include <iostream> // for endl, operator<<, cout
