@@ -137,7 +137,7 @@ class FieldEquationBase : public Model,
     sum_AB_dW(ScalarField &rho, Expr const &e) {
         // dispatch on KernelGradientType
         auto &dW =
-            get_objReg().get_object<KernelGradientField>("KerneldWdx");
+            get_objReg().template get_object<KernelGradientField>("KerneldWdx");
         decltype(auto) expr = boost::yap::as_expr(e);
         sum_AB_dW_res_impl_rho(rho, this->df_, np_, dW, expr);
 
@@ -149,11 +149,11 @@ class FieldEquationBase : public Model,
         // dispatch on KernelGradientType
         if (kernelGradientType_ == KernelGradientType::Symmetric) {
             auto &dW =
-                get_objReg().get_object<KernelGradientField>("KerneldWdx");
+                get_objReg().template get_object<KernelGradientField>("KerneldWdx");
             decltype(auto) expr = boost::yap::as_expr(e);
             sum_AB_dW_res_impl(this->df_, np_, dW, expr);
         } else {
-            auto &dW = get_objReg().get_object<DoubleKernelGradientField>(
+            auto &dW = get_objReg().template get_object<DoubleKernelGradientField>(
                 "KerneldWdx");
             decltype(auto) expr = boost::yap::as_expr(e);
             sum_AB_dW_res_impl(this->df_, np_, dW, expr);
