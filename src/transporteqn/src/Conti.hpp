@@ -44,8 +44,6 @@ class Conti : public ScalarFieldEquation {
 
     const Scalar lower_limit_;
 
-    const Scalar dx_;
-
     Scalar mp_;
 
   public:
