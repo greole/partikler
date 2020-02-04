@@ -38,6 +38,8 @@ class InitShape : public ParticleGeneratorBase {
 
     Vec3 position_;
 
+    Scalar noise_;
+
   public:
     InitShape(
         const std::string &model_name,
