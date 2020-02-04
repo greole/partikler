@@ -28,7 +28,7 @@
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include "Pressure.hpp"
+#include "PressureBonet.hpp"
 
 class ObjectRegistry;
 namespace YAML {
