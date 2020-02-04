@@ -26,6 +26,8 @@
 #include <boost/yap/print.hpp>
 #include <boost/yap/yap.hpp>
 
+#include "Scalar.hpp"
+
 template <class ValType> struct Pow_Wrapper {
     Pow_Wrapper() {};
     Pow_Wrapper(ValType i) { inner = i; };
@@ -94,6 +96,7 @@ template <boost::yap::expr_kind Kind, typename eqn> struct equation {
 
     eqn elements;
 };
+
 
 template <class T, class I> T solve(I terminal) {
     auto expr =
@@ -236,7 +239,7 @@ std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
 std::vector<T> &sum_AB_impl(
-    float particle_mass,
+    Scalar particle_mass,
     std::vector<T> &vec,
     const NeighbourFieldAB &nb,
     Expr const &e) {
@@ -273,12 +276,39 @@ sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
                 boost::yap::as_expr(expr), take_nth {a, b, ab_index});
             auto res = boost::yap::evaluate(vec_ij_expr);
             vec[a] += res;
-            vec[b] += res;
+            vec[b] -= res;
             ab_index++;
         }
     }
     return vec;
 }
+
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_res_impl(
+    Scalar mp,
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // reset field
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+
+    return sum_AB_impl(mp, vec, nb, e);
+}
+
+
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_res_impl(
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // reset field
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+
+    return sum_AB_impl(vec, nb, e);
+}
+
 
 template <typename T, typename Expr>
 std::vector<T> &sum_AB_dW_res_impl(
@@ -323,6 +353,32 @@ std::vector<T> &sum_AB_dW_impl(
 }
 
 template <typename T, typename Expr>
+std::vector<T> &sum_AB_dW_impl_rho(
+    ScalarField& rho,
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    KernelGradientField &dW,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
+        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
+            auto nb_pair = nb[ab_index];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec[a] -= res * dW[ab_index];
+            vec[b] += res * dW[ab_index];
+            ab_index++;
+        }
+        vec[a] = vec[a]/rho[a];
+    }
+    return vec;
+}
+
+template <typename T, typename Expr>
 std::vector<T> &sum_AB_dW_impl(
     std::vector<T> &vec,
     NeighbourFieldAB &nb,
@@ -338,13 +394,31 @@ std::vector<T> &sum_AB_dW_impl(
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab_index});
             auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res * dW[ab_index];
-            vec[b] -= res * dW[ab_index];
+            vec[a] -= res * dW[ab_index];
+            vec[b] += res * dW[ab_index];
             ab_index++;
         }
     }
     return vec;
 }
+
+
+template <typename T, typename Expr>
+std::vector<T> &sum_AB_dW_res_impl_rho(
+    ScalarField& rho,
+    std::vector<T> &vec,
+    NeighbourFieldAB &nb,
+    KernelGradientField &dW,
+    Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    // Iterate particle index a
+    size_t ab_index = 0;
+    // reset field
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+
+    return sum_AB_dW_impl_rho(rho, vec, nb, dW, e);
+}
+
 
 template <typename T, typename Expr>
 std::vector<T> &sum_AB_dW_res_impl(
