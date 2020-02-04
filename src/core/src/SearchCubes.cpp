@@ -293,7 +293,8 @@ size_t position_to_cube_id_vec3(SearchCubeDomain scd, const Vec3 &p) {
 size_t position_to_cube_id(SearchCubeDomain scd, const Point &p) {
     // TODO test if speed up n_cubes are copied to a const size_t nx ...
 
-    return position_to_cube_id_vec3(scd, Vec3 {p[0], p[1], p[2]});
+    return position_to_cube_id_vec3(
+        scd, Vec3 {(Scalar)p[0], (Scalar)p[1], (Scalar)p[2]});
 }
 
 SubDivision id_to_i_j_k(const size_t id, const SubDivision sub) {
