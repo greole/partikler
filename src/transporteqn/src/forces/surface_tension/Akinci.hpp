@@ -34,7 +34,7 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class CohesionAkinci : public VectorFieldEquation {
+class Akinci : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Akinci);
 
@@ -54,7 +54,7 @@ class CohesionAkinci : public VectorFieldEquation {
     VectorField &pos_; // Particle positions
 
   public:
-    CohesionAkinci(
+    Akinci(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

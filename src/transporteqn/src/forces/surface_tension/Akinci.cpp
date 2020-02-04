@@ -52,14 +52,14 @@ struct SplineFunc {
     Scalar h;
 };
 
-CohesionAkinci::CohesionAkinci(
+Akinci::Akinci(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : VectorFieldEquation(
           model_name,
           parameter,
           objReg,
           objReg.create_field<VectorField>(
-              "fCohesion", {}, {"fCx", "fCy", "fCz"})),
+              "f", {}, {"fCx", "fCy", "fCz"})),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
@@ -68,7 +68,7 @@ CohesionAkinci::CohesionAkinci(
       n_(objReg.create_field<VectorField>("normal", {}, {"nx", "ny", "nz"})),
       pos_(objReg.get_object<VectorField>("Pos")) {}
 
-void CohesionAkinci::execute() {
+void Akinci::execute() {
 
     log().info_begin() << "Computing surface normals";
     ScalarField &rho = conti_.get(time_.get_current_timestep());
