@@ -36,7 +36,7 @@ class Node;
 
 class CohesionAkinci : public VectorFieldEquation {
 
-    REGISTER_DEC_TYPE(CohesionAkinci);
+    REGISTER_DEC_TYPE(Akinci);
 
   private:
     ScalarFieldEquation &conti_;
@@ -46,6 +46,8 @@ class CohesionAkinci : public VectorFieldEquation {
     Scalar gamma_;
 
     Scalar h_;
+
+    Scalar rho_0_;
 
     VectorField &n_; // Normal vector
 

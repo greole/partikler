@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-#include "AdhesionAkinci.hpp"
+#include "Akinci.hpp"
 
 #include "Conti.hpp"
 #include "Time.hpp"
@@ -63,7 +63,8 @@ CohesionAkinci::CohesionAkinci(
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
-      h_(read_or_default_coeff<Scalar>("h_", 1.0)),
+      h_(read_or_default_coeff<Scalar>("h", 1.0)),
+      rho_0_(read_or_default_coeff<Scalar>("rho", 1.0)),
       n_(objReg.create_field<VectorField>("normal", {}, {"nx", "ny", "nz"})),
       pos_(objReg.get_object<VectorField>("Pos")) {}
 
@@ -85,12 +86,14 @@ void CohesionAkinci::execute() {
     auto C = boost::yap::make_terminal(SplineFunc(h_));
 
     sum_AB(
+        2.0 * rho_0_/(rho.a()+rho.b())*(
         mp_ * mp_ * gamma * C(norm(ab(pos_))) * ab(pos_) / norm(ab(pos_)) +
-        mp_ * gamma * ab(n_));
+        mp_ * gamma * ab(n_))
+            );
 
     log().info_end();
 
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, CohesionAkinci);
+REGISTER_DEF_TYPE(SURFACETENSION, Akinci);
