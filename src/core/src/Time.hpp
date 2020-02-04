@@ -23,6 +23,7 @@
 #include "Models.hpp"
 #include "ObjectRegistry.hpp" // for ObjectRegistry
 #include "yaml-cpp/yaml.h"
+#include "Scalar.hpp"
 
 // TODO use std::variant<float,size_t> to
 class TimeGraph : public Model {
@@ -41,15 +42,15 @@ class TimeGraph : public Model {
 
     int current_timestep_;
 
-    float current_time_;
+    Scalar current_time_;
 
     std::string name_;
 
-    float endTime_;
+    Scalar endTime_;
 
-    float deltaT_;
+    Scalar deltaT_;
 
-    float max_deltaT_;
+    Scalar max_deltaT_;
 
     int iterations_;
 
@@ -78,6 +79,8 @@ class TimeGraph : public Model {
             current_timestep_++;
         };
     }
+
+
 
     void execute_post() { post_.execute(); }
 

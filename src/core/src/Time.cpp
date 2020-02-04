@@ -25,9 +25,9 @@ TimeGraph::TimeGraph(
       main_(ModelGraph("main", parameter, objReg)),
       post_(ModelGraph("post", parameter, objReg)), current_timestep_(0),
       current_time_(0), name_(read_coeff<std::string>("name")),
-      endTime_(read_or_default_coeff<float>("endTime", -1.0)),
-      deltaT_(read_or_default_coeff<float>("deltaT", -1.0)),
-      max_deltaT_(read_or_default_coeff<float>("max_deltaT", -1.0)),
+      endTime_(read_or_default_coeff<Scalar>("endTime", -1.0)),
+      deltaT_(read_or_default_coeff<Scalar>("deltaT", -1.0)),
+      max_deltaT_(read_or_default_coeff<Scalar>("max_deltaT", -1.0)),
       iterations_(read_or_default_coeff<int>("iterations", 0)) {
     if (deltaT_ < 0) {
         iter_mode = true;
