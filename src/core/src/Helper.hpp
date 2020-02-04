@@ -32,7 +32,7 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles);
 std::vector<Point> create_uniform_particle_cube(size_t n_particles);
 
 std::vector<Point>
-create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx);
+create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx, float noise=0);
 
 struct FixedDistanceParticles {
 
