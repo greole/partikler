@@ -20,19 +20,23 @@
 
 #include "Cubiod.hpp"
 
+#include "Scalar.hpp"
+
 InitShape::InitShape(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ParticleGeneratorBase(model_name, parameter, objReg),
       shape_(read_coeff<std::string>("shape")),
       dimensions_(read_vector(parameter, "dimensions")),
-      position_(read_vector(parameter, "position")) {}
+      position_(read_vector(parameter, "position")),
+      noise_(read_or_default_coeff("noise", 0.1))
+{}
 
 void InitShape::execute() {
 
-    auto cube_pos = create_uniform_particle_cube(dimensions_, position_, dx_);
+    auto cube_pos = create_uniform_particle_cube(dimensions_, position_, dx_, noise_);
     // pos_.insert(points_.end(), cube_pos.begin(), cube_pos.end());
     for (auto p : cube_pos)
-        pos_.push_back({(float)p[0], (float)p[1], (float)p[2]});
+        pos_.push_back({(Scalar)p[0], (Scalar)p[1], (Scalar)p[2]});
 
     post_execute();
 }
