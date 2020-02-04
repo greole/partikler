@@ -133,6 +133,18 @@ class FieldEquationBase : public Model,
     NeighbourFieldAB &N() { return np_; };
 
     template <class Expr>
+    typename FieldGradientType::value_type &
+    sum_AB_dW(ScalarField &rho, Expr const &e) {
+        // dispatch on KernelGradientType
+        auto &dW =
+            get_objReg().get_object<KernelGradientField>("KerneldWdx");
+        decltype(auto) expr = boost::yap::as_expr(e);
+        sum_AB_dW_res_impl_rho(rho, this->df_, np_, dW, expr);
+
+        return this->df_;
+    }
+
+    template <class Expr>
     typename FieldGradientType::value_type &sum_AB_dW(Expr const &e) {
         // dispatch on KernelGradientType
         if (kernelGradientType_ == KernelGradientType::Symmetric) {
@@ -151,12 +163,12 @@ class FieldEquationBase : public Model,
     }
 
     template <class RHS> typename FieldValueType::value_type &sum_AB(RHS rhs) {
-        sum_AB_impl(this->f_, np_, rhs * W_);
+        sum_AB_res_impl(this->f_, np_, rhs * W_);
         return this->f_;
     }
 
     typename FieldValueType::value_type &m_sum_AB(float particle_mass) {
-        sum_AB_impl(particle_mass, this->f_, np_, W_);
+        sum_AB_res_impl(particle_mass, this->f_, np_, W_);
         return this->f_;
     };
 
