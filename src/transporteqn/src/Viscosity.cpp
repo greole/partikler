@@ -18,6 +18,7 @@
 */
 #include "Viscosity.hpp"
 
+#include "Scalar.hpp"
 #include "Time.hpp"
 
 Viscosity::Viscosity(
@@ -31,10 +32,10 @@ Viscosity::Viscosity(
               zero<VectorField::value_type>::val,
               {"taux", "tauy", "tauz"})),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
-      nu_(read_or_default_coeff<float>("nu", 1e-05)),
+      nu_(read_or_default_coeff<Scalar>("nu", 1e-05)),
       u_(objReg.create_field<VectorField>(
           "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
-      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()),
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       pos_(objReg.get_object<VectorField>("Pos")) {}
 
 void Viscosity::execute() {
