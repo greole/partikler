@@ -9,17 +9,17 @@ target_sources(TransportEqn
   PRIVATE
   "src/Momentum.cpp"
   "src/Conti.cpp"
-  "src/Pressure.cpp"
+  "src/pressure/PressureBonet.cpp"
   "src/Viscosity.cpp"
   "src/forces/Gravity.cpp"
-  "src/forces/AdhesionAkinci.cpp"
+  "src/forces/surface_tension/Akinci.cpp"
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Momentum.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Conti.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/Pressure.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/pressure/PressureBonet.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Viscosity.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/Gravity.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/AdhesionAkinci.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/Akinci.hpp"
   )
 
 add_dependencies(TransportEqn Core)
@@ -34,6 +34,8 @@ target_include_directories(TransportEqn
   PUBLIC
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/src/forces
+  ${PROJECT_SOURCE_DIR}/src/forces/surface_tension
+  ${PROJECT_SOURCE_DIR}/src/pressure
 )
 
 #add_subdirectory(tests/SPHCore)

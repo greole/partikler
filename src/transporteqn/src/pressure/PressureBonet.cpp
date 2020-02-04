@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-#include "Pressure.hpp"
+#include "PressureBonet.hpp"
 
 #include "Time.hpp"
 
@@ -59,9 +59,12 @@ void Pressure::execute() {
     //               *  A<ScalarField>(rho) / B<ScalarField>(rho)
     //     );
 
-    sum_AB_dW(
-        mp_ * mp_ *
-        (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
+    // sum_AB_dW(
+    //     mp_ *
+    //     (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
+
+
+    sum_AB_dW(rho, mp_ / rho.b() * (p.a() + p.b()));
 
     log().info_end();
 
