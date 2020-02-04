@@ -64,7 +64,7 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 #include "Momentum.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
-#include "Pressure.hpp"
+#include "PressureBonet.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
 #include "Viscosity.hpp"
@@ -154,7 +154,9 @@ int main(int argc, char *argv[]) {
     ObjectRegistry obj_reg {};
 
     obj_reg.register_object<Generic<Scalar>>(std::make_unique<Generic<Scalar>>(
-        "specific_particle_mass", GenericType, 1.0));
+        "specific_particle_mass",
+        GenericType,
+        config["PROJECT"]["mp"].as<Scalar>()));
 
     TimeGraph &timeGraph = obj_reg.register_object<TimeGraph>(
         std::make_unique<TimeGraph>("TimeGraph", config["PROJECT"], obj_reg));
