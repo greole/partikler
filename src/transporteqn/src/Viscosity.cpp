@@ -20,10 +20,12 @@
 
 #include "Scalar.hpp"
 #include "Time.hpp"
+#include "Conti.hpp"
+
 
 Viscosity::Viscosity(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : VectorFieldEquation(
+    : VectorGradientEquation(
           model_name,
           parameter,
           objReg,
@@ -33,17 +35,17 @@ Viscosity::Viscosity(
               {"taux", "tauy", "tauz"})),
       conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
       nu_(read_or_default_coeff<Scalar>("nu", 1e-05)),
-      u_(objReg.create_field<VectorField>(
-          "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
+      u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
-      pos_(objReg.get_object<VectorField>("Pos")) {}
+      pos_(objReg.get_pos()) {}
 
 void Viscosity::execute() {
 
     log().info_begin() << "Computing dnu";
 
     // auto& u = momentum_.get();
-    ScalarField &rho = conti_.get(time_.get_current_timestep());
+    int it = time_.get_current_timestep();
+    ScalarField &rho = conti_.get(it);
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());

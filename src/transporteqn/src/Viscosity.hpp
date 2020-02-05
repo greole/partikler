@@ -24,18 +24,18 @@
 
 #include "Field.hpp" // for VectorField, PointField
 #include "FieldOps.hpp"
+#include "Equation.hpp"
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include "PressureBonet.hpp"
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
 } // namespace YAML
 
-class Viscosity : public VectorFieldEquation {
+class Viscosity : public VectorGradientEquation {
 
     REGISTER_DEC_TYPE(Viscosity);
 

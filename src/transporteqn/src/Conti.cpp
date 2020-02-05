@@ -25,7 +25,7 @@
 Conti::Conti(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ScalarFieldEquation(
-          model_name,
+          "Conti",
           parameter,
           objReg,
           objReg.create_field<ScalarField>("rho", 0.0)),
@@ -36,11 +36,6 @@ Conti::Conti(
 void Conti::execute() {
 
     log().info_begin() << "Computing density";
-
-    // TODO needs lazy reset of rho_;
-    for (auto &el : f_) {
-        el = 0;
-    }
 
     m_sum_AB(mp_);
     // TODO do it lazily
