@@ -213,7 +213,7 @@ struct take_nth {
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
-std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
+std::vector<T> &solve_impl(std::vector<T> &vec, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
         auto vec_i_expr = boost::yap::transform(
@@ -234,6 +234,7 @@ std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
 //     }
 //     return vec;
 // }
+
 
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
@@ -262,6 +263,12 @@ std::vector<T> &sum_AB_impl(
     return vec;
 }
 
+// TODO
+// Pos independent
+// f(a-b) = f(b-a)
+
+// Pos dependent
+// f(a-b) = - f(b-a)
 template <typename T, typename Expr>
 std::vector<T> &
 sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
@@ -458,5 +465,25 @@ std::vector<T> &sum_AB_dW_res_impl(
 template <class T> void field_append(T &a, T &b) {
     a.insert(a.end(), b.begin(), b.end());
 }
+
+struct Sum_AB {
+    Sum_AB(NeighbourFieldAB nb) : nb_(nb) {};
+    template <typename T, typename Expr>
+    T &operator()(T &vec, size_t a, size_t &ab_index, Expr expr) {
+        while (ab_index < nb_.size() && a == nb_[ab_index].ownId) {
+            auto nb_pair = nb_[ab_index];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec[a] += res;
+            vec[b] += res;
+            ab_index++;
+        }
+        return vec;
+    }
+
+    NeighbourFieldAB &nb_;
+};
 
 #endif
