@@ -34,9 +34,21 @@ Pressure::Pressure(
       rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
-      prefac_(c_ * c_ * rho_0_ / gamma_),
-      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")()), p(f_),
-      dp(df_) {}
+      prefac_(c_ * c_ * rho_0_ / gamma_)
+{}
+
+PressureGradient::PressureGradient(
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+
+    : ScalarGradientEquation(
+        model_name,
+        parameter,
+        objReg,
+        objReg.get_object<ScalarField>("p")),
+      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
+      pressure_(objReg.get_or_create_model<Pressure>("Pressure", parameter, objReg)),
+      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")())
+{}
 
 void Pressure::execute() {
 
@@ -48,21 +60,20 @@ void Pressure::execute() {
 
     log().info_begin() << "Computing pressure";
 
-    solve(p, (prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_));
+    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_);
 
     log().info_end();
 
-    log().info_begin() << "Computing gradient";
+    iteration_ = time_.get_current_timestep();
+}
 
-    // sum_AB_dW_res(dp, np_, dW_,
-    //           mp_ * ( A<ScalarField>(p) + B<ScalarField>(p) )
-    //               *  A<ScalarField>(rho) / B<ScalarField>(rho)
-    //     );
+void PressureGradient::execute() {
 
-    // sum_AB_dW(
-    //     mp_ *
-    //     (p.b() / (rho.b() * rho.b()) + p.a() / (rho.a() * rho.a())));
+    log().info_begin() << "Computing pressure gradient";
 
+    int it = time_.get_current_timestep();
+    auto &p = pressure_.get(it);
+    auto &rho = conti_.get(it);
 
     sum_AB_dW(rho, mp_ / rho.b() * (p.a() + p.b()));
 
@@ -72,3 +83,4 @@ void Pressure::execute() {
 }
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
+REGISTER_DEF_TYPE(TRANSPORTEQN, PressureGradient);

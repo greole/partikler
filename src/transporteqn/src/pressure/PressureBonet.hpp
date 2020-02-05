@@ -42,7 +42,7 @@ class Pressure : public ScalarFieldEquation {
 
     REGISTER_DEC_TYPE(Pressure);
 
-  private:
+private:
     // In
     // Density
     ScalarFieldEquation &conti_;
@@ -53,13 +53,32 @@ class Pressure : public ScalarFieldEquation {
     const float gamma_;
     const float p_0_;
     const float prefac_;
+
+public:
+    Pressure(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
+
+    void execute();
+};
+
+
+class PressureGradient : public ScalarGradientEquation {
+
+    REGISTER_DEC_TYPE(PressureGradient);
+
+  private:
+    // In
+    // Density
+    ScalarFieldEquation &conti_;
+    ScalarFieldEquation &pressure_;
+
+    // Coeffs
     const float mp_;
 
-    ScalarField &p;
-    VectorField &dp;
-
   public:
-    Pressure(
+    PressureGradient(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);
