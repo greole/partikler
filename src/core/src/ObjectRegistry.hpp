@@ -148,6 +148,21 @@ class ObjectRegistry {
         return register_object<T>(
             std::make_unique<T>(model_name, parameter, objReg));
     }
+
+    // look up velocity and create if it doesnt exist yet
+    VectorField &velocity() {
+        if (object_exists("u")) return get_object<VectorField>("u");
+        return register_object<VectorField>(
+            std::make_unique<VectorField>(
+                n_particles_,
+                zero<VectorField::value_type>::val,
+                "u",
+                std::vector<std::string> {"U", "V", "W"}
+            )
+        );
+    }
+
+
 };
 
 class FieldIdMap : public SPHObject {
