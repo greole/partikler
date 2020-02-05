@@ -90,6 +90,12 @@ YAML::Node GenerateBoundaryParticles::default_graph() {
     gravity["TRANSPORTEQN"]["model"] = "Gravity";
     node["main"].push_back(gravity);
 
+    YAML::Node st;
+    st["SURFACETENSION"]["model"] = "Akinci";
+    st["SURFACETENSION"]["gamma"] = 0;
+    node["main"].push_back(st);
+
+
     YAML::Node mom;
     mom["TRANSPORTEQN"]["model"] = "Momentum";
     mom["TRANSPORTEQN"]["KernelType"] = "NonSymmetric";
