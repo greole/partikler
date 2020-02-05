@@ -92,7 +92,7 @@ TEST(ScalarField, ParenthesisTest) {
 
     ScalarField res(2, 0.0);
 
-    solve(res, (a + b) * c);
+    solve_impl(res, (a + b) * c);
 
     ASSERT_EQ(res[0], 9.0);
     ASSERT_EQ(res[1], 9.0);
@@ -175,7 +175,7 @@ TEST(ScalarField, ComplexArithmeticFields) {
 
     ScalarField res(1, 0.0);
 
-    solve(res, (a + b) / b);
+    solve_impl(res, (a + b) / b);
 
     ASSERT_EQ(res[0], 1.5);
 }
@@ -188,7 +188,7 @@ TEST(ScalarField, MultScalarFields) {
 
     ScalarField res(1, 0.0);
 
-    solve(res, a * b);
+    solve_impl(res, a * b);
 
     ASSERT_EQ(res[0], 2.0);
 }
@@ -201,7 +201,7 @@ TEST(ScalarField, NormScalarFields) {
 
     auto norm = Norm();
 
-    solve(res, norm(a));
+    solve_impl(res, norm(a));
 
     ASSERT_EQ(res[0], 6.0);
 }
@@ -214,7 +214,7 @@ TEST(ScalarField, PowScalarFields) {
 
     auto pow_t = Pow<float>(2.0);
 
-    solve(res, pow_t(a));
+    solve_impl(res, pow_t(a));
 
     ASSERT_EQ(res[0], 4.0);
 }
@@ -227,9 +227,9 @@ TEST(ScalarField, ManualPowScalarFields) {
 
     auto pow_t = Pow<float>(2.0);
 
-    solve(res, a + a);
+    solve_impl(res, a + a);
 
-    solve(res, pow_t(res));
+    solve_impl(res, pow_t(res));
 
     ASSERT_EQ(res[0], 4.0);
 }
@@ -255,7 +255,7 @@ TEST(ScalarField, AddScalarFields) {
 
     ScalarField res(1, 0.0);
 
-    solve(res, a + b);
+    solve_impl(res, a + b);
 
     ASSERT_EQ(res[0], 3.0);
 }
@@ -266,7 +266,7 @@ TEST(ScalarField, AddScalarToScalarFields) {
 
     ScalarField res(1, 0.0);
 
-    solve(res, a + 1.0);
+    solve_impl(res, a + 1.0);
 
     ASSERT_EQ(res[0], 2.0);
 }
@@ -281,7 +281,7 @@ TEST(ScalarField, PowScalarFieldExpr) {
 
     auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(2.0));
 
-    solve(res, pow(a + b));
+    solve_impl(res, pow(a + b));
 
     ASSERT_EQ(res[0], 4.0);
 }
