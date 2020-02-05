@@ -37,10 +37,9 @@
 #include "Models.hpp"
 #include "Object.hpp"         // for SPHObject, ModelType
 #include "ObjectRegistry.hpp" // for ObjectRegistry
-#include "SearchCubes.hpp"    // for NeighbourFieldAB
+#include "Scalar.hpp"
+#include "SearchCubes.hpp" // for NeighbourFieldAB
 #include "Time.hpp"
-#include "yaml-cpp/node/impl.h" // for Node::~Node, Node::Node, Node::as
-#include "yaml-cpp/node/node.h" // for Node
 #include "yaml-cpp/yaml.h"
 
 // TODO TransportedQuantity
@@ -53,50 +52,18 @@
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
 
-// class EmptyFieldEquation {
-
-// };
-
-template <class FieldGradientType> class FieldGradientEquation {
+template <class FieldType>
+class FieldEquationBase : public Model {
 
   protected:
-    FieldGradientType &df_;
 
-  public:
-    typedef FieldGradientType value_type;
-
-    template <class FieldType>
-    FieldGradientEquation(ObjectRegistry &objReg, FieldType &f)
-        : df_(objReg.create_field<FieldGradientType>(
-              "d" + f.get_name(),
-              zero<typename FieldGradientType::value_type>::val,
-              {"dx" + f.get_name(),
-               "dy" + f.get_name(),
-               "dz" + f.get_name()})) {}
-};
-
-template <class FieldType> class FieldValueEquation {
-
-  protected:
     FieldType &f_;
 
-  public:
-    typedef FieldType value_type;
-
-    FieldValueEquation(ObjectRegistry &objReg, FieldType &f) : f_(f) {};
-};
-
-template <class FieldValueType, class FieldGradientType>
-class FieldEquationBase : public Model,
-                          public FieldValueType,
-                          public FieldGradientType {
-
-  protected:
     TimeGraph &time_;
 
     NeighbourFieldAB &np_;
 
-    ScalarField &W_;
+    ObjectRegistry &objReg_;
 
     // store previous results
     // std::map<int, T> prev_;
@@ -105,80 +72,43 @@ class FieldEquationBase : public Model,
     int iteration_;
 
   public:
-    KernelGradientType kernelGradientType_;
 
-    template <class FieldType>
     FieldEquationBase(
         const std::string &field_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        FieldType &f)
-        : Model(field_name, parameter, objReg), FieldValueType(objReg, f),
-          FieldGradientType(objReg, f),
+        FieldType& f)
+        : Model(field_name, parameter, objReg),
+          f_(f),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          W_(objReg.get_object<ScalarField>("KernelW")),
-          // TODO refactor kernelGradientType to FieldGradientType
-          kernelGradientType_(
-              (read_or_default_coeff_impl<std::string>(
-                   parameter, "KernelType", "Symmetric") == "Symmetric")
-                  ? KernelGradientType::Symmetric
-                  : KernelGradientType::NonSymmetric) {}
+          objReg_(objReg)
+           {}
 
-    // get result for iteration i
-    // if result is not cached solve gets executed
-
-    ScalarField &W() { return W_; };
-
-    NeighbourFieldAB &N() { return np_; };
-
-    template <class Expr>
-    typename FieldGradientType::value_type &
-    sum_AB_dW(ScalarField &rho, Expr const &e) {
-        // dispatch on KernelGradientType
-        auto &dW =
-            get_objReg().template get_object<KernelGradientField>("KerneldWdx");
-        decltype(auto) expr = boost::yap::as_expr(e);
-        sum_AB_dW_res_impl_rho(rho, this->df_, np_, dW, expr);
-
-        return this->df_;
-    }
-
-    template <class Expr>
-    typename FieldGradientType::value_type &sum_AB_dW(Expr const &e) {
-        // dispatch on KernelGradientType
-        if (kernelGradientType_ == KernelGradientType::Symmetric) {
-            auto &dW =
-                get_objReg().template get_object<KernelGradientField>("KerneldWdx");
-            decltype(auto) expr = boost::yap::as_expr(e);
-            sum_AB_dW_res_impl(this->df_, np_, dW, expr);
-        } else {
-            auto &dW = get_objReg().template get_object<DoubleKernelGradientField>(
-                "KerneldWdx");
-            decltype(auto) expr = boost::yap::as_expr(e);
-            sum_AB_dW_res_impl(this->df_, np_, dW, expr);
-        }
-
-        return this->df_;
-    }
-
-    template <class RHS> typename FieldValueType::value_type &sum_AB(RHS rhs) {
-        sum_AB_res_impl(this->f_, np_, rhs * W_);
-        return this->f_;
-    }
-
-    typename FieldValueType::value_type &m_sum_AB(float particle_mass) {
-        sum_AB_res_impl(particle_mass, this->f_, np_, W_);
-        return this->f_;
-    };
-
-    // VectorField& ddx() {
-    // };
+    std::pair<bool, Scalar> timestep_limit() { return {false, 0}; }
 
     template <class RHS> void ddt(RHS rhs) {
 
         // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1)
         // ...
+    }
+
+    template<class Expr>
+    void solve(Expr e) {
+        decltype(auto) expr = boost::yap::as_expr(e);
+        solve_impl(f_, expr);
+    }
+
+    FieldType &get(int iteration) {
+        if (iteration == iteration_) {
+            std::cout << get_name()
+                      << "DEBUG using cached solution for iteration "
+                      << iteration << std::endl;
+            return f_;
+        } else {
+            this->execute();
+            return f_;
+        }
     }
 
     // template<class T>
@@ -191,38 +121,153 @@ class FieldEquationBase : public Model,
     // get the result for the given iteration
     // if iteration is larger then cached iteration
     // equation is solved
-    typename FieldValueType::value_type &get(int iteration) {
-        if (iteration == iteration_) {
-            std::cout << get_name()
-                      << "DEBUG using cached solution for iteration "
-                      << iteration << std::endl;
-            return this->f_;
-        } else {
-            this->execute();
-            return this->f_;
-        }
-    }
-
-    typename FieldGradientType::value_type &get_dx(int iteration) {
-        if (iteration == iteration_) {
-            std::cout << get_name()
-                      << "DEBUG using cached solution for iteration "
-                      << iteration << std::endl;
-            return this->df_;
-        } else {
-            this->execute();
-            return this->df_;
-        }
-    }
 };
 
-using ScalarFieldEquation = FieldEquationBase<
-    FieldValueEquation<ScalarField>,
-    FieldGradientEquation<VectorField>>;
+template <class FieldType>
+class TimeDerivativeEquation : public FieldEquationBase<FieldType> {
 
-using VectorFieldEquation = FieldEquationBase<
-    FieldValueEquation<VectorField>,
-    FieldGradientEquation<VectorField>>;
+private:
+
+    FieldType& Intf_;
+
+public:
+
+    TimeDerivativeEquation(
+        const std::string &eqn_base_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        FieldType &f):
+         FieldEquationBase<FieldType>(
+            eqn_base_name,
+            parameter,
+            objReg,
+            objReg.create_field<FieldType>(
+                "d" + f.get_name(),
+                zero<typename FieldType::value_type>::val,
+                {"d_" + f.get_name() + "dx",
+                 "d_" + f.get_name() + "dy",
+                 "d_" + f.get_name() + "dz"})),
+         Intf_(f) {}
+
+
+    void IntDt() {
+        this->log().info_begin() << "Time integration " << Intf_.get_name();
+        for (size_t i = 0; i < this->f_.size(); i++) {
+            Intf_[i] += this->f_[i] * this->time_.get_deltaT();
+        }
+        this->log().info_end();
+    }
+
+};
+
+
+template <class FieldGradientType>
+class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
+
+  public:
+    KernelGradientType kernelGradientType_;
+
+    typedef FieldGradientType value_type;
+
+    template <class FieldType>
+    FieldGradientEquation(
+        const std::string &eqn_base_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        FieldType &f)
+        : FieldEquationBase<FieldGradientType>(
+              eqn_base_name,
+              parameter,
+              objReg,
+              objReg.create_field<FieldGradientType>(
+                  "d" + f.get_name(),
+                  zero<typename FieldGradientType::value_type>::val,
+                  {"d_" + f.get_name() + "_dx",
+                   "d_" + f.get_name() + "_dy",
+                   "d_" + f.get_name() + "_dz"})),
+          kernelGradientType_(
+              (read_or_default_coeff_impl<std::string>(
+                   parameter, "KernelType", "Symmetric") == "Symmetric")
+                  ? KernelGradientType::Symmetric
+                  : KernelGradientType::NonSymmetric) {}
+
+    template <class Expr>
+    FieldGradientType &sum_AB_dW(ScalarField &rho, Expr const &e) {
+        // dispatch on KernelGradientType
+        auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+            "KerneldWdx");
+        decltype(auto) expr = boost::yap::as_expr(e);
+        sum_AB_dW_res_impl_rho(rho, this->f_, this->np_, dW, expr);
+
+        return this->f_;
+    }
+
+    template <class Expr> FieldGradientType &sum_AB_dW(Expr const &e) {
+        // dispatch on KernelGradientType
+        if (kernelGradientType_ == KernelGradientType::Symmetric) {
+            auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+                "KerneldWdx");
+            decltype(auto) expr = boost::yap::as_expr(e);
+            sum_AB_dW_res_impl(this->f_, this->np_, dW, expr);
+        } else {
+            auto &dW =
+                this->get_objReg().template get_object<DoubleKernelGradientField>(
+                    "KerneldWdx");
+            decltype(auto) expr = boost::yap::as_expr(e);
+            sum_AB_dW_res_impl(this->f_, this->np_, dW, expr);
+        }
+
+        return this->f_;
+    }
+
+};
+
+template <class FieldType>
+class FieldValueEquation : public FieldEquationBase<FieldType> {
+
+  protected:
+
+    ScalarField &W_;
+
+  public:
+    typedef FieldType value_type;
+
+    FieldValueEquation(
+        const std::string &eqn_base_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg,
+        FieldType &f)
+        : FieldEquationBase<FieldType>(eqn_base_name, parameter, objReg, f),
+          W_(objReg.get_object<ScalarField>("KernelW")) {};
+
+    template <class RHS> FieldType &sum_AB(RHS rhs) {
+        sum_AB_res_impl(this->f_, this->np_, rhs * W_);
+        return this->f_;
+    }
+
+    FieldType &m_sum_AB(float particle_mass) {
+        sum_AB_res_impl(particle_mass, this->f_, this->np_, W_);
+        return this->f_;
+    };
+
+
+    template <class RHS> void solve(RHS rhs) {
+        // TODO implement sum_AB as yap terminal
+        // sum_AB needs nb as data member
+    }
+
+
+};
+
+
+using ScalarFieldEquation = FieldValueEquation<ScalarField>;
+using VectorFieldEquation = FieldValueEquation<VectorField>;
+
+using ScalarGradientEquation = FieldGradientEquation<VectorField>;
+// TODO clarify why this is not a tensor field
+using VectorGradientEquation = FieldGradientEquation<VectorField>;
+
+using TimeDerivativeVectorEquation = TimeDerivativeEquation<VectorField>;
 
 // TODO implement this
 // using ABVectorFieldEquation =
