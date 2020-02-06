@@ -71,6 +71,10 @@ class FieldEquationBase : public Model {
     // the current iteraton
     int iteration_;
 
+    Scalar h_;
+
+    Scalar maxDt_  = std::numeric_limits<Scalar>::max();
+
   public:
 
     FieldEquationBase(
@@ -82,6 +86,7 @@ class FieldEquationBase : public Model {
           f_(f),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
+          h_(objReg.get_object<Generic<Scalar>>("h")()),
           objReg_(objReg)
            {}
 
@@ -126,7 +131,7 @@ class FieldEquationBase : public Model {
 template <class FieldType>
 class TimeDerivativeEquation : public FieldEquationBase<FieldType> {
 
-private:
+protected:
 
     FieldType& Intf_;
 
@@ -151,9 +156,14 @@ public:
 
 
     void IntDt() {
-        this->log().info_begin() << "Time integration " << Intf_.get_name();
+        Scalar dt =  this->time_.get_deltaT();
+        // clang-format off
+        this->log().info_begin()
+            << "Time integration " << Intf_.get_name()
+            << " deltaT " << dt;
+        // clang-format on
         for (size_t i = 0; i < this->f_.size(); i++) {
-            Intf_[i] += this->f_[i] * this->time_.get_deltaT();
+            Intf_[i] += this->f_[i] * dt;
         }
         this->log().info_end();
     }
