@@ -37,7 +37,9 @@ Gauss::Gauss(
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<ScalarField>("KernelW")),
-      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {}
+      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {
+    objReg.create_generic<Scalar>("h", h_);
+}
 
 void Gauss::execute() {
 
