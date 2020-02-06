@@ -56,6 +56,8 @@ class TimeGraph : public Model {
 
     bool iter_mode = false;
 
+    std::map<std::string, Scalar> model_timestep_restrictions_;
+
   public:
     TimeGraph(
         const std::string &model_name,
@@ -80,7 +82,10 @@ class TimeGraph : public Model {
         };
     }
 
-
+    void set_model_timestep(std::string name, Scalar dt){
+        log().info() << "Setting timestep limit " << dt << " for Model " << name;
+        model_timestep_restrictions_[name] = dt;
+    };
 
     void execute_post() { post_.execute(); }
 
@@ -96,8 +101,12 @@ class TimeGraph : public Model {
         post_.sub_model_push_back(m);
     }
 
-    float get_deltaT() {
-        if (iter_mode) return 1.0e-32;
+    Scalar get_deltaT() {
+        Scalar dt = std::numeric_limits<Scalar>::max();
+        for (auto &el : model_timestep_restrictions_) {
+            if (el.second < dt) dt = el.second;
+        }
+        set_deltaT(dt);
         return deltaT_;
     }
 
