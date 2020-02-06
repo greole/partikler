@@ -27,7 +27,6 @@ WriterBase::WriterBase(
       time_graph_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 bool WriterBase::write() {
-
     int ct = time_graph_.get_current_timestep();
     if (ct % write_freq_ == 0) return true;
     return false;
