@@ -2,100 +2,57 @@ PROJECT:
     name: ExampleProject
     path: /home/go/data/partikler_projects
     debug: False
-    iterations: 10000
+    iterations: 1
     write_frequency: 10
-    deltaT: 0.000025
-    mp: 1.94e-07
 
     PARAMETERSTUDY:
         model: GenerateBoundaryParticles
         parameter: dx
-        values: [0.1, 0.5, 1.0]
+        values: [0.1, 0.5. 1.0]
 
     PRE:
 
-        # - BOUNDARY:
-        #       model: GenerateBoundaryParticles
-        #       name: Cube
-        #       file: ../example/cube.stl
-        #       dx: 2.0
-        #       writeout: 10
-        #       iterations: 1
-        #       debug: True
-        #
-        # - BOUNDARY:
-        #       model: GenerateBoundaryParticles
-        #       name: Tetrahedron
-        #       file: ../example/Tetrahedron.stl
-        #       dx: 2.0
-        #       writeout: 10
-        #       iterations: 1
-        #       scale: 1
-        #       #translate: [0, 50, 10]
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Cube
+              file: ../example/cube.stl
+              dx: 2.0
+              writeout: 10
+              iterations: 1
+
+        - BOUNDARY:
+              model: GenerateBoundaryParticles
+              name: Tetrahedron
+              file: ../example/Tetrahedron.stl
+              dx: 2.0
+              writeout: 10
+              iterations: 1
+              scale: 1
+              #translate: [0, 50, 10]
 
         - FIELDS:
             model: InitShape
             shape: Cubiod
             name: FluidCube
-            dimensions: [0.01, 0.01, 0.01] # x y z
-            translate: [0.0,0.0,0.0]
-            dx: 0.0005
+            dimensions: [10.0, 20.0, 30.0] # x y z
+            position: [0, 0, 0]
+            dx: 2.0
 
-        # - FIELDS:
-        #     model: InitShape
-        #     shape: Cubiod
-        #     name: Bottom
-        #     dimensions: [5.0, 50.0, 50.0] # x y z
-        #     translate: [0, -25.0, -25.0]
-        #     dx: 1.0
-
-        # - FIELDS:
-        #     model: InitShape
-        #     shape: Cubiod
-        #     name: TOP
-        #     dimensions: [5.0, 50.0, 50.0] # x y z
-        #     translate: [30, -25.0, -25.0]
-        #     dx: 1.0
-        #
-        # - FIELDS:
-        #     model: InitShape
-        #     shape: Cubiod
-        #     name: LEFT
-        #     dimensions: [30.0, 5.0, 50.0] # x y z
-        #     translate: [0, -25.0, -25.0]
-        #     dx: 1.0
-        #
-        # - FIELDS:
-        #     model: InitShape
-        #     shape: Cubiod
-        #     name: RIGHT
-        #     dimensions: [30.0, 5.0, 50.0] # x y z
-        #     translate: [0, 25.0, -25.0]
-        #     dx: 1.0
-
-
-
-
-        # # Generate Additional fields for export
-        # - FIELDS:
-        #     model: InitFields
-        #     ScalarFields: ["T", "f"]
+        # Generate Additional fields for export
+        - FIELDS:
+            model: InitFields
+            FloatFields: ["T", "f"]
 
         # Set fixed value boundaries
-        # - BOUNDARY:
-        #     model: FixedValue
-        #     boundaries:
-        #       - field: T
-        #         values:
-        #         # - name: Cube
-        #         #   value: 300
-        #         # - name: Tetrahedron
-        #         #   value: 400
-        #         - name: FluidCube
-        #           value: 600
-        #         # - name: Bottom
-        #         #   value: 1000
-
+        - BOUNDARY:
+            model: FixedValue
+            boundaries:
+              - field: T
+                values:
+                - name: Cube
+                  value: 300
+                - name: Tetrahedron
+                  value: 400
 
         - EXPORT:
             model: SuperSPHWriter
@@ -107,51 +64,4 @@ PROJECT:
 
 
     MAIN:
-
-      - PARTICLENEIGHBOURS:
-          model: SPHParticleNeighbours
-          dx: 0.001
-
-      - KERNEL:
-          model: Wendland3D
-          h: 0.001
-
-      - TRANSPORTEQN:
-          model: Conti
-
-      - TRANSPORTEQN:
-          model: Pressure
-          rho_0: 1000
-          p_0: 0.0
-          c: 300
-          gamma: 1.4
-
-      - TRANSPORTEQN:
-          model: Viscosity
-          nu: 0.01
-
-      - TRANSPORTEQN:
-          model: Gravity
-          g:  [0.0, 0.0, 0.0]
-
-      - SURFACETENSION:
-          model: Akinci
-          h: 0.001
-          rho_0: 1000.0
-          gamma: 0.0
-
-
-      - TRANSPORTEQN:
-          model: Momentum
-
-      - TRANSPORTEQN:
-          model: PosIntegrator
-
-      - EXPORT:
-          model: SuperSPHWriter
-          name: main
-
-      - EXPORT:
-         model: HDF5Writer
-         name: main
 
