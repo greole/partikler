@@ -53,6 +53,16 @@ void Momentum::execute() {
 
     log().info_end();
 
+    Scalar maxAbsU = 0;
+    for(auto &el: Intf_) {
+        Scalar absU = mag(el);
+        if (absU > maxAbsU) maxAbsU = absU;
+    }
+    if (maxAbsU > 0) {
+        maxDt_ = 0.5*h_/maxAbsU;
+        time_.set_model_timestep("Momentum", maxDt_);
+    }
+
     IntDt();
 
     iteration_ = time_.get_current_timestep();

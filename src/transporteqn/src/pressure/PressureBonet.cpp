@@ -35,7 +35,10 @@ Pressure::Pressure(
       gamma_(read_or_default_coeff<float>("gamma", 1.4)),
       p_0_(read_or_default_coeff<float>("p_0", 10000)),
       prefac_(c_ * c_ * rho_0_ / gamma_)
-{}
+{
+    maxDt_ = 0.5/c_*h_;
+    time_.set_model_timestep(model_name, maxDt_);
+}
 
 PressureGradient::PressureGradient(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)

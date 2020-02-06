@@ -37,7 +37,11 @@ Viscosity::Viscosity(
       nu_(read_or_default_coeff<Scalar>("nu", 1e-05)),
       u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
-      pos_(objReg.get_pos()) {}
+      pos_(objReg.get_pos()) {
+
+    maxDt_ = 0.25 * h_*h_/nu_;
+    time_.set_model_timestep(model_name, maxDt_);
+}
 
 void Viscosity::execute() {
 
@@ -49,8 +53,9 @@ void Viscosity::execute() {
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    Scalar fact =  mp_*10.0*nu_;
     sum_AB_dW(
-        mp_* 10.* rho * nu_ *  (ab(u_) * ab(pos_))
+        fact * rho * (ab(u_) * ab(pos_))
       / ( ( rho.a() + rho.b() ) * ( normSqr(ab(pos_)) ) )
         );
     // clang-format on
