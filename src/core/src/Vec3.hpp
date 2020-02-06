@@ -73,4 +73,6 @@ void scalePoints(std::vector<Vec3> &points, Vec3 scale);
 
 void scalePoints(std::vector<Vec3> &points, Scalar scale);
 
+Scalar mag(Vec3 v);
+
 #endif

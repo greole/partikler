@@ -19,6 +19,7 @@
 */
 
 #include "Vec3.hpp"
+#include "math.h"
 
 Vec3 &Vec3::operator=(const Vec3 &x) {
     operator[](0) = x[0];
@@ -115,3 +116,5 @@ void translatePoints(std::vector<Vec3> &points, Vec3 translate) {
         pos += translate;
     }
 }
+
+Scalar mag(Vec3 v) {return std::sqrt(squared_length(v));}
