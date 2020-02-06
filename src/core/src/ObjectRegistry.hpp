@@ -110,9 +110,11 @@ class ObjectRegistry {
 
     // create an generic with defined  val
     template <class T>
-    T &create_generic(const std::string name, typename T::value_type val) {
-        if (object_exists(name)) return get_object<T>(name);
-        return register_object<T>(std::make_unique<T>(name, GenericType, val));
+    Generic<T> &
+    create_generic(const std::string name, T val) {
+        if (object_exists(name)) return get_object<Generic<T>>(name);
+        return register_object<Generic<T>>(
+            std::make_unique<Generic<T>>(name, GenericType, val));
     }
 
     template <class T>
