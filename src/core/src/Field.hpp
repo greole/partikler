@@ -131,10 +131,10 @@ template <class T> class Field : public T, public SPHObject {
           comp_names_(comp_names) {};
 
     Field(
-        int size,
+        size_t size,
         typename T::value_type val,
         const std::string name = "",
-        std::vector<std::string> comp_names = {})
+        const std::vector<std::string> comp_names = {})
         : T(size, val), SPHObject(name, GetFieldType<T>::value),
           comp_names_(comp_names) {};
 
