@@ -20,19 +20,20 @@
 #include "SearchCubes.hpp"
 
 #include "Logger.hpp" // for MSG, Logger
+#include "Scalar.hpp" // for MSG, Logger
 
 SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
+initSearchCubeDomain(const std::vector<Point> &particles, Scalar dx) {
     auto bound_box = bounding_box(particles.begin(), particles.end());
 
     // bounds are scaled a bit to avoid particles on exact boundary
-    const float domain_extrusion = 0.01 * dx; // in dx
-    float min_x = bound_box.min().x() - domain_extrusion;
-    float min_y = bound_box.min().y() - domain_extrusion;
-    float min_z = bound_box.min().z() - domain_extrusion;
-    float max_x = bound_box.max().x() + domain_extrusion;
-    float max_y = bound_box.max().y() + domain_extrusion;
-    float max_z = bound_box.max().z() + domain_extrusion;
+    const Scalar domain_extrusion = 0.01 * dx; // in dx
+    Scalar min_x = bound_box.min().x() - domain_extrusion;
+    Scalar min_y = bound_box.min().y() - domain_extrusion;
+    Scalar min_z = bound_box.min().z() - domain_extrusion;
+    Scalar max_x = bound_box.max().x() + domain_extrusion;
+    Scalar max_y = bound_box.max().y() + domain_extrusion;
+    Scalar max_z = bound_box.max().z() + domain_extrusion;
 
     // ceil with fixed dx increases max(x,y,z) a bit
     unsigned int n_cubes_x = (unsigned int)ceil(((max_x - min_x) / dx));
@@ -48,7 +49,7 @@ initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
     Logger(3, "initSearchCubeDomainSTL").check(n_cubes_z >= 3)
         << " n_cubes_z less than 3";
 
-    const float idx = 1.0 / dx;
+    const Scalar idx = 1.0 / dx;
     return SearchCubeDomain {
         Point3D {min_x, min_y, min_z},
         Point3D {max_x, max_y, max_z},
@@ -60,8 +61,10 @@ initSearchCubeDomain(const std::vector<Point> &particles, float dx) {
 }
 
 auto bounding_box(std::vector<Vec3> const &particles) {
-    Scalar minx, miny, minz = std::numeric_limits<Scalar>::max();
-    Scalar maxx, maxy, maxz = std::numeric_limits<Scalar>::min();
+    Scalar minx, miny, minz;
+    Scalar maxx, maxy, maxz;
+    minx, miny, minz = std::numeric_limits<Scalar>::max();
+    maxx, maxy, maxz = std::numeric_limits<Scalar>::min();
 
     for (auto &el : particles) {
 
@@ -79,11 +82,8 @@ auto bounding_box(std::vector<Vec3> const &particles) {
 }
 
 SearchCubeDomain
-initSearchCubeDomain(const std::vector<Vec3> &particles, float dx) {
+initSearchCubeDomain(const std::vector<Vec3> &particles, Scalar dx) {
     auto bound_box = bounding_box(particles);
-
-    std::cout << __PRETTY_FUNCTION__ << bound_box.first << bound_box.second
-              << std::endl;
 
     // bounds are scaled a bit to avoid particles on exact boundary
     const Scalar domain_extrusion = 0.01 * dx; // in dx
@@ -124,7 +124,7 @@ void stl_owner_cube_search(
     const std::vector<Point> &pos,
     const size_t first,
     const size_t last,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
     std::vector<STLUnsortedNeighbour> &ret) {
 
@@ -144,7 +144,7 @@ void stl_owner_cube_search(
             STLSurfaceDist sd =
                 compute_STLSurface_dist(opos, npos, facets[oid], facets[nid]);
 
-            const float distanceSqr = sd.len * sd.len;
+            const Scalar distanceSqr = sd.len * sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
                 ret.push_back({{oid, nid}, sd});
@@ -159,7 +159,7 @@ void stl_neighbour_cube_search(
     const size_t last,
     const size_t first_nc,
     const size_t last_nc,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     const std::vector<Facet_handle> &facets,
     std::vector<STLUnsortedNeighbour> &ret) {
 
@@ -174,7 +174,7 @@ void stl_neighbour_cube_search(
             STLSurfaceDist sd =
                 compute_STLSurface_dist(opos, npos, facets[oid], facets[nid]);
 
-            const float distanceSqr = sd.len * sd.len;
+            const Scalar distanceSqr = sd.len * sd.len;
 
             if (distanceSqr < maxDistanceSqr) {
                 ret.push_back({{oid, nid}, sd});
@@ -188,7 +188,7 @@ void owner_cube_search(
     const std::vector<Vec3> &pos,
     const size_t first,
     const size_t last,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     std::vector<UnsortedNeighbour> &ret) {
 
     for (size_t oid = first; oid < last; oid++) {
@@ -221,7 +221,7 @@ std::array<bool, 27> vector_inner_owner_cube_search(
     std::vector<Point> &pos,
     size_t first,
     size_t last,
-    float maxDistanceSqr) {
+    Scalar maxDistanceSqr) {
 
     std::array<bool, 27> mask {};
 
@@ -233,7 +233,7 @@ std::array<bool, 27> vector_inner_owner_cube_search(
 
         // const Point npos = pos[nid];
 
-        const float distanceSqr = squared_distance(opos, pos[nid]);
+        const Scalar distanceSqr = squared_distance(opos, pos[nid]);
 
         mask[nid - first] = distanceSqr < maxDistanceSqr;
     }
@@ -247,7 +247,7 @@ void neighbour_cube_search(
     const size_t last,
     const size_t first_nc,
     const size_t last_nc,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     std::vector<UnsortedNeighbour> &ret) {
 
     // Step 3.1. set pivot particle
@@ -553,7 +553,7 @@ STLSortedNeighbours createSTLNeighbours(
 
 #pragma omp parallel
     {
-        const float maxDistanceSqr = scd.dx * scd.dx;
+        const Scalar maxDistanceSqr = scd.dx * scd.dx;
 
         NeighbourIdHalfStencil ncidsten(scd.n.nx, scd.n.ny);
         SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
@@ -696,7 +696,7 @@ SortedNeighbours createNeighbours(
 
 #pragma omp parallel
     {
-        const float maxDistanceSqr = scd.dx * scd.dx;
+        const Scalar maxDistanceSqr = scd.dx * scd.dx;
 
         NeighbourIdHalfStencil ncidsten(scd.n.nx, scd.n.ny);
         SubDivision sub {scd.n.nx, scd.n.ny, scd.n.nz};
