@@ -1,4 +1,4 @@
-#include "SearchCubes.hpp"
+#include "CGALSearchCubes.hpp"
 #include "Helper.hpp"
 #include "cgal/CGALTYPEDEFS.hpp"
 #include "gtest/gtest.h"

@@ -70,7 +70,7 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
 #include "Viscosity.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
-#include "ParticleGenerator.hpp"
+#include "CGALParticleGenerator.hpp"
 
 REGISTER_DEF_TYPE(READER, SPHSTLReader);
 REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);

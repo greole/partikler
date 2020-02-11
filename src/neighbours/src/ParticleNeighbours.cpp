@@ -34,7 +34,7 @@ SPHParticleNeighbours::SPHParticleNeighbours(
           "search_cube_domain")) {
 
     auto pcs = ModelFactory::createInstance(
-        "SORTING", "CountingSortParticlesVec3", "sort", parameter, objReg);
+        "SORTING", "CountingSortParticles", "sort", parameter, objReg);
 
     sub_model_push_back(pcs);
 }
@@ -62,7 +62,8 @@ void SPHParticleNeighbours::execute() {
 }
 
 void SPHParticleNeighbours::update_search_cube_domain() {
-    scd_() = initSearchCubeDomain(pos_, search_cube_size_ * dx_);
+    std::pair<Vec3, Vec3> bb = bounding_box(pos_);
+    scd_() = initSearchCubeDomain(bb, search_cube_size_ * dx_);
 }
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHParticleNeighbours);

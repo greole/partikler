@@ -23,7 +23,7 @@
 
 CountingSortParticles::CountingSortParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg), pos_(objReg.get_points()),
+    : Model(model_name, parameter, objReg), pos_(objReg.get_pos()),
       sc_(objReg.get_object<Field<std::vector<SearchCube>>>("search_cubes")),
       si_(objReg.create_field<SizeTField>("sorting_idxs")),
       scd_(objReg.get_object<Generic<SearchCubeDomain>>("search_cube_domain")) {
@@ -52,54 +52,6 @@ void CountingSortParticles::reorder_fields() {
     log().info_begin() << "Reordering particle fields ";
 
     for (auto &f : get_objReg().get_objects()) {
-        f->get_type();
-        if (f->get_name() == "Pos") continue;
-        if (f->get_name() == "KernelW") continue;
-        if (f->get_name() == "KerneldWdx") continue;
-        if (f->get_name() == "neighbour_pairs") continue;
-        if (f->get_name() == "surface_dist") continue;
-        if (f->get_name() == "search_cubes") continue;
-        if (f->get_name() == "sorting_idxs") continue;
-
-        auto type = f->get_type();
-        std::shared_ptr<SPHObject> *obj_ptr = &f;
-        DISPATCH(obj_ptr, reorder_vector, type, si_);
-    }
-
-    log().info_end();
-}
-
-CountingSortParticlesVec3::CountingSortParticlesVec3(
-    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg), pos_(objReg.get_pos()),
-      sc_(objReg.get_object<Field<std::vector<SearchCube>>>("search_cubes")),
-      si_(objReg.create_field<SizeTField>("sorting_idxs")),
-      scd_(objReg.get_object<Generic<SearchCubeDomain>>("search_cube_domain")) {
-}
-
-void CountingSortParticlesVec3::execute() {
-
-    log().info_begin() << "Sorting particles ";
-
-    // PointField old_pos(pos_);
-
-    // pos.store_old();
-
-    // TODO too much copying
-    auto [sc, si, pos] = countingSortParticles(scd_(), pos_);
-
-    sc_ = sc;
-    si_ = si;
-    pos_ = pos;
-
-    log().info_end();
-    reorder_fields();
-}
-
-void CountingSortParticlesVec3::reorder_fields() {
-    log().info_begin() << "Reordering particle fields ";
-
-    for (auto &f : get_objReg().get_objects()) {
         if (f->get_name() == "Pos") continue;
         if (f->get_name() == "KernelW") continue;
         if (f->get_name() == "KerneldWdx") continue;
@@ -117,4 +69,3 @@ void CountingSortParticlesVec3::reorder_fields() {
 }
 
 REGISTER_DEF_TYPE(SORTING, CountingSortParticles);
-REGISTER_DEF_TYPE(SORTING, CountingSortParticlesVec3);

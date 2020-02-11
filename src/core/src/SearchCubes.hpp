@@ -18,7 +18,6 @@
 */
 
 #ifndef SEARCHCUBES_H
-
 #define SEARCHCUBES_H
 
 #include <omp.h>    // omp_get_num_threads
@@ -31,7 +30,55 @@
 
 #include <algorithm> // for std::sort
 
+#include "Scalar.hpp"
 #include "Vec3.hpp"
+
+std::pair<Vec3, Vec3> bounding_box(std::vector<Vec3> const &particles);
+
+struct SubDivision {
+    // 3*4bytes = 12bytes
+    // Max 65535**3 cubes, which are approx (65535*3)**3 particles
+    unsigned int nx, ny, nz;
+};
+
+struct SearchCubeDomain {
+
+    Vec3 min;
+    Vec3 max;
+
+    Scalar dx;
+    Scalar idx;
+
+    // 32 byte
+
+    SubDivision n;
+    size_t nt;
+
+    // 24 byte
+
+    /* size_t padding; */
+};
+
+template<class T>
+size_t position_to_cube_id(SearchCubeDomain scd, const T &p) {
+    // TODO test if speed up n_cubes are copied to a const size_t nx ...
+
+    const size_t nx = (size_t)scd.n.nx;
+    const size_t ny = (size_t)scd.n.ny;
+    // const size_t nz = (size_t)scd.n.nz;
+
+    // use idx instead of dx
+    const Scalar idx = scd.idx;
+    const Scalar mx = scd.min[0];
+    const Scalar my = scd.min[1];
+    const Scalar mz = scd.min[2];
+
+    const size_t i {(size_t)((p[0] - mx) * idx)};
+    const size_t j {(size_t)((p[1] - my) * idx)};
+    const size_t k {(size_t)((p[2] - mz) * idx)};
+
+    return i + nx * j + nx * ny * k;
+}
 
 struct NeighbourIdHalfStencil {
     // Stores the stride of a domain, ie the difference of search cubes ids
@@ -80,48 +127,12 @@ struct NeighbourIdHalfStencil {
     };
 };
 
-struct SubDivision {
-    // 3*4bytes = 12bytes
-    // Max 65535**3 cubes, which are approx (65535*3)**3 particles
-    unsigned int nx, ny, nz;
-};
-
-struct SearchCubeDomain {
-
-    Point3D min;
-    Point3D max;
-
-    float dx;
-    float idx;
-
-    // 32 byte
-
-    SubDivision n;
-    size_t nt;
-
-    // 24 byte
-
-    /* size_t padding; */
-};
-
 SearchCubeDomain
-initSearchCubeDomain(const std::vector<Point> &particles, float dx);
-
-SearchCubeDomain
-initSearchCubeDomain(const std::vector<Vec3> &particles, float dx);
+initSearchCubeDomain(const std::pair<Vec3, Vec3> &bound_box, Scalar dx);
 
 struct NeighbourPair {
     size_t ownId;
     size_t neighId;
-};
-
-struct STLSortedNeighbours {
-    std::vector<NeighbourPair> ids;
-
-    // since computation of neighbouring particles
-    // on different STL is expensive a vector holding
-    // the STLSurfaceDist is stored here
-    std::vector<STLSurfaceDist> dist;
 };
 
 struct SortedNeighbours {
@@ -129,15 +140,6 @@ struct SortedNeighbours {
     std::vector<Vec3> dist;
 };
 
-struct STLUnsortedNeighbour {
-
-    NeighbourPair ids;
-
-    // since computation of neighbouring particles
-    // on different STL is expensive a vector holding
-    // the STLSurfaceDist is stored here
-    STLSurfaceDist dist;
-};
 
 struct UnsortedNeighbour {
 
@@ -149,38 +151,20 @@ struct UnsortedNeighbour {
     Vec3 dist;
 };
 
-void stl_neighbour_cube_search(
-    const std::vector<Point> &pos,
-    const size_t first,
-    const size_t last,
-    const size_t first_nc,
-    const size_t last_nc,
-    const float maxDistanceSqr,
-    const std::vector<Facet_handle> &facets,
-    std::vector<STLUnsortedNeighbour> &ret);
-
-void stl_owner_cube_search(
-    const std::vector<Point> &pos,
-    const size_t first,
-    const size_t last,
-    const float maxDistanceSqr,
-    const std::vector<Facet_handle> &facets,
-    std::vector<STLUnsortedNeighbour> &ret);
-
 void neighbour_cube_search(
     const std::vector<Vec3> &pos,
     const size_t first,
     const size_t last,
     const size_t first_nc,
     const size_t last_nc,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     std::vector<UnsortedNeighbour> &ret);
 
 void owner_cube_search(
     const std::vector<Vec3> &pos,
     const size_t first,
     const size_t last,
-    const float maxDistanceSqr,
+    const Scalar maxDistanceSqr,
     std::vector<UnsortedNeighbour> &ret);
 
 // A search cube stores first and last particle ids
@@ -189,27 +173,10 @@ struct SearchCube {
     size_t last;
 };
 
-STLSortedNeighbours createSTLNeighbours(
-    const SearchCubeDomain scd,
-    const std::vector<Point> &pos,
-    std::vector<SearchCube> &searchCubes,
-    const std::vector<Facet_handle> &facets);
-
 SortedNeighbours createNeighbours(
     const SearchCubeDomain scd,
     const std::vector<Vec3> &pos,
     std::vector<SearchCube> &searchCubes);
-
-// SortedNeighbours createNeighbours(
-//     const SearchCubeDomain scd,
-//     const std::vector<Point> &pos,
-//     std::vector<SearchCube> &searchCubes);
-
-struct STLSortedParticles {
-    std::vector<SearchCube> searchCubes;
-    std::vector<size_t> sorting_idxs;
-    std::vector<Point> particles;
-};
 
 struct SortedParticles {
     std::vector<SearchCube> searchCubes;
@@ -217,8 +184,10 @@ struct SortedParticles {
     std::vector<Vec3> particles;
 };
 
-STLSortedParticles countingSortParticles(
-    const SearchCubeDomain scd, const std::vector<Point> &unsorted_particles);
+std::vector<size_t> upper_neighbour_cubes(
+    const SubDivision sub,
+    const NeighbourIdHalfStencil &upper_neighbourId_stencil,
+    const size_t id);
 
 SortedParticles countingSortParticles(
     const SearchCubeDomain scd, const std::vector<Vec3> &unsorted_particles);

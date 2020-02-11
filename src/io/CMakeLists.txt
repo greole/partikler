@@ -55,12 +55,12 @@ add_library(IO SHARED)
 
 target_sources(IO
   PRIVATE
-  "src/ParticleGenerator.cpp"
+  "src/cgal/CGALParticleGenerator.cpp"
   "src/WriterBase.cpp"
   "src/SuperSPHWriter.cpp"
   "src/HDF5Writer.cpp"
   PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ParticleGenerator.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALParticleGenerator.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/WriterBase.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/SuperSPHWriter.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/HDF5Writer.hpp"
@@ -88,6 +88,7 @@ target_link_directories(IO
 target_include_directories(IO
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal"
   "${CMAKE_CURRENT_BINARY_DIR}/include"
   )
 

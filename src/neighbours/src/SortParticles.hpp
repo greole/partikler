@@ -35,35 +35,9 @@ struct SearchCube;
 struct SearchCubeDomain;
 template <class T> class Generic;
 
-class CountingSortParticles : public Model {
+class CountingSortParticles: public Model {
 
     REGISTER_DEC_TYPE(CountingSortParticles);
-
-  private:
-    // In
-    PointField &pos_;
-
-    Field<std::vector<SearchCube>> &sc_;
-
-    //  Sorting indexes
-    SizeTField &si_;
-
-    Generic<SearchCubeDomain> &scd_;
-
-  public:
-    CountingSortParticles(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg);
-
-    void execute();
-
-    void reorder_fields();
-};
-
-class CountingSortParticlesVec3 : public Model {
-
-    REGISTER_DEC_TYPE(CountingSortParticlesVec3);
 
   private:
     // In
@@ -77,7 +51,7 @@ class CountingSortParticlesVec3 : public Model {
     Generic<SearchCubeDomain> &scd_;
 
   public:
-    CountingSortParticlesVec3(
+    CountingSortParticles(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

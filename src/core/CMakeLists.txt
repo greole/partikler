@@ -18,6 +18,7 @@ target_sources(Core
     src/Time.cpp
     src/Equation.cpp
     src/ObjectRegistry.cpp
+    src/cgal/CGALSearchCubes.cpp
     src/cgal/CGALHelper.cpp
   PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Scalar.hpp"
@@ -29,6 +30,7 @@ target_sources(Core
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Time.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Equation.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/SearchCubes.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALSearchCubes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectRegistry.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"
   )
@@ -49,6 +51,7 @@ target_link_libraries(Core
 target_include_directories(Core
   PUBLIC
     ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/src/cgal
   )
 
 add_subdirectory(tests)
