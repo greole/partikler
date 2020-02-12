@@ -23,11 +23,11 @@
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp" // for Field (ptr only), IntField, PointField
+#include "CGALTYPEDEFS.hpp" // for Facet_handle
+#include "Field.hpp"        // for Field (ptr only), IntField, PointField
 #include "FieldOps.hpp"
-#include "Models.hpp"            // for Model, ModelRegister (ptr only)
-#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
-#include "stl/STLLimitedDx.hpp"
+#include "Models.hpp" // for Model, ModelRegister (ptr only)
+#include "STLLimitedDx.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;

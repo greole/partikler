@@ -75,6 +75,7 @@ class Model : public SPHObject {
     bool debug_;
 
   public:
+
     Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg);
 
     YAML::Node get_parameter() { return parameter_; }

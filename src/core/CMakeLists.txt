@@ -18,22 +18,19 @@ target_sources(Core
     src/Time.cpp
     src/Equation.cpp
     src/ObjectRegistry.cpp
-    src/cgal/CGALSearchCubes.cpp
-    src/cgal/CGALHelper.cpp
   PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Scalar.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Vec3.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Object.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Field.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Models.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Helper.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Time.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Equation.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/SearchCubes.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALSearchCubes.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectRegistry.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cgal/CGALHelper.hpp"
+    src/Scalar.hpp
+    src/Vec3.hpp
+    src/Object.hpp
+    src/Field.hpp
+    src/Models.hpp
+    src/Helper.hpp
+    src/Time.hpp
+    src/Equation.hpp
+    src/SearchCubes.hpp
+    src/ObjectRegistry.hpp
   )
+
 
 target_compile_definitions(Core
   PUBLIC
@@ -44,15 +41,17 @@ target_compile_definitions(Core
 target_link_libraries(Core
   PUBLIC
     ${YAML_CPP_LIBRARIES}
-    ${CGAL_LIBRARIES}
     OpenMP::OpenMP_CXX
   )
 
 target_include_directories(Core
   PUBLIC
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/src/cgal
+    src
   )
+
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 add_subdirectory(tests)
 

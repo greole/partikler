@@ -20,7 +20,7 @@
 #include "STLParticleNeighbours.hpp"
 
 #include "ObjectRegistry.hpp"
-#include "CGALSearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
+#include "cgal/CGALSearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
 
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)

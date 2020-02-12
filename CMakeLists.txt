@@ -95,12 +95,12 @@ include(ExternalProject)
 
 include(cmake/build_3rd_party.cmake)
 
-OPTION(BUILD_CGAL "Building CGAL" OFF)
-IF(BUILD_CGAL)
+OPTION(CGAL_SUPPORT "WITH CGAL SUPPORT" ON)
+IF(CGAL_SUPPORT)
     BUILD(CGAL)
+    find_package(CGAL CONFIG REQUIRED)
 ENDIF()
 
-find_package(CGAL CONFIG REQUIRED)
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 

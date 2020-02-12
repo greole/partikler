@@ -8,18 +8,24 @@ add_library(Neighbours SHARED)
 
 target_sources(Neighbours
   PRIVATE
-    src/stl/STLParticleNeighbours.cpp
     src/ParticleNeighbours.cpp
     src/SortParticles.cpp
   PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/stl/STLParticleNeighbours.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ParticleNeighbours.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/SortParticles.hpp"
+    src/ParticleNeighbours.hpp
+    src/SortParticles.hpp
   )
 
 add_dependencies(Neighbours Core)
 
 target_link_libraries(Neighbours Core OpenMP::OpenMP_CXX ${YAML_CPP_LIBRARIES})
-target_include_directories(Neighbours PUBLIC ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(Neighbours
+  PUBLIC
+  src
+  )
+
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 #add_subdirectory(tests/SPHCore)

@@ -7,11 +7,9 @@ add_library(BoundaryConditions SHARED)
 
 target_sources(BoundaryConditions
   PRIVATE
-    src/stl/GenerateBoundaryParticles.cpp
     src/FixedValue.cpp
     src/CreateFields.cpp
   PUBLIC
-    src/stl/GenerateBoundaryParticles.hpp
     src/FixedValue.hpp
     src/CreateFields.hpp
   )
@@ -29,9 +27,13 @@ target_link_libraries(BoundaryConditions
   OpenMP::OpenMP_CXX
   ${YAML_CPP_LIBRARIES})
 
-target_include_directories(
-  BoundaryConditions
-  PUBLIC ${PROJECT_SOURCE_DIR}/src
+target_include_directories(BoundaryConditions
+  PUBLIC
+  src
   )
+
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 #add_subdirectory(tests/SPHCore)

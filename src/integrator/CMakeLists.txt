@@ -7,11 +7,9 @@ add_library(Integrator SHARED)
 
 target_sources(Integrator
   PRIVATE
-    "src/stl/STLPosIntegrator.cpp"
-    "src/PosIntegrator.cpp"
+    src/PosIntegrator.cpp
   PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/stl/STLPosIntegrator.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/PosIntegrator.hpp"
+    src/PosIntegrator.hpp
   )
 
 
@@ -20,12 +18,19 @@ add_dependencies(Integrator Geometry)
 
 
 target_link_libraries(Integrator
+  PUBLIC
   Core
   Geometry
   OpenMP::OpenMP_CXX
   ${YAML_CPP_LIBRARIES}
   )
 
-target_include_directories(Integrator PUBLIC ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(Integrator
+  PUBLIC
+  src)
+
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 #add_subdirectory(tests/SPHCore)

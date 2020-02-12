@@ -6,13 +6,11 @@ add_dependencies(Geometry IO Core)
 
 target_sources(Geometry
   PRIVATE
-    src/stl/STLLimitedDx.cpp
     src/ParticleGeneratorBase.cpp
     src/Cubiod.cpp
   PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/stl/STLLimitedDx.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ParticleGeneratorBase.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/Cubiod.hpp"
+    src/ParticleGeneratorBase.hpp
+    src/Cubiod.hpp
   )
 
 target_link_libraries(Geometry
@@ -25,6 +23,12 @@ target_link_libraries(Geometry
   )
 
 target_include_directories(Geometry
-  PUBLIC ${PROJECT_SOURCE_DIR}/src)
+  PUBLIC
+    src
+  )
+
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 #add_subdirectory(tests/SPHCore)

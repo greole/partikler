@@ -44,14 +44,14 @@
 // Hence, for no the register calls are made manually
 // until a better solution is found
 #ifdef WITH_GNU
-#include "stl/GenerateBoundaryParticles.hpp"
+#include "GenerateBoundaryParticles.hpp"
 
 REGISTER_DEF_TYPE(BOUNDARY, GenerateBoundaryParticles);
-#include "stl/Wendland2D.hpp"
+#include "Wendland2D.hpp"
 
 REGISTER_DEF_TYPE(KERNEL, STLWendland2D);
 #include "ParticleNeighbours.hpp"
-#include "stl/STLParticleNeighbours.hpp"
+#include "STLParticleNeighbours.hpp"
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHParticleNeighbours);
@@ -74,7 +74,7 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
 
 REGISTER_DEF_TYPE(READER, SPHSTLReader);
 REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
-#include "stl/STLPosIntegrator.hpp"
+#include "STLPosIntegrator.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, STLPosIntegrator);
 #include "SuperSPHWriter.hpp"
