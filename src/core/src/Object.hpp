@@ -26,7 +26,6 @@
 
 #include "Logger.hpp" // for Logger
 #include "Vec3.hpp"
-#include "cgal/CGALTYPEDEFS.hpp" // for Point
 
 enum SPHObjectType {
     GenericType,
@@ -60,10 +59,6 @@ template <> struct GetFieldType<std::vector<size_t>> {
 
 template <> struct GetFieldType<std::vector<Vec3>> {
     constexpr static SPHObjectType value = VectorFieldType;
-};
-
-template <> struct GetFieldType<std::vector<Point>> {
-    constexpr static SPHObjectType value = PointFieldType;
 };
 
 std::string sphObjectType_to_string(SPHObjectType t);
