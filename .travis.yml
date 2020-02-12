@@ -57,5 +57,12 @@ script:
   - ctest -VV -R "Partikler_Test"
 
 after_script:
-  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/generate_boundaries/SPH.yaml
+  if [ "$CGAL" -eq "ON"  ]
+  then
+    export CONFIG="../example/generate_boundaries/SPH.yaml"
+  else
+    export CONFIG="../example/droplet_formation/SPH.yaml"
+  fi
+
+  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=$CONFIG
 
