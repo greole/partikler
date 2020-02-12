@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 
-#include "PressureBonet.hpp"
+#include "Bonet.hpp"
 
 #include "Time.hpp"
 

@@ -29,8 +29,6 @@
 #include "Vec3.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include "PressureBonet.hpp"
-
 class ObjectRegistry;
 namespace YAML {
 class Node;

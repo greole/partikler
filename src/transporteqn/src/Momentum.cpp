@@ -18,8 +18,7 @@
 */
 
 #include "Momentum.hpp"
-#include "Conti.hpp"
-#include "PressureBonet.hpp"
+#include "Equation.hpp"
 
 #include "Time.hpp"
 
@@ -32,8 +31,8 @@ Momentum::Momentum(
           objReg,
           objReg.create_field<VectorField>(
               "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
-      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
-      dp_(objReg.get_or_create_model<PressureGradient>("PressureGradient", parameter, objReg)),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
+      dp_(objReg.get_object<ScalarGradientEquation>("PressureGradient")),
       dtau_(objReg.get_object<VectorGradientEquation>("Viscosity")),
       p_(objReg.get_object<ScalarFieldEquation>("Pressure")),
       g_(objReg.get_object<VectorFieldEquation>("Gravity")),

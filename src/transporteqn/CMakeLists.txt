@@ -9,14 +9,14 @@ target_sources(TransportEqn
   PRIVATE
   "src/Momentum.cpp"
   "src/continuity/Conti.cpp"
-  "src/pressure/PressureBonet.cpp"
+  "src/pressure/Bonet.cpp"
   "src/Viscosity.cpp"
   "src/forces/Gravity.cpp"
   "src/forces/surface_tension/Akinci.cpp"
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Momentum.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/continuity/Conti.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/pressure/PressureBonet.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/pressure/Bonet.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Viscosity.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/Gravity.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/Akinci.hpp"
