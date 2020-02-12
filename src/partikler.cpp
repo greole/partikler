@@ -64,7 +64,7 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 #include "Momentum.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
-#include "PressureBonet.hpp"
+#include "Bonet.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
 #include "Viscosity.hpp"
