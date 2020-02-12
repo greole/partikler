@@ -49,12 +49,12 @@ before_script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DBUILD_CGAL=ON -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DCGAL_SUPPORT=ON -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
 
 script:
   - ctest -VV -R "Partikler_Test"
 
 after_script:
-  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/SPH.yaml
+  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/generate_boundaries/SPH.yaml
 
