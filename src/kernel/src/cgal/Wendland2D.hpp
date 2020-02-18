@@ -23,6 +23,8 @@
 #include <string> // for string
 #include <vector> // for vector
 
+#include "Scalar.hpp"
+
 #include "Field.hpp"       // for Field (ptr only), ScalarField, KernelGradi...
 #include "Models.hpp"      // for Model, ModelRegister (ptr only), REGISTER...
 #include "SearchCubes.hpp" // for NeighbourFieldAB
@@ -41,10 +43,10 @@ class STLWendland2D : public Model {
 
   private:
     // Coeffs
-    const float h_;       // Smoothing length
-    const float ih_;      // Inverse Smoothing length
-    const float W_fak2_;  // = 7. / (64. * M_PI * h * h);
-    const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
+    const Scalar h_;       // Smoothing length
+    const Scalar ih_;      // Inverse Smoothing length
+    const Scalar W_fak2_;  // = 7. / (64. * M_PI * h * h);
+    const Scalar dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
 
     // In
     const PointField &pos_; // Particle positions
@@ -55,7 +57,12 @@ class STLWendland2D : public Model {
     // Out
     // Kernel &kernel                               // Kernel field
     ScalarField &W_;
-    DoubleKernelGradientField &dWdx_;
+
+    KernelGradientField &dWdx_;
+
+    // KernelGradient as seen from the neighbouring particle
+    // since KernelGradients on the surfaces are not isotropic
+    KernelGradientField &dWdxn_;
 
   public:
     STLWendland2D(

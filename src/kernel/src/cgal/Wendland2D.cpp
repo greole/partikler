@@ -24,14 +24,16 @@
 STLWendland2D::STLWendland2D(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
-      h_(read_or_default_coeff<float>("h", 1.0)), ih_(1.0 / h_),
+      h_(read_or_default_coeff<Scalar>("h", 1.0)), ih_(1.0 / h_),
       W_fak2_(7. / (64. * M_PI * h_ * h_)),
       dW_fak2_(7. / (64. * M_PI * h_ * h_ * h_)), pos_(objReg.get_points()),
       np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
       sd_(objReg.get_object<Field<std::vector<STLSurfaceDist>>>(
           "surface_dist")),
       W_(objReg.create_field<ScalarField>("KernelW")),
-      dWdx_(objReg.create_field<DoubleKernelGradientField>("KerneldWdx")) {}
+      dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")),
+      dWdxn_(objReg.create_field<KernelGradientField>("KerneldWdxNeighbour"))
+{}
 
 void STLWendland2D::execute() {
 
@@ -46,41 +48,37 @@ void STLWendland2D::execute() {
 
     for (size_t pid = 0; pid < size; pid++) {
 
-        // auto [oid, nid] = np_[pid];
-
-        // const Point &opos = pos_[oid];
-        // const Point &npos = pos_[nid];
-
         auto [len, lenVo, lenVn] = sd_[pid];
 
-        const float q {len * ih_};
+        const Scalar q {len * ih_};
 
         if (q > 2.) {
             log().warn() << "Outside kernel radius";
             W_[pid] = 0.0;
-            dWdx_[pid] = {{{0, 0, 0}}, {{0, 0, 0}}};
+            dWdx_[pid] = {{0, 0, 0}};
+            dWdxn_[pid] = {{0, 0, 0}};
             continue;
         }
 
-        const float q3 = (q - 2.);
-        const float qfac2 = q3 * q3;
-        const float qfac4 = qfac2 * qfac2;
+        const Scalar q3 = (q - 2.);
+        const Scalar qfac2 = q3 * q3;
+        const Scalar qfac4 = qfac2 * qfac2;
 
-        float q2 = 2. * q;
+        Scalar q2 = 2. * q;
         q2 += 1.;
 
         W_[pid] = qfac4 * q2 * W_fak2_;
 
+
         const float prefact = 10. * qfac2 * q * dW_fak2_;
         if (len != 0.0) {
-            for (int j = 0; j < 3; j++) {
-                dWdx_[pid].on[j] = (float)lenVo[j] / len * prefact;
-                dWdx_[pid].no[j] = (float)lenVn[j] / len * prefact;
-            }
+            Vec3 lenVoV = {(Scalar)lenVo.x(), (Scalar)lenVo.y(), (Scalar)lenVo.z()};
+            Vec3 lenVnV = {(Scalar)lenVn.x(), (Scalar)lenVn.y(), (Scalar)lenVn.z()};
+            dWdx_[pid] = lenVoV / len * prefact;
+            dWdxn_[pid] = lenVnV / len * prefact;
         } else {
-            for (int j = 0; j < 3; j++) {
-                dWdx_[pid] = {{{0.0, 0.0, 0.0}}, {{0.0, 0.0, 0.0}}};
-            }
+            dWdx_[pid] = {{0.0, 0.0, 0.0}};
+            dWdxn_[pid] = {{0.0, 0.0, 0.0}};
             log().warn() << "Neighbour sum == 0";
         }
     }
