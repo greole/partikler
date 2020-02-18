@@ -22,6 +22,7 @@
 
 #include <string> // for string
 
+#include "Scalar.hpp"
 #include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, VectorField
 #include "FieldOps.hpp"
@@ -48,11 +49,11 @@ private:
     ScalarFieldEquation &conti_;
 
     // Coeffs
-    const float c_;
-    const float rho_0_;
-    const float gamma_;
-    const float p_0_;
-    const float prefac_;
+    const Scalar c_;
+    const Scalar rho_0_;
+    const Scalar gamma_;
+    const Scalar p_0_;
+    const Scalar prefac_;
 
 public:
     Pressure(

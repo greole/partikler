@@ -29,11 +29,11 @@ Pressure::Pressure(
           parameter,
           objReg,
           objReg.create_field<ScalarField>("p", 10000)),
-      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
-      c_(read_or_default_coeff<float>("c", 300.0)),
-      rho_0_(read_or_default_coeff<float>("rho_0", 1.0)),
-      gamma_(read_or_default_coeff<float>("gamma", 1.4)),
-      p_0_(read_or_default_coeff<float>("p_0", 10000)),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
+      c_(read_or_default_coeff<Scalar>("c", 300.0)),
+      rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
+      gamma_(read_or_default_coeff<Scalar>("gamma", 1.4)),
+      p_0_(read_or_default_coeff<Scalar>("p_0", 10000)),
       prefac_(c_ * c_ * rho_0_ / gamma_)
 {
     maxDt_ = 0.5/c_*h_;
@@ -48,22 +48,20 @@ PressureGradient::PressureGradient(
         parameter,
         objReg,
         objReg.get_object<ScalarField>("p")),
-      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       pressure_(objReg.get_or_create_model<Pressure>("Pressure", parameter, objReg)),
-      mp_(objReg.get_object<Generic<float>>("specific_particle_mass")())
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")())
 {}
 
 void Pressure::execute() {
 
     auto &rho = conti_.get(time_.get_current_timestep());
 
-    auto pow = boost::yap::make_terminal(Pow_Wrapper<float>(gamma_));
-
-    // auto pow = Pow<float>(gamma_);
+    auto pow = boost::yap::make_terminal(Pow_Wrapper<Scalar>(gamma_));
 
     log().info_begin() << "Computing pressure";
 
-    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_);
+    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_, true);
 
     log().info_end();
 
@@ -78,7 +76,16 @@ void PressureGradient::execute() {
     auto &p = pressure_.get(it);
     auto &rho = conti_.get(it);
 
-    sum_AB_dW(rho, mp_ / rho.b() * (p.a() + p.b()));
+    auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+        "KerneldWdx");
+
+    auto sum_AB_e = Sum_AB_dW<VectorField, KernelGradientField>(f_, np_, dW);
+    auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);
+
+    solve(
+        1.0/rho*sum_AB_dW_e(mp_/rho.b()*(p.a()+p.b())),
+        true
+        );
 
     log().info_end();
 

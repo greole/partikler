@@ -75,6 +75,10 @@ class FieldEquationBase : public Model {
 
     Scalar maxDt_  = std::numeric_limits<Scalar>::max();
 
+    Ddt<FieldType> ddt_;
+
+    decltype(boost::yap::make_terminal(Ddt<FieldType>())) ddt_terminal_;
+
   public:
 
     FieldEquationBase(
@@ -87,21 +91,26 @@ class FieldEquationBase : public Model {
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
           h_(objReg.get_object<Generic<Scalar>>("h")()),
-          objReg_(objReg)
-           {}
+          objReg_(objReg),
+          ddt_(Ddt(time_.get_deltaT(),  f_))
+           {
+
+          ddt_terminal_ = boost::yap::make_terminal(ddt_);
+}
 
     std::pair<bool, Scalar> timestep_limit() { return {false, 0}; }
 
-    template <class RHS> void ddt(RHS rhs) {
-
-        // integrate RK4 -> k1 = ddt(t, u^o).get(), k2=ddt(t+h/2, u^o+h/2*k1)
-        // ...
+    template <class RHS> auto ddt(RHS rhs) {
+        return ddt_terminal_(rhs);
     }
 
     template<class Expr>
     void solve(Expr e) {
+
+        this->log().info_begin() << "Solving: " << f_.name();
         decltype(auto) expr = boost::yap::as_expr(e);
         solve_impl(f_, expr);
+        this->log().info_end();
     }
 
     FieldType &get(int iteration) {
@@ -128,51 +137,66 @@ class FieldEquationBase : public Model {
     // equation is solved
 };
 
-template <class FieldType>
-class TimeDerivativeEquation : public FieldEquationBase<FieldType> {
+// template <class FieldType>
+// class TimeDerivativeEquation : public FieldEquationBase<FieldType> {
 
-protected:
+// protected:
 
-    FieldType& Intf_;
+//     FieldType& Intf_;
 
-public:
+// public:
 
-    TimeDerivativeEquation(
-        const std::string &eqn_base_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg,
-        FieldType &f):
-         FieldEquationBase<FieldType>(
-            eqn_base_name,
-            parameter,
-            objReg,
-            objReg.create_field<FieldType>(
-                "d" + f.get_name(),
-                zero<typename FieldType::value_type>::val,
-                {"d_" + f.get_name() + "dx",
-                 "d_" + f.get_name() + "dy",
-                 "d_" + f.get_name() + "dz"})),
-         Intf_(f) {}
+//     TimeDerivativeEquation(
+//         const std::string &eqn_base_name,
+//         YAML::Node parameter,
+//         ObjectRegistry &objReg,
+//         FieldType &f):
+//          FieldEquationBase<FieldType>(
+//             eqn_base_name,
+//             parameter,
+//             objReg,
+//             objReg.create_field<FieldType>(
+//                 "d" + f.get_name(),
+//                 zero<typename FieldType::value_type>::val,
+//                 {"d_" + f.get_name() + "dx",
+//                  "d_" + f.get_name() + "dy",
+//                  "d_" + f.get_name() + "dz"})),
+//          Intf_(f) {}
 
 
-    void IntDt() {
-        Scalar dt =  this->time_.get_deltaT();
-        // clang-format off
-        this->log().info_begin()
-            << "Time integration " << Intf_.get_name()
-            << " deltaT " << dt;
-        // clang-format on
-        for (size_t i = 0; i < this->f_.size(); i++) {
-            Intf_[i] += this->f_[i] * dt;
-        }
-        this->log().info_end();
-    }
+//     void IntDt() {
+//         Scalar dt =  this->time_.get_deltaT();
+//         // clang-format off
+//         this->log().info_begin()
+//             << "Time integration " << Intf_.get_name()
+//             << " deltaT " << dt;
+//         // clang-format on
+//         for (size_t i = 0; i < this->f_.size(); i++) {
+//             Intf_[i] += this->f_[i] * dt;
+//         }
+//         this->log().info_end();
+//     }
 
-};
+//     // template <class Expr>
+//     // FieldGradientType &sum_AB_dW(Expr const &e) {
+//     //     // dispatch on KernelGradientType
+//     //     auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+//     //         "KerneldWdx");
+//     //     decltype(auto) expr = boost::yap::as_expr(e);
+//     //     sum_AB_dW_res_impl(rho, this->f_, this->np_, dW, expr);
+
+//     //     return this->f_;
+//     // }
+
+// };
 
 
 template <class FieldGradientType>
 class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
+
+    // TODO use two separate fields for gradients of the Kernel
+    // in the symmetric case the neighbour owner gradient field is just a reference
+    // other wise the two fields are different fields
 
   public:
     KernelGradientType kernelGradientType_;
@@ -230,14 +254,21 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
         return this->f_;
     }
 
+    template <class RHS> void solve(RHS rhs, bool reset=false) {
+        if (reset) solve_impl_res(this->f_, rhs);
+        else solve_impl(this->f_, rhs);
+    }
+
 };
 
-template <class FieldType>
+template<class FieldType, template<typename> class SumType>
 class FieldValueEquation : public FieldEquationBase<FieldType> {
 
   protected:
 
     ScalarField &W_;
+
+    SumType<FieldType> sum_AB_s;
 
   public:
     typedef FieldType value_type;
@@ -248,39 +279,29 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         ObjectRegistry &objReg,
         FieldType &f)
         : FieldEquationBase<FieldType>(eqn_base_name, parameter, objReg, f),
-          W_(objReg.get_object<ScalarField>("KernelW")) {};
+          W_(objReg.get_object<ScalarField>("KernelW")),
+          sum_AB_s(SumType<FieldType>(this->f_, this->np_)) {};
 
-    template <class RHS> FieldType &sum_AB(RHS rhs) {
-        sum_AB_res_impl(this->f_, this->np_, rhs * W_);
-        return this->f_;
-    }
-
-    FieldType &m_sum_AB(float particle_mass) {
-        sum_AB_res_impl(particle_mass, this->f_, this->np_, W_);
-        return this->f_;
-    };
-
-
-    template <class RHS> void solve(RHS rhs) {
-        // TODO implement sum_AB as yap terminal
-        // sum_AB needs nb as data member
+    template <class RHS> void solve(RHS rhs, bool reset=false) {
+        if (reset) solve_impl_res(this->f_, rhs);
+        else solve_impl(this->f_, rhs);
+        // TODO find a better solution
+        // Reset sum_AB indizes
+        sum_AB_s.a = 0;
+        sum_AB_s.ab = 0;
+        this->ddt_.a_ = 0;
     }
 
 
 };
 
 
-using ScalarFieldEquation = FieldValueEquation<ScalarField>;
-using VectorFieldEquation = FieldValueEquation<VectorField>;
+using ScalarFieldEquation = FieldValueEquation<ScalarField, Sum_AB_sym>;
+using VectorFieldEquation = FieldValueEquation<VectorField, Sum_AB_sym>;
 
 using ScalarGradientEquation = FieldGradientEquation<VectorField>;
 // TODO clarify why this is not a tensor field
 using VectorGradientEquation = FieldGradientEquation<VectorField>;
 
-using TimeDerivativeVectorEquation = TimeDerivativeEquation<VectorField>;
-
-// TODO implement this
-// using ABVectorFieldEquation =
-//         FieldEquation<VectorFieldAB, VectorFieldAB>;
 
 #endif

@@ -35,51 +35,45 @@ template <class ValType> struct Pow_Wrapper {
     ValType inner;
 };
 
-template <class OpType, class... Inner> struct Terminal_Generator {
-    Terminal_Generator(Inner... params) {
-        terminal = boost::yap::make_terminal(OpType(params...));
-    }
+// template <class OpType, class... Inner> struct Terminal_Generator {
+//     Terminal_Generator(Inner... params) {
+//         terminal = boost::yap::make_terminal(OpType(params...));
+//     }
 
-    // copy  expressions
-    template <typename T> auto operator()(T x) { return terminal(x); }
-    // but take Fields by reference
-    template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
+//     // copy  expressions
+//     template <typename T> auto operator()(T x) { return terminal(x); }
+//     // but take Fields by reference
+//     template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
 
-    decltype(boost::yap::make_terminal(OpType())) terminal;
-};
+//     decltype(boost::yap::make_terminal(OpType())) terminal;
+// };
 
-template <class OpType> struct Terminal_Generator_NoArg {
-    Terminal_Generator_NoArg() {
-        terminal = boost::yap::make_terminal(OpType());
-    }
-    // copy  expressions
-    template <typename T> auto operator()(T x) { return terminal(x); }
-    // but take Fields by reference
-    template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
+// template <class OpType> struct Terminal_Generator_NoArg {
+//     Terminal_Generator_NoArg() {
+//         terminal = boost::yap::make_terminal(OpType());
+//     }
+//     // copy  expressions
+//     template <typename T> auto operator()(T x) { return terminal(x); }
+//     // but take Fields by reference
+//     template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
 
-    decltype(boost::yap::make_terminal(OpType())) terminal;
-};
-
-template <class... ValType>
-using Pow = Terminal_Generator<Pow_Wrapper<ValType...>, ValType...>;
+//     decltype(boost::yap::make_terminal(OpType())) terminal;
+// };
 
 struct Norm_Wrapper {
     Norm_Wrapper() {};
-    template <typename T> float operator()(T x) {
+    template <typename T> Scalar operator()(T x) {
         return std::sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
     }
 };
 
-using Norm = Terminal_Generator_NoArg<Norm_Wrapper>;
 
 struct NormSqr_Wrapper {
     NormSqr_Wrapper() {};
-    template <typename T> float operator()(T x) {
+    template <typename T> Scalar operator()(T x) {
         return x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
     }
 };
-
-using NormSqr = Terminal_Generator_NoArg<NormSqr_Wrapper>;
 
 template <class ValType> struct Set_Wrapper {
     Set_Wrapper() {};
@@ -88,41 +82,6 @@ template <class ValType> struct Set_Wrapper {
     ValType inner;
 };
 
-template <class... ValType>
-using Set = Terminal_Generator<Set_Wrapper<ValType...>, ValType...>;
-
-template <boost::yap::expr_kind Kind, typename eqn> struct equation {
-    static const boost::yap::expr_kind kind = Kind;
-
-    eqn elements;
-};
-
-
-template <class T, class I> T solve(I terminal) {
-    auto expr =
-        boost::yap::make_expression<equation, boost::yap::expr_kind::call>(
-            terminal);
-
-    std::cout << "solving " << std::endl;
-    auto res = boost::yap::evaluate(expr);
-    std::cout << "end " << std::endl;
-
-    return res;
-}
-
-// template <class Expr> auto pow(Expr const& e, double exponent, size_t elems)
-// {
-//     std::cout << __PRETTY_FUNCTION__ << std::endl;
-//     decltype(auto) expr = boost::yap::as_expr(e);
-//     ScalarField tmp(elems,0);
-//     solve(tmp, expr);
-//     std::cout << tmp << std::endl;
-//     auto pow_impl = Pow<float>(exponent);
-//     std::cout << "2" << std::endl;
-//     auto ret = pow_impl(tmp);
-//     std::cout << "3" << std::endl;
-//     return ret;
-// }
 
 // struct to access field elements
 //
@@ -131,44 +90,9 @@ template <class T, class I> T solve(I terminal) {
 // a-th, b-th, or ab-th index or simply makes a terminal
 struct take_nth {
 
-    // template <typename Arg>
-    // auto operator()(
-    //     boost::yap::expr_tag<boost::yap::expr_kind::call>,
-    //     Pow_Wrapper<float> callable,
-    //     Arg && arg) {
-    //     // boost::yap::print(std::cout, boost::yap::as_expr(arg));
-    //     // std::cout << "call subexpr " <<  a << __PRETTY_FUNCTION__ <<
-    //     std::endl;
-    //     // std::cout << "call subexpr " <<  callable.inner  << std::endl;
-
-    //     // auto arg_expr = boost::yap::as_expr(arg);
-    //     // std::cout << "done transform 1 " <<  callable.inner  << std::endl;
-
-    //     // auto inner = boost::yap::transform(arg_expr, take_nth{a,b,ab});
-    //     // // auto inner = boost::yap::transform(boost::yap::as_expr(arg),
-    //     take_nth{a,0,0});
-    //     // std::cout << "done transform 2" <<  callable.inner  << std::endl;
-
-    //     // float retII = boost::yap::evaluate(inner);
-    //     // std::cout << retII << std::endl;
-    //     // std::cout << " Done " << std::endl;
-    //     return  boost::yap::make_terminal(
-    //         callable(boost::yap::evaluate(boost::yap::transform(boost::yap::as_expr(arg),
-    //         *this))));
-
-    //     // auto ret = boost::yap::make_terminal(2.0);
-
-    //     // return ret;
-    //     // return
-    //     //     boost::yap::make_expression<boost::yap::expr_kind::call>(
-    //     //     boost::yap::as_expr(callable),
-    //     //     boost::yap::transform(boost::yap::as_expr(arg),
-    //     //     take_nth{a,0,0}));
-    // }
-
     template <typename T>
     auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>, float const s) {
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Scalar const s) {
         return boost::yap::make_terminal(s);
     }
 
@@ -213,6 +137,13 @@ struct take_nth {
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
+std::vector<T> &solve_impl_res(std::vector<T> &vec, Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    std::fill(vec.begin(), vec.end(), zero<T>::val);
+    return solve_impl(vec, e);
+}
+
+template <typename T, typename Expr>
 std::vector<T> &solve_impl(std::vector<T> &vec, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
@@ -223,267 +154,136 @@ std::vector<T> &solve_impl(std::vector<T> &vec, Expr const &e) {
     return vec;
 }
 
-// template <typename T, typename A, typename Expr>
-// std::vector<T> &solve(std::vector<T> &vec, Expr const &e) {
-//     decltype(auto) expr = boost::yap::as_expr(e);
-//     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
-//         std::cout << "i" << i << std::endl;
-//         auto vec_i_expr = boost::yap::transform(
-//             boost::yap::as_expr(expr), take_nth {i, 0, 0});
-//         vec[i] = boost::yap::evaluate(vec_i_expr);
-//     }
-//     return vec;
-// }
-
-
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_impl(
-    Scalar particle_mass,
-    std::vector<T> &vec,
-    const NeighbourFieldAB &nb,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res;
-            vec[b] += res;
-            ab_index++;
-        }
-        vec[a] *= particle_mass;
-    }
-    return vec;
-}
-
-// TODO
-// Pos independent
-// f(a-b) = f(b-a)
-
-// Pos dependent
-// f(a-b) = - f(b-a)
-template <typename T, typename Expr>
-std::vector<T> &
-sum_AB_impl(std::vector<T> &vec, const NeighbourFieldAB &nb, Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res;
-            vec[b] -= res;
-            ab_index++;
-        }
-    }
-    return vec;
-}
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_res_impl(
-    Scalar mp,
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // reset field
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-
-    return sum_AB_impl(mp, vec, nb, e);
-}
-
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_res_impl(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // reset field
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-
-    return sum_AB_impl(vec, nb, e);
-}
-
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_res_impl(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    DoubleKernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    // reset field
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-
-    return sum_AB_dW_impl(vec, nb, dW, e);
-}
-
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-// NOTE sum_AB generally assumes nb to be sorted
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_impl(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    DoubleKernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res * dW[ab_index].on;
-            vec[b] += res * dW[ab_index].no;
-            ab_index++;
-        }
-    }
-    return vec;
-}
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_impl_rho(
-    ScalarField& rho,
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    KernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] -= res * dW[ab_index];
-            vec[b] += res * dW[ab_index];
-            ab_index++;
-        }
-        vec[a] = vec[a]/rho[a];
-    }
-    return vec;
-}
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_impl(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    KernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    for (std::size_t a = 0, size = vec.size(); a < size; ++a) {
-        while (ab_index < nb.size() && a == nb[ab_index].ownId) {
-            auto nb_pair = nb[ab_index];
-            size_t b = nb_pair.neighId;
-            auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-            auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] -= res * dW[ab_index];
-            vec[b] += res * dW[ab_index];
-            ab_index++;
-        }
-    }
-    return vec;
-}
-
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_res_impl_rho(
-    ScalarField& rho,
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    KernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    // reset field
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-
-    return sum_AB_dW_impl_rho(rho, vec, nb, dW, e);
-}
-
-
-template <typename T, typename Expr>
-std::vector<T> &sum_AB_dW_res_impl(
-    std::vector<T> &vec,
-    NeighbourFieldAB &nb,
-    KernelGradientField &dW,
-    Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    // Iterate particle index a
-    size_t ab_index = 0;
-    // reset field
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-
-    return sum_AB_dW_impl(vec, nb, dW, e);
-}
-
-// NOTE the unsorted variant could look something like this
-// while (n_index < nb[ab_index].count) {
-
-//     // own ids are not consecutive since first all own cube neighbours
-//     // are collected, than all neighbour cube neighbours.
-//     // Hence ab_end is at maximum
-//     // max_particles_per_cube**2/2 + max_particles_per_cube *
-//     n_neighbour_cubes
-//     // away
-//     for(size_t ab_index=ab_start; ab_index<ab_end; ab_index++) {
-//         auto nb_pair = nb[ab_index];
-//         size_t b = nb_pair.neighId;
-//         auto vec_ij_expr = boost::yap::transform(
-//             boost::yap::as_expr(expr), take_nth {a, b, ab_index});
-//         auto res = boost::yap::evaluate(vec_ij_expr);
-//         vec[a] += res * dW[ab_index].on;
-//         vec[b] += res * dW[ab_index].no;
-//         ab_index++;
 
 // appends the values of b to a inplace
 template <class T> void field_append(T &a, T &b) {
     a.insert(a.end(), b.begin(), b.end());
 }
 
-struct Sum_AB {
-    Sum_AB(NeighbourFieldAB nb) : nb_(nb) {};
-    template <typename T, typename Expr>
-    T &operator()(T &vec, size_t a, size_t &ab_index, Expr expr) {
-        while (ab_index < nb_.size() && a == nb_[ab_index].ownId) {
-            auto nb_pair = nb_[ab_index];
+
+template<class Inner>
+struct Sum_AB_sym {
+
+    Sum_AB_sym(Inner& state, NeighbourFieldAB &nb)
+        : vec_(state), nb_(nb) {};
+
+    template<class Expr>
+    typename Inner::value_type operator()(Expr expr) {
+        while (ab < nb_.size() && a == nb_[ab].ownId) {
+            auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
             auto vec_ij_expr = boost::yap::transform(
-                boost::yap::as_expr(expr), take_nth {a, b, ab_index});
+                boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
-            vec[a] += res;
-            vec[b] += res;
-            ab_index++;
+            vec_[a] += res;
+            vec_[b] += res;
+            ab++;
         }
-        return vec;
+        size_t aret = a;
+        a++;
+        return vec_[aret];
     }
 
+    size_t a=0;
+    size_t ab=0;
+
+    Inner &vec_;
     NeighbourFieldAB &nb_;
+};
+
+template<class Inner>
+struct Sum_AB_asym {
+
+    Sum_AB_asym(Inner& state, NeighbourFieldAB &nb)
+        : vec_(state), nb_(nb) {};
+
+    template<class Expr>
+    typename Inner::value_type operator()(Expr expr) {
+        while (ab < nb_.size() && a == nb_[ab].ownId) {
+            auto nb_pair = nb_[ab];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec_[a] += res;
+            vec_[b] += res;
+            ab++;
+        }
+        size_t aret = a;
+        a++;
+        return vec_[aret];
+    }
+
+    size_t a=0;
+    size_t ab=0;
+
+    Inner &vec_;
+    NeighbourFieldAB &nb_;
+};
+
+
+template <class Inner, class KernelGradientType> struct Sum_AB_dW {
+
+    Sum_AB_dW(
+        Inner &state,
+        NeighbourFieldAB &nb,
+        KernelGradientType& dW)
+        : vec_(state), nb_(nb), dW_(dW) {};
+
+    template <class Expr> typename Inner::value_type  operator()(Expr expr) {
+        while (ab < nb_.size() && a == nb_[ab].ownId) {
+            auto nb_pair = nb_[ab];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec_[a] += res * dW_[ab];
+            vec_[b] -= res * dW_[ab];
+            ab++;
+        }
+        size_t aret = a;
+        a++;
+        return vec_[aret];
+    }
+
+    size_t a=0;
+    size_t ab=0;
+
+    Inner &vec_;
+    NeighbourFieldAB &nb_;
+    KernelGradientType &dW_;
+};
+
+template<class Inner>
+struct Ddt {
+
+    // Default constructor to allow decltype(make_terminal(Ddt())) construction
+    Ddt() {};
+
+    Ddt(
+        Scalar dt,
+        Inner & vec
+        )
+        :  dt_(dt), vec_({})  {
+        // store old state
+        vec_.reserve(vec.size());
+        for(size_t i=0; i<vec.size(); i++) {
+            vec_.push_back(vec[i]);
+        }
+    };
+
+    template <class T> T operator()(T v) {
+        T ret = vec_[a_] + v * dt_;
+        a_++;
+        return ret;
+    }
+
+    size_t a_=0;
+
+    Scalar dt_;
+
+    std::vector<typename Inner::value_type> vec_;
+
 };
 
 #endif

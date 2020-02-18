@@ -25,12 +25,11 @@
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : TimeDerivativeVectorEquation(
+    : VectorFieldEquation(
           model_name,
           parameter,
           objReg,
-          objReg.create_field<VectorField>(
-              "u", zero<VectorField::value_type>::val, {"U", "V", "W"})),
+          objReg.velocity()),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       dp_(objReg.get_object<ScalarGradientEquation>("PressureGradient")),
       dtau_(objReg.get_object<VectorGradientEquation>("Viscosity")),
@@ -48,12 +47,16 @@ void Momentum::execute() {
     auto &dp = dp_.get(it);
     auto &dtau = dtau_.get(it);
 
-    solve(dtau / rho - dp / rho + g_.get(it) + fc_.get(it));
+    size_t a2 = 0;
+
+    auto ddt = boost::yap::make_terminal(ddt_);
+
+    solve(ddt(dtau / rho - dp / rho + g_.get(it) + fc_.get(it)));
 
     log().info_end();
 
     Scalar maxAbsU = 0;
-    for(auto &el: Intf_) {
+    for(auto &el: f_) {
         Scalar absU = mag(el);
         if (absU > maxAbsU) maxAbsU = absU;
     }
@@ -61,8 +64,6 @@ void Momentum::execute() {
         maxDt_ = 0.5*h_/maxAbsU;
         time_.set_model_timestep("Momentum", maxDt_);
     }
-
-    IntDt();
 
     iteration_ = time_.get_current_timestep();
 }

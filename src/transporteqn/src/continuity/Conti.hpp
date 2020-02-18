@@ -55,4 +55,24 @@ class Conti : public ScalarFieldEquation {
     void execute();
 };
 
+class TransientConti : public ScalarFieldEquation {
+
+    REGISTER_DEC_TYPE(TransientConti);
+
+private:
+    // Coeffs
+
+    VectorField& u_;
+
+    Scalar mp_;
+
+public:
+    TransientConti(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
+
+    void execute();
+};
+
 #endif

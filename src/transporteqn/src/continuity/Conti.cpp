@@ -37,7 +37,13 @@ void Conti::execute() {
 
     log().info_begin() << "Computing density";
 
-    m_sum_AB(mp_);
+    auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
+
+    solve(
+        mp_*sum_AB_e(W_),
+        true
+        );
+
     // TODO do it lazily
     for (auto &el : f_) {
         if (el < lower_limit_) {
@@ -51,4 +57,40 @@ void Conti::execute() {
     log().info_end();
 }
 
+TransientConti::TransientConti(
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+    : ScalarFieldEquation(
+          "Conti",
+          parameter,
+          objReg,
+          objReg.create_field<ScalarField>(
+              "rho",
+              read_or_default_coeff_impl<Scalar>(parameter, "rho_0", 1.0))),
+      u_(objReg.velocity()),
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
+
+void TransientConti::execute() {
+
+    log().info_begin() << "Computing density";
+
+    auto &dW = get_objReg().template get_object<KernelGradientField>("KerneldWdx");
+
+    auto sum_AB_s = Sum_AB_dW<ScalarField, KernelGradientField>(f_, np_, dW);
+    auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
+
+    auto ddt = boost::yap::make_terminal(ddt_);
+
+    solve(
+        ddt(sum_AB_e(-mp_*(u_.b()-u_.a()))),
+        true
+        );
+
+    // set iteration
+    iteration_ = time_.get_current_timestep();
+
+    log().info_end();
+}
+
+
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti);

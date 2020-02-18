@@ -34,7 +34,7 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Momentum : public TimeDerivativeVectorEquation {
+class Momentum : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(Momentum);
 

@@ -60,7 +60,7 @@ Akinci::Akinci(
           objReg,
           objReg.create_field<VectorField>(
               "f", {}, {"fCx", "fCy", "fCz"})),
-      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
       h_(read_or_default_coeff<Scalar>("h", 1.0)),
@@ -74,7 +74,7 @@ void Akinci::execute() {
     ScalarField &rho = conti_.get(time_.get_current_timestep());
 
     auto &dW = get_objReg().get_object<KernelGradientField>("KerneldWdx");
-    sum_AB_dW_res_impl(n_, np_, dW, mp_ / rho.b());
+    // sum_AB_dW_res_impl(n_, np_, dW, mp_ / rho.b());
     log().info_end();
 
     log().info_begin() << "Computing coehesive forces";
@@ -85,11 +85,11 @@ void Akinci::execute() {
     auto norm = boost::yap::make_terminal(Norm_Wrapper());
     auto C = boost::yap::make_terminal(SplineFunc(h_));
 
-    sum_AB(
-        2.0 * rho_0_/(rho.a()+rho.b())*(
-        mp_ * mp_ * gamma * C(norm(ab(pos_))) * ab(pos_) / norm(ab(pos_)) +
-        mp_ * gamma * ab(n_))
-            );
+    // sum_AB(
+    //     2.0 * rho_0_/(rho.a()+rho.b())*(
+    //     mp_ * mp_ * gamma * C(norm(ab(pos_))) * ab(pos_) / norm(ab(pos_)) +
+    //     mp_ * gamma * ab(n_))
+    //         );
 
     log().info_end();
 

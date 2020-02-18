@@ -33,7 +33,7 @@ Viscosity::Viscosity(
               "tau",
               zero<VectorField::value_type>::val,
               {"taux", "tauy", "tauz"})),
-      conti_(objReg.get_or_create_model<Conti>("Conti", parameter, objReg)),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       nu_(read_or_default_coeff<Scalar>("nu", 1e-05)),
       u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
@@ -54,10 +54,10 @@ void Viscosity::execute() {
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
     Scalar fact =  mp_*10.0*nu_;
-    sum_AB_dW(
-        fact * rho * (ab(u_) * ab(pos_))
-      / ( ( rho.a() + rho.b() ) * ( normSqr(ab(pos_)) ) )
-        );
+    // sum_AB_dW(
+    //     fact * rho * (ab(u_) * ab(pos_))
+    //   / ( ( rho.a() + rho.b() ) * ( normSqr(ab(pos_)) ) )
+    //     );
     // clang-format on
 
     log().info_end();
