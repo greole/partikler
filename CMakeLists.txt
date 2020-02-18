@@ -61,6 +61,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
       --coverage\
       -fprofile-arcs \
       -fsanitize=address \
+      -ggdb3 \
       -ftest-coverage"
 )
 
@@ -68,7 +69,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
-        -g -rdynamic \
+        -rdynamic \
         "
         # -fopt-info-vec-missed"
         )
