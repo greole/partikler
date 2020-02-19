@@ -42,7 +42,7 @@ SPHParticleNeighbours::SPHParticleNeighbours(
 void SPHParticleNeighbours::execute() {
 
     // log().set_scope("")
-    log().info() << " Constructing particle neighbours";
+    log().info() << " Constructing neighbourship for " << pos_.size() << " particles";
     update_search_cube_domain();
     execute_submodels();
 
@@ -63,6 +63,9 @@ void SPHParticleNeighbours::execute() {
 
 void SPHParticleNeighbours::update_search_cube_domain() {
     std::pair<Vec3, Vec3> bb = bounding_box(pos_);
+    log().info()
+        << " Calculating bounding box. Min: "
+        << bb.first << " Max: " << bb.second;
     scd_() = initSearchCubeDomain(bb, search_cube_size_ * dx_);
 }
 
