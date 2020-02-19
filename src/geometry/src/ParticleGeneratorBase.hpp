@@ -82,7 +82,7 @@ class ParticleGeneratorBase : public Model {
             append(pos_, "Pos");
         } else {
             // Move the object if it doesn't exist in the main registry yet
-            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("Pos"));
+            oreg.get_objects()["Pos"] = local_objReg_.get_object_ptr("Pos");
         }
 
         id_.reserve(pos_.size());
@@ -94,7 +94,7 @@ class ParticleGeneratorBase : public Model {
             append(id_, "id");
         } else {
             // Move the object if it doesn't exist in the main registry yet
-            oreg.get_objects().push_back(*local_objReg_.get_object_ptr("id"));
+            oreg.get_objects()["id"] = local_objReg_.get_object_ptr("id");
         }
 
         get_objReg().update_n_particles();

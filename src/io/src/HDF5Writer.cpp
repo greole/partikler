@@ -116,11 +116,11 @@ void HDF5Writer::execute() {
 
         for (auto &obj : objReg.get_objects()) {
 
-            auto name = obj->get_name();
-            auto type = obj->get_type();
+            auto name = obj.first;
+            auto type = obj.second->get_type();
 
             // TODO
-            std::shared_ptr<SPHObject> *obj_ptr = &obj;
+            std::shared_ptr<SPHObject> *obj_ptr = &obj.second;
             DISPATCH(obj_ptr, write_to_disk, type, file);
         }
 

@@ -39,6 +39,7 @@ Gauss::Gauss(
       W_(objReg.create_field<ScalarField>("KernelW")),
       dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {
     objReg.create_generic<Scalar>("h", h_);
+    objReg.reference_clone("KerneldWdx", "KerneldWdxNeighbour");
 }
 
 void Gauss::execute() {
