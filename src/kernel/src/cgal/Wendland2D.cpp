@@ -74,7 +74,7 @@ void STLWendland2D::execute() {
         if (len != 0.0) {
             Vec3 lenVoV = {(Scalar)lenVo.x(), (Scalar)lenVo.y(), (Scalar)lenVo.z()};
             Vec3 lenVnV = {(Scalar)lenVn.x(), (Scalar)lenVn.y(), (Scalar)lenVn.z()};
-            dWdx_[pid] = lenVoV / len * prefact;
+            dWdx_[pid]  = lenVoV / len * prefact;
             dWdxn_[pid] = lenVnV / len * prefact;
         } else {
             dWdx_[pid] = {{0.0, 0.0, 0.0}};
