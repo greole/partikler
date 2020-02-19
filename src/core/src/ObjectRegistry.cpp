@@ -20,12 +20,10 @@
 #include "ObjectRegistry.hpp"
 
 bool ObjectRegistry::object_exists(const std::string name) const {
-    for (auto &&f : objects_) {
-        if (f->get_name() == name) {
-            return true;
-        };
+    auto search = objects_.find(name);
+    if (search != objects_.end()) {
+        return true;
     }
-
     return false;
 }
 

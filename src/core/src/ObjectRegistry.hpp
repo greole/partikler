@@ -39,7 +39,7 @@
 class ObjectRegistry {
 
   private:
-    using ObjReg = std::vector<std::shared_ptr<SPHObject>>;
+    using ObjReg = std::map<std::string, std::shared_ptr<SPHObject>>;
 
     ObjReg objects_;
 
@@ -49,16 +49,16 @@ class ObjectRegistry {
 
   public:
     template <class T> T &register_object(std::shared_ptr<SPHObject> f) {
-        int idx = objects_.size();
-        objects_.push_back(std::move(f));
-        return dynamic_cast<T &>(*objects_[idx]);
+        objects_[f->get_name()] = f;
+        // return dynamic_cast<T &>(*objects_[f->get_name()]);
+        // return *(objects_[f->get_name()].get());
+        return dynamic_cast<T&>(*objects_[f->get_name()]);
     }
 
     template <class T>
     std::shared_ptr<T> register_object_get_ptr(std::shared_ptr<SPHObject> f) {
-        int idx = objects_.size();
-        objects_.push_back(std::move(f));
-        return std::dynamic_pointer_cast<T>(objects_[idx]);
+        objects_[f->get_name()] = f;
+        return std::dynamic_pointer_cast<T>(objects_[f->get_name()]);
     }
 
     // Setter
@@ -73,27 +73,26 @@ class ObjectRegistry {
     }
 
     template <class T> T &get_object(const std::string name) {
-        for (auto &&f : objects_) {
-            if (f == nullptr) continue;
-            if (f->get_name() == name) {
-                return dynamic_cast<T &>(*f);
-            };
-        }
+        // return dynamic_cast<T> (*objects_[name]);
+        // return dynamic_cast<T> (objects_[name].get());
+        return dynamic_cast<T&>(*objects_[name]);
+
         std::string error_str =
             "no object " + name + " found in object registry";
         throw std::runtime_error(error_str);
     }
 
-    // std::unique_ptr<SPHObject> &get_object_ptr(const std::string name) {
-
     auto get_object_ptr(const std::string name) {
-        return std::find_if(
-            objects_.begin(), objects_.end(), [&](const auto &val) {
-                return val->get_name() == name;
-            });
+        return objects_[name];
     }
 
     ObjReg &get_objects() { return objects_; }
+
+    // creates a copy of the pointer of object with a new name
+    void reference_clone(std::string orig_name, std::string new_name) {
+        objects_[new_name] = objects_[orig_name];
+
+    }
 
     bool object_exists(const std::string name) const;
 
