@@ -293,12 +293,6 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     return os;
 }
 
-// Kind tag to distinguish between symmetric kernels
-// ie dW between particle a and b is -dW between b and a
-// and non-symmetric kernels as used for the stl surfaces
-// where a rotation between surfaces could be necessary
-enum KernelGradientType { Symmetric, NonSymmetric };
-
 using FloatField = Field<std::vector<float>>;
 using DoubleField = Field<std::vector<double>>;
 using ScalarField = Field<std::vector<Scalar>>;
