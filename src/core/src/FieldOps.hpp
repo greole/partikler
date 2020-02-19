@@ -221,16 +221,16 @@ struct Sum_AB_asym {
     NeighbourFieldAB &nb_;
 };
 
+template <class Inner> struct Sum_AB_dW_asym {
 
-template <class Inner, class KernelGradientType> struct Sum_AB_dW {
-
-    Sum_AB_dW(
+    Sum_AB_dW_asym(
         Inner &state,
         NeighbourFieldAB &nb,
-        KernelGradientType& dW)
-        : vec_(state), nb_(nb), dW_(dW) {};
+        KernelGradientField &dW,
+        KernelGradientField &dWn)
+        : vec_(state), nb_(nb), dW_(dW), dWn_(dWn) {};
 
-    template <class Expr> typename Inner::value_type  operator()(Expr expr) {
+    template <class Expr> typename Inner::value_type operator()(Expr expr) {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
@@ -238,7 +238,7 @@ template <class Inner, class KernelGradientType> struct Sum_AB_dW {
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
             vec_[a] += res * dW_[ab];
-            vec_[b] -= res * dW_[ab];
+            vec_[b] += res * dWn_[ab];
             ab++;
         }
         size_t aret = a;
@@ -246,13 +246,49 @@ template <class Inner, class KernelGradientType> struct Sum_AB_dW {
         return vec_[aret];
     }
 
-    size_t a=0;
-    size_t ab=0;
+    size_t a = 0;
+    size_t ab = 0;
 
     Inner &vec_;
     NeighbourFieldAB &nb_;
-    KernelGradientType &dW_;
+    KernelGradientField &dW_;
+    KernelGradientField &dWn_;
 };
+
+template <class Inner> struct Sum_AB_dW_sym {
+
+    Sum_AB_dW_sym(
+        Inner &state,
+        NeighbourFieldAB &nb,
+        KernelGradientField &dW,
+        KernelGradientField &dWn)
+        : vec_(state), nb_(nb), dW_(dW), dWn_(dWn) {};
+
+    template <class Expr> typename Inner::value_type operator()(Expr expr) {
+        while (ab < nb_.size() && a == nb_[ab].ownId) {
+            auto nb_pair = nb_[ab];
+            size_t b = nb_pair.neighId;
+            auto vec_ij_expr = boost::yap::transform(
+                boost::yap::as_expr(expr), take_nth {a, b, ab});
+            auto res = boost::yap::evaluate(vec_ij_expr);
+            vec_[a] += res * dW_[ab];
+            vec_[b] -= res * dWn_[ab];
+            ab++;
+        }
+        size_t aret = a;
+        a++;
+        return vec_[aret];
+    }
+
+    size_t a = 0;
+    size_t ab = 0;
+
+    Inner &vec_;
+    NeighbourFieldAB &nb_;
+    KernelGradientField &dW_;
+    KernelGradientField &dWn_;
+};
+
 
 template<class Inner>
 struct Ddt {
