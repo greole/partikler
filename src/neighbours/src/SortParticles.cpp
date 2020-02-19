@@ -52,16 +52,16 @@ void CountingSortParticles::reorder_fields() {
     log().info_begin() << "Reordering particle fields ";
 
     for (auto &f : get_objReg().get_objects()) {
-        if (f->get_name() == "Pos") continue;
-        if (f->get_name() == "KernelW") continue;
-        if (f->get_name() == "KerneldWdx") continue;
-        if (f->get_name() == "neighbour_pairs") continue;
-        if (f->get_name() == "surface_dist") continue;
-        if (f->get_name() == "search_cubes") continue;
-        if (f->get_name() == "sorting_idxs") continue;
+        if (f.second->get_name() == "Pos") continue;
+        if (f.second->get_name() == "KernelW") continue;
+        if (f.second->get_name() == "KerneldWdx") continue;
+        if (f.second->get_name() == "neighbour_pairs") continue;
+        if (f.second->get_name() == "surface_dist") continue;
+        if (f.second->get_name() == "search_cubes") continue;
+        if (f.second->get_name() == "sorting_idxs") continue;
 
-        auto type = f->get_type();
-        std::shared_ptr<SPHObject> *obj_ptr = &f;
+        auto type = f.second->get_type();
+        std::shared_ptr<SPHObject> *obj_ptr = &f.second;
         DISPATCH(obj_ptr, reorder_vector, type, si_);
     }
 
