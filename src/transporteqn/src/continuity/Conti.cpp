@@ -75,7 +75,7 @@ void TransientConti::execute() {
 
     auto &dW = get_objReg().template get_object<KernelGradientField>("KerneldWdx");
 
-    auto sum_AB_s = Sum_AB_dW<ScalarField, KernelGradientField>(f_, np_, dW);
+    auto sum_AB_s = Sum_AB_dW_sym<ScalarField>(f_, np_, dW, dW);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
 
     auto ddt = boost::yap::make_terminal(ddt_);

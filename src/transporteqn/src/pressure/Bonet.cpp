@@ -79,7 +79,7 @@ void PressureGradient::execute() {
     auto &dW = this->get_objReg().template get_object<KernelGradientField>(
         "KerneldWdx");
 
-    auto sum_AB_e = Sum_AB_dW<VectorField, KernelGradientField>(f_, np_, dW);
+    auto sum_AB_e = Sum_AB_dW_sym<VectorField>(f_, np_, dW, dW);
     auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);
 
     solve(
