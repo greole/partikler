@@ -137,70 +137,20 @@ class FieldEquationBase : public Model {
     // equation is solved
 };
 
-// template <class FieldType>
-// class TimeDerivativeEquation : public FieldEquationBase<FieldType> {
-
-// protected:
-
-//     FieldType& Intf_;
-
-// public:
-
-//     TimeDerivativeEquation(
-//         const std::string &eqn_base_name,
-//         YAML::Node parameter,
-//         ObjectRegistry &objReg,
-//         FieldType &f):
-//          FieldEquationBase<FieldType>(
-//             eqn_base_name,
-//             parameter,
-//             objReg,
-//             objReg.create_field<FieldType>(
-//                 "d" + f.get_name(),
-//                 zero<typename FieldType::value_type>::val,
-//                 {"d_" + f.get_name() + "dx",
-//                  "d_" + f.get_name() + "dy",
-//                  "d_" + f.get_name() + "dz"})),
-//          Intf_(f) {}
-
-
-//     void IntDt() {
-//         Scalar dt =  this->time_.get_deltaT();
-//         // clang-format off
-//         this->log().info_begin()
-//             << "Time integration " << Intf_.get_name()
-//             << " deltaT " << dt;
-//         // clang-format on
-//         for (size_t i = 0; i < this->f_.size(); i++) {
-//             Intf_[i] += this->f_[i] * dt;
-//         }
-//         this->log().info_end();
-//     }
-
-//     // template <class Expr>
-//     // FieldGradientType &sum_AB_dW(Expr const &e) {
-//     //     // dispatch on KernelGradientType
-//     //     auto &dW = this->get_objReg().template get_object<KernelGradientField>(
-//     //         "KerneldWdx");
-//     //     decltype(auto) expr = boost::yap::as_expr(e);
-//     //     sum_AB_dW_res_impl(rho, this->f_, this->np_, dW, expr);
-
-//     //     return this->f_;
-//     // }
-
-// };
-
-
-template <class FieldGradientType>
+template <class FieldGradientType, template<typename> class SumABdWType>
 class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
 
     // TODO use two separate fields for gradients of the Kernel
-    // in the symmetric case the neighbour owner gradient field is just a reference
-    // other wise the two fields are different fields
+    // in the symmetric case the neighbour owner gradient field is just a
+    // reference other wise the two fields are different fields
+
+  protected:
+    KernelGradientField &dWdx_;
+    KernelGradientField &dWdxn_;
+
+    SumABdWType<FieldGradientType> sum_AB_dW_s;
 
   public:
-    KernelGradientType kernelGradientType_;
-
     typedef FieldGradientType value_type;
 
     template <class FieldType>
@@ -219,44 +169,18 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
                   {"d_" + f.get_name() + "_dx",
                    "d_" + f.get_name() + "_dy",
                    "d_" + f.get_name() + "_dz"})),
-          kernelGradientType_(
-              (read_or_default_coeff_impl<std::string>(
-                   parameter, "KernelType", "Symmetric") == "Symmetric")
-                  ? KernelGradientType::Symmetric
-                  : KernelGradientType::NonSymmetric) {}
-
-    template <class Expr>
-    FieldGradientType &sum_AB_dW(ScalarField &rho, Expr const &e) {
-        // dispatch on KernelGradientType
-        auto &dW = this->get_objReg().template get_object<KernelGradientField>(
-            "KerneldWdx");
-        decltype(auto) expr = boost::yap::as_expr(e);
-        sum_AB_dW_res_impl_rho(rho, this->f_, this->np_, dW, expr);
-
-        return this->f_;
-    }
-
-    template <class Expr> FieldGradientType &sum_AB_dW(Expr const &e) {
-        // dispatch on KernelGradientType
-        if (kernelGradientType_ == KernelGradientType::Symmetric) {
-            auto &dW = this->get_objReg().template get_object<KernelGradientField>(
-                "KerneldWdx");
-            decltype(auto) expr = boost::yap::as_expr(e);
-            sum_AB_dW_res_impl(this->f_, this->np_, dW, expr);
-        } else {
-            auto &dW =
-                this->get_objReg().template get_object<DoubleKernelGradientField>(
-                    "KerneldWdx");
-            decltype(auto) expr = boost::yap::as_expr(e);
-            sum_AB_dW_res_impl(this->f_, this->np_, dW, expr);
-        }
-
-        return this->f_;
-    }
+          dWdx_(objReg.get_object<KernelGradientField>("KerneldWdx")),
+          dWdxn_(objReg.get_object<KernelGradientField>("KerneldWdxNeighbour")),
+          sum_AB_dW_s(SumABdWType<FieldGradientType>(
+              this->f_, this->np_, dWdx_, dWdxn_)) {}
 
     template <class RHS> void solve(RHS rhs, bool reset=false) {
         if (reset) solve_impl_res(this->f_, rhs);
         else solve_impl(this->f_, rhs);
+
+        sum_AB_dW_s.a = 0;
+        sum_AB_dW_s.ab = 0;
+        this->ddt_.a_ = 0;
     }
 
 };
@@ -299,9 +223,9 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
 using ScalarFieldEquation = FieldValueEquation<ScalarField, Sum_AB_sym>;
 using VectorFieldEquation = FieldValueEquation<VectorField, Sum_AB_sym>;
 
-using ScalarGradientEquation = FieldGradientEquation<VectorField>;
+using ScalarGradientEquation = FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 // TODO clarify why this is not a tensor field
-using VectorGradientEquation = FieldGradientEquation<VectorField>;
+using VectorGradientEquation = FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 
 
 #endif
