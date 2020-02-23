@@ -53,11 +53,18 @@ void Viscosity::execute() {
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
     Scalar fact =  mp_*10.0*nu_;
-    // sum_AB_dW(
-    //     fact * rho * (ab(u_) * ab(pos_))
-    //   / ( ( rho.a() + rho.b() ) * ( normSqr(ab(pos_)) ) )
-    //     );
+    // TODO do this via a solve method
+    VectorFieldAB dist(this->np_.size(), {0,0,0});
+    solve_inner_impl(this->np_, dist, ab(pos_));
+
+    solve(
+    sum_AB_dW(
+        fact * rho.a() * (ab(u_) * dist)
+        / ( ( rho.a() + rho.b() ) * ( normSqr(dist ) ))
+        ),true
+        );
     // clang-format on
 
     log().info_end();

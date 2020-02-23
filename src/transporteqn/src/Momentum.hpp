@@ -47,7 +47,8 @@ class Momentum : public VectorFieldEquation {
 
     ScalarFieldEquation &p_;
     VectorFieldEquation &g_;
-    VectorFieldEquation &fc_;
+    VectorFieldEquationA &fco_;
+    VectorFieldEquationA &fcu_;
 
   public:
     Momentum(

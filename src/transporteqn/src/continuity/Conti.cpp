@@ -71,24 +71,17 @@ TransientConti::TransientConti(
 
 void TransientConti::execute() {
 
-    log().info_begin() << "Computing density";
-
-    auto &dW = get_objReg().template get_object<KernelGradientField>("KerneldWdx");
-
-    auto sum_AB_s = Sum_AB_dW_sym<ScalarField>(f_, np_, dW, dW);
-    auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
+    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
 
     auto ddt = boost::yap::make_terminal(ddt_);
 
     solve(
-        ddt(sum_AB_e(-mp_*(u_.b()-u_.a()))),
+        ddt(sum_AB_dW(-mp_*(u_.b()-u_.a()))),
         true
         );
 
     // set iteration
     iteration_ = time_.get_current_timestep();
-
-    log().info_end();
 }
 
 

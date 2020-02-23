@@ -35,7 +35,9 @@ Momentum::Momentum(
       dtau_(objReg.get_object<VectorGradientEquation>("Viscosity")),
       p_(objReg.get_object<ScalarFieldEquation>("Pressure")),
       g_(objReg.get_object<VectorFieldEquation>("Gravity")),
-      fc_(objReg.get_object<VectorFieldEquation>("Akinci")) {}
+      fco_(objReg.get_object<VectorFieldEquationA>("Cohesion")),
+      fcu_(objReg.get_object<VectorFieldEquationA>("Curvature"))
+{}
 
 void Momentum::execute() {
 
@@ -51,7 +53,7 @@ void Momentum::execute() {
 
     auto ddt = boost::yap::make_terminal(ddt_);
 
-    solve(ddt(dtau / rho - dp / rho + g_.get(it) + fc_.get(it)));
+    solve(ddt(dtau / rho - dp / rho + g_.get(it) + fco_.get(it) +  fcu_.get(it)),true);
 
     log().info_end();
 
