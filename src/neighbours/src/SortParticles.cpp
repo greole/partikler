@@ -55,6 +55,7 @@ void CountingSortParticles::reorder_fields() {
         if (f.second->get_name() == "Pos") continue;
         if (f.second->get_name() == "KernelW") continue;
         if (f.second->get_name() == "KerneldWdx") continue;
+        if (f.first == "KerneldWdxNeighbour") continue;
         if (f.second->get_name() == "neighbour_pairs") continue;
         if (f.second->get_name() == "surface_dist") continue;
         if (f.second->get_name() == "search_cubes") continue;
