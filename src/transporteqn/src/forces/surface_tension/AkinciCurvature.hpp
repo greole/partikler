@@ -34,9 +34,9 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Akinci : public VectorFieldEquationA {
+class AkinciCurvature : public VectorFieldEquationA {
 
-    REGISTER_DEC_TYPE(Akinci);
+    REGISTER_DEC_TYPE(AkinciCurvature);
 
   private:
     ScalarFieldEquation &conti_;
@@ -45,14 +45,12 @@ class Akinci : public VectorFieldEquationA {
 
     Scalar gamma_;
 
-    Scalar h_;
-
     Scalar rho_0_;
 
-    VectorField &pos_; // Particle positions
+    VectorField &n_; // Normal vector
 
   public:
-    Akinci(
+    AkinciCurvature(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

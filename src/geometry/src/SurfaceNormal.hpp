@@ -34,25 +34,19 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Akinci : public VectorFieldEquationA {
+class SurfaceNormal : public VectorFieldEquation {
 
-    REGISTER_DEC_TYPE(Akinci);
+    REGISTER_DEC_TYPE(SurfaceNormal);
 
   private:
     ScalarFieldEquation &conti_;
 
     Scalar mp_;
 
-    Scalar gamma_;
-
     Scalar h_;
 
-    Scalar rho_0_;
-
-    VectorField &pos_; // Particle positions
-
   public:
-    Akinci(
+    SurfaceNormal(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

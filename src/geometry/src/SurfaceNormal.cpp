@@ -17,47 +17,31 @@
     contact: go@hpsim.de
 */
 
-#ifndef PARTIKLER_GRAVITY_INCLUDED
-#define PARTIKLER_GRAVITY_INCLUDED
+#include "SurfaceNormal.hpp"
 
-#include <string> // for string
+#include "Time.hpp"
 
-#include "Equation.hpp"
-#include "Field.hpp" // for ScalarField, PointField
-#include "FieldOps.hpp"
-#include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
-#include "Scalar.hpp"
-#include "SearchCubes.hpp"
+SurfaceNormal::SurfaceNormal(
+    const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
+    : VectorFieldEquation(
+          "SurfaceNormal",
+          parameter,
+          objReg,
+          objReg.create_field<VectorField>(
+              "normal", {}, {"nx", "ny", "nz"})),
+      conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
+      h_(read_or_default_coeff<Scalar>("h", 1.0))
+{}
 
-class ObjectRegistry;
-namespace YAML {
-class Node;
-} // namespace YAML
+void SurfaceNormal::execute() {
 
-class Akinci : public VectorFieldEquationA {
+    ScalarField &rho = conti_.get(time_.get_current_timestep());
+    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
 
-    REGISTER_DEC_TYPE(Akinci);
+    solve(h_*sum_AB_dW(mp_/rho.b()),true);
 
-  private:
-    ScalarFieldEquation &conti_;
+    iteration_ = time_.get_current_timestep();
+}
 
-    Scalar mp_;
-
-    Scalar gamma_;
-
-    Scalar h_;
-
-    Scalar rho_0_;
-
-    VectorField &pos_; // Particle positions
-
-  public:
-    Akinci(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg);
-
-    void execute();
-};
-
-#endif
+REGISTER_DEF_TYPE(SURFACETENSION, SurfaceNormal);

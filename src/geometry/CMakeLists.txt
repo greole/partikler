@@ -8,9 +8,11 @@ target_sources(Geometry
   PRIVATE
     src/ParticleGeneratorBase.cpp
     src/Cubiod.cpp
+    src/SurfaceNormal.cpp
   PUBLIC
     src/ParticleGeneratorBase.hpp
     src/Cubiod.hpp
+    src/SurfaceNormal.hpp
   )
 
 target_link_libraries(Geometry

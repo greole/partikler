@@ -13,6 +13,7 @@ target_sources(TransportEqn
   "src/Viscosity.cpp"
   "src/forces/Gravity.cpp"
   "src/forces/surface_tension/Akinci.cpp"
+  "src/forces/surface_tension/AkinciCurvature.cpp"
   PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Momentum.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/continuity/Conti.hpp"
@@ -20,6 +21,7 @@ target_sources(TransportEqn
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Viscosity.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/Gravity.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/Akinci.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/AkinciCurvature.hpp"
   )
 
 add_dependencies(TransportEqn Core)
