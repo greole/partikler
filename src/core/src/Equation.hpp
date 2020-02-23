@@ -23,6 +23,7 @@
 #include <algorithm>                // for max
 #include <boost/hana/at.hpp>        // for at_t::operator()
 #include <boost/yap/expression.hpp> // for as_expr, make_terminal
+#include <boost/yap/print.hpp> // for as_expr, make_terminal
 #include <iostream>                 // for operator<<, basic_ostream, endl
 #include <map>                      // for map<>::iterator, operator!=, ope...
 #include <memory>                   // for shared_ptr, allocator, __shared_...
@@ -106,8 +107,7 @@ class FieldEquationBase : public Model {
 
     template<class Expr>
     void solve(Expr e) {
-
-        this->log().info_begin() << "Solving: " << f_.name();
+        this->log().info_begin() << "Solving: " << this->f_.get_name();
         decltype(auto) expr = boost::yap::as_expr(e);
         solve_impl(f_, expr);
         this->log().info_end();
@@ -175,17 +175,23 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
               this->f_, this->np_, dWdx_, dWdxn_)) {}
 
     template <class RHS> void solve(RHS rhs, bool reset=false) {
+        this->log().info_begin() << "Solving: " << this->f_.get_name();
         if (reset) solve_impl_res(this->f_, rhs);
         else solve_impl(this->f_, rhs);
 
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
         this->ddt_.a_ = 0;
+        this->log().info_end();
     }
 
 };
 
-template<class FieldType, template<typename> class SumType>
+template <
+    class FieldType,
+    template <typename> class SumType,
+    template <typename> class SumABdWType
+>
 class FieldValueEquation : public FieldEquationBase<FieldType> {
 
   protected:
@@ -193,6 +199,12 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
     ScalarField &W_;
 
     SumType<FieldType> sum_AB_s;
+
+    KernelGradientField &dWdx_;
+
+    KernelGradientField &dWdxn_;
+
+    SumABdWType<FieldType> sum_AB_dW_s;
 
   public:
     typedef FieldType value_type;
@@ -204,9 +216,14 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         FieldType &f)
         : FieldEquationBase<FieldType>(eqn_base_name, parameter, objReg, f),
           W_(objReg.get_object<ScalarField>("KernelW")),
-          sum_AB_s(SumType<FieldType>(this->f_, this->np_)) {};
+          sum_AB_s(SumType<FieldType>(this->f_, this->np_)),
+          dWdx_(objReg.get_object<KernelGradientField>("KerneldWdx")),
+          dWdxn_(objReg.get_object<KernelGradientField>("KerneldWdxNeighbour")),
+          sum_AB_dW_s(
+              SumABdWType<FieldType>(this->f_, this->np_, dWdx_, dWdxn_)) {};
 
     template <class RHS> void solve(RHS rhs, bool reset=false) {
+        this->log().info_begin() << "Solving: " << " for " << this->f_.get_name();
         if (reset) solve_impl_res(this->f_, rhs);
         else solve_impl(this->f_, rhs);
         // TODO find a better solution
@@ -214,18 +231,28 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         sum_AB_s.a = 0;
         sum_AB_s.ab = 0;
         this->ddt_.a_ = 0;
+        // TODO refactor this
+        std::copy(
+            this->f_.begin(),
+            this->f_.end(),
+            this->ddt_.vec_.begin()
+            );
+        sum_AB_dW_s.a = 0;
+        sum_AB_dW_s.ab = 0;
+        this->log().info_end();
     }
-
-
 };
 
 
-using ScalarFieldEquation = FieldValueEquation<ScalarField, Sum_AB_sym>;
-using VectorFieldEquation = FieldValueEquation<VectorField, Sum_AB_sym>;
+using ScalarFieldEquation = FieldValueEquation<ScalarField, Sum_AB_sym, Sum_AB_dW_sym>;
+using VectorFieldEquation = FieldValueEquation<VectorField, Sum_AB_sym, Sum_AB_dW_sym>;
+using VectorFieldEquationA = FieldValueEquation<VectorField, Sum_AB_asym, Sum_AB_dW_asym>;
 
-using ScalarGradientEquation = FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
+using ScalarGradientEquation =
+    FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 // TODO clarify why this is not a tensor field
 using VectorGradientEquation = FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 
 
+// using ScalarIntegralEquation = FieldGradientEquation<ScalarField, Sum_AB_dW_sym>;
 #endif
