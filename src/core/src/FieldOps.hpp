@@ -63,7 +63,8 @@ template <class ValType> struct Pow_Wrapper {
 struct Norm_Wrapper {
     Norm_Wrapper() {};
     template <typename T> Scalar operator()(T x) {
-        return std::sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+        Scalar ret = std::sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+        return ret;
     }
 };
 
@@ -81,6 +82,27 @@ template <class ValType> struct Set_Wrapper {
     template <typename T> T operator()(T x) { return inner; }
     ValType inner;
 };
+
+struct take_ith {
+
+    template <typename T>
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Scalar const s) {
+        return boost::yap::make_terminal(s);
+    }
+
+    template <typename T>
+    auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        Field<std::vector<T>> const &f) {
+        return boost::yap::make_terminal(f[a]);
+    }
+
+
+    // owner particle index a
+    std::size_t a;
+};
+
 
 
 // struct to access field elements
@@ -148,7 +170,7 @@ std::vector<T> &solve_impl(std::vector<T> &vec, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
         auto vec_i_expr = boost::yap::transform(
-            boost::yap::as_expr(expr), take_nth {i, 0, 0});
+            boost::yap::as_expr(expr), take_ith {i});
         vec[i] = boost::yap::evaluate(vec_i_expr);
     }
     return vec;
@@ -206,7 +228,7 @@ struct Sum_AB_asym {
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
             vec_[a] += res;
-            vec_[b] += res;
+            vec_[b] -= res;
             ab++;
         }
         size_t aret = a;
@@ -289,6 +311,21 @@ template <class Inner> struct Sum_AB_dW_sym {
     KernelGradientField &dWn_;
 };
 
+template <typename T, typename Expr>
+std::vector<T> &
+solve_inner_impl(NeighbourFieldAB& nb, std::vector<T> &vec, Expr const &e) {
+    decltype(auto) expr = boost::yap::as_expr(e);
+    for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
+        auto nb_pair = nb[i];
+        size_t b = nb_pair.neighId;
+        size_t a = nb_pair.ownId;
+        auto vec_ij_expr = boost::yap::transform(
+            boost::yap::as_expr(expr), take_nth {a, b, 0});
+        auto res = boost::yap::evaluate(vec_ij_expr);
+        vec[i] = res;
+    }
+    return vec;
+};
 
 template<class Inner>
 struct Ddt {
