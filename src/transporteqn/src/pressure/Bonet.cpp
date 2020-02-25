@@ -25,7 +25,7 @@ Pressure::Pressure(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarFieldEquation(
-          model_name,
+          "Pressure",
           parameter,
           objReg,
           objReg.create_field<ScalarField>("p", 10000)),
@@ -44,7 +44,7 @@ PressureGradient::PressureGradient(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarGradientEquation(
-        model_name,
+        "PressureGradient",
         parameter,
         objReg,
         objReg.get_object<ScalarField>("p")),
@@ -92,5 +92,5 @@ void PressureGradient::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Pressure);
-REGISTER_DEF_TYPE(TRANSPORTEQN, PressureGradient);
+REGISTER_DEF_TYPE(PRESSURE, Bonet);
+REGISTER_DEF_TYPE(PRESSURE, BonetGradient);

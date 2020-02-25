@@ -41,7 +41,7 @@ class Node;
 
 class Pressure : public ScalarFieldEquation {
 
-    REGISTER_DEC_TYPE(Pressure);
+    REGISTER_DEC_TYPE(Bonet);
 
 private:
     // In
@@ -67,7 +67,7 @@ public:
 
 class PressureGradient : public ScalarGradientEquation {
 
-    REGISTER_DEC_TYPE(PressureGradient);
+    REGISTER_DEC_TYPE(BonetGradient);
 
   private:
     // In
