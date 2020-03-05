@@ -21,7 +21,7 @@
 
 #include "Time.hpp"
 
-Pressure::Pressure(
+Bonet::Bonet(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarFieldEquation(
@@ -40,7 +40,7 @@ Pressure::Pressure(
     time_.set_model_timestep(model_name, maxDt_);
 }
 
-PressureGradient::PressureGradient(
+BonetGradient::BonetGradient(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarGradientEquation(
@@ -49,11 +49,11 @@ PressureGradient::PressureGradient(
         objReg,
         objReg.get_object<ScalarField>("p")),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      pressure_(objReg.get_or_create_model<Pressure>("Pressure", parameter, objReg)),
+      pressure_(objReg.get_object<ScalarFieldEquation>("Pressure")),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")())
 {}
 
-void Pressure::execute() {
+void Bonet::execute() {
 
     auto &rho = conti_.get(time_.get_current_timestep());
 
@@ -68,7 +68,7 @@ void Pressure::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-void PressureGradient::execute() {
+void BonetGradient::execute() {
 
     log().info_begin() << "Computing pressure gradient";
 

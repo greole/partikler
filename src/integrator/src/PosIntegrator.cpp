@@ -24,10 +24,10 @@
 PosIntegrator::PosIntegrator(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : Model(model_name, parameter, objReg),
+    : VectorFieldEquation(
+          "Position", parameter, objReg, objReg.get_object<VectorField>("Pos")),
       id_(objReg.get_object<IntField>("id")),
       u_(objReg.get_object<VectorField>("u")),
-      pos_(objReg.get_object<VectorField>("Pos")),
       time_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 void PosIntegrator::execute() {
@@ -37,18 +37,18 @@ void PosIntegrator::execute() {
 
     VectorField dx(u_.size(), {0.0, 0.0, 0.0});
 
-    for (size_t i = 0; i < pos_.size(); i++) {
-        if (id_[i] > 0) {
-            u_[i][0] = 0.0;
-            u_[i][1] = 0.0;
-            u_[i][2] = 0.0;
-        }
+    for (size_t i = 0; i < f_.size(); i++) {
+        // if (id_[i] > 0) {
+        //     u_[i][0] = 0.0;
+        //     u_[i][1] = 0.0;
+        //     u_[i][2] = 0.0;
+        // }
         dx[i] = u_[i] * time_.get_deltaT();
     }
 
-    pos_ += dx;
+    f_ += dx;
 
-    const float CFL = 0.01;
+    // const float CFL = 0.01;
     // float current_max_dx = (pos_ - old_pos).norm().get_max();
     // // float dx_ratio = CFL*dx_max/current_max_dx;
     // float dx_ratio = CFL /current_max_dx;

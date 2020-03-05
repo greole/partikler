@@ -26,7 +26,7 @@ Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : VectorFieldEquation(
-          model_name,
+          "Momentum",
           parameter,
           objReg,
           objReg.velocity()),

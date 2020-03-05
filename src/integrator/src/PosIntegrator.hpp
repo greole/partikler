@@ -26,6 +26,7 @@
 #include "Field.hpp" // for Field (ptr only), IntField, PointField
 #include "FieldOps.hpp"
 #include "Models.hpp"            // for Model, ModelRegister (ptr only)
+#include "Equation.hpp"
 #include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 #include "yaml-cpp/yaml.h"
 
@@ -36,7 +37,7 @@ class Node;
 
 class TimeGraph;
 
-class PosIntegrator : public Model {
+class PosIntegrator : public VectorFieldEquation {
 
     REGISTER_DEC_TYPE(PosIntegrator);
 
@@ -46,7 +47,6 @@ class PosIntegrator : public Model {
 
     // Out
     VectorField &u_;
-    VectorField &pos_;
     TimeGraph &time_;
 
   public:

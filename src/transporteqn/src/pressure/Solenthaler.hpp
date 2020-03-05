@@ -17,8 +17,8 @@
     contact: go@hpsim.de
 */
 
-#ifndef Pressure_H
-#define Pressure_H
+#ifndef Solenthaler_H
+#define Solenthaler_H
 
 #include <string> // for string
 
@@ -33,41 +33,17 @@
 #include <boost/yap/print.hpp>
 #include <boost/yap/yap.hpp>
 
-#include "Conti.hpp"
+#include "Scalar.hpp"
 class ObjectRegistry;
 namespace YAML {
 class Node;
 } // namespace YAML
 
-class Bonet : public ScalarFieldEquation {
-
-    REGISTER_DEC_TYPE(Bonet);
-
-private:
-    // In
-    // Density
-    ScalarFieldEquation &conti_;
-
-    // Coeffs
-    const Scalar c_;
-    const Scalar rho_0_;
-    const Scalar gamma_;
-    const Scalar p_0_;
-    const Scalar prefac_;
-
-public:
-    Bonet(
-        const std::string &model_name,
-        YAML::Node parameter,
-        ObjectRegistry &objReg);
-
-    void execute();
-};
 
 
-class BonetGradient : public ScalarGradientEquation {
+class SolenthalerGradient : public ScalarGradientEquation {
 
-    REGISTER_DEC_TYPE(BonetGradient);
+    REGISTER_DEC_TYPE(SolenthalerGradient);
 
   private:
     // In
@@ -75,11 +51,17 @@ class BonetGradient : public ScalarGradientEquation {
     ScalarFieldEquation &conti_;
     ScalarFieldEquation &pressure_;
 
+    VectorFieldEquation &vel_;
+    VectorFieldEquation &pos_;
+
     // Coeffs
-    const float mp_;
+    const Scalar rho_0_;
+    const Scalar eta_;
+    const Scalar mp_;
+    const int minIter_=3;
 
   public:
-    BonetGradient(
+    SolenthalerGradient(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);
