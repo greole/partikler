@@ -24,6 +24,7 @@
 #include <vector>   // for vector
 
 #include "Vec3.hpp"
+#include "Scalar.hpp"
 
 #include "cgal/CGALTYPEDEFS.hpp" // for Point, CGALVector, Facet_handle
 
@@ -32,13 +33,13 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles);
 std::vector<Point> create_uniform_particle_cube(size_t n_particles);
 
 std::vector<Point>
-create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx, float noise=0);
+create_uniform_particle_cube(Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise=0);
 
 struct FixedDistanceParticles {
 
     std::vector<Point> points; // id of original particle
     std::vector<size_t> fixId; // id of original particle
-    std::vector<float> maxDx;  // max allowed distance
+    std::vector<Scalar> maxDx;  // max allowed distance
 
     // defines which motions are allowed
     // 0 - fixed, 1 - along line, 2 - plane, 3 half sphere,
@@ -54,8 +55,8 @@ struct FixedDistanceParticles {
     std::vector<Facet_handle> facets;
 };
 
-float rand01();
+Scalar rand01();
 
-std::vector<Point> disperse_particles(std::vector<Point> &points, float dx);
+std::vector<Point> disperse_particles(std::vector<Point> &points, Scalar dx);
 
 #endif
