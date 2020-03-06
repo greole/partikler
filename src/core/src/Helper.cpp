@@ -25,9 +25,9 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
     points.reserve(n_particles);
     for (size_t j = 0; j < n_particles; j++) {
         for (size_t i = 0; i < n_particles; i++) {
-            float x = ((float)i) / ((float)n_particles);
-            float y = ((float)j) / ((float)n_particles);
-            float z = 0.0;
+            Scalar x = ((Scalar)i) / ((Scalar)n_particles);
+            Scalar y = ((Scalar)j) / ((Scalar)n_particles);
+            Scalar z = 0.0;
             points.push_back(Point(x, y, z));
         }
     }
@@ -35,7 +35,7 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
 }
 
 std::vector<Point>
-create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx, float noise) {
+create_uniform_particle_cube(Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise) {
 
     srand(time(NULL));
 
@@ -50,13 +50,13 @@ create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx, float noi
     for (size_t k = 0; k < nz; k++) {
         for (size_t j = 0; j < ny; j++) {
             for (size_t i = 0; i < nx; i++) {
-                float nx = ((float)(rand() % 100)) / 50.0 - 1.0;
-                float ny = ((float)(rand() % 100)) / 50.0 - 1.0;
-                float nz = ((float)(rand() % 100)) / 50.0 - 1.0;
+                Scalar nx = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
+                Scalar ny = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
+                Scalar nz = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
 
-                float x = ((float)i) * dx + nx*noise*dx;
-                float y = ((float)j) * dx + ny*noise*dx;
-                float z = ((float)k) * dx + nz*noise*dx;
+                Scalar x = ((Scalar)i) * dx + nx*noise*dx;
+                Scalar y = ((Scalar)j) * dx + ny*noise*dx;
+                Scalar z = ((Scalar)k) * dx + nz*noise*dx;
                 points.push_back(Point(x, y, z));
             }
         }
@@ -70,9 +70,9 @@ std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
     for (size_t k = 0; k < n_particles; k++) {
         for (size_t j = 0; j < n_particles; j++) {
             for (size_t i = 0; i < n_particles; i++) {
-                float x = ((float)i) / ((float)n_particles);
-                float y = ((float)j) / ((float)n_particles);
-                float z = ((float)k) / ((float)n_particles);
+                Scalar x = ((Scalar)i) / ((Scalar)n_particles);
+                Scalar y = ((Scalar)j) / ((Scalar)n_particles);
+                Scalar z = ((Scalar)k) / ((Scalar)n_particles);
                 points.push_back(Point(x, y, z));
             }
         }
@@ -80,14 +80,14 @@ std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
     return points;
 }
 
-float rand01() { return ((float)rand() / (RAND_MAX)); }
+Scalar rand01() { return ((Scalar)rand() / (RAND_MAX)); }
 
-std::vector<Point> disperse_particles(std::vector<Point> &points, float dx) {
+std::vector<Point> disperse_particles(std::vector<Point> &points, Scalar dx) {
     for (size_t piter = 0; piter < points.size(); piter++) {
 
-        float x = points[piter].x() + rand01() * dx;
-        float y = points[piter].x() + rand01() * dx;
-        float z = points[piter].x() + rand01() * dx;
+        Scalar x = points[piter].x() + rand01() * dx;
+        Scalar y = points[piter].x() + rand01() * dx;
+        Scalar z = points[piter].x() + rand01() * dx;
         points[piter] = Point(x, y, z);
     }
     return points;
