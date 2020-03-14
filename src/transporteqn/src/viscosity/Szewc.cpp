@@ -16,44 +16,62 @@
 
     contact: go@hpsim.de
 */
-
-#include "AkinciCurvature.hpp"
+#include "Szewc.hpp"
 
 #include "Conti.hpp"
+#include "Scalar.hpp"
 #include "Time.hpp"
-#include <math.h>
 
-AkinciCurvature::AkinciCurvature(
+#include "static_block.hpp"
+
+Szewc::Szewc(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : VectorFieldEquation(
-          "Curvature",
+    : VectorGradientEquation(
+          "Viscosity",
           parameter,
           objReg,
           objReg.create_field<VectorField>(
-              "fCurv", {}, {"fCurvx", "fCurvy", "fCurvz"})),
+              "tau",
+              zero<VectorField::value_type>::val,
+              {"taux", "tauy", "tauz"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
+      nu_(read_or_default_coeff<Scalar>("nu", 1e-05)), u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
-      gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
-      rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
-      n_(objReg.get_object<VectorField>("normal")) {}
+      pos_(objReg.get_pos()) {
 
-void AkinciCurvature::execute() {
+    maxDt_ = 0.25 * h_ * h_ / nu_;
+    time_.set_model_timestep(model_name, maxDt_);
+}
 
-    log().info_begin() << "Computing coehesive forces";
-    iteration_ = time_.get_current_timestep();
+void Szewc::execute() {
 
-    Scalar gamma = -1.0 * gamma_;
+    log().info_begin() << "Computing dnu";
 
+    // auto& u = momentum_.get();
     ScalarField &rho = conti_.get();
-    auto saba = sum_AB_a();
-    auto sum_AB_e = boost::yap::make_terminal(saba);
+
+    // clang-format off
+    auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
+    Scalar fact =  mp_*10.0*nu_;
+    // TODO do this via a solve method
+    VectorFieldAB dist(this->np_.size(), {0,0,0});
+    solve_inner_impl(this->np_, dist, ab(pos_));
 
     solve(
-        sum_AB_e(2.0 * rho_0_ / (rho.a() + rho.b()) * (mp_ * gamma * ab(n_))));
+    sum_AB_dW(
+        fact * rho.a() * (ab(u_) * dist)
+        / ( ( rho.a() + rho.b() ) * ( normSqr(dist ) ))
+        ),true
+        );
+    // clang-format on
 
     log().info_end();
-
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(SURFACETENSION, AkinciCurvature);
+REGISTER_DEF_TYPE(VISCOSITY, Szewc);
+
+static_block {
+    std::cout << "Hello static block world!\n";
+}

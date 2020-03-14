@@ -23,10 +23,10 @@
 #include <string> // for string
 #include <vector> // for vector
 
+#include "Equation.hpp"
 #include "Field.hpp" // for Field (ptr only), IntField, PointField
 #include "FieldOps.hpp"
 #include "Models.hpp"            // for Model, ModelRegister (ptr only)
-#include "Equation.hpp"
 #include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 #include "yaml-cpp/yaml.h"
 

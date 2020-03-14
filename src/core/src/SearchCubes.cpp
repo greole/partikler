@@ -325,8 +325,7 @@ SortedParticles countingSortParticles(
     std::vector<Vec3> retp(n_particles);
     for (size_t uid = 0; uid < n_particles; uid++) {
         // copy particle to new position in sorted array
-        const size_t sid =
-            position_to_cube_id(scd, unsorted_particles[uid]);
+        const size_t sid = position_to_cube_id(scd, unsorted_particles[uid]);
 
         // std::cout
         //   << "[DEBUG] SearchCubes.cpp::countingSortParticles"

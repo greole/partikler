@@ -59,14 +59,14 @@ class TransientConti : public ScalarFieldEquation {
 
     REGISTER_DEC_TYPE(TransientConti);
 
-private:
+  private:
     // Coeffs
 
-    VectorField& u_;
+    VectorField &u_;
 
     Scalar mp_;
 
-public:
+  public:
     TransientConti(
         const std::string &model_name,
         YAML::Node parameter,

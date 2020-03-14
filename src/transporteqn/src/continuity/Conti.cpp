@@ -37,12 +37,10 @@ void Conti::execute() {
 
     log().info_begin() << "Computing density";
 
-    auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
+    auto sab = sum_AB();
+    auto sum_AB_o = boost::yap::make_terminal(sab);
 
-    solve(
-        mp_*sum_AB_e(W_),
-        true
-        );
+    solve(mp_ * sum_AB_o(W_));
 
     // TODO do it lazily
     for (auto &el : f_) {
@@ -71,19 +69,17 @@ TransientConti::TransientConti(
 
 void TransientConti::execute() {
 
-    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
+    auto sabdw = sum_AB_dW_asym();
+    auto sum_AB_dW = boost::yap::make_terminal(sabdw);
 
-    auto ddt = boost::yap::make_terminal(ddt_);
+    auto ddts = ddt();
+    auto ddto = boost::yap::make_terminal(ddts);
 
-    solve(
-        ddt(sum_AB_dW(-mp_*(u_.b()-u_.a()))),
-        true
-        );
+    solve(ddto(sum_AB_dW(-mp_ * (u_.b() - u_.a()))));
 
     // set iteration
     iteration_ = time_.get_current_timestep();
 }
-
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti);

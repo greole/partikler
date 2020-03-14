@@ -59,7 +59,7 @@ struct SearchCubeDomain {
     /* size_t padding; */
 };
 
-template<class T>
+template <class T>
 size_t position_to_cube_id(SearchCubeDomain scd, const T &p) {
     // TODO test if speed up n_cubes are copied to a const size_t nx ...
 
@@ -139,7 +139,6 @@ struct SortedNeighbours {
     std::vector<NeighbourPair> ids;
     std::vector<Vec3> dist;
 };
-
 
 struct UnsortedNeighbour {
 

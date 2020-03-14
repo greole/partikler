@@ -234,8 +234,8 @@ STLSortedNeighbours createSTLNeighbours(
 std::pair<Vec3, Vec3> cgal_bounding_box(std::vector<Point> const &particles) {
     Scalar minx, miny, minz;
     Scalar maxx, maxy, maxz;
-    minx, miny, minz = std::numeric_limits<Scalar>::max();
-    maxx, maxy, maxz = std::numeric_limits<Scalar>::min();
+    minx = miny = minz = std::numeric_limits<Scalar>::max();
+    maxx = maxy = maxz = std::numeric_limits<Scalar>::min();
 
     for (auto &el : particles) {
 

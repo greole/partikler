@@ -28,6 +28,7 @@ TimeGraph::TimeGraph(
       endTime_(read_or_default_coeff<Scalar>("endTime", -1.0)),
       deltaT_(read_or_default_coeff<Scalar>("deltaT", -1.0)),
       max_deltaT_(read_or_default_coeff<Scalar>("max_deltaT", -1.0)),
+      min_deltaT_(read_or_default_coeff<Scalar>("min_deltaT", -1.0)),
       iterations_(read_or_default_coeff<int>("iterations", 0)) {
     model_timestep_restrictions_["maxDeltaT"] = max_deltaT_;
     if (deltaT_ < 0) {

@@ -27,19 +27,17 @@ SurfaceNormal::SurfaceNormal(
           "SurfaceNormal",
           parameter,
           objReg,
-          objReg.create_field<VectorField>(
-              "normal", {}, {"nx", "ny", "nz"})),
+          objReg.create_field<VectorField>("normal", {}, {"nx", "ny", "nz"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
-      h_(read_or_default_coeff<Scalar>("h", 1.0))
-{}
+      h_(read_or_default_coeff<Scalar>("h", 1.0)) {}
 
 void SurfaceNormal::execute() {
 
-    ScalarField &rho = conti_.get(time_.get_current_timestep());
+    ScalarField &rho = conti_.get();
     auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
 
-    solve(h_*sum_AB_dW(mp_/rho.b()),true);
+    solve(h_ * sum_AB_dW(mp_ / rho.b()));
 
     iteration_ = time_.get_current_timestep();
 }

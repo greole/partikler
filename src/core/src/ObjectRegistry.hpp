@@ -52,7 +52,7 @@ class ObjectRegistry {
         objects_[f->get_name()] = f;
         // return dynamic_cast<T &>(*objects_[f->get_name()]);
         // return *(objects_[f->get_name()].get());
-        return dynamic_cast<T&>(*objects_[f->get_name()]);
+        return dynamic_cast<T &>(*objects_[f->get_name()]);
     }
 
     template <class T>
@@ -75,23 +75,20 @@ class ObjectRegistry {
     template <class T> T &get_object(const std::string name) {
         // return dynamic_cast<T> (*objects_[name]);
         // return dynamic_cast<T> (objects_[name].get());
-        return dynamic_cast<T&>(*objects_[name]);
+        return dynamic_cast<T &>(*objects_[name]);
 
         std::string error_str =
             "no object " + name + " found in object registry";
         throw std::runtime_error(error_str);
     }
 
-    auto get_object_ptr(const std::string name) {
-        return objects_[name];
-    }
+    auto get_object_ptr(const std::string name) { return objects_[name]; }
 
     ObjReg &get_objects() { return objects_; }
 
     // creates a copy of the pointer of object with a new name
     void reference_clone(std::string orig_name, std::string new_name) {
         objects_[new_name] = objects_[orig_name];
-
     }
 
     bool object_exists(const std::string name) const;
@@ -109,8 +106,7 @@ class ObjectRegistry {
 
     // create an generic with defined  val
     template <class T>
-    Generic<T> &
-    create_generic(const std::string name, T val) {
+    Generic<T> &create_generic(const std::string name, T val) {
         if (object_exists(name)) return get_object<Generic<T>>(name);
         return register_object<Generic<T>>(
             std::make_unique<Generic<T>>(name, GenericType, val));
@@ -153,17 +149,12 @@ class ObjectRegistry {
     // look up velocity and create if it doesnt exist yet
     VectorField &velocity() {
         if (object_exists("u")) return get_object<VectorField>("u");
-        return register_object<VectorField>(
-            std::make_unique<VectorField>(
-                n_particles_,
-                zero<VectorField::value_type>::val,
-                "u",
-                std::vector<std::string> {"U", "V", "W"}
-            )
-        );
+        return register_object<VectorField>(std::make_unique<VectorField>(
+            n_particles_,
+            zero<VectorField::value_type>::val,
+            "u",
+            std::vector<std::string> {"U", "V", "W"}));
     }
-
-
 };
 
 class FieldIdMap : public SPHObject {

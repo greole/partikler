@@ -23,7 +23,7 @@
 #include <algorithm>                // for max
 #include <boost/hana/at.hpp>        // for at_t::operator()
 #include <boost/yap/expression.hpp> // for as_expr, make_terminal
-#include <boost/yap/print.hpp> // for as_expr, make_terminal
+#include <boost/yap/print.hpp>      // for as_expr, make_terminal
 #include <iostream>                 // for operator<<, basic_ostream, endl
 #include <map>                      // for map<>::iterator, operator!=, ope...
 #include <memory>                   // for shared_ptr, allocator, __shared_...
@@ -53,12 +53,15 @@
 // - allows other TransportEqn as dependencies
 // - Computes a d(...)
 
-template <class FieldType>
-class FieldEquationBase : public Model {
+template <class FieldType> class FieldEquationBase : public Model {
 
   protected:
-
     FieldType &f_;
+
+    // old time step value
+    FieldType fo_;
+
+    IntField &id_;
 
     TimeGraph &time_;
 
@@ -74,55 +77,51 @@ class FieldEquationBase : public Model {
 
     Scalar h_;
 
-    Scalar maxDt_  = std::numeric_limits<Scalar>::max();
+    Scalar maxDt_ = std::numeric_limits<Scalar>::max();
 
-    Ddt<FieldType> ddt_;
+    int stored_iteration_;
 
-    decltype(boost::yap::make_terminal(Ddt<FieldType>())) ddt_terminal_;
+    // decltype(boost::yap::make_terminal(Ddt<FieldType>())) ddt_terminal_;
 
   public:
-
     FieldEquationBase(
         const std::string &field_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        FieldType& f)
-        : Model(field_name, parameter, objReg),
-          f_(f),
+        FieldType &f)
+        : Model(field_name, parameter, objReg), f_(f),
+          fo_(f.size(), zero<typename FieldType::value_type>::val),
+          id_(objReg.get_object<IntField>("id")),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          h_(objReg.get_object<Generic<Scalar>>("h")()),
-          objReg_(objReg),
-          ddt_(Ddt(time_.get_deltaT(),  f_))
-           {
+          h_(objReg.get_object<Generic<Scalar>>("h")()), objReg_(objReg) {}
 
-          ddt_terminal_ = boost::yap::make_terminal(ddt_);
-}
+    void store_old_value() {
+        for(size_t i=0; i<fo_.size(); i++) {
+            fo_[i] = f_[i];
+        }
+    }
 
     std::pair<bool, Scalar> timestep_limit() { return {false, 0}; }
 
-    template <class RHS> auto ddt(RHS rhs) {
-        return ddt_terminal_(rhs);
-    }
+    Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_, this->id_); }
 
-    template<class Expr>
-    void solve(Expr e) {
+    template <class Expr> void solve(Expr e) {
         this->log().info_begin() << "Solving: " << this->f_.get_name();
         decltype(auto) expr = boost::yap::as_expr(e);
-        solve_impl(f_, expr);
+        solve_impl(f_, id_, expr);
         this->log().info_end();
     }
 
-    FieldType &get(int iteration) {
-        if (iteration == iteration_) {
-            std::cout << get_name()
-                      << "DEBUG using cached solution for iteration "
-                      << iteration << std::endl;
-            return f_;
-        } else {
-            this->execute();
-            return f_;
-        }
+    // get the current solution
+    FieldType &get() { return f_; }
+
+    // force an execution of the equation
+    // use always previous timestep value
+    // for ddt
+    FieldType &estimate() {
+        this->execute();
+        return f_;
     }
 
     // template<class T>
@@ -137,7 +136,7 @@ class FieldEquationBase : public Model {
     // equation is solved
 };
 
-template <class FieldGradientType, template<typename> class SumABdWType>
+template <class FieldGradientType, template <typename> class SumABdWType>
 class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
 
     // TODO use two separate fields for gradients of the Kernel
@@ -174,31 +173,29 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
           sum_AB_dW_s(SumABdWType<FieldGradientType>(
               this->f_, this->np_, dWdx_, dWdxn_)) {}
 
-    template <class RHS> void solve(RHS rhs, bool reset=false) {
+    template <class RHS> void solve(RHS rhs, bool reset = true) {
         this->log().info_begin() << "Solving: " << this->f_.get_name();
-        if (reset) solve_impl_res(this->f_, rhs);
-        else solve_impl(this->f_, rhs);
+        if (reset)
+            solve_impl_res(this->f_, this->id_, rhs);
+        else
+            solve_impl(this->f_, this->id_, rhs);
 
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
-        this->ddt_.a_ = 0;
         this->log().info_end();
     }
-
 };
 
 template <
     class FieldType,
-    template <typename> class SumType,
-    template <typename> class SumABdWType
->
+    template <typename>
+    class SumType,
+    template <typename>
+    class SumABdWType>
 class FieldValueEquation : public FieldEquationBase<FieldType> {
 
   protected:
-
     ScalarField &W_;
-
-    SumType<FieldType> sum_AB_s;
 
     KernelGradientField &dWdx_;
 
@@ -213,46 +210,53 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         const std::string &eqn_base_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        FieldType &f)
+        FieldType &f,
+        bool symmetric = true)
         : FieldEquationBase<FieldType>(eqn_base_name, parameter, objReg, f),
           W_(objReg.get_object<ScalarField>("KernelW")),
-          sum_AB_s(SumType<FieldType>(this->f_, this->np_)),
           dWdx_(objReg.get_object<KernelGradientField>("KerneldWdx")),
           dWdxn_(objReg.get_object<KernelGradientField>("KerneldWdxNeighbour")),
           sum_AB_dW_s(
               SumABdWType<FieldType>(this->f_, this->np_, dWdx_, dWdxn_)) {};
 
-    template <class RHS> void solve(RHS rhs, bool reset=false) {
-        this->log().info_begin() << "Solving: " << " for " << this->f_.get_name();
-        if (reset) solve_impl_res(this->f_, rhs);
-        else solve_impl(this->f_, rhs);
-        // TODO find a better solution
-        // Reset sum_AB indizes
-        sum_AB_s.a = 0;
-        sum_AB_s.ab = 0;
-        this->ddt_.a_ = 0;
-        // TODO refactor this
-        std::copy(
-            this->f_.begin(),
-            this->f_.end(),
-            this->ddt_.vec_.begin()
-            );
+    Sum_AB_sym<FieldType> sum_AB() {
+        return Sum_AB_sym<FieldType>(this->f_, this->np_, this->id_);
+    }
+
+    Sum_AB_asym<FieldType> sum_AB_a() {
+        return Sum_AB_asym<FieldType>(this->f_, this->np_);
+    }
+
+    Sum_AB_dW_asym<FieldType> sum_AB_dW_asym() {
+        return Sum_AB_dW_asym<FieldType>(this->f_, this->np_, dWdx_, dWdxn_);
+    }
+
+    template <class RHS> void solve(RHS rhs, bool reset = true) {
+        this->log().info_begin() << "Solving: "
+                                 << " for " << this->f_.get_name();
+        if (reset)
+            solve_impl_res(this->f_, this->id_, rhs);
+        else
+            solve_impl(this->f_, this->id_, rhs);
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
         this->log().info_end();
     }
 };
 
-
-using ScalarFieldEquation = FieldValueEquation<ScalarField, Sum_AB_sym, Sum_AB_dW_sym>;
-using VectorFieldEquation = FieldValueEquation<VectorField, Sum_AB_sym, Sum_AB_dW_sym>;
-using VectorFieldEquationA = FieldValueEquation<VectorField, Sum_AB_asym, Sum_AB_dW_asym>;
+using ScalarFieldEquation =
+    FieldValueEquation<ScalarField, Sum_AB_sym, Sum_AB_dW_sym>;
+using VectorFieldEquation =
+    FieldValueEquation<VectorField, Sum_AB_sym, Sum_AB_dW_sym>;
+using VectorFieldEquationA =
+    FieldValueEquation<VectorField, Sum_AB_asym, Sum_AB_dW_asym>;
 
 using ScalarGradientEquation =
     FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 // TODO clarify why this is not a tensor field
-using VectorGradientEquation = FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
+using VectorGradientEquation =
+    FieldGradientEquation<VectorField, Sum_AB_dW_sym>;
 
-
-// using ScalarIntegralEquation = FieldGradientEquation<ScalarField, Sum_AB_dW_sym>;
+// using ScalarIntegralEquation = FieldGradientEquation<ScalarField,
+// Sum_AB_dW_sym>;
 #endif

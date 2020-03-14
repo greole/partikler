@@ -20,7 +20,7 @@
 #include "STLParticleNeighbours.hpp"
 
 #include "ObjectRegistry.hpp"
-#include "cgal/CGALSearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
+#include "cgal/CGALSearchCubes.hpp" // for SearchCube, NeighbourFieldAB, Searc...
 
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -66,8 +66,8 @@ void SPHSTLParticleNeighbours::execute() {
 }
 
 void SPHSTLParticleNeighbours::update_search_cube_domain() {
-    scd_() =
-        initSearchCubeDomain(cgal_bounding_box(points_), search_cube_size_ * dx_);
+    scd_() = initSearchCubeDomain(
+        cgal_bounding_box(points_), search_cube_size_ * dx_);
 }
 
 REGISTER_DEF_TYPE(PARTICLENEIGHBOURS, SPHSTLParticleNeighbours);

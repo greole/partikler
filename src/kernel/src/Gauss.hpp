@@ -48,7 +48,7 @@ class Gauss : public Model {
     // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
     // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
     // 2d
-    const Scalar alpha_;  // = 7. / (64. * M_PI * h * h);
+    const Scalar alpha_; // = 7. / (64. * M_PI * h * h);
 
     // In
     const VectorField &pos_; // Particle positions

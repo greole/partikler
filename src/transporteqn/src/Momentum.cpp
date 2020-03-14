@@ -25,45 +25,37 @@
 Momentum::Momentum(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : VectorFieldEquation(
-          "Momentum",
-          parameter,
-          objReg,
-          objReg.velocity()),
+    : VectorFieldEquation("Momentum", parameter, objReg, objReg.velocity()),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       dp_(objReg.get_object<ScalarGradientEquation>("PressureGradient")),
       dtau_(objReg.get_object<VectorGradientEquation>("Viscosity")),
       p_(objReg.get_object<ScalarFieldEquation>("Pressure")),
-      g_(objReg.get_object<VectorFieldEquation>("Gravity")),
-      fco_(objReg.get_object<VectorFieldEquationA>("Cohesion")),
-      fcu_(objReg.get_object<VectorFieldEquationA>("Curvature"))
-{}
+      forces_(objReg.get_object<VectorFieldEquation>("ForcesList")) {}
 
 void Momentum::execute() {
 
     log().info_begin() << "Computing du/dt";
 
-    int it = time_.get_current_timestep();
-
-    auto &rho = conti_.get(it);
-    auto &dp = dp_.get(it);
-    auto &dtau = dtau_.get(it);
+    auto &rho = conti_.get();
+    auto &dp = dp_.get();
+    auto &dtau = dtau_.get();
 
     size_t a2 = 0;
 
-    auto ddt = boost::yap::make_terminal(ddt_);
+    auto ddts = ddt();
+    auto ddto = boost::yap::make_terminal(ddts);
 
-    solve(ddt(dtau / rho - dp / rho + g_.get(it) + fco_.get(it) +  fcu_.get(it)),true);
+    solve(ddto(dtau / rho - dp / rho + forces_.get()));
 
     log().info_end();
 
     Scalar maxAbsU = 0;
-    for(auto &el: f_) {
+    for (auto &el : f_) {
         Scalar absU = mag(el);
         if (absU > maxAbsU) maxAbsU = absU;
     }
     if (maxAbsU > 0) {
-        maxDt_ = 0.5*h_/maxAbsU;
+        maxDt_ = 0.5 * h_ / maxAbsU;
         time_.set_model_timestep("Momentum", maxDt_);
     }
 

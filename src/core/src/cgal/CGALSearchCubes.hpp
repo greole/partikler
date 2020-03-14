@@ -31,8 +31,8 @@
 #include <algorithm> // for std::sort
 
 #include "Scalar.hpp"
-#include "Vec3.hpp"
 #include "SearchCubes.hpp"
+#include "Vec3.hpp"
 
 struct STLSortedNeighbours {
     std::vector<NeighbourPair> ids;

@@ -1,6 +1,5 @@
-#include "CGALSearchCubes.hpp"
+#include "SearchCubes.hpp"
 #include "Helper.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"
 #include "gtest/gtest.h"
 
 #include <vector>
@@ -16,15 +15,16 @@ bool found_particle_pair(
 TEST(OwnerCubeSearch, FindsNeighbours) {
     // number of particles in each direction
     const size_t n_particles = 3;
-    std::vector<Point> points = create_uniform_particle_cube(n_particles);
+    std::vector<Vec3> points =
+        create_uniform_particle_cube(n_particles); // evtl andere  funktion
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
-    std::vector<STLUnsortedNeighbour> ret {};
+    std::vector<UnsortedNeighbour> ret {};
     ret.reserve(tot_n_particles * points.size() / 2);
 
     // Assume all particles on same facet
-    const std::vector<Facet_handle> facets(points.size(), NULL);
+    // const std::vector<Facet_handle> facets(points.size(), NULL);
 
     // TODO needs facets, create facets with test data
     stl_owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);

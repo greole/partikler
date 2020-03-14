@@ -75,7 +75,6 @@ class Model : public SPHObject {
     bool debug_;
 
   public:
-
     Model(const std::string name, YAML::Node parameter, ObjectRegistry &objReg);
 
     YAML::Node get_parameter() { return parameter_; }
@@ -118,6 +117,8 @@ class Model : public SPHObject {
     virtual void execute() = 0;
 
     void sub_model_push_back(std::shared_ptr<Model> m);
+
+    std::vector<std::shared_ptr<Model>> &get_submodels() { return submodels_; }
 
     void execute_submodels();
 

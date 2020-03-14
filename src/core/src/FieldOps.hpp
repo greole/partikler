@@ -43,7 +43,8 @@ template <class ValType> struct Pow_Wrapper {
 //     // copy  expressions
 //     template <typename T> auto operator()(T x) { return terminal(x); }
 //     // but take Fields by reference
-//     template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
+//     template <typename U> auto operator()(Field<U> &x) { return terminal(x);
+//     }
 
 //     decltype(boost::yap::make_terminal(OpType())) terminal;
 // };
@@ -55,7 +56,8 @@ template <class ValType> struct Pow_Wrapper {
 //     // copy  expressions
 //     template <typename T> auto operator()(T x) { return terminal(x); }
 //     // but take Fields by reference
-//     template <typename U> auto operator()(Field<U> &x) { return terminal(x); }
+//     template <typename U> auto operator()(Field<U> &x) { return terminal(x);
+//     }
 
 //     decltype(boost::yap::make_terminal(OpType())) terminal;
 // };
@@ -67,7 +69,6 @@ struct Norm_Wrapper {
         return ret;
     }
 };
-
 
 struct NormSqr_Wrapper {
     NormSqr_Wrapper() {};
@@ -98,12 +99,9 @@ struct take_ith {
         return boost::yap::make_terminal(f[a]);
     }
 
-
     // owner particle index a
     std::size_t a;
 };
-
-
 
 // struct to access field elements
 //
@@ -159,46 +157,47 @@ struct take_nth {
 // Assigns some expression e to the given vector by evaluating e elementwise,
 // to avoid temporaries and allocations.
 template <typename T, typename Expr>
-std::vector<T> &solve_impl_res(std::vector<T> &vec, Expr const &e) {
+std::vector<T> &
+solve_impl_res(std::vector<T> &vec, std::vector<int> id, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     std::fill(vec.begin(), vec.end(), zero<T>::val);
-    return solve_impl(vec, e);
+    return solve_impl(vec, id, e);
 }
 
 template <typename T, typename Expr>
-std::vector<T> &solve_impl(std::vector<T> &vec, Expr const &e) {
+std::vector<T> &
+solve_impl(std::vector<T> &vec, std::vector<int> id, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
-        auto vec_i_expr = boost::yap::transform(
-            boost::yap::as_expr(expr), take_ith {i});
+        auto vec_i_expr =
+            boost::yap::transform(boost::yap::as_expr(expr), take_ith {i});
         vec[i] = boost::yap::evaluate(vec_i_expr);
     }
     return vec;
 }
-
 
 // appends the values of b to a inplace
 template <class T> void field_append(T &a, T &b) {
     a.insert(a.end(), b.begin(), b.end());
 }
 
+template <class Inner> struct Sum_AB_sym {
 
-template<class Inner>
-struct Sum_AB_sym {
+    Sum_AB_sym(Inner &state, NeighbourFieldAB &nb, IntField &id)
+        : vec_(state), nb_(nb), id_(id) {};
 
-    Sum_AB_sym(Inner& state, NeighbourFieldAB &nb)
-        : vec_(state), nb_(nb) {};
-
-    template<class Expr>
-    typename Inner::value_type operator()(Expr expr) {
+    template <class Expr> typename Inner::value_type operator()(Expr expr) {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
+            // Calculate density only for same fluid ids
+            // if (id_[b] == id_[a]) {
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
             vec_[a] += res;
             vec_[b] += res;
+            // }
             ab++;
         }
         size_t aret = a;
@@ -206,21 +205,19 @@ struct Sum_AB_sym {
         return vec_[aret];
     }
 
-    size_t a=0;
-    size_t ab=0;
+    size_t a = 0;
+    size_t ab = 0;
 
     Inner &vec_;
     NeighbourFieldAB &nb_;
+    IntField &id_;
 };
 
-template<class Inner>
-struct Sum_AB_asym {
+template <class Inner> struct Sum_AB_asym {
 
-    Sum_AB_asym(Inner& state, NeighbourFieldAB &nb)
-        : vec_(state), nb_(nb) {};
+    Sum_AB_asym(Inner &state, NeighbourFieldAB &nb) : vec_(state), nb_(nb) {};
 
-    template<class Expr>
-    typename Inner::value_type operator()(Expr expr) {
+    template <class Expr> typename Inner::value_type operator()(Expr expr) {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
@@ -236,8 +233,8 @@ struct Sum_AB_asym {
         return vec_[aret];
     }
 
-    size_t a=0;
-    size_t ab=0;
+    size_t a = 0;
+    size_t ab = 0;
 
     Inner &vec_;
     NeighbourFieldAB &nb_;
@@ -313,7 +310,7 @@ template <class Inner> struct Sum_AB_dW_sym {
 
 template <typename T, typename Expr>
 std::vector<T> &
-solve_inner_impl(NeighbourFieldAB& nb, std::vector<T> &vec, Expr const &e) {
+solve_inner_impl(NeighbourFieldAB &nb, std::vector<T> &vec, Expr const &e) {
     decltype(auto) expr = boost::yap::as_expr(e);
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
         auto nb_pair = nb[i];
@@ -327,36 +324,39 @@ solve_inner_impl(NeighbourFieldAB& nb, std::vector<T> &vec, Expr const &e) {
     return vec;
 };
 
-template<class Inner>
-struct Ddt {
+template <class Inner> struct Ddt {
 
-    // Default constructor to allow decltype(make_terminal(Ddt())) construction
-    Ddt() {};
+    // // Default constructor to allow decltype(make_terminal(Ddt()))
+    // construction Ddt() {};
 
-    Ddt(
-        Scalar dt,
-        Inner & vec
-        )
-        :  dt_(dt), vec_({})  {
+    Ddt(Scalar dt, Inner &vec, IntField &id) : dt_(dt), vec_({}), id_(id) {
         // store old state
         vec_.reserve(vec.size());
-        for(size_t i=0; i<vec.size(); i++) {
+        for (size_t i = 0; i < vec.size(); i++) {
             vec_.push_back(vec[i]);
         }
     };
 
     template <class T> T operator()(T v) {
-        T ret = vec_[a_] + v * dt_;
-        a_++;
-        return ret;
+
+        if (id_[a_] < 1) {
+            T ret = vec_[a_] + v * dt_;
+            a_++;
+            return ret;
+        } else {
+            T ret = vec_[a_];
+            a_++;
+            return ret;
+        }
     }
 
-    size_t a_=0;
+    size_t a_ = 0;
 
     Scalar dt_;
 
     std::vector<typename Inner::value_type> vec_;
 
+    IntField &id_;
 };
 
 #endif

@@ -34,9 +34,8 @@ Bonet::Bonet(
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.4)),
       p_0_(read_or_default_coeff<Scalar>("p_0", 10000)),
-      prefac_(c_ * c_ * rho_0_ / gamma_)
-{
-    maxDt_ = 0.5/c_*h_;
+      prefac_(c_ * c_ * rho_0_ / gamma_) {
+    maxDt_ = 0.5 / c_ * h_;
     time_.set_model_timestep(model_name, maxDt_);
 }
 
@@ -44,24 +43,23 @@ BonetGradient::BonetGradient(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarGradientEquation(
-        "PressureGradient",
-        parameter,
-        objReg,
-        objReg.get_object<ScalarField>("p")),
+          "PressureGradient",
+          parameter,
+          objReg,
+          objReg.get_object<ScalarField>("p")),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       pressure_(objReg.get_object<ScalarFieldEquation>("Pressure")),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")())
-{}
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
 
 void Bonet::execute() {
 
-    auto &rho = conti_.get(time_.get_current_timestep());
+    auto &rho = conti_.get();
 
     auto pow = boost::yap::make_terminal(Pow_Wrapper<Scalar>(gamma_));
 
     log().info_begin() << "Computing pressure";
 
-    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_, true);
+    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_);
 
     log().info_end();
 
@@ -72,9 +70,8 @@ void BonetGradient::execute() {
 
     log().info_begin() << "Computing pressure gradient";
 
-    int it = time_.get_current_timestep();
-    auto &p = pressure_.get(it);
-    auto &rho = conti_.get(it);
+    auto &p = pressure_.get();
+    auto &rho = conti_.get();
 
     auto &dW = this->get_objReg().template get_object<KernelGradientField>(
         "KerneldWdx");
@@ -82,10 +79,7 @@ void BonetGradient::execute() {
     auto sum_AB_e = Sum_AB_dW_sym<VectorField>(f_, np_, dW, dW);
     auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);
 
-    solve(
-        1.0/rho*sum_AB_dW_e(mp_/rho.b()*(p.a()+p.b())),
-        true
-        );
+    solve(1.0 / rho * sum_AB_dW_e(mp_ / rho.b() * (p.a() + p.b())));
 
     log().info_end();
 

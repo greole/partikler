@@ -9,19 +9,23 @@ target_sources(TransportEqn
   PRIVATE
   "src/Momentum.cpp"
   "src/continuity/Conti.cpp"
+  "src/viscosity/Szewc.cpp"
   "src/pressure/Bonet.cpp"
-  "src/Viscosity.cpp"
+  "src/pressure/Solenthaler.cpp"
+  "src/forces/ForcesList.cpp"
   "src/forces/Gravity.cpp"
   "src/forces/surface_tension/Akinci.cpp"
   "src/forces/surface_tension/AkinciCurvature.cpp"
   PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/Momentum.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/continuity/Conti.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/pressure/Bonet.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/Viscosity.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/Gravity.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/Akinci.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/forces/surface_tension/AkinciCurvature.hpp"
+  "src/Momentum.hpp"
+  "src/continuity/Conti.hpp"
+  "src/viscosity/Szewc.hpp"
+  "src/pressure/Bonet.hpp"
+  "src/pressure/Solenthaler.hpp"
+  "src/forces/ForcesList.hpp"
+  "src/forces/Gravity.hpp"
+  "src/forces/surface_tension/Akinci.hpp"
+  "src/forces/surface_tension/AkinciCurvature.hpp"
   )
 
 add_dependencies(TransportEqn Core)
@@ -38,6 +42,7 @@ target_include_directories(TransportEqn
   ${PROJECT_SOURCE_DIR}/src/forces
   ${PROJECT_SOURCE_DIR}/src/forces/surface_tension
   ${PROJECT_SOURCE_DIR}/src/pressure
+  ${PROJECT_SOURCE_DIR}/src/viscosity
   ${PROJECT_SOURCE_DIR}/src/continuity
 )
 

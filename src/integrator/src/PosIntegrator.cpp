@@ -35,18 +35,12 @@ void PosIntegrator::execute() {
     log().info_begin() << " Updating Particle Positions";
     log().info() << " DeltaT " << time_.get_deltaT();
 
-    VectorField dx(u_.size(), {0.0, 0.0, 0.0});
+    auto ddts = ddt();
+    auto ddto = boost::yap::make_terminal(ddts);
 
-    for (size_t i = 0; i < f_.size(); i++) {
-        // if (id_[i] > 0) {
-        //     u_[i][0] = 0.0;
-        //     u_[i][1] = 0.0;
-        //     u_[i][2] = 0.0;
-        // }
-        dx[i] = u_[i] * time_.get_deltaT();
-    }
+    solve(ddto(u_), false);
 
-    f_ += dx;
+    // f_ += dx;
 
     // const float CFL = 0.01;
     // float current_max_dx = (pos_ - old_pos).norm().get_max();

@@ -167,6 +167,24 @@ TEST(ScalarField, abMacroTest) {
     ASSERT_EQ(res[1], 0.0);
 }
 
+TEST(ScalarField, sumABExpr) {
+
+    ScalarField W(2, 1.0);
+
+    NeighbourFieldAB n(1, {0, 1});
+
+    ScalarField res(2, 0.0);
+    size_t a = 0;
+    size_t ab = 0;
+
+    auto sum_AB_e = boost::yap::make_terminal(Sum_AB(a, ab, res, n));
+
+    solve_impl(res, sum_AB_e(W));
+
+    ASSERT_EQ(res[0], 2.0);
+    ASSERT_EQ(res[1], 2.0);
+}
+
 TEST(ScalarField, ComplexArithmeticFields) {
 
     ScalarField a(1, 1.0);
@@ -291,3 +309,5 @@ int main(int argc, char **argv) {
 
     return RUN_ALL_TESTS();
 }
+
+template <class T> T add(T a, T b) { return a + b; }

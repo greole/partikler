@@ -28,7 +28,11 @@ Wendland::Wendland(
     YAML::Node parameter,
     ObjectRegistry &objReg,
     float hfact)
-    : Model(model_name, parameter, objReg),
+    : ScalarFieldEquation(
+          "KernelEqn",
+          parameter,
+          objReg,
+          objReg.create_field<ScalarField>("KernelW")),
       h_(read_or_default_coeff<Scalar>("h", 1.0)), ih_(1.0 / h_),
       W_fak2_(hfact / (h_ * h_)), dW_fak2_(hfact / (h_ * h_ * h_)),
       pos_(objReg.get_pos()),

@@ -16,17 +16,16 @@
 
     contact: go@hpsim.de
 */
-#include "Viscosity.hpp"
+#include "Szewc.hpp"
 
+#include "Conti.hpp"
 #include "Scalar.hpp"
 #include "Time.hpp"
-#include "Conti.hpp"
 
-
-Viscosity::Viscosity(
+Szewc::Szewc(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : VectorGradientEquation(
-          model_name,
+          "Viscosity",
           parameter,
           objReg,
           objReg.create_field<VectorField>(
@@ -34,22 +33,20 @@ Viscosity::Viscosity(
               zero<VectorField::value_type>::val,
               {"taux", "tauy", "tauz"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      nu_(read_or_default_coeff<Scalar>("nu", 1e-05)),
-      u_(objReg.velocity()),
+      nu_(read_or_default_coeff<Scalar>("nu", 1e-05)), u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       pos_(objReg.get_pos()) {
 
-    maxDt_ = 0.25 * h_*h_/nu_;
+    maxDt_ = 0.25 * h_ * h_ / nu_;
     time_.set_model_timestep(model_name, maxDt_);
 }
 
-void Viscosity::execute() {
+void Szewc::execute() {
 
     log().info_begin() << "Computing dnu";
 
     // auto& u = momentum_.get();
-    int it = time_.get_current_timestep();
-    ScalarField &rho = conti_.get(it);
+    ScalarField &rho = conti_.get();
 
     // clang-format off
     auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
@@ -71,4 +68,4 @@ void Viscosity::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
+REGISTER_DEF_TYPE(VISCOSITY, Szewc);

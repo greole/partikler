@@ -35,7 +35,7 @@ struct SearchCube;
 struct SearchCubeDomain;
 template <class T> class Generic;
 
-class CountingSortParticles: public Model {
+class CountingSortParticles : public Model {
 
     REGISTER_DEC_TYPE(CountingSortParticles);
 

@@ -22,8 +22,8 @@
 
 #include "Models.hpp"
 #include "ObjectRegistry.hpp" // for ObjectRegistry
-#include "yaml-cpp/yaml.h"
 #include "Scalar.hpp"
+#include "yaml-cpp/yaml.h"
 
 // TODO use std::variant<float,size_t> to
 class TimeGraph : public Model {
@@ -51,6 +51,8 @@ class TimeGraph : public Model {
     Scalar deltaT_;
 
     Scalar max_deltaT_;
+
+    Scalar min_deltaT_;
 
     int iterations_;
 
@@ -82,8 +84,9 @@ class TimeGraph : public Model {
         };
     }
 
-    void set_model_timestep(std::string name, Scalar dt){
-        log().info() << "Setting timestep limit " << dt << " for Model " << name;
+    void set_model_timestep(std::string name, Scalar dt) {
+        log().info() << "Setting timestep limit " << dt << " for Model "
+                     << name;
         model_timestep_restrictions_[name] = dt;
     };
 
@@ -106,7 +109,7 @@ class TimeGraph : public Model {
         for (auto &el : model_timestep_restrictions_) {
             if (el.second < dt) dt = el.second;
         }
-        set_deltaT(dt);
+        set_deltaT(max(min_deltaT_, dt));
         return deltaT_;
     }
 

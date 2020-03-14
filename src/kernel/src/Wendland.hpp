@@ -29,6 +29,7 @@
 #include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "Equation.hpp"
 #include "Scalar.hpp"
 
 class ObjectRegistry;
@@ -38,7 +39,7 @@ class Node;
 struct NeighbourPair;
 struct Vec3;
 
-class Wendland : public Model {
+class Wendland : public ScalarFieldEquation {
 
   private:
     // Coeffs

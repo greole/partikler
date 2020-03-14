@@ -17,43 +17,29 @@
     contact: go@hpsim.de
 */
 
-#ifndef VISCOSITY_H
-#define VISCOSITY_H
+#ifndef PARTIKLER_GRAVITY_INCLUDED
+#define PARTIKLER_GRAVITY_INCLUDED
 
 #include <string> // for string
 
-#include "Field.hpp" // for VectorField, PointField
-#include "FieldOps.hpp"
 #include "Equation.hpp"
-#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "Field.hpp" // for ScalarField, PointField
+#include "FieldOps.hpp"
+#include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
 #include "SearchCubes.hpp"
-#include "yaml-cpp/yaml.h"
-
 
 class ObjectRegistry;
 namespace YAML {
 class Node;
 } // namespace YAML
 
-class Viscosity : public VectorGradientEquation {
+class ForcesList : public VectorFieldEquation {
 
-    REGISTER_DEC_TYPE(Viscosity);
+    REGISTER_DEC_TYPE(ForcesList);
 
   private:
-    ScalarFieldEquation &conti_;
-
-    // Coeffs
-    float nu_;
-
-    // In
-    VectorField &u_;
-
-    float mp_;
-
-    VectorField &pos_; // Particle positions
-
   public:
-    Viscosity(
+    ForcesList(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

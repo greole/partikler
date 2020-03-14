@@ -32,18 +32,18 @@ struct SplineFunc {
         Scalar h6 = h3 * h3;
         Scalar h9 = h6 * h3;
 
-        Scalar r3 = r*r*r;
+        Scalar r3 = r * r * r;
         Scalar hr3 = (h - r) * (h - r) * (h - r);
 
-            Scalar pi = (Scalar)M_PI;
+        Scalar pi = (Scalar)M_PI;
 
-        Scalar c =  32.0 /pi/h9;
+        Scalar c = 32.0 / pi / h9;
 
         if (2.0 * r > h && r <= h) {
-            return c * hr3*r3;
+            return c * hr3 * r3;
         }
         if (r > 0 && 2 * r <= h) {
-            return c*2.0 * hr3 * r3 - h6 / 64.0;
+            return c * 2.0 * hr3 * r3 - h6 / 64.0;
         }
 
         return 0.0;
@@ -54,7 +54,7 @@ struct SplineFunc {
 
 Akinci::Akinci(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : VectorFieldEquationA(
+    : VectorFieldEquation(
           "Cohesion",
           parameter,
           objReg,
@@ -74,24 +74,22 @@ void Akinci::execute() {
 
     Scalar gamma = -1.0 * gamma_;
 
-    ScalarField &rho = conti_.get(time_.get_current_timestep());
-    auto sum_AB_e = boost::yap::make_terminal(sum_AB_s);
+    ScalarField &rho = conti_.get();
+
+    auto saba = sum_AB_a();
+    auto sum_AB_e = boost::yap::make_terminal(saba);
     auto norm_e = Norm_Wrapper();
     auto norm = boost::yap::make_terminal(norm_e);
     auto C = boost::yap::make_terminal(SplineFunc(h_));
 
     // TODO do this via a solve method
-    VectorFieldAB dist(this->np_.size(), {0,0,0});
+    VectorFieldAB dist(this->np_.size(), {0, 0, 0});
     solve_inner_impl(this->np_, dist, ab(pos_));
 
     Scalar c = 2.0 * rho_0_ * mp_ * mp_ * gamma;
 
-    solve(
-    sum_AB_e(
-        c/(rho.a()+rho.b())*(C(norm(dist)) * ab(pos_)  / norm(dist) )
-        ),
-        true
-        );
+    solve(sum_AB_e(
+        c / (rho.a() + rho.b()) * (C(norm(dist)) * ab(pos_) / norm(dist))));
 
     log().info_end();
 

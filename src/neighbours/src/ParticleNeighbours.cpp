@@ -24,8 +24,7 @@
 
 SPHParticleNeighbours::SPHParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      dx_(read_coeff<Scalar>("dx")),
+    : Model(model_name, parameter, objReg), dx_(read_coeff<Scalar>("dx")),
       pos_(objReg.get_pos()),
       sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
       np_(objReg.create_field<NeighbourFieldAB>("neighbour_pairs")),
@@ -42,7 +41,8 @@ SPHParticleNeighbours::SPHParticleNeighbours(
 void SPHParticleNeighbours::execute() {
 
     // log().set_scope("")
-    log().info() << " Constructing neighbourship for " << pos_.size() << " particles";
+    log().info() << " Constructing neighbourship for " << pos_.size()
+                 << " particles";
     update_search_cube_domain();
     execute_submodels();
 
@@ -63,9 +63,8 @@ void SPHParticleNeighbours::execute() {
 
 void SPHParticleNeighbours::update_search_cube_domain() {
     std::pair<Vec3, Vec3> bb = bounding_box(pos_);
-    log().info()
-        << " Calculating bounding box. Min: "
-        << bb.first << " Max: " << bb.second;
+    log().info() << " Calculating bounding box. Min: " << bb.first
+                 << " Max: " << bb.second;
     scd_() = initSearchCubeDomain(bb, search_cube_size_ * dx_);
 }
 

@@ -17,46 +17,42 @@
     contact: go@hpsim.de
 */
 
-#ifndef Solenthaler_H
-#define Solenthaler_H
+#ifndef VISCOSITY_H
+#define VISCOSITY_H
 
 #include <string> // for string
 
 #include "Equation.hpp"
-#include "Field.hpp" // for ScalarField, VectorField
+#include "Field.hpp" // for VectorField, PointField
 #include "FieldOps.hpp"
-#include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
-#include "Scalar.hpp"
+#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include <boost/yap/print.hpp>
-#include <boost/yap/yap.hpp>
-
-#include "Scalar.hpp"
 class ObjectRegistry;
 namespace YAML {
 class Node;
 } // namespace YAML
 
-class SolenthalerGradient : public ScalarGradientEquation {
+class Szewc : public VectorGradientEquation {
 
-    REGISTER_DEC_TYPE(SolenthalerGradient);
+    REGISTER_DEC_TYPE(Szewc);
 
   private:
-    // In
-    // Density
     ScalarFieldEquation &conti_;
-    ScalarFieldEquation &pressure_;
 
     // Coeffs
-    const Scalar rho_0_;
-    const Scalar eta_;
-    const int min_iter_;
-    const Scalar mp_;
+    float nu_;
+
+    // In
+    VectorField &u_;
+
+    float mp_;
+
+    VectorField &pos_; // Particle positions
 
   public:
-    SolenthalerGradient(
+    Szewc(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

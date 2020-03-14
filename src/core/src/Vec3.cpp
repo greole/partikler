@@ -117,4 +117,4 @@ void translatePoints(std::vector<Vec3> &points, Vec3 translate) {
     }
 }
 
-Scalar mag(Vec3 v) {return std::sqrt(squared_length(v));}
+Scalar mag(Vec3 v) { return std::sqrt(squared_length(v)); }

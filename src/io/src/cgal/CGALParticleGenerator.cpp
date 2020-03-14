@@ -77,7 +77,7 @@ SPHParticleGenerator::SPHParticleGenerator(
 
 void SPHParticleGenerator::execute() {
 
-    std::vector<Point>  points {};
+    std::vector<Point> points {};
 
     // NOTE
     // Here CGAL points are generated first and then converted

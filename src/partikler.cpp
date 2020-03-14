@@ -68,9 +68,9 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
 #include "Solenthaler.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Bonet);
-#include "Viscosity.hpp"
+#include "Szewc.hpp"
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Viscosity);
+REGISTER_DEF_TYPE(VISCOSITY, Szewc);
 #include "CGALParticleGenerator.hpp"
 
 REGISTER_DEF_TYPE(READER, SPHSTLReader);

@@ -177,24 +177,28 @@ template <class T> class Field : public T, public SPHObject {
 // partial template specialisation takes care of the fields
 template <class T>
 void reorder_vector(Field<T> &vec, const std::vector<size_t> &idxs) {
+    std::cout << " reorder vector begin" << std::endl;
     T tmp(vec.size());
     for (size_t i = 0; i < idxs.size(); i++) {
         tmp[idxs[i]] = vec[i];
     }
 
     vec = tmp;
+    std::cout << " done" << std::endl;
 }
 
 template <class T>
 void reorder_vector(
     std::vector<typename T::value_type> &vec, const std::vector<size_t> &idxs) {
     std::vector<typename T::value_type> tmp(vec.size());
+    std::cout << " reorder vector II begin" << std::endl;
 
     for (size_t i = 0; i < idxs.size(); i++) {
         tmp[idxs[i]] = vec[i];
     }
 
     vec = tmp;
+    std::cout << " done" << std::endl;
 }
 
 // Lazy functions

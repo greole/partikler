@@ -34,8 +34,8 @@ std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
     return points;
 }
 
-std::vector<Point>
-create_uniform_particle_cube(Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise) {
+std::vector<Point> create_uniform_particle_cube(
+    Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise) {
 
     srand(time(NULL));
 
@@ -54,9 +54,9 @@ create_uniform_particle_cube(Vec3 dimensions, Vec3 position, Scalar dx, Scalar n
                 Scalar ny = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
                 Scalar nz = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
 
-                Scalar x = ((Scalar)i) * dx + nx*noise*dx;
-                Scalar y = ((Scalar)j) * dx + ny*noise*dx;
-                Scalar z = ((Scalar)k) * dx + nz*noise*dx;
+                Scalar x = ((Scalar)i) * dx + nx * noise * dx;
+                Scalar y = ((Scalar)j) * dx + ny * noise * dx;
+                Scalar z = ((Scalar)k) * dx + nz * noise * dx;
                 points.push_back(Point(x, y, z));
             }
         }

@@ -62,6 +62,7 @@ void CountingSortParticles::reorder_fields() {
         if (f.second->get_name() == "sorting_idxs") continue;
 
         auto type = f.second->get_type();
+        std::cout << "reordering " << f.second->get_name() << std::endl;
         std::shared_ptr<SPHObject> *obj_ptr = &f.second;
         DISPATCH(obj_ptr, reorder_vector, type, si_);
     }

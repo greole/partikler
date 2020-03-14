@@ -29,11 +29,9 @@ Gauss::Gauss(
     YAML::Node parameter,
     ObjectRegistry &objReg,
     float hfact)
-    : Model(model_name, parameter, objReg),
-      h_(read_or_default_coeff<Scalar>("h", 1.0)),
-      ih_(1.0 / h_),
-      alpha_(hfact / (h_ * h_)),
-      pos_(objReg.get_pos()),
+    : Model("KernelEqn", parameter, objReg),
+      h_(read_or_default_coeff<Scalar>("h", 1.0)), ih_(1.0 / h_),
+      alpha_(hfact / (h_ * h_)), pos_(objReg.get_pos()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
       W_(objReg.create_field<ScalarField>("KernelW")),
@@ -78,7 +76,7 @@ void Gauss::execute() {
 
         W_[pid] = W;
 
-        const Scalar prefact = -2.0 * q * W ;
+        const Scalar prefact = -2.0 * q * W;
 
         if (maglen > 0.0) {
             for (int j = 0; j < 3; j++) {
@@ -97,7 +95,7 @@ void Gauss::execute() {
 
 Gauss2D::Gauss2D(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Gauss(model_name, parameter, objReg, 1.0/M_PI) {}
+    : Gauss(model_name, parameter, objReg, 1.0 / M_PI) {}
 
 Gauss3D::Gauss3D(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -105,9 +103,8 @@ Gauss3D::Gauss3D(
           model_name,
           parameter,
           objReg,
-          1.0 / ((pow(M_PI, 3/2)) *
-                 read_or_default_coeff_impl<Scalar>(parameter, "h", 1.0))
-        ) {}
+          1.0 / ((pow(M_PI, 3 / 2)) *
+                 read_or_default_coeff_impl<Scalar>(parameter, "h", 1.0))) {}
 
 REGISTER_DEF_TYPE(KERNEL, Gauss2D);
 REGISTER_DEF_TYPE(KERNEL, Gauss3D);

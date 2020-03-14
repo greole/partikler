@@ -32,8 +32,7 @@ STLWendland2D::STLWendland2D(
           "surface_dist")),
       W_(objReg.create_field<ScalarField>("KernelW")),
       dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")),
-      dWdxn_(objReg.create_field<KernelGradientField>("KerneldWdxNeighbour"))
-{}
+      dWdxn_(objReg.create_field<KernelGradientField>("KerneldWdxNeighbour")) {}
 
 void STLWendland2D::execute() {
 
@@ -69,12 +68,13 @@ void STLWendland2D::execute() {
 
         W_[pid] = qfac4 * q2 * W_fak2_;
 
-
         const float prefact = 10. * qfac2 * q * dW_fak2_;
         if (len != 0.0) {
-            Vec3 lenVoV = {(Scalar)lenVo.x(), (Scalar)lenVo.y(), (Scalar)lenVo.z()};
-            Vec3 lenVnV = {(Scalar)lenVn.x(), (Scalar)lenVn.y(), (Scalar)lenVn.z()};
-            dWdx_[pid]  = lenVoV / len * prefact;
+            Vec3 lenVoV = {
+                (Scalar)lenVo.x(), (Scalar)lenVo.y(), (Scalar)lenVo.z()};
+            Vec3 lenVnV = {
+                (Scalar)lenVn.x(), (Scalar)lenVn.y(), (Scalar)lenVn.z()};
+            dWdx_[pid] = lenVoV / len * prefact;
             dWdxn_[pid] = lenVnV / len * prefact;
         } else {
             dWdx_[pid] = {{0.0, 0.0, 0.0}};

@@ -34,7 +34,8 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Akinci : public VectorFieldEquationA {
+class Akinci : public VectorFieldEquation {
+    // class Akinci : public VectorFieldEquationA {
 
     REGISTER_DEC_TYPE(Akinci);
 

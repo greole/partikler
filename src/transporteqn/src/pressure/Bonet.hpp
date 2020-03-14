@@ -22,11 +22,11 @@
 
 #include <string> // for string
 
-#include "Scalar.hpp"
 #include "Equation.hpp"
 #include "Field.hpp" // for ScalarField, VectorField
 #include "FieldOps.hpp"
 #include "Models.hpp" // for ScalarFieldEquation, ModelRegister (ptr only)
+#include "Scalar.hpp"
 #include "SearchCubes.hpp"
 #include "yaml-cpp/yaml.h"
 
@@ -43,7 +43,7 @@ class Bonet : public ScalarFieldEquation {
 
     REGISTER_DEC_TYPE(Bonet);
 
-private:
+  private:
     // In
     // Density
     ScalarFieldEquation &conti_;
@@ -55,7 +55,7 @@ private:
     const Scalar p_0_;
     const Scalar prefac_;
 
-public:
+  public:
     Bonet(
         const std::string &model_name,
         YAML::Node parameter,
@@ -63,7 +63,6 @@ public:
 
     void execute();
 };
-
 
 class BonetGradient : public ScalarGradientEquation {
 
