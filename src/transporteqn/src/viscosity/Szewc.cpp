@@ -71,7 +71,3 @@ void Szewc::execute() {
 }
 
 REGISTER_DEF_TYPE(VISCOSITY, Szewc);
-
-static_block {
-    std::cout << "Hello static block world!\n";
-}

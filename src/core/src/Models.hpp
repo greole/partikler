@@ -39,13 +39,16 @@
 
 #include "Scalar.hpp"
 #include "Vec3.hpp"
+#include "static_block.hpp"
 
 class ObjectRegistry;
 
-#define REGISTER_DEC_TYPE(NAME) static ModelRegister<NAME> reg
+#define REGISTER_DEC_TYPE(NAME)                                                \
+  public:                                                                      \
+    static ModelRegister<NAME> reg
 
 #define REGISTER_DEF_TYPE(CLASS, NAME)                                         \
-    ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME)
+    static_block { NAME::reg = ModelRegister<NAME>(#CLASS "::" #NAME); }
 
 template <class T>
 T read_coeff_impl(YAML::Node const &parameter, std::string coeff_name) {

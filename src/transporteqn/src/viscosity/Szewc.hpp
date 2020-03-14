@@ -36,7 +36,7 @@ class Node;
 
 class Szewc : public VectorGradientEquation {
 
-    REGISTER_DEC_TYPE(Szewc);
+  REGISTER_DEC_TYPE(Szewc);
 
   private:
     ScalarFieldEquation &conti_;
