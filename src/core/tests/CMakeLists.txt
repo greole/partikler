@@ -1,3 +1,3 @@
 
 #add_subdirectory (Field)
-#add_subdirectory (SearchCubes)
+add_subdirectory (SearchCubes)

@@ -140,8 +140,11 @@ struct SortedNeighbours {
     std::vector<Vec3> dist;
 };
 
+// Keeps track of neighbour pair and
+// corresponding kartesian distance
 struct UnsortedNeighbour {
 
+    // Pair of owner and corresponding neighbour ids
     NeighbourPair ids;
 
     // since computation of neighbouring particles

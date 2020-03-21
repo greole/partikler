@@ -26,37 +26,16 @@
 #include "Scalar.hpp"
 #include "Vec3.hpp"
 
-#include "cgal/CGALTYPEDEFS.hpp" // for Point, CGALVector, Facet_handle
+std::vector<Vec3> create_uniform_particle_plane(size_t n_particles);
 
-std::vector<Point> create_uniform_particle_plane(size_t n_particles);
+std::vector<Vec3> create_uniform_particle_cube(size_t n_particles);
 
-std::vector<Point> create_uniform_particle_cube(size_t n_particles);
-
-std::vector<Point> create_uniform_particle_cube(
+std::vector<Vec3> create_uniform_particle_cube(
     Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise = 0);
 
-struct FixedDistanceParticles {
-
-    std::vector<Point> points; // id of original particle
-    std::vector<size_t> fixId; // id of original particle
-    std::vector<Scalar> maxDx; // max allowed distance
-
-    // defines which motions are allowed
-    // 0 - fixed, 1 - along line, 2 - plane, 3 half sphere,
-    // 4 free
-    std::vector<int> mType;
-    // motion vector for particle of mType
-    // 0 - ignored, 1 direction of line, 2 normal to plane,
-    // 3 - direction of half sphere, 4 0 -ignored
-
-    std::vector<CGALVector> dir;
-
-    // Facet to which particle belongs to
-    std::vector<Facet_handle> facets;
-};
 
 Scalar rand01();
 
-std::vector<Point> disperse_particles(std::vector<Point> &points, Scalar dx);
+std::vector<Vec3> disperse_particles(std::vector<Vec3> &points, Scalar dx);
 
 #endif
