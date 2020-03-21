@@ -2,6 +2,7 @@
 #include "cgal/CGALTYPEDEFS.hpp"
 #include "core.hpp"
 #include "gtest/gtest.h"
+#include "FieldOps.hpp"
 #include <vector>
 
 TEST(ScalarField, reoderVector) {
