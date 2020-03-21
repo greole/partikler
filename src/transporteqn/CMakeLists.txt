@@ -7,9 +7,11 @@ add_library(TransportEqn SHARED)
 
 target_sources(TransportEqn
   PRIVATE
-  "src/Momentum.cpp"
+  "src/momentum/Momentum.cpp"
+  "src/momentum/MomentumDamping.cpp"
   "src/continuity/Conti.cpp"
   "src/viscosity/Szewc.cpp"
+  "src/viscosity/Monaghan.cpp"
   "src/pressure/Bonet.cpp"
   "src/pressure/Solenthaler.cpp"
   "src/forces/ForcesList.cpp"
@@ -17,9 +19,11 @@ target_sources(TransportEqn
   "src/forces/surface_tension/Akinci.cpp"
   "src/forces/surface_tension/AkinciCurvature.cpp"
   PUBLIC
-  "src/Momentum.hpp"
+  "src/momentum/Momentum.hpp"
+  "src/momentum/MomentumDamping.hpp"
   "src/continuity/Conti.hpp"
   "src/viscosity/Szewc.hpp"
+  "src/viscosity/Monaghan.hpp"
   "src/pressure/Bonet.hpp"
   "src/pressure/Solenthaler.hpp"
   "src/forces/ForcesList.hpp"
@@ -44,6 +48,7 @@ target_include_directories(TransportEqn
   ${PROJECT_SOURCE_DIR}/src/pressure
   ${PROJECT_SOURCE_DIR}/src/viscosity
   ${PROJECT_SOURCE_DIR}/src/continuity
+  ${PROJECT_SOURCE_DIR}/src/momentum
 )
 
 #add_subdirectory(tests/SPHCore)

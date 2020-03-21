@@ -34,15 +34,17 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class Szewc : public VectorGradientEquation {
+class Monaghan : public VectorGradientEquation {
 
-    REGISTER_DEC_TYPE(Szewc);
+    REGISTER_DEC_TYPE(Monaghan);
 
   private:
     ScalarFieldEquation &conti_;
 
     // Coeffs
-    float nu_;
+    Scalar alpha_;
+
+    Scalar c_;
 
     // In
     VectorField &u_;
@@ -52,7 +54,7 @@ class Szewc : public VectorGradientEquation {
     VectorField &pos_; // Particle positions
 
   public:
-    Szewc(
+    Monaghan(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

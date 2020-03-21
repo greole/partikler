@@ -16,13 +16,13 @@
 
     contact: go@hpsim.de
 */
-#include "Szewc.hpp"
+#include "Monaghan.hpp"
 
 #include "Conti.hpp"
 #include "Scalar.hpp"
 #include "Time.hpp"
 
-Szewc::Szewc(
+Monaghan::Monaghan(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : VectorGradientEquation(
           "Viscosity",
@@ -33,15 +33,17 @@ Szewc::Szewc(
               zero<VectorField::value_type>::val,
               {"taux", "tauy", "tauz"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      nu_(read_or_default_coeff<Scalar>("nu", 1e-05)), u_(objReg.velocity()),
+      alpha_(read_or_default_coeff<Scalar>("alpha", 1e-05)),
+      c_(read_or_default_coeff<Scalar>("c", 300)),
+      u_(objReg.velocity()),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
       pos_(objReg.get_pos()) {
 
-    maxDt_ = 0.25 * h_ * h_ / nu_;
-    time_.set_model_timestep(model_name, maxDt_);
+    // maxDt_ = 0.25 * h_ * h_ / nu_;
+    // time_.set_model_timestep(model_name, maxDt_);
 }
 
-void Szewc::execute() {
+void Monaghan::execute() {
 
     log().info_begin() << "Computing dnu";
 
@@ -49,18 +51,15 @@ void Szewc::execute() {
     ScalarField &rho = conti_.get();
 
     // clang-format off
-    auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
     auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
-    Scalar fact =  mp_*10.0*nu_;
+    Scalar fact =  2.0*alpha_*h_*c_*mp_;
     // TODO do this via a solve method
     VectorFieldAB dist(this->np_.size(), {0,0,0});
     solve_inner_impl(this->np_, dist, ab(pos_));
 
     solve(
     sum_AB_dW(
-        fact * rho.a() * (ab(u_) * dist)
-        / ( ( rho.a() + rho.b() ) * ( normSqr(dist ) ))
-        ),true
+        fact / (rho.a() + rho.b()) * ((ab(u_) * dist)/(dist*dist))),true
         );
     // clang-format on
 
@@ -68,4 +67,4 @@ void Szewc::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(VISCOSITY, Szewc);
+REGISTER_DEF_TYPE(VISCOSITY, Monaghan);
