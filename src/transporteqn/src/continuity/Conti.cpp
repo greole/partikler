@@ -31,7 +31,14 @@ Conti::Conti(
           objReg.create_field<ScalarField>("rho", 0.0)),
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
       lower_limit_(read_or_default_coeff<Scalar>("lower_limit", 0.0)),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {
+
+    auto& idx = objReg_.create_field<ScalarField>("idx", 0.0);
+    for (size_t i=0;i<idx.size();i++) {
+        idx[i] = (Scalar)i;
+    }
+
+}
 
 void Conti::execute() {
 
@@ -72,6 +79,7 @@ void TransientConti::execute() {
     auto sabdw = sum_AB_dW_asym();
     auto sum_AB_dW = boost::yap::make_terminal(sabdw);
 
+    store_old_value();
     auto ddts = ddt();
     auto ddto = boost::yap::make_terminal(ddts);
 
