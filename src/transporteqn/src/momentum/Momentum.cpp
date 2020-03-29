@@ -35,17 +35,16 @@ Momentum::Momentum(
 void Momentum::execute() {
 
     log().info_begin() << "Computing du/dt";
+    store_old_value();
 
     auto &rho = conti_.get();
     auto &dp = dp_.get();
     auto &dtau = dtau_.get();
 
-    size_t a2 = 0;
-
-    auto ddts = ddt();
+    auto ddts =  Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
     auto ddto = boost::yap::make_terminal(ddts);
 
-    solve(ddto(dtau / rho - dp / rho + forces_.get()));
+    solve(ddto(dtau / rho - dp / rho + forces_.get()), false);
 
     log().info_end();
 
