@@ -35,7 +35,9 @@ void PosIntegrator::execute() {
     log().info_begin() << " Updating Particle Positions";
     log().info() << " DeltaT " << time_.get_deltaT();
 
-    auto ddts = ddt();
+    // auto ddts = ddt();
+    store_old_value();
+    auto ddts =  Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
     auto ddto = boost::yap::make_terminal(ddts);
 
     solve(ddto(u_), false);
