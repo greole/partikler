@@ -38,12 +38,13 @@ struct SplineFunc {
         Scalar pi = (Scalar)M_PI;
 
         Scalar c = 32.0 / pi / h9;
+        Scalar hr3r3 = hr3 * r3;
 
         if (2.0 * r > h && r <= h) {
-            return c * hr3 * r3;
+            return c * hr3r3;
         }
         if (r > 0 && 2 * r <= h) {
-            return c * 2.0 * hr3 * r3 - h6 / 64.0;
+            return c * (2.0 * hr3r3 - h6 / 64.0);
         }
 
         return 0.0;
@@ -80,7 +81,8 @@ void Akinci::execute() {
     auto sum_AB_e = boost::yap::make_terminal(saba);
     auto norm_e = Norm_Wrapper();
     auto norm = boost::yap::make_terminal(norm_e);
-    auto C = boost::yap::make_terminal(SplineFunc(h_));
+    auto spline_f = SplineFunc(h_);
+    auto C = boost::yap::make_terminal(spline_f);
 
     // TODO do this via a solve method
     VectorFieldAB dist(this->np_.size(), {0, 0, 0});
