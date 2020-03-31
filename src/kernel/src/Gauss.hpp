@@ -66,7 +66,7 @@ class Gauss : public Model {
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg,
-        float hfact);
+        Scalar hfact);
 
     void execute();
 };
