@@ -51,7 +51,8 @@ void Szewc::execute() {
     ScalarField &rho = conti_.get();
 
     // clang-format off
-    auto normSqr = boost::yap::make_terminal(NormSqr_Wrapper());
+    auto norm_s = NormSqr_Wrapper();
+    auto normSqr = boost::yap::make_terminal(norm_s);
     auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
     Scalar fact =  mp_*10.0*nu_;
     // TODO do this via a solve method
