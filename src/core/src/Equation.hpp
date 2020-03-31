@@ -67,19 +67,21 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     NeighbourFieldAB &np_;
 
+    Scalar h_;
+
     ObjectRegistry &objReg_;
+
+    bool estimate_;
 
     // store previous results
     // std::map<int, T> prev_;
 
-    // the current iteraton
-    int iteration_;
-
-    Scalar h_;
-
     Scalar maxDt_ = std::numeric_limits<Scalar>::max();
 
     int stored_iteration_;
+
+    int iteration_;
+
 
     // decltype(boost::yap::make_terminal(Ddt<FieldType>())) ddt_terminal_;
 
@@ -94,7 +96,10 @@ template <class FieldType> class FieldEquationBase : public Model {
           id_(objReg.get_object<IntField>("id")),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          h_(objReg.get_object<Generic<Scalar>>("h")()), objReg_(objReg) {}
+          h_(objReg.get_object<Generic<Scalar>>("h")()),
+          objReg_(objReg),
+          estimate_(false)
+    {}
 
     void store_old_value() {
         for(size_t i=0; i<fo_.size(); i++) {
@@ -120,7 +125,10 @@ template <class FieldType> class FieldEquationBase : public Model {
     // use always previous timestep value
     // for ddt
     FieldType &estimate() {
+        // dont advance in time for estimate
+        this->estimate_ = true;
         this->execute();
+        this->estimate_ = false;
         return f_;
     }
 
