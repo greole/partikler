@@ -43,6 +43,7 @@ Monaghan::Monaghan(
     // time_.set_model_timestep(model_name, maxDt_);
 }
 
+
 void Monaghan::execute() {
 
     log().info_begin() << "Computing dnu";
@@ -51,17 +52,21 @@ void Monaghan::execute() {
     ScalarField &rho = conti_.get();
 
     // clang-format off
-    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
+    auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+        "KerneldWdx");
+    auto sum_AB_e = Sum_AB_asym<VectorField>(f_, np_);
+    auto sum_AB = boost::yap::make_terminal(sum_AB_e);
     Scalar fact =  2.0*alpha_*h_*c_*mp_;
     // TODO do this via a solve method
     VectorFieldAB dist(this->np_.size(), {0,0,0});
-    solve_inner_impl(this->np_, dist, ab(pos_));
-
+    solve_inner_impl(this->np_, dist, pos_.a() - pos_.b());
     solve(
-    sum_AB_dW(
-        fact / (rho.a() + rho.b()) * ((ab(u_) * dist)/(dist*dist))),true
+    sum_AB(
+        // fact / (rho.a() + rho.b()) * ((ab(u_) * dist)/(dist*dist))),true
+        fact / (rho.a() + rho.b()) * ((dist*dW)/(dist*dist))*ab(u_)),true
         );
     // clang-format on
+
 
     log().info_end();
     iteration_ = time_.get_current_timestep();

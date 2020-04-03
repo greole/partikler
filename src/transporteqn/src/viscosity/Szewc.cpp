@@ -51,19 +51,22 @@ void Szewc::execute() {
     ScalarField &rho = conti_.get();
 
     // clang-format off
+    auto &dW = this->get_objReg().template get_object<KernelGradientField>(
+        "KerneldWdx");
     auto norm_s = NormSqr_Wrapper();
     auto normSqr = boost::yap::make_terminal(norm_s);
-    auto sum_AB_dW = boost::yap::make_terminal(sum_AB_dW_s);
+    auto sum_AB_e = Sum_AB_asym<VectorField>(f_, np_);
+    auto sum_AB = boost::yap::make_terminal(sum_AB_e);
     Scalar fact =  mp_*10.0*nu_;
     // TODO do this via a solve method
     VectorFieldAB dist(this->np_.size(), {0,0,0});
     solve_inner_impl(this->np_, dist, ab(pos_));
 
     solve(
-    sum_AB_dW(
-        fact * rho.a() * (ab(u_) * dist)
+    sum_AB(
+        fact * rho.a() * (dW* dist)
         / ( ( rho.a() + rho.b() ) * ( normSqr(dist ) ))
-        ),true
+        *ab(u_) ),true
         );
     // clang-format on
 
