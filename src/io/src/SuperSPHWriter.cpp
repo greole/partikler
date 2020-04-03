@@ -76,7 +76,7 @@ std::string field_type_to_str(SPHObjectType t) {
     case (IntFieldType):
         return "int";
     case (SizeTFieldType):
-        return "long";
+        return "int";
     // case (ScalarFieldType):
     //     return "float";
     // case (PointFieldType):
@@ -119,6 +119,17 @@ void SuperSPHWriter::write_to_disk(T const &data, const std::string path) {
 template <>
 void SuperSPHWriter::write_to_disk<PointField>(
     const PointField &data, const std::string path) {}
+
+template <>
+void SuperSPHWriter::write_to_disk<SizeTField>(
+    const SizeTField &data, const std::string path) {
+
+    std::vector<int> buffer(data.size());
+    for (size_t i = 0; i < data.size(); i++) {
+        buffer[i] = (int) data[i];
+    }
+    write_to_disk_impl(buffer, path, data.get_name(), data.get_type());
+}
 
 template <>
 void SuperSPHWriter::write_to_disk<VectorField>(
