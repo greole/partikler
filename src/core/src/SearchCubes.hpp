@@ -135,6 +135,8 @@ struct NeighbourPair {
     size_t neighId;
 };
 
+
+
 struct SortedNeighbours {
     std::vector<NeighbourPair> ids;
     std::vector<Vec3> dist;
@@ -185,6 +187,8 @@ struct SortedParticles {
     std::vector<size_t> sorting_idxs;
     std::vector<Vec3> particles;
 };
+
+std::ostream &operator<<(std::ostream &os, NeighbourPair const &n);
 
 std::vector<size_t> upper_neighbour_cubes(
     const SubDivision sub,

@@ -487,3 +487,8 @@ SortedNeighbours createNeighbours(
 
     return ret;
 }
+
+std::ostream &operator<<(std::ostream &os, NeighbourPair const &n) {
+    os << " own " << n.ownId << " neigh " << n.neighId;
+    return os;
+}
