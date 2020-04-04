@@ -37,7 +37,6 @@ void HDF5Writer::write_to_disk(T const &data, h5_file_t &fh) {}
 
 template <>
 void HDF5Writer::write_to_disk(IntField const &data, h5_file_t &fh) {
-    // H5PartWriteDataInt32(fh, data.get_name().c_str(), &data[0]);
     H5PartWriteDataInt32(fh, data.get_name().c_str(), &data[0]);
 }
 
@@ -54,22 +53,11 @@ void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
 // TODO use SFINAE here
 template <>
 void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {
-
-    size_t j = 0;
-    for (std::string comp : data.get_comp_names()) {
-        std::vector<Scalar> buffer(data.size());
-        for (size_t i = 0; i < data.size(); i++) {
-            buffer[i] = data[i][j];
-        }
-        H5PartWriteWrapper(fh, comp, buffer);
-        j++;
-    }
 }
 
 // TODO use SFINAE here
 template <>
 void HDF5Writer::write_to_disk(const VectorField &data, h5_file_t &fh) {
-
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {
         std::vector<Scalar> buffer(data.size());
@@ -88,9 +76,6 @@ HDF5Writer::HDF5Writer(
 
 void HDF5Writer::execute() {
 
-    // cleanup
-
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     if (write()) {
         const h5_int64_t h5_verbosity = H5_VERBOSE_DEFAULT;
 
@@ -104,7 +89,8 @@ void HDF5Writer::execute() {
         // open file and create first step
         h5_prop_t prop = H5CreateFileProp();
         H5SetPropFileCoreVFD(prop, 0);
-        h5_file_t file = H5OpenFile(fname.c_str(), H5_O_WRONLY, prop);
+        h5_file_t file = H5OpenFile(fname.c_str(), H5_O_RDWR, prop);
+        h5_int64_t start, end;
 
         int cur_timestep = get_timeGraph().get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
@@ -119,7 +105,6 @@ void HDF5Writer::execute() {
             auto name = obj.first;
             auto type = obj.second->get_type();
 
-            // TODO
             std::shared_ptr<SPHObject> *obj_ptr = &obj.second;
             DISPATCH(obj_ptr, write_to_disk, type, file);
         }
