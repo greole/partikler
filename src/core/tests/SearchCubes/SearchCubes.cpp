@@ -23,10 +23,6 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
     std::vector<UnsortedNeighbour> ret {};
     ret.reserve(tot_n_particles * points.size() / 2);
 
-    // Assume all particles on same facet
-    // const std::vector<Facet_handle> facets(points.size(), NULL);
-
-    // TODO needs facets, create facets with test data
     owner_cube_search(points, 0, tot_n_particles, 5.0, ret);
 
     // Should find at least some neighbours
@@ -93,9 +89,6 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
 
     std::vector<UnsortedNeighbour> ret {};
     ret.reserve(tot_n_particles * points.size() / 2);
-
-    // Assume all particles on same facet
-    // const std::vector<Facet_handle> facets(points.size(), NULL);
 
     neighbour_cube_search(
         points,
