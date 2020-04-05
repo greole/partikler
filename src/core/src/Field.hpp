@@ -287,11 +287,15 @@ BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     logical_and, boost::yap::expression, is_field)
 
+#include "SearchCubes.hpp"
+
 template <class T>
 std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     os << f.get_type() << ": " << f.get_name() << "\n[";
+    size_t it = 0;
     for (auto &v : f) {
-        os << "\n " << v;
+        os << "\n " << it << " " << v;
+        it++;
     }
     os << "\n]\n";
     return os;
