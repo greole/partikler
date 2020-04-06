@@ -66,7 +66,7 @@ T read_or_default_coeff_impl(
 // Abstract base class for Models
 class Model : public SPHObject {
 
-  private:
+  protected:
     YAML::Node parameter_; // Parameter of given model
 
     ObjectRegistry &objReg_; // Reference to main runTime
