@@ -17,8 +17,8 @@
     contact: go@hpsim.de
 */
 
-#ifndef Pressure_H
-#define Pressure_H
+#ifndef PARTIKLER_COLE_INCLUDED_H
+#define PARTIKLER_COLE_INCLUDED_H
 
 #include <string> // for string
 
@@ -39,21 +39,24 @@ namespace YAML {
 class Node;
 } // namespace YAML
 
-class BonetGradient : public ScalarGradientEquation {
+class Cole : public ScalarFieldEquation {
 
-    REGISTER_DEC_TYPE(BonetGradient);
+    REGISTER_DEC_TYPE(Cole);
 
   private:
     // In
     // Density
     ScalarFieldEquation &conti_;
-    ScalarFieldEquation &pressure_;
 
     // Coeffs
-    const float mp_;
+    const Scalar c_;
+    const Scalar rho_0_;
+    const Scalar gamma_;
+    const Scalar p_0_;
+    const Scalar prefac_;
 
   public:
-    BonetGradient(
+    Cole(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

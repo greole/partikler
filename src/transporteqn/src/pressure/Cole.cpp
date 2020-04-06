@@ -17,37 +17,39 @@
     contact: go@hpsim.de
 */
 
-#include "Bonet.hpp"
+#include "Cole.hpp"
 
 #include "Time.hpp"
 
-BonetGradient::BonetGradient(
+Cole::Cole(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : ScalarGradientEquation(
-        "PressureGradient",
-        parameter,
-        objReg,
-        objReg.get_object<ScalarField>("p")),
+    : ScalarFieldEquation(
+          "Pressure",
+          parameter,
+          objReg,
+          objReg.create_field<ScalarField>("p", 10000)),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      pressure_(objReg.get_object<ScalarFieldEquation>("Pressure")),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
+      c_(read_or_default_coeff<Scalar>("c", 300.0)),
+      rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
+      gamma_(read_or_default_coeff<Scalar>("gamma", 1.4)),
+      p_0_(read_or_default_coeff<Scalar>("p_0", 10000)),
+      prefac_(c_ * c_ * rho_0_ / gamma_) {
+    maxDt_ = 0.5 / c_ * h_;
+    time_.set_model_timestep(model_name, maxDt_);
+    init_limits();
+}
 
+void Cole::execute() {
 
-void BonetGradient::execute() {
-
-    auto &p = pressure_.get();
     auto &rho = conti_.get();
 
-    auto &dW = this->get_objReg().template get_object<KernelGradientField>(
-        "KerneldWdx");
+    auto pow_s = Pow_Wrapper<Scalar>(gamma_);
+    auto pow = boost::yap::make_terminal(pow_s);
 
-    auto sum_AB_e = Sum_AB_dW_sym<VectorField>(f_, np_, dW, dW);
-    auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);
-
-    solve(1.0 / rho * sum_AB_dW_e(mp_ / rho.b() * (p.a() + p.b())));
+    solve(prefac_ * (pow(rho / rho_0_) - 1.0) + p_0_);
 
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(PRESSURE, BonetGradient);
+REGISTER_DEF_TYPE(PRESSURE, Cole);
