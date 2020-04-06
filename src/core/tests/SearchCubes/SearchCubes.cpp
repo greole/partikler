@@ -77,7 +77,7 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
     // shift neighbour particles x-position by 1
     for (size_t i = 0; i < neighbour_points.size(); i++) {
         auto point = neighbour_points[i];
-        neighbour_points[i] = Vec3 {point[0] + 1.0, point[1], point[2]};
+        neighbour_points[i] = Vec3 {(Scalar)(point[0] + 1.0), point[1], point[2]};
     }
 
     // append neighbour points to owner points
