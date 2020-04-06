@@ -12,6 +12,7 @@ target_sources(Core
     src/Vec3.cpp
     src/Object.cpp
     src/Field.cpp
+    src/FieldOps.cpp
     src/Models.cpp
     src/Helper.cpp
     src/SearchCubes.cpp
@@ -23,6 +24,7 @@ target_sources(Core
     src/Vec3.hpp
     src/Object.hpp
     src/Field.hpp
+    src/FieldOps.hpp
     src/Models.hpp
     src/Helper.hpp
     src/Time.hpp
