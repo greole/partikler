@@ -42,8 +42,6 @@ class Conti : public ScalarFieldEquation {
     // Coeffs
     const Scalar rho_0_;
 
-    const Scalar lower_limit_;
-
     Scalar mp_;
 
   public:

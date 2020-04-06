@@ -30,14 +30,9 @@ Conti::Conti(
           objReg,
           objReg.create_field<ScalarField>("rho", 0.0)),
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
-      lower_limit_(read_or_default_coeff<Scalar>("lower_limit", 0.0)),
       mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {
 
-    auto& idx = objReg_.create_field<ScalarField>("idx", 0.0);
-    for (size_t i=0;i<idx.size();i++) {
-        idx[i] = (Scalar)i;
-    }
-
+    init_limits();
 }
 
 void Conti::execute() {
@@ -50,11 +45,6 @@ void Conti::execute() {
     solve(mp_ * sum_AB_o(W_));
 
     // TODO do it lazily
-    for (auto &el : f_) {
-        if (el < lower_limit_) {
-            el = lower_limit_;
-        }
-    }
 
     // set iteration
     iteration_ = time_.get_current_timestep();
@@ -72,7 +62,9 @@ TransientConti::TransientConti(
               "rho",
               read_or_default_coeff_impl<Scalar>(parameter, "rho_0", 1.0))),
       u_(objReg.velocity()),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
+      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {
+    init_limits();
+}
 
 void TransientConti::execute() {
 
@@ -89,5 +81,5 @@ void TransientConti::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
-REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti);
+REGISTER_DEF_TYPE(TRANSPORTEQN, Conti)
+REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti)
