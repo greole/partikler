@@ -66,8 +66,9 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
 #include "Bonet.hpp"
 #include "Solenthaler.hpp"
+#include "Cole.hpp"
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, Bonet);
+REGISTER_DEF_TYPE(TRANSPORTEQN, Cole);
 #include "Szewc.hpp"
 
 REGISTER_DEF_TYPE(VISCOSITY, Szewc);
@@ -162,6 +163,9 @@ int main(int argc, char *argv[]) {
     TimeGraph &timeGraph = obj_reg.register_object<TimeGraph>(
         std::make_unique<TimeGraph>("TimeGraph", config["PROJECT"], obj_reg));
 
+    // Upon creation every "block" of particles gets its own id
+    // so that boundary/solid particles can be identified.
+    // Additionally every id maps to a material type.
     FieldIdMap &fieldIdMap = obj_reg.register_object<FieldIdMap>(
         std::make_unique<FieldIdMap>("FieldIdMap", GenericType));
 
@@ -182,6 +186,12 @@ int main(int argc, char *argv[]) {
     timeGraph.execute_pre();
 
     std::cout << "main" << std::endl;
+
+    auto& idx = obj_reg.create_field<ScalarField>("idx", 0.0);
+    for (size_t i=0;i<idx.size();i++) {
+        idx[i] = (Scalar)i;
+    }
+
 
     for (auto el : config["PROJECT"]["MAIN"]) {
 
