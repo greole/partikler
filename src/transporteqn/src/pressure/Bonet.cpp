@@ -25,14 +25,13 @@ BonetGradient::BonetGradient(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
     : ScalarGradientEquation(
-        "PressureGradient",
-        parameter,
-        objReg,
-        objReg.get_object<ScalarField>("p")),
+          "PressureGradient",
+          parameter,
+          objReg,
+          objReg.get_object<ScalarField>("p")),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
       pressure_(objReg.get_object<ScalarFieldEquation>("Pressure")),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
-
+      mp_(objReg.get_object<ScalarField>("mp")) {}
 
 void BonetGradient::execute() {
 
@@ -45,7 +44,7 @@ void BonetGradient::execute() {
     auto sum_AB_e = Sum_AB_dW_sym<VectorField>(f_, np_, dW, dW);
     auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);
 
-    solve(1.0 / rho * sum_AB_dW_e(mp_ / rho.b() * (p.a() + p.b())));
+    solve(1.0 / rho * sum_AB_dW_e(mp_.b() / rho.b() * (p.a() + p.b())));
 
     iteration_ = time_.get_current_timestep();
 }

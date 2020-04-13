@@ -17,7 +17,7 @@
 #define STATIC_BLOCK_HPP_
 
 #ifndef CONCATENATE
-#define CONCATENATE(s1, s2)     s1##s2
+#define CONCATENATE(s1, s2) s1##s2
 #define EXPAND_THEN_CONCATENATE(s1, s2) CONCATENATE(s1, s2)
 #endif /* CONCATENATE */
 
@@ -44,7 +44,8 @@
  * - No need for a semicolon after the block (but it won't hurt).
  * - Do not put static blocks in files, as it might get compiled multiple
  *   times ane execute multiple times.
- * - A static_block can only be used in file scope - not within any other block etc.
+ * - A static_block can only be used in file scope - not within any other block
+ * etc.
  * - Templated static blocks will probably not work. Avoid them.
  * - No other funny business, this is fragile.
  * - This does not having any threading issues (AFAICT) - as it has no static
@@ -52,9 +53,9 @@
  *   your static code.
  * - Execution of the code is guaranteed to occur before main() executes,
  *   but the relative order of statics being initialized is unknown/unclear. So,
- *   do not call any method of an instance of a class which you expect to have been
- *   constructed; it may not have been. Instead, you can use a static getInstance() method
- *   (look this idiom up on the web, it's safe).
+ *   do not call any method of an instance of a class which you expect to have
+ * been constructed; it may not have been. Instead, you can use a static
+ * getInstance() method (look this idiom up on the web, it's safe).
  * - Variables defined within the static block are not global; they will
  *   go out of scope as soon as its execution concludes.
  *
@@ -68,13 +69,12 @@
  */
 #define static_block STATIC_BLOCK_IMPL1(UNIQUE_IDENTIFIER(_static_block_))
 
-#define STATIC_BLOCK_IMPL1(prefix) \
-	STATIC_BLOCK_IMPL2(CONCATENATE(prefix,_fn),CONCATENATE(prefix,_var))
+#define STATIC_BLOCK_IMPL1(prefix)                                             \
+    STATIC_BLOCK_IMPL2(CONCATENATE(prefix, _fn), CONCATENATE(prefix, _var))
 
-#define STATIC_BLOCK_IMPL2(function_name,var_name) \
-static void function_name(); \
-static int var_name __attribute((unused)) = (function_name(), 0) ; \
-static void function_name()
-
+#define STATIC_BLOCK_IMPL2(function_name, var_name)                            \
+    static void function_name();                                               \
+    static int var_name __attribute((unused)) = (function_name(), 0);          \
+    static void function_name()
 
 #endif // STATIC_BLOCK_HPP_

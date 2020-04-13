@@ -52,8 +52,7 @@ void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {
-}
+void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {}
 
 // TODO use SFINAE here
 template <>
@@ -72,7 +71,9 @@ void HDF5Writer::write_to_disk(const VectorField &data, h5_file_t &fh) {
 HDF5Writer::HDF5Writer(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : WriterBase(model_name, parameter, objReg),
-      export_name_(parameter["name"].as<std::string>()) {}
+      export_name_(parameter["name"].as<std::string>()),
+      step_(0)
+{}
 
 void HDF5Writer::execute() {
 
@@ -80,7 +81,6 @@ void HDF5Writer::execute() {
         const h5_int64_t h5_verbosity = H5_VERBOSE_DEFAULT;
 
         int comm_rank = 0;
-        size_t num_particles {1000};
         std::string fname {(export_name_ + ".h5part")};
 
         H5AbortOnError();
@@ -92,7 +92,7 @@ void HDF5Writer::execute() {
         h5_file_t file = H5OpenFile(fname.c_str(), H5_O_RDWR, prop);
         h5_int64_t start, end;
 
-        int cur_timestep = get_timeGraph().get_current_timestep();
+        int cur_timestep = time_graph_.get_current_timestep();
         int index_on_dist = cur_timestep / get_write_freq();
 
         H5SetStep(file, index_on_dist);

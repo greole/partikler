@@ -157,10 +157,55 @@ class ObjectRegistry {
     }
 };
 
+// Base class to handle materials
+class Material {
+
+  private:
+    std::string name_;
+
+    std::string type_;
+
+    Scalar mp_;
+
+    Scalar rho_;
+
+  public:
+    Material() {};
+
+    Material(std::string name, std::string type, Scalar mp, Scalar rho)
+        : name_(name), type_(type), mp_(mp), rho_(rho) {};
+
+    Scalar getMp() { return mp_; };
+
+    Scalar getRho() { return rho_; };
+};
+
+// Maps materials names to material objects
+class MaterialMap : public SPHObject {
+
+  private:
+    std::map<std::string, Material> materials_;
+
+  public:
+    MaterialMap(const std::string name, const SPHObjectType type)
+        : SPHObject(name, type) {};
+
+    void insert(std::string material_name, Material m) {
+        materials_[material_name] = m;
+    };
+
+    Material getMaterial(std::string material_name) {
+        return materials_[material_name];
+    };
+};
+
+// Maps field names to field ids
 class FieldIdMap : public SPHObject {
 
   private:
     std::vector<std::string> fields_;
+
+    std::vector<Material> material_;
 
   public:
     FieldIdMap(const std::string name, const SPHObjectType type)
@@ -169,7 +214,10 @@ class FieldIdMap : public SPHObject {
     // get field id from name string
     int getId(const std::string name);
 
-    int append(std::string field_name);
+    // get material from given id
+    Material getMaterial(int const id) { return material_[id]; };
+
+    int append(std::string field_name, Material m);
 };
 
 #endif

@@ -135,8 +135,6 @@ struct NeighbourPair {
     size_t neighId;
 };
 
-
-
 struct SortedNeighbours {
     std::vector<NeighbourPair> ids;
     std::vector<Vec3> dist;

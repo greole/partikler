@@ -17,23 +17,24 @@
     contact: go@hpsim.de
 */
 
-#ifndef PARTIKLER_HDF5_INCLUDED_H
-#define PARTIKLER_HDF5_INCLUDED_H
+#ifndef PARTIKLER_READERBASE_INCLUDED_H
+#define PARTIKLER_READERBASE_INCLUDED_H
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <string> // for string
-#include <sys/stat.h>
+
+#include "Models.hpp" // for TimeGraph (ptr only), Model
+#include "Time.hpp"   // for TimeGraph (ptr only), Model
+
+class ObjectRegistry;
+namespace YAML {
+class Node;
+} // namespace YAML
 
 #include "H5hut.h"
 #include "h5core/h5_types.h"
 
-#include "Field.hpp"
-#include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
-#include "WriterBase.hpp" // for WriterBase
-#include "cgal/CGALHelper.hpp"
-#include "yaml-cpp/yaml.h"
+typedef struct h5_prop_file h5_prop_file_t;
+typedef h5_prop_file_t *h5_prop_file_p;
 
 // NOTE re-declaration of h5_prop_file to do the pointer clean-up.
 //      we cant include the corresponding private/h5_types.h since it is not
@@ -55,30 +56,41 @@ struct h5_prop_file {     // file property
     int flush;                   // flush iteration after writing dataset
 };
 
-typedef struct h5_prop_file h5_prop_file_t;
-typedef h5_prop_file_t *h5_prop_file_p;
 
-class ObjectRegistry;
-namespace YAML {
-class Node;
-} // namespace YAML
+class ReaderBase : public Model {
 
-class HDF5Writer : public WriterBase {
+  protected:
 
-    REGISTER_DEC_TYPE(HDF5Writer);
+    bool read_;
 
-  private:
-    std::string export_name_;
-
-    int step_;
+    // store reference to current TimeGraph instance
+    TimeGraph &time_graph_;
 
   public:
-    HDF5Writer(
+    ReaderBase(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-    template <class T> void write_to_disk(T const &t, h5_file_t &fh);
+    TimeGraph &get_timeGraph() { return time_graph_; }
+
+    bool read() {return read_;};
+};
+
+class HDF5Reader : public ReaderBase {
+
+    REGISTER_DEC_TYPE(HDF5Reader);
+
+private:
+    std::string file_name_;
+
+    int write_freq_;
+
+public:
+    HDF5Reader(
+        const std::string &model_name,
+        YAML::Node parameter,
+        ObjectRegistry &objReg);
 
     void execute();
 };

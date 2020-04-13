@@ -5,8 +5,8 @@ PROJECT:
     iterations: 100000
     write_frequency: 2
     deltaT: 0.000025
-    max_deltaT: 1.0
-    min_deltaT: 2.0e-4
+    max_deltaT: 10.0e-05
+    min_deltaT: 10.0e-05
     mp: 1.94e-07
 
     PARAMETERSTUDY:
@@ -30,7 +30,7 @@ PROJECT:
         #     name: Bottom
         #     dimensions: [0.02, 0.02, 0.0025] # x y z
         #     translate: [-0.005,-0.005,0.0]
-        #     dx: 0.00025
+        #     dx: 0.0005
 
         - EXPORT:
             model: SuperSPHWriter
@@ -45,10 +45,10 @@ PROJECT:
 
       - KERNEL:
           model: Gauss3D
-          h: 0.001
+          h: 0.0005
 
       - TRANSPORTEQN:
-          model: Conti
+          model: TransientConti
           rho_0: 1000.0
 
       - SURFACETENSION:
@@ -57,50 +57,50 @@ PROJECT:
       - FORCES:
           model: ForcesList
           submodel:
-              - TRANSPORTEQN:
-                  model: Gravity
-                  g:  [0.0, 0.0, -9.81]
+              # - TRANSPORTEQN:
+              #     model: Gravity
+              #     g:  [0.0, 0.0, -9.81]
 
               - SURFACETENSION:
                   model: Akinci
-                  h: 0.001
+                  h: 0.0005
                   rho_0: 1000.0
-                  gamma: 1.0
+                  gamma: 400000.00
 
               - SURFACETENSION:
                   model: AkinciCurvature
-                  gamma: 1.0
+                  gamma: 400000.00
 
       - PRESSURE:
           model: Bonet
           rho_0: 1000.0
-          p_0: 0.0
+          p_0: 4.0e5
           c: 1000.0
-          gamma: 1.4
+          gamma: 4.4
 
-      # - PRESSUREGRADIENT:
       - PRESSURE:
           model: BonetGradient
-          # model: SolenthalerGradient
-          eta: 0.01
-          minIter: 2
 
-      - TRANSPORTEQN:
-          model: Viscosity
-          nu: 0.1
+      - VISCOSITY:
+          model: Szewc
+          nu: 0.01
 
       - TRANSPORTEQN:
           model: Momentum
+
+      - TRANSPORTEQN:
+          model: MomentumDamping
+          nu: 0.999
 
       - TRANSPORTEQN:
           model: PosIntegrator
 
       - EXPORT:
           model: SuperSPHWriter
-          name: main
-          writeout: 2
+          name: weakly
+          writeout: 20
 
       - EXPORT:
          model: HDF5Writer
-         name: main
+         name: weakly
 

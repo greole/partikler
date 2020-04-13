@@ -41,7 +41,7 @@ class SurfaceNormal : public VectorFieldEquation {
   private:
     ScalarFieldEquation &conti_;
 
-    Scalar mp_;
+    ScalarField& mp_;
 
     Scalar h_;
 

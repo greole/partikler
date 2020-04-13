@@ -36,18 +36,18 @@ class Node;
 
 class Szewc : public VectorGradientEquation {
 
-  REGISTER_DEC_TYPE(Szewc);
+    REGISTER_DEC_TYPE(Szewc);
 
   private:
     ScalarFieldEquation &conti_;
 
     // Coeffs
-    float nu_;
+    Scalar nu_;
 
     // In
     VectorField &u_;
 
-    float mp_;
+    ScalarField &mp_;
 
     VectorField &pos_; // Particle positions
 

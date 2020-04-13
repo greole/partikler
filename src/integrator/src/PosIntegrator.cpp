@@ -37,7 +37,7 @@ void PosIntegrator::execute() {
 
     // auto ddts = ddt();
     store_old_value();
-    auto ddts =  Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
+    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
     auto ddto = boost::yap::make_terminal(ddts);
 
     solve(ddto(u_), false);

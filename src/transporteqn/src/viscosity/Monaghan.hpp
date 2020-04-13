@@ -49,7 +49,7 @@ class Monaghan : public VectorGradientEquation {
     // In
     VectorField &u_;
 
-    float mp_;
+    ScalarField &mp_;
 
     VectorField &pos_; // Particle positions
 

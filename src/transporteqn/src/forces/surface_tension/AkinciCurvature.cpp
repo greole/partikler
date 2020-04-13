@@ -32,7 +32,7 @@ AkinciCurvature::AkinciCurvature(
           objReg.create_field<VectorField>(
               "fCurv", {}, {"fCurvx", "fCurvy", "fCurvz"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
+      mp_(objReg.get_object<ScalarField>("mp")),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
       n_(objReg.get_object<VectorField>("normal")) {}
@@ -49,7 +49,7 @@ void AkinciCurvature::execute() {
     auto sum_AB_e = boost::yap::make_terminal(saba);
 
     solve(
-        sum_AB_e(2.0 * rho_0_ / (rho.a() + rho.b()) * (mp_ * gamma * ab(n_))));
+        sum_AB_e(2.0 * rho_0_ / (rho.a() + rho.b()) * (mp_.a() * gamma * ab(n_))));
 
     log().info_end();
 

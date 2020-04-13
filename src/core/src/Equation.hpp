@@ -86,7 +86,6 @@ template <class FieldType> class FieldEquationBase : public Model {
     bool bounded_ {false};
     std::pair<Scalar, Scalar> bounds_;
 
-
   public:
     FieldEquationBase(
         const std::string &field_name,
@@ -98,13 +97,11 @@ template <class FieldType> class FieldEquationBase : public Model {
           id_(objReg.get_object<IntField>("id")),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
-          h_(objReg.get_object<Generic<Scalar>>("h")()),
-          objReg_(objReg),
-          estimate_(false)
-    {}
+          h_(objReg.get_object<Generic<Scalar>>("h")()), objReg_(objReg),
+          estimate_(false) {}
 
     void store_old_value() {
-        for(size_t i=0; i<fo_.size(); i++) {
+        for (size_t i = 0; i < fo_.size(); i++) {
             fo_[i] = f_[i];
         }
     }

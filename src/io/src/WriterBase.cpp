@@ -22,7 +22,7 @@
 WriterBase::WriterBase(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg),
-      write_freq_(read_or_default_coeff<float>("writeout", 1.0)),
+      write_freq_(read_or_default_coeff<int>("freq", 1.0)),
       last_write_(0), // TODO seek on disk for last write
       time_graph_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 

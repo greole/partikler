@@ -25,9 +25,9 @@
 MomentumDamping::MomentumDamping(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
 
-    : VectorFieldEquation("MomentumDamping", parameter, objReg, objReg.velocity()),
-      nu_(read_or_default_coeff<Scalar>("nu", 1.0))
-{}
+    : VectorFieldEquation(
+          "MomentumDamping", parameter, objReg, objReg.velocity()),
+      nu_(read_or_default_coeff<Scalar>("nu", 1.0)) {}
 
 void MomentumDamping::execute() {
 

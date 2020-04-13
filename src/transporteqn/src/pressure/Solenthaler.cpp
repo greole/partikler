@@ -34,7 +34,7 @@ SolenthalerGradient::SolenthalerGradient(
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
       eta_(read_or_default_coeff<Scalar>("eta", 1.0)),
       min_iter_(read_or_default_coeff<int>("minIter", 1)),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()) {}
+      mp_(objReg.get_object<ScalarField>("mp")) {}
 
 void SolenthalerGradient::execute() {
 
@@ -55,43 +55,60 @@ void SolenthalerGradient::execute() {
 
         auto &kernelModel = objReg_.get_object<Model>("KernelEqn");
 
-        kernelModel.execute();
-
         auto &vel = vel_.estimate();
 
         auto &pos = pos_.estimate();
 
         auto &rho = conti_.estimate();
 
+        kernelModel.execute();
+
         Scalar alpha = 0.0;
         Scalar beta_ = 0.0;
         Scalar rho_diff = 0.0;
-        for (size_t it=0; it<rho.size(); it++){
-            alpha = 1.0/((Scalar) (it+1));
+        Scalar max_rho_diff = 0.0;
+        for (size_t it = 0; it < rho.size(); it++) {
+            alpha = 1.0 / ((Scalar)(it + 1));
             beta_ = 1.0 - alpha;
             Scalar diff = rho[it] - rho_0_;
             rho_diff = alpha * diff + beta_ * rho_diff;
         }
 
-        std::cout << "ITERATION " <<  iter << " rho_diff " << rho_diff << std::endl;
+        for (size_t it = 0; it < rho.size(); it++) {
+            Scalar temp_max_rho_diff = rho[it] - rho_0_;
+            if (temp_max_rho_diff > max_rho_diff)
+                max_rho_diff = temp_max_rho_diff;
+        }
+
+        std::cout << "ITERATION " << iter << " rho_diff " << rho_diff
+                  << std::endl;
+        std::cout << "ITERATION " << iter << " max_rho_diff " << max_rho_diff
+                  << std::endl;
+
+        if (abs(max_rho_diff) < 1.0) {
+            break;
+        }
 
         // update pressure
 
-        Scalar dt =  time_.get_deltaT();
+        Scalar dt = time_.get_deltaT();
 
-        Scalar beta = 2.0 * dt * dt * mp_ * mp_ / (rho_0_ * rho_0_);
+        Scalar beta = 2.0 * dt * dt / (rho_0_ * rho_0_);
 
         auto &dW = this->get_objReg().template get_object<KernelGradientField>(
             "KerneldWdx");
 
+        std::string saboname = "sumABone" + std::to_string(iter);
+        std::string sabotwoname = "sumABtwo" + std::to_string(iter);
+
         // auto &ptilda = objReg_.create_field<ScalarField>(ptildaname, 0);
         // TODO implement a lazy variant
         VectorField &sumABone = objReg_.create_field<VectorField>(
-            "sumABone", {0.0, 0.0, 0.0}, {"sABox", "sABoy", "sABoz"});
-        ScalarField &sumABtwo = objReg_.create_field<ScalarField>(
-            "sumABtwo", 0.0, {"sumABtwo"});
+            saboname, {0.0, 0.0, 0.0}, {"sABox", "sABoy", "sABoz"});
+        ScalarField &sumABtwo =
+            objReg_.create_field<ScalarField>(sabotwoname, 0.0, {"sumABtwo"});
 
-        std::fill(sumABone.begin(), sumABone.end(), Vec3 {0.0,0.0,0.0});
+        std::fill(sumABone.begin(), sumABone.end(), Vec3 {0.0, 0.0, 0.0});
         std::fill(sumABtwo.begin(), sumABtwo.end(), 0.0);
 
         for (size_t ab = 0; ab < np_.size(); ab++) {
@@ -107,22 +124,23 @@ void SolenthalerGradient::execute() {
             sumABtwo[j] += sumABtwores;
         }
 
-        std::string ptildaname = "ptilda" + std::to_string(iter);
+        size_t i = 555;
+        Vec3 sumABonei = sumABone[i];
+        Scalar sumABtwoi = sumABtwo[i];
 
-        auto &ptilda = objReg_.create_field<ScalarField>(ptildaname, 0);
+        Scalar delta = -1 / (beta * (-(sumABonei * sumABonei) - sumABtwoi));
 
-        std::fill(ptilda.begin(), ptilda.end(), 0);
-
-        IntField &id_(objReg_.get_object<IntField>("id"));
-
-        solve_impl(
-            ptilda,
-            id_,
-            -(rho - rho_0_) / (beta * (-(sumABone * sumABone) - sumABtwo)));
+        std::cout << "delta " << delta << std::endl;
 
         for (size_t i = 0; i < f_.size(); i++) {
-            p[i] += ptilda[i];
+            p[i] += (rho[i] - rho_0_) * delta;
         }
+
+        // for (auto &el : p) {
+        //     if (el < 0.0) {
+        //         el = 0.0;
+        //     }
+        // }
 
         auto sum_AB_e = Sum_AB_dW_sym<VectorField>(f_, np_, dW, dW);
         auto sum_AB_dW_e = boost::yap::make_terminal(sum_AB_e);

@@ -74,7 +74,7 @@ class TimeGraph : public Model {
         // TODO register some kind of call back
         while (current_timestep_ < iterations_) {
 
-            log().info_begin() << "Start Timestep " << current_timestep_;
+            log().info_begin() << "Start Timestep " << current_timestep_ << " deltaT " << get_deltaT();
 
             main_.execute();
             log().info_end() << "Timestep " << current_timestep_;
@@ -121,6 +121,18 @@ class TimeGraph : public Model {
     void set_deltaT(float deltaT) { deltaT_ = deltaT; }
 
     int &get_current_timestep() { return current_timestep_; }
+
+    void set_iteration(int iteration) { iterations_ = iterations_;}
+
+    void set_current_timestep(int current_timestep) {
+        current_timestep_ = current_timestep;
+    }
+
+    // void set_write_offset(int offset) {write_offset_ = offset;}
+
+    // int &get_index_on_disk() {
+    //     return (current_timestep_  / write_freq_) + write_offset_;
+    // }
 };
 
 #endif

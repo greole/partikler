@@ -32,7 +32,7 @@ class Node;
 
 class WriterBase : public Model {
 
-  private:
+  protected:
     int write_freq_;
 
     int last_write_;

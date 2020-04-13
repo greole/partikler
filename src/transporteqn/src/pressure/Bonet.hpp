@@ -50,7 +50,7 @@ class BonetGradient : public ScalarGradientEquation {
     ScalarFieldEquation &pressure_;
 
     // Coeffs
-    const float mp_;
+    ScalarField &mp_;
 
   public:
     BonetGradient(

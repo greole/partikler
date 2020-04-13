@@ -21,6 +21,7 @@
 #include "Cubiod.hpp"
 
 #include "Scalar.hpp"
+#include "ReaderBase.hpp"
 
 InitShape::InitShape(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -32,13 +33,18 @@ InitShape::InitShape(
 
 void InitShape::execute() {
 
-    auto cube_pos =
-        create_uniform_particle_cube(dimensions_, position_, dx_, noise_);
-    // pos_.insert(points_.end(), cube_pos.begin(), cube_pos.end());
-    for (auto p : cube_pos)
-        pos_.push_back({(Scalar)p[0], (Scalar)p[1], (Scalar)p[2]});
+    auto time = get_objReg().get_object<TimeGraph>("TimeGraph");
 
-    post_execute();
+    if (time.get_current_timestep() == 0) {
+
+        auto cube_pos =
+            create_uniform_particle_cube(dimensions_, position_, dx_, noise_);
+        // pos_.insert(points_.end(), cube_pos.begin(), cube_pos.end());
+        for (auto p : cube_pos)
+            pos_.push_back({(Scalar)p[0], (Scalar)p[1], (Scalar)p[2]});
+
+        post_execute();
+    }
 }
 
 REGISTER_DEF_TYPE(FIELDS, InitShape);

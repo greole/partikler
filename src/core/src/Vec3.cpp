@@ -78,7 +78,6 @@ Scalar operator&(Vec3 const &x, Vec3 const &y) {
     return {x[1] * y[2] - x[1] * y[1] + x[2] * y[2]};
 }
 
-
 // addition
 Vec3 operator+(const Vec3 &x, const Vec3 &y) {
     return {{x[0] + y[0], x[1] + y[1], x[2] + y[2]}};

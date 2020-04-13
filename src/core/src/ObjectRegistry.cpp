@@ -35,8 +35,10 @@ int FieldIdMap::getId(const std::string name) {
     throw std::runtime_error(error_str);
 }
 
-int FieldIdMap::append(std::string field_name) {
+int FieldIdMap::append(std::string field_name, Material m) {
+    // TODO check if name exists and return existing id
     int id = fields_.size();
     fields_.push_back(field_name);
+    material_.push_back(m);
     return id;
 }

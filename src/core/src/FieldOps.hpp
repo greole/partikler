@@ -326,7 +326,8 @@ template <class Inner> struct Ddt {
     // // Default constructor to allow decltype(make_terminal(Ddt()))
     // construction Ddt() {};
 
-    Ddt(Scalar dt, Inner &vec, IntField const &id) : dt_(dt), vec_({}), id_(id) {
+    Ddt(Scalar dt, Inner &vec, IntField const &id)
+        : dt_(dt), vec_({}), id_(id) {
         // store old state
         vec_.reserve(vec.size());
         for (size_t i = 0; i < vec.size(); i++) {
@@ -356,7 +357,7 @@ template <class Inner> struct Ddt {
     IntField const &id_;
 };
 
-template<class Field, class El>
+template <class Field, class El>
 void clamp_field_in_range(Field &f, El lo, El hi);
 
 #endif

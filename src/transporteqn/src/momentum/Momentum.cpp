@@ -41,12 +41,21 @@ void Momentum::execute() {
     auto &dp = dp_.get();
     auto &dtau = dtau_.get();
 
-    auto ddts =  Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
+    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_, this->id_);
     auto ddto = boost::yap::make_terminal(ddts);
 
     solve(ddto(dtau / rho - dp / rho + forces_.get()), false);
 
     log().info_end();
+
+    // // TODO Remove
+    // if (time_.get_current_timestep() > 1000) {
+    //     for (size_t i = 0; i < f_.size(); i++) {
+    //         if (this->id_[i] == 6) {
+    //             f_[i] = {0, 1, 0};
+    //         }
+    //     }
+    // }
 
     Scalar maxAbsU = 0;
     for (auto &el : f_) {

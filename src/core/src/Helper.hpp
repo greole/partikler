@@ -33,7 +33,6 @@ std::vector<Vec3> create_uniform_particle_cube(size_t n_particles);
 std::vector<Vec3> create_uniform_particle_cube(
     Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise = 0);
 
-
 Scalar rand01();
 
 std::vector<Vec3> disperse_particles(std::vector<Vec3> &points, Scalar dx);

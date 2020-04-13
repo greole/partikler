@@ -53,7 +53,7 @@ class SolenthalerGradient : public ScalarGradientEquation {
     const Scalar rho_0_;
     const Scalar eta_;
     const int min_iter_;
-    const Scalar mp_;
+    const ScalarField &mp_;
 
   public:
     SolenthalerGradient(

@@ -38,6 +38,7 @@ enum SPHObjectType {
     KernelGradientFieldType,
     EquationType,
     ModelType,
+    MaterialType
 };
 
 // Template meta function to get SPHObjectType from std::vector<T>

@@ -60,6 +60,7 @@ void CountingSortParticles::reorder_fields() {
         if (f.second->get_name() == "surface_dist") continue;
         if (f.second->get_name() == "search_cubes") continue;
         if (f.second->get_name() == "sorting_idxs") continue;
+        if (f.second->get_name() == "idx") continue;
 
         auto type = f.second->get_type();
         std::cout << "reordering " << f.second->get_name() << std::endl;

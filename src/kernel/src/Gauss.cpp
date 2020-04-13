@@ -78,7 +78,7 @@ void Gauss::execute() {
 
         if (maglen > 0.0) {
             for (int j = 0; j < 3; j++) {
-                dWdx_[pid][j] = (Scalar) len[j] / maglen * prefact;
+                dWdx_[pid][j] = (Scalar)len[j] / maglen * prefact;
             }
         } else {
             dWdx_[pid] = {0.0, 0.0, 0.0};

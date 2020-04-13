@@ -77,7 +77,8 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
     // shift neighbour particles x-position by 1
     for (size_t i = 0; i < neighbour_points.size(); i++) {
         auto point = neighbour_points[i];
-        neighbour_points[i] = Vec3 {(Scalar)(point[0] + 1.0), point[1], point[2]};
+        neighbour_points[i] =
+            Vec3 {(Scalar)(point[0] + 1.0), point[1], point[2]};
     }
 
     // append neighbour points to owner points
@@ -159,8 +160,7 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
     // TODO searchCubes are created by counting sort
     std::vector<SearchCube> searchCubes(1, {0, points.size()});
 
-    SortedNeighbours ret =
-        createNeighbours(scd, sp.particles, sp.searchCubes);
+    SortedNeighbours ret = createNeighbours(scd, sp.particles, sp.searchCubes);
 
     // Should find at least some neighbours
     ASSERT_GT(ret.ids.size(), 0);

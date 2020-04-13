@@ -126,7 +126,7 @@ void SuperSPHWriter::write_to_disk<SizeTField>(
 
     std::vector<int> buffer(data.size());
     for (size_t i = 0; i < data.size(); i++) {
-        buffer[i] = (int) data[i];
+        buffer[i] = (int)data[i];
     }
     write_to_disk_impl(buffer, path, data.get_name(), data.get_type());
 }

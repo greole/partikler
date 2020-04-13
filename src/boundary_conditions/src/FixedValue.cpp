@@ -26,10 +26,22 @@ FixedValue::FixedValue(
     : Model(model_name, parameter, objReg) {
     for (YAML::Node ps : parameter["boundaries"]) {
         std::string fname = ps["field"].as<std::string>();
-        for (auto p : ps["values"]) {
-            std::string bname = p["name"].as<std::string>();
-            float val = p["value"].as<float>();
-            float_fields_[fname][bname] = val;
+        std::string type = ps["type"].as<std::string>();
+
+        if (type == "Scalar") {
+            for (auto p : ps["values"]) {
+                std::string bname = p["name"].as<std::string>();
+                Scalar val = p["value"].as<Scalar>();
+                float_fields_[fname][bname] = val;
+            }
+        } else {
+            for (auto p : ps["values"]) {
+                std::string bname = p["name"].as<std::string>();
+                Scalar valx = p["value"][0].as<Scalar>();
+                Scalar valy = p["value"][1].as<Scalar>();
+                Scalar valz = p["value"][2].as<Scalar>();
+                vec_fields_[fname][bname] = Vec3 {valx, valy, valz};
+            }
         }
     }
 }
@@ -41,6 +53,7 @@ void FixedValue::execute() {
     IntField &boundary_id_(get_objReg().get_object<IntField>("id"));
 
     for (auto field : float_fields_) {
+
         for (auto boundary : field.second) {
             int fieldId = fieldIdMap_.getId(boundary.first);
 

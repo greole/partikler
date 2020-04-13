@@ -32,6 +32,10 @@ class ParticleGeneratorBase : public Model {
   protected:
     FieldIdMap &fieldIdMap_;
 
+    MaterialMap &materialMap_;
+
+    Material material_;
+
     ObjectRegistry local_objReg_;
 
     PointField &points_;

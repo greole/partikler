@@ -65,8 +65,8 @@ REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Momentum);
 #include "Bonet.hpp"
-#include "Solenthaler.hpp"
 #include "Cole.hpp"
+#include "Solenthaler.hpp"
 
 REGISTER_DEF_TYPE(TRANSPORTEQN, Cole);
 #include "Szewc.hpp"
@@ -155,10 +155,22 @@ int main(int argc, char *argv[]) {
 
     ObjectRegistry obj_reg {};
 
-    obj_reg.register_object<Generic<Scalar>>(std::make_unique<Generic<Scalar>>(
-        "specific_particle_mass",
-        GenericType,
-        config["PROJECT"]["mp"].as<Scalar>()));
+    // Register Materials
+
+    MaterialMap &mm = obj_reg.register_object<MaterialMap>(
+        std::make_unique<MaterialMap>("MaterialMap", GenericType));
+
+    for (auto el : config["PROJECT"]["MATERIALS"]) {
+        YAML::const_iterator it = el.begin();
+        std::string material_name = it->first.as<std::string>();
+        std::string material_type = it->second["type"].as<std::string>();
+        Scalar mp = it->second["mp"].as<Scalar>();
+        Scalar rho = it->second["rho"].as<Scalar>();
+
+        Material m {material_name, material_type, mp, rho};
+
+        mm.insert(material_name, m);
+    }
 
     TimeGraph &timeGraph = obj_reg.register_object<TimeGraph>(
         std::make_unique<TimeGraph>("TimeGraph", config["PROJECT"], obj_reg));
@@ -185,13 +197,10 @@ int main(int argc, char *argv[]) {
 
     timeGraph.execute_pre();
 
-    std::cout << "main" << std::endl;
-
-    auto& idx = obj_reg.create_field<ScalarField>("idx", 0.0);
-    for (size_t i=0;i<idx.size();i++) {
+    auto &idx = obj_reg.create_field<ScalarField>("idx", 0.0);
+    for (size_t i = 0; i < idx.size(); i++) {
         idx[i] = (Scalar)i;
     }
-
 
     for (auto el : config["PROJECT"]["MAIN"]) {
 

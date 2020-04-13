@@ -130,5 +130,5 @@ void SPHParticleGenerator::execute() {
     }
 }
 
-REGISTER_DEF_TYPE(READER, SPHSTLReader);
-REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator);
+REGISTER_DEF_TYPE(READER, SPHSTLReader)
+REGISTER_DEF_TYPE(GENERATOR, SPHParticleGenerator)

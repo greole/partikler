@@ -18,6 +18,7 @@ target_sources(Geometry
 target_link_libraries(Geometry
   PUBLIC
     Core
+    IO
   INTERFACE
     ${YAML_CPP_LIBRARIES}
   PRIVATE

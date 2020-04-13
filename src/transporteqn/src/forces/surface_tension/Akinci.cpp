@@ -62,7 +62,7 @@ Akinci::Akinci(
           objReg.create_field<VectorField>(
               "f", {}, {"fCoex", "fCoey", "fCoez"})),
       conti_(objReg.get_object<ScalarFieldEquation>("Conti")),
-      mp_(objReg.get_object<Generic<Scalar>>("specific_particle_mass")()),
+      mp_(objReg.get_object<ScalarField>("mp")),
       gamma_(read_or_default_coeff<Scalar>("gamma", 1.0)),
       h_(read_or_default_coeff<Scalar>("h", 1.0)),
       rho_0_(read_or_default_coeff<Scalar>("rho_0", 1.0)),
@@ -88,10 +88,10 @@ void Akinci::execute() {
     VectorFieldAB dist(this->np_.size(), {0, 0, 0});
     solve_inner_impl(this->np_, dist, ab(pos_));
 
-    Scalar c = 2.0 * rho_0_ * mp_ * mp_ * gamma;
+    Scalar c = 2.0 * rho_0_ *  gamma;
 
     solve(sum_AB_e(
-        c / (rho.a() + rho.b()) * (C(norm(dist)) * ab(pos_) / norm(dist))));
+              mp_.a() * mp_.b() / (rho.a() + rho.b()) * (C(norm(dist)) * ab(pos_) / norm(dist))));
 
     log().info_end();
 

@@ -50,8 +50,10 @@ std::vector<Vec3> create_uniform_particle_cube(
     points.reserve(ntot);
     for (size_t k = 0; k < nz; k++) {
         // on every second layer particles are moved dx/2 in x and y
-        if (k % 2 == 0) dx_layer = 0.0;
-        else dx_layer = dx/2.0;
+        if (k % 2 == 0)
+            dx_layer = 0.0;
+        else
+            dx_layer = dx / 2.0;
 
         for (size_t j = 0; j < ny; j++) {
             for (size_t i = 0; i < nx; i++) {
