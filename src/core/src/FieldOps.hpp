@@ -27,6 +27,7 @@
 #include <boost/yap/yap.hpp>
 
 #include "Scalar.hpp"
+#include <math.h>
 
 template <class ValType> struct Pow_Wrapper {
     Pow_Wrapper() {};

@@ -21,6 +21,8 @@
 
 #include "Logger.hpp" // for MSG, Logger
 #include "Scalar.hpp" // for MSG, Logger
+#include <math.h>     // for ceil
+#include <algorithm>  // std::min, std::max
 
 SearchCubeDomain
 initSearchCubeDomain(const std::pair<Vec3, Vec3> &bound_box, Scalar dx) {
@@ -67,14 +69,14 @@ std::pair<Vec3, Vec3> bounding_box(std::vector<Vec3> const &particles) {
 
     for (auto &el : particles) {
 
-        minx = min(minx, el[0]);
-        maxx = max(maxx, el[0]);
+        minx = std::min(minx, el[0]);
+        maxx = std::max(maxx, el[0]);
 
-        miny = min(miny, el[1]);
-        maxy = max(maxy, el[1]);
+        miny = std::min(miny, el[1]);
+        maxy = std::max(maxy, el[1]);
 
-        minz = min(minz, el[2]);
-        maxz = max(maxz, el[2]);
+        minz = std::min(minz, el[2]);
+        maxz = std::max(maxz, el[2]);
     }
 
     return std::pair<Vec3, Vec3> {{minx, miny, minz}, {maxx, maxy, maxz}};
@@ -113,30 +115,30 @@ void owner_cube_search(
     }
 }
 
-std::array<bool, 27> vector_inner_owner_cube_search(
-    Point opos,
-    std::vector<Point> &pos,
-    size_t first,
-    size_t last,
-    Scalar maxDistanceSqr) {
+// std::array<bool, 27> vector_inner_owner_cube_search(
+//     Point opos,
+//     std::vector<Point> &pos,
+//     size_t first,
+//     size_t last,
+//     Scalar maxDistanceSqr) {
 
-    std::array<bool, 27> mask {};
+//     std::array<bool, 27> mask {};
 
-    for (size_t i = 0; i < last - first; i++) {
-        mask[i] = false;
-    }
+//     for (size_t i = 0; i < last - first; i++) {
+//         mask[i] = false;
+//     }
 
-    for (size_t nid = first; nid < last; nid++) {
+//     for (size_t nid = first; nid < last; nid++) {
 
-        // const Point npos = pos[nid];
+//         // const Point npos = pos[nid];
 
-        const Scalar distanceSqr = squared_distance(opos, pos[nid]);
+//         const Scalar distanceSqr = squared_distance(opos, pos[nid]);
 
-        mask[nid - first] = distanceSqr < maxDistanceSqr;
-    }
+//         mask[nid - first] = distanceSqr < maxDistanceSqr;
+//     }
 
-    return mask;
-}
+//     return mask;
+// }
 
 void neighbour_cube_search(
     const std::vector<Vec3> &pos,
@@ -173,9 +175,9 @@ SubDivision id_to_i_j_k(const size_t id, const SubDivision sub) {
     const size_t ny = sub.ny;
     const size_t nz = sub.nz;
     const size_t nxny = nx * ny;
-    const unsigned int k {(unsigned int)min(nz - 1, id / nxny)};
-    const unsigned int j {(unsigned int)min(ny - 1, (id - k * nxny) / nx)};
-    const unsigned int i {(unsigned int)min(nx - 1, id - j * nx - k * nxny)};
+    const unsigned int k {(unsigned int)std::min(nz - 1, id / nxny)};
+    const unsigned int j {(unsigned int)std::min(ny - 1, (id - k * nxny) / nx)};
+    const unsigned int i {(unsigned int)std::min(nx - 1, id - j * nx - k * nxny)};
     // std::cout
     //           << [DEBUG ]
     //           << "id_to_i_j_k id " << id

@@ -41,6 +41,7 @@
 #include "Field.hpp" // for VectorField, Field (ptr only), IntF...
 #include "cgal/CGALHelper.hpp"
 #include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
+#include "cgal/CGALField.hpp" // for Facet_handle
 
 void STL_limited_dx(
     VectorField &u,

@@ -3,10 +3,12 @@ target_sources(Core
   PRIVATE
     CGALSearchCubes.cpp
     CGALHelper.cpp
+    CGALField.cpp
   PUBLIC
     CGALSearchCubes.hpp
     CGALHelper.hpp
     CGALTYPEDEFS.hpp
+    CGALField.hpp
     )
 
 target_link_libraries(Core

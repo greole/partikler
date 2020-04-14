@@ -29,6 +29,7 @@
 #include "Models.hpp"      // for Model, ModelRegister (ptr only), REGISTER...
 #include "SearchCubes.hpp" // for NeighbourFieldAB
 #include "cgal/CGALHelper.hpp"
+#include "cgal/CGALField.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
@@ -47,9 +48,6 @@ class STLWendland2D : public Model {
     const Scalar ih_;      // Inverse Smoothing length
     const Scalar W_fak2_;  // = 7. / (64. * M_PI * h * h);
     const Scalar dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
-
-    // In
-    const PointField &pos_; // Particle positions
 
     const NeighbourFieldAB &np_;
     const Field<std::vector<STLSurfaceDist>> &sd_;

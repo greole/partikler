@@ -38,7 +38,7 @@ class ParticleGeneratorBase : public Model {
 
     ObjectRegistry local_objReg_;
 
-    PointField &points_;
+    // PointField &points_;
 
     VectorField &pos_;
 

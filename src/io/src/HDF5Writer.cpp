@@ -52,10 +52,6 @@ void HDF5Writer::write_to_disk(FloatField const &data, h5_file_t &fh) {
 
 // TODO use SFINAE here
 template <>
-void HDF5Writer::write_to_disk(const PointField &data, h5_file_t &fh) {}
-
-// TODO use SFINAE here
-template <>
 void HDF5Writer::write_to_disk(const VectorField &data, h5_file_t &fh) {
     size_t j = 0;
     for (std::string comp : data.get_comp_names()) {

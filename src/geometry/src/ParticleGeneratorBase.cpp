@@ -27,8 +27,8 @@ ParticleGeneratorBase::ParticleGeneratorBase(
       materialMap_(objReg.get_object<MaterialMap>("MaterialMap")),
       material_(materialMap_.getMaterial(read_coeff<std::string>("material"))),
       local_objReg_(ObjectRegistry()),
-      points_(local_objReg_.create_field<PointField>(
-          "Points", {}, {"X", "Y", "Z"})),
+      // points_(local_objReg_.create_field<PointField>(
+      //     "Points", {}, {"X", "Y", "Z"})),
       pos_(local_objReg_.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
       id_(local_objReg_.create_field<IntField>("id")),
       name_(read_coeff<std::string>("name")),

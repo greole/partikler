@@ -25,7 +25,7 @@
 SPHSTLParticleNeighbours::SPHSTLParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : Model(model_name, parameter, objReg), dx_(parameter["dx"].as<float>()),
-      points_(objReg.get_points()),
+      points_(objReg.get_object<PointField>("points")),
       facets_(objReg.get_object<Field<std::vector<Facet_handle>>>("facets")),
       sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
       np_(objReg.create_field<NeighbourFieldAB>("neighbour_pairs")),

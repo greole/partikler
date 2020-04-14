@@ -17,18 +17,15 @@
     contact: go@hpsim.de
 */
 
+#ifndef PARTIKLER_CGALFIELD_INCLUDED
+#define PARTIKLER_CGALFIELD_INCLUDED
+
+#include "CGALTYPEDEFS.hpp"
 #include "Field.hpp"
 
-VectorField &operator+=(VectorField &a, VectorField &b) {
-    for (size_t i = 0; i < a.size(); i++) {
-        a[i] += b[i];
-    }
-    return a;
-}
+using PointField = Field<std::vector<Point>>;
 
-VectorField &operator-=(VectorField &a, VectorField &b) {
-    for (size_t i = 0; i < a.size(); i++) {
-        a[i] -= b[i];
-    }
-    return a;
-}
+PointField &operator+=(PointField &a, VectorField &b);
+
+
+#endif

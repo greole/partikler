@@ -93,8 +93,6 @@ class ObjectRegistry {
 
     bool object_exists(const std::string name) const;
 
-    PointField &get_points() { return get_object<PointField &>("Points"); }
-
     VectorField &get_pos() { return get_object<VectorField &>("Pos"); }
 
     // create an generic with default val

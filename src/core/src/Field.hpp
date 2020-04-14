@@ -30,10 +30,6 @@
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
 
 #define ab(field) (field.a() - field.b())
-#define ab_v(field) (ab(field))
-// #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) -
-// B<Field<std::vector<CGALVector>>>(field) )
-#define ab_f(field) (A<ScalarField>(field) - B<ScalarField>(field))
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
