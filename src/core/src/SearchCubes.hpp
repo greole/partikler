@@ -24,10 +24,6 @@
 #include <stddef.h> // for size_t
 #include <vector>   // for vector
 
-// #include "Field.hpp" // for FieldAB
-#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist, Point3D
-#include "cgal/CGALTYPEDEFS.hpp" // for Point, Facet_handle
-
 #include <algorithm> // for std::sort
 
 #include "Scalar.hpp"
