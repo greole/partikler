@@ -26,7 +26,6 @@
 #include "Field.hpp"  // for Field (ptr only), ScalarField, PointField
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
-#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include "Equation.hpp"
