@@ -28,14 +28,12 @@
 #include "Object.hpp"            // for SPHObject, GetFieldType, FloatF...
 #include "Scalar.hpp"            // for Vec3, VectorPair (ptr only)
 #include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
-#include "cgal/CGALTYPEDEFS.hpp" // for Point
 
 #define ab(field) (field.a() - field.b())
 #define ab_v(field) (ab(field))
 // #define ab_cv(field) ( A<Field<std::vector<CGALVector>>>(field) -
 // B<Field<std::vector<CGALVector>>>(field) )
 #define ab_f(field) (A<ScalarField>(field) - B<ScalarField>(field))
-#define ab_p(field) (A<PointField>(field) - B<PointField>(field))
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
@@ -54,10 +52,6 @@
     case VectorFieldType:                                                      \
         func<VectorField>(                                                     \
             dynamic_cast<VectorField &>(*obj->get()), __VA_ARGS__);            \
-        break;                                                                 \
-    case PointFieldType:                                                       \
-        func<PointField>(                                                      \
-            dynamic_cast<PointField &>(*obj->get()), __VA_ARGS__);             \
         break;                                                                 \
     default:                                                                   \
         continue;                                                              \
@@ -308,7 +302,6 @@ using IntField = Field<std::vector<int>>;
 using SizeTField = Field<std::vector<size_t>>;
 using VectorField = Field<std::vector<Vec3>>;
 using DoubleVectorField = Field<std::vector<VectorPair>>;
-using PointField = Field<std::vector<Point>>;
 
 using ScalarFieldAB = FieldAB<ScalarField>;
 using VectorFieldAB = FieldAB<Field<std::vector<Vec3>>>;
@@ -319,7 +312,6 @@ using DoubleKernelGradientField = FieldAB<DoubleVectorField>;
 
 using SizeTVectorField = Field<std::vector<std::vector<size_t>>>;
 
-PointField &operator+=(PointField &a, VectorField &b);
 VectorField &operator+=(VectorField &a, VectorField &b);
 VectorField &operator-=(VectorField &a, VectorField &b);
 
