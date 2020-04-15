@@ -96,7 +96,7 @@ void HDF5Reader::execute() {
     posf.reserve(posf.size());
     idf.reserve(posf.size());
 
-    for (size_t iter=0; iter< num_particles; iter++) {
+    for (h5_int64_t iter=0; iter< num_particles; iter++) {
         posf.push_back({X[iter], Y[iter], Z[iter]});
         idf.push_back(id[iter]);
     }
