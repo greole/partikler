@@ -20,6 +20,7 @@
 
 #include "Cubiod.hpp"
 
+#include "Helper.hpp"
 #include "Scalar.hpp"
 #include "ReaderBase.hpp"
 
