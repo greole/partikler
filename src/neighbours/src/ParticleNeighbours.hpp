@@ -26,8 +26,6 @@
 #include "Field.hpp"             // for FieldAB, Field (ptr only), PointField
 #include "Models.hpp"            // for Model, ModelRegister (ptr only)
 #include "SearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
-#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist
-#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
 
 #include "Vec3.hpp"
 
