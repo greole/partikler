@@ -1,6 +1,4 @@
 #include "FieldOps.hpp"
-#include "cgal/CGALHelper.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"
 #include "core.hpp"
 #include "gtest/gtest.h"
 #include <vector>
