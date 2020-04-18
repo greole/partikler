@@ -27,20 +27,9 @@ ParticleGeneratorBase::ParticleGeneratorBase(
       materialMap_(objReg.get_object<MaterialMap>("MaterialMap")),
       material_(materialMap_.getMaterial(read_coeff<std::string>("material"))),
       local_objReg_(ObjectRegistry()),
-      // points_(local_objReg_.create_field<PointField>(
-      //     "Points", {}, {"X", "Y", "Z"})),
       pos_(local_objReg_.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
       id_(local_objReg_.create_field<IntField>("id")),
       name_(read_coeff<std::string>("name")),
       fieldId_(fieldIdMap_.append(name_, material_)),
       dx_(read_coeff<float>("dx")),
-      translation_vector_(read_vector(parameter, "translate")) {}
-
-Vec3 ParticleGeneratorBase::read_vector(
-    YAML::Node parameter, std::string coeff) {
-
-    if (!parameter[coeff]) return {0, 0, 0};
-
-    auto p = parameter[coeff];
-    return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
-}
+      translation_vector_(read_vec3("translate")) {}

@@ -57,7 +57,7 @@ class ParticleGeneratorBase : public Model {
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
-    Vec3 read_vector(YAML::Node parameter, std::string coeff);
+    // Vec3 read_vector(YAML::Node parameter, std::string coeff);
 
     template <class T> void append(T &, std::string name) {
         auto &oreg = get_objReg();
