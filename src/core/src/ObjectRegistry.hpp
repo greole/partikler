@@ -176,6 +176,8 @@ class Material {
     Scalar getMp() { return mp_; };
 
     Scalar getRho() { return rho_; };
+
+    std::string getName() {return name_;};
 };
 
 // Maps materials names to material objects
