@@ -48,7 +48,7 @@ class ObjectRegistry;
     static ModelRegister<NAME> reg
 
 #define REGISTER_DEF_TYPE(CLASS, NAME)                                         \
-    static_block { NAME::reg = ModelRegister<NAME>(#CLASS "::" #NAME); }
+    ModelRegister<NAME> NAME::reg(#CLASS "::" #NAME)
 
 template <class T>
 T read_coeff_impl(YAML::Node const &parameter, std::string coeff_name) {

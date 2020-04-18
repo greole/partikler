@@ -105,6 +105,6 @@ void TransientConti::execute() {
     iteration_ = time_.get_current_timestep();
 }
 
-REGISTER_DEF_TYPE(TRANSPORTEQN, ParticleMass)
-REGISTER_DEF_TYPE(TRANSPORTEQN, Conti)
-REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti)
+REGISTER_DEF_TYPE(TRANSPORTEQN, ParticleMass);
+REGISTER_DEF_TYPE(TRANSPORTEQN, Conti);
+REGISTER_DEF_TYPE(TRANSPORTEQN, TransientConti);
