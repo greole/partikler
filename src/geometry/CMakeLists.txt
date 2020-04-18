@@ -9,10 +9,12 @@ target_sources(Geometry
     src/ParticleGeneratorBase.cpp
     src/Cubiod.cpp
     src/SurfaceNormal.cpp
+    src/SelectMaterial.cpp
   PUBLIC
     src/ParticleGeneratorBase.hpp
     src/Cubiod.hpp
     src/SurfaceNormal.hpp
+    src/SelectMaterial.hpp
   )
 
 target_link_libraries(Geometry
