@@ -28,8 +28,8 @@ InitShape::InitShape(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ParticleGeneratorBase(model_name, parameter, objReg),
       shape_(read_coeff<std::string>("shape")),
-      dimensions_(read_vector(parameter, "dimensions")),
-      position_(read_vector(parameter, "position")),
+      dimensions_(read_vec3("dimensions")),
+      position_(read_vec3("position")),
       noise_(read_or_default_coeff("noise", 0.1)) {}
 
 void InitShape::execute() {
