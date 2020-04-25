@@ -198,8 +198,10 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
         else
             solve_impl(this->f_, this->id_, rhs);
 
+        // Reset counter
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
+
         this->clamp_in_range();
         this->log().info_end();
     }
