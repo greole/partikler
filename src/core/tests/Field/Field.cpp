@@ -50,22 +50,81 @@ TEST(ScalarField, sumABFloatTest) {
 
     ScalarField b(4, 2.0);
 
-    IntField id(4, 0);
-
     NeighbourFieldAB n({{0, 1}, {1, 2}});
+
+    std::vector<bool> mask(4, true);
 
     ScalarField res(4, 0.0);
 
-    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n, id);
+    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
-    solve_impl(res, id, sum_AB_e(a.a() + b.b()));
+    solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
 
     ASSERT_EQ(res[0], 3.0);
     ASSERT_EQ(res[1], 6.0);
     ASSERT_EQ(res[2], 3.0);
     ASSERT_EQ(res[3], 0.0);
 }
+
+TEST(ScalarField, sumABdWFloatTest) {
+
+    ScalarField a(4, 1.0);
+
+    ScalarField b(4, 2.0);
+
+    KernelGradientField dW({{1,1,1}, {1,1,1}});
+
+    NeighbourFieldAB n({{0, 1}, {1, 2}});
+
+    std::vector<bool> mask(4, true);
+
+    VectorField res(4, {0.0, 0.0, 0.0});
+
+    auto sum_AB_i = Sum_AB_dW_asym<VectorField>(res, n, dW, dW);
+    auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
+
+    solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
+
+    for (int i=0;i<3;i++) {
+        ASSERT_EQ(res[0][i],3.0);
+        ASSERT_EQ(res[1][i],0.0);
+        ASSERT_EQ(res[2][i],-3.0);
+        ASSERT_EQ(res[3][i],0.0);
+    }
+}
+
+TEST(ScalarField, sumABdWMaskFloatTest) {
+
+    ScalarField a(4, 1.0);
+
+    ScalarField b(4, 2.0);
+
+    KernelGradientField dW({{1,1,1}, {1,1,1}});
+
+    NeighbourFieldAB n({{0, 1}, {1, 2}});
+
+    std::vector<bool> mask(4, true);
+
+    VectorField res(4, {0.0, 0.0, 0.0});
+
+    mask[1] = false;
+
+
+    auto sum_AB_i = Sum_AB_dW_asym<VectorField>(res, n, dW, dW);
+    auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
+
+    solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
+
+
+    for (int i=0;i<3;i++) {
+        ASSERT_EQ(res[0][i],3.0);
+        ASSERT_EQ(res[1][i],0.0);
+        ASSERT_EQ(res[2][i],-3.0);
+        ASSERT_EQ(res[3][i],0.0);
+    }
+}
+
 
 TEST(ScalarField, sumABFloatTestOuter) {
 
@@ -75,16 +134,16 @@ TEST(ScalarField, sumABFloatTestOuter) {
 
     ScalarField o(4, 2.0);
 
-    IntField id(4, 0);
+    std::vector<bool> mask(4, true);
 
     NeighbourFieldAB n({{0, 1}, {1, 2}, {1, 3}});
 
     ScalarField res(4, 0.0);
 
-    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n, id);
+    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
-    solve_impl(res, id, o * sum_AB_e(a.a() + b.b()));
+    solve_impl(res, mask, o * sum_AB_e(a.a() + b.b()));
 
     ASSERT_EQ(res[0], 6.0);  // 2*sum(1+2.0) = 6.0
     ASSERT_EQ(res[1], 18.0); // 2*sum(1+2.0, 1+2.0, 1+2.0)
@@ -100,16 +159,16 @@ TEST(ScalarField, sumABFloatTestOuterII) {
 
     ScalarField o({1.0, 2.0, 3.0, 4.0});
 
-    IntField id(4, 0);
+    std::vector<bool> mask(4, true);
 
     NeighbourFieldAB n({{0, 1}, {1, 2}, {1, 3}});
 
     ScalarField res(4, 0.0);
 
-    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n, id);
+    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
-    solve_impl(res, id, o * sum_AB_e(a.a() + b.b()));
+    solve_impl(res, mask, o * sum_AB_e(a.a() + b.b()));
 
     ASSERT_EQ(res[0], 3.0);  // 1.0*sum(1+2.0) = 3.0
     ASSERT_EQ(res[1], 28.0); // 2.0*sum(1+2.0, 2.0+3.0, 2.0+4.0)
@@ -125,12 +184,12 @@ TEST(ScalarField, ddtTest) {
 
     ScalarField u(4, 0.0);
 
-    IntField id(4, 0);
+    std::vector<bool> mask(4, true);
 
-    auto ddts = Ddt<ScalarField>(1.0, u, id);
+    auto ddts = Ddt<ScalarField>(1.0, u);
     auto ddt = boost::yap::make_terminal(ddts);
 
-    solve_impl(u, id, ddt(f * du));
+    solve_impl(u, mask, ddt(f * du));
 
     ASSERT_EQ(u[0], 1.0);
     ASSERT_EQ(u[1], 1.0);
@@ -146,19 +205,19 @@ TEST(ScalarField, ddtsumABFloatTestOuterII) {
 
     ScalarField o({1.0, 2.0, 3.0, 4.0});
 
-    IntField id(4, 0);
+    std::vector<bool> mask(4, true);
 
     NeighbourFieldAB n({{0, 1}, {1, 2}, {1, 3}});
 
     ScalarField res(4, 0.0);
 
-    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n, id);
+    auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
-    auto ddts = Ddt<ScalarField>(0.1, res, id);
+    auto ddts = Ddt<ScalarField>(0.1, res);
     auto ddt = boost::yap::make_terminal(ddts);
 
-    solve_impl(res, id, ddt(o * sum_AB_e(a.a() + b.b())));
+    solve_impl(res, mask, ddt(o * sum_AB_e(a.a() + b.b())));
 
     ASSERT_FLOAT_EQ(res[0], 0.3);  // 0.0 + 0.1*1.0*sum(1+2.0) = 3.0
     ASSERT_FLOAT_EQ(res[1], 2.80); // 0.0 + 0.1*2.0*sum(1+2.0, 2.0+3.0, 2.0+4.0)
