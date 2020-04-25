@@ -34,6 +34,9 @@
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
     switch (type_enum) {                                                       \
+    case BoolFieldType:                                                  \
+        func<BoolField>(dynamic_cast<BoolField &>(*obj->get()), __VA_ARGS__); \
+        break;                                                          \
     case IntFieldType:                                                         \
         func<IntField>(dynamic_cast<IntField &>(*obj->get()), __VA_ARGS__);    \
         break;                                                                 \
@@ -291,6 +294,7 @@ std::ostream &operator<<(std::ostream &os, Field<T> const &f) {
     return os;
 }
 
+using BoolField = Field<std::vector<bool>>;
 using FloatField = Field<std::vector<float>>;
 using DoubleField = Field<std::vector<double>>;
 using ScalarField = Field<std::vector<Scalar>>;
