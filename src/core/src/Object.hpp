@@ -26,10 +26,12 @@
 
 #include "Logger.hpp" // for Logger
 #include "Vec3.hpp"
+#include "Scalar.hpp"
 
 enum SPHObjectType {
     GenericType,
     FieldType,
+    BoolFieldType,
     IntFieldType,
     SizeTFieldType,
     ScalarFieldType,
@@ -46,7 +48,11 @@ template <class T> struct GetFieldType {
     constexpr static SPHObjectType value = GenericType;
 };
 
-template <> struct GetFieldType<std::vector<float>> {
+template <> struct GetFieldType<std::vector<bool>> {
+    constexpr static SPHObjectType value = BoolFieldType;
+};
+
+template <> struct GetFieldType<std::vector<Scalar>> {
     constexpr static SPHObjectType value = ScalarFieldType;
 };
 
