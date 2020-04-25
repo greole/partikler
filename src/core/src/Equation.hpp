@@ -63,6 +63,10 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     IntField &id_;
 
+    // mask to which particles the equation applies
+    // this can be used to implement boundary conditions
+    BoolField& mask_;
+
     TimeGraph &time_;
 
     NeighbourFieldAB &np_;
@@ -95,10 +99,38 @@ template <class FieldType> class FieldEquationBase : public Model {
         : Model(field_name, parameter, objReg), f_(f),
           fo_(f.size(), zero<typename FieldType::value_type>::val),
           id_(objReg.get_object<IntField>("id")),
+          mask_(objReg.create_field<BoolField>(field_name + "mask", true)),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
           h_(objReg.get_object<Generic<Scalar>>("h")()), objReg_(objReg),
-          estimate_(false) {}
+          estimate_(false) {
+        init_boundary();
+
+    }
+
+    void init_boundary() {
+        // check parameter for exclude list
+        auto &fieldIdMap(get_objReg().get_object<FieldIdMap>("FieldIdMap"));
+
+        // TODO avoid looping through id several times
+        // collect all fixIDs first
+        if (parameter_["fixed_value"]) {
+            for (auto el : parameter_["fixed_value"]) {
+                YAML::const_iterator it = el.begin();
+                auto boundary_name = it->first.as<std::string>();
+                Vec3 val {it->second["value"][0].as<Scalar>(),
+                          it->second["value"][1].as<Scalar>(),
+                          it->second["value"][2].as<Scalar>()};
+
+                int fixID = fieldIdMap.getId(boundary_name);
+
+
+                for (size_t i = 0; i < id_.size(); i++) {
+                    if (id_[i] == fixID){ mask_[i] = false;}
+                }
+            }
+        }
+    };
 
     void store_old_value() {
         for (size_t i = 0; i < fo_.size(); i++) {
@@ -108,12 +140,12 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     std::pair<bool, Scalar> timestep_limit() { return {false, 0}; }
 
-    Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_, this->id_); }
+    Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_); }
 
     template <class Expr> void solve(Expr e) {
         this->log().info_begin() << "Solving for" << this->f_.get_name();
         decltype(auto) expr = boost::yap::as_expr(e);
-        solve_impl(f_, id_, expr);
+        solve_impl(f_, mask_, expr);
         clamp_in_range();
         this->log().info_end();
     }
@@ -193,10 +225,11 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
 
     template <class RHS> void solve(RHS rhs, bool reset = true) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
+
         if (reset)
-            solve_impl_res(this->f_, this->id_, rhs);
+            solve_impl_res(this->f_, this->mask_, rhs);
         else
-            solve_impl(this->f_, this->id_, rhs);
+            solve_impl(this->f_, this->mask_, rhs);
 
         // Reset counter
         sum_AB_dW_s.a = 0;
@@ -241,7 +274,7 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
               SumABdWType<FieldType>(this->f_, this->np_, dWdx_, dWdxn_)) {};
 
     Sum_AB_sym<FieldType> sum_AB() {
-        return Sum_AB_sym<FieldType>(this->f_, this->np_, this->id_);
+        return Sum_AB_sym<FieldType>(this->f_, this->np_);
     }
 
     Sum_AB_asym<FieldType> sum_AB_a() {
@@ -255,9 +288,9 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
     template <class RHS> void solve(RHS rhs, bool reset = true) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
         if (reset)
-            solve_impl_res(this->f_, this->id_, rhs);
+            solve_impl_res(this->f_, this->mask_, rhs);
         else
-            solve_impl(this->f_, this->id_, rhs);
+            solve_impl(this->f_, this->mask_, rhs);
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
         this->clamp_in_range();
