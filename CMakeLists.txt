@@ -195,6 +195,7 @@ OPTION(BUILD_H5HUT "Build H5Part data-Format" ON)
 # gcov                 #
 ########################
 
+IF ("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
 IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 include (cmake/CodeCoverage.cmake)
 
@@ -210,6 +211,7 @@ setup_target_for_coverage_lcov(
 # setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
 # target_link_libraries(${PROJECT_TEST_NAME} gcov)
 
+ENDIF()
 ENDIF()
 ########################
 # ctags                #
