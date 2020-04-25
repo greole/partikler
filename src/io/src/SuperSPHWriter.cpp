@@ -81,8 +81,8 @@ std::string field_type_to_str(SPHObjectType t) {
     //     return "float";
     // case (PointFieldType):
     //     return "float";
-    // case (VectorFieldType):
-    //     return "float";
+    case (BoolFieldType):
+        return "bool";
     default:
         return "float";
     }
@@ -116,9 +116,9 @@ void SuperSPHWriter::write_to_disk(T const &data, const std::string path) {
 //     write_to_disk_impl(data, path, data.get_name(), data.get_type());
 // }
 
-// template <>
-// void SuperSPHWriter::write_to_disk<PointField>(
-//     const PointField &data, const std::string path) {}
+template <>
+void SuperSPHWriter::write_to_disk<BoolField>(
+    const BoolField &data, const std::string path) {}
 
 template <>
 void SuperSPHWriter::write_to_disk<SizeTField>(
