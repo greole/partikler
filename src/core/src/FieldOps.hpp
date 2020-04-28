@@ -27,9 +27,9 @@
 #include <boost/yap/yap.hpp>
 
 #include "Scalar.hpp"
+#include <cstdlib>
 #include <math.h>
 #include <queue>
-#include <cstdlib>
 #include <stdexcept>
 
 template <class ValType> struct Pow_Wrapper {
@@ -39,21 +39,16 @@ template <class ValType> struct Pow_Wrapper {
     ValType inner;
 };
 
-template <class T>
-class CyclicVector              {
+template <class T> class CyclicVector {
 
-private:
-
+  private:
     std::vector<T> v_;
 
     // current insert position
     size_t p_;
 
-public:
-
-    CyclicVector(size_t n):
-        v_(std::vector<T> (n, zero<T>::val)), p_(0) {
-    };
+  public:
+    CyclicVector(size_t n) : v_(std::vector<T>(n, zero<T>::val)), p_(0) {};
 
     std::pair<size_t, size_t> div(size_t x, size_t y) {
         size_t rem = x % y;
@@ -62,9 +57,9 @@ public:
     }
 
     // access operator
-    T& operator[](size_t i) {
+    T &operator[](size_t i) {
 
-        auto res = div(p_+i, v_.size());
+        auto res = div(p_ + i, v_.size());
         // access position should not cross p
         if (res.first > 1 && res.second > p_) {
             throw std::runtime_error("cache error");
@@ -75,7 +70,7 @@ public:
 
     void add(size_t i, T elem) {
 
-        auto res = div(p_+i, v_.size());
+        auto res = div(p_ + i, v_.size());
         // access position should not cross p
         if (res.first > 1 && res.second > p_) {
             throw std::runtime_error("cache error");
@@ -93,7 +88,6 @@ public:
         }
         return v_[po];
     };
-
 };
 
 // template <class OpType, class... Inner> struct Terminal_Generator {
@@ -173,6 +167,13 @@ struct take_nth {
 
     template <typename T>
     auto operator()(
+        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+        AB<Field<std::vector<T>>> const &f) {
+        return boost::yap::make_terminal(f()[ab]);
+    }
+
+    template <typename T>
+    auto operator()(
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Scalar const s) {
         return boost::yap::make_terminal(s);
     }
@@ -182,13 +183,6 @@ struct take_nth {
         boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
         Field<std::vector<T>> const &f) {
         return boost::yap::make_terminal(f[a]);
-    }
-
-    template <typename T>
-    auto operator()(
-        boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-        FieldAB<Field<std::vector<T>>> const &f) {
-        return boost::yap::make_terminal(f[ab]);
     }
 
     template <typename T>
@@ -215,15 +209,6 @@ struct take_nth {
     std::size_t ab;
 };
 
-// Assigns some expression e to the given vector by evaluating e elementwise,
-// to avoid temporaries and allocations.
-template <typename T, typename Expr>
-std::vector<T> &
-solve_impl_res(std::vector<T> &vec, std::vector<bool>& mask, Expr const &e) {
-    decltype(auto) expr = boost::yap::as_expr(e);
-    std::fill(vec.begin(), vec.end(), zero<T>::val);
-    return solve_impl(vec, mask, e);
-}
 
 template <typename T, typename Expr>
 std::vector<T> &
@@ -233,7 +218,15 @@ solve_impl(std::vector<T> &vec, std::vector<bool> &mask, Expr const &e) {
     size_t thread_begin = 0;
     size_t thread_end = 0;
 
+    auto zero_val = zero<T>::val;
+
     for (std::size_t i = 0, size = vec.size(); i < size; ++i) {
+
+        // Reset value
+        if (mask[i]) {
+            vec[i] = zero_val;
+        }
+
         auto vec_i_expr =
             boost::yap::transform(boost::yap::as_expr(expr), take_ith {i});
 
@@ -242,15 +235,11 @@ solve_impl(std::vector<T> &vec, std::vector<bool> &mask, Expr const &e) {
 
         auto res = boost::yap::evaluate(vec_i_expr);
 
-        // check if i is a boundary
-        // NOTE
-        // if fixed value do nothing since value should be assigned on field
-        // construction
+        // check this equation applies to this particle
 
-        if ( mask[i] ) {
+        if (mask[i]) {
             vec[i] = res;
         }
-
     }
     return vec;
 }
@@ -263,10 +252,7 @@ template <class T> void field_append(T &a, T &b) {
 template <class Inner> struct Sum_AB_sym {
 
     Sum_AB_sym(Inner &state, NeighbourFieldAB &nb)
-        : vec_(state),
-          cache_(state.size()),
-          nb_(nb)
-    {};
+        : vec_(state), cache_(state.size()), nb_(nb) {};
 
     template <class Expr> typename Inner::value_type operator()(Expr expr) {
 
@@ -283,7 +269,7 @@ template <class Inner> struct Sum_AB_sym {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
-            size_t dist = b-a-1;
+            size_t dist = b - a - 1;
 
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
@@ -299,20 +285,17 @@ template <class Inner> struct Sum_AB_sym {
 
     size_t a = 0;
     size_t ab = 0;
-    typename Inner::value_type ret_= zero<typename Inner::value_type>::val;
+    typename Inner::value_type ret_ = zero<typename Inner::value_type>::val;
 
     Inner &vec_;
-    CyclicVector <typename Inner::value_type> cache_;
+    CyclicVector<typename Inner::value_type> cache_;
 
     NeighbourFieldAB &nb_;
 };
 
 template <class Inner> struct Sum_AB_asym {
     Sum_AB_asym(Inner &state, NeighbourFieldAB &nb)
-        : vec_(state),
-          cache_(state.size()),
-          nb_(nb)
-    {};
+        : vec_(state), cache_(state.size()), nb_(nb) {};
 
     template <class Expr> typename Inner::value_type operator()(Expr expr) {
 
@@ -329,7 +312,7 @@ template <class Inner> struct Sum_AB_asym {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
-            size_t dist = b-a-1;
+            size_t dist = b - a - 1;
 
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
@@ -345,10 +328,10 @@ template <class Inner> struct Sum_AB_asym {
 
     size_t a = 0;
     size_t ab = 0;
-    typename Inner::value_type ret_= zero<typename Inner::value_type>::val;
+    typename Inner::value_type ret_ = zero<typename Inner::value_type>::val;
 
     Inner &vec_;
-    CyclicVector <typename Inner::value_type> cache_;
+    CyclicVector<typename Inner::value_type> cache_;
 
     NeighbourFieldAB &nb_;
 };
@@ -377,14 +360,14 @@ template <class Inner> struct Sum_AB_dW_sym {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
-            size_t dist = b-a-1;
+            size_t dist = b - a - 1;
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
             ret_ += res * dW_[ab];
 
             // rather use a vector since to keep size constant
-            cache_.add(dist, res*dWn_[ab]);
+            cache_.add(dist, res * dWn_[ab]);
             ab++;
         }
         a++;
@@ -393,10 +376,10 @@ template <class Inner> struct Sum_AB_dW_sym {
 
     size_t a = 0;
     size_t ab = 0;
-    typename Inner::value_type ret_= zero<typename Inner::value_type>::val;
+    typename Inner::value_type ret_ = zero<typename Inner::value_type>::val;
 
     Inner &vec_;
-    CyclicVector <typename Inner::value_type> cache_;
+    CyclicVector<typename Inner::value_type> cache_;
     NeighbourFieldAB &nb_;
     KernelGradientField &dW_;
     KernelGradientField &dWn_;
@@ -425,14 +408,14 @@ template <class Inner> struct Sum_AB_dW_asym {
         while (ab < nb_.size() && a == nb_[ab].ownId) {
             auto nb_pair = nb_[ab];
             size_t b = nb_pair.neighId;
-            size_t dist = b-a-1;
+            size_t dist = b - a - 1;
             auto vec_ij_expr = boost::yap::transform(
                 boost::yap::as_expr(expr), take_nth {a, b, ab});
             auto res = boost::yap::evaluate(vec_ij_expr);
             ret_ += res * dW_[ab];
 
             // rather use a vector since to keep size constant
-            cache_.add(dist, res*dWn_[ab]);
+            cache_.add(dist, res * dWn_[ab]);
             ab++;
         }
         a++;
@@ -441,11 +424,10 @@ template <class Inner> struct Sum_AB_dW_asym {
 
     size_t a = 0;
     size_t ab = 0;
-    typename Inner::value_type ret_= zero<typename Inner::value_type>::val;
-
+    typename Inner::value_type ret_ = zero<typename Inner::value_type>::val;
 
     Inner &vec_;
-    CyclicVector <typename Inner::value_type> cache_;
+    CyclicVector<typename Inner::value_type> cache_;
     NeighbourFieldAB &nb_;
     KernelGradientField &dW_;
     KernelGradientField &dWn_;
@@ -470,11 +452,18 @@ solve_inner_impl(NeighbourFieldAB &nb, std::vector<T> &vec, Expr const &e) {
 
 template <class Inner> struct Ddt {
 
-    // // Default constructor to allow decltype(make_terminal(Ddt()))
-    // construction Ddt() {};
+    Ddt(Scalar dt, Inner &vec, SizeTField &sid) : dt_(dt), vec_({}) {
 
-    Ddt(Scalar dt, Inner &vec)
-        : dt_(dt), vec_({}) {
+        vec_.resize(vec.size());
+
+        for (size_t i = 0; i < vec.size(); i++) {
+            vec_[sid[i]] = vec[i];
+        }
+
+    };
+
+    Ddt(Scalar dt, Inner &vec) : dt_(dt), vec_({}) {
+
         // store old state
         vec_.reserve(vec.size());
         for (size_t i = 0; i < vec.size(); i++) {

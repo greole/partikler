@@ -25,18 +25,18 @@
 #include <type_traits> // for true_type, false_type
 #include <vector>      // for vector, allocator
 
-#include "Object.hpp"            // for SPHObject, GetFieldType, FloatF...
-#include "Scalar.hpp"            // for Vec3, VectorPair (ptr only)
-#include "Vec3.hpp"              // for Vec3, VectorPair (ptr only)
+#include "Object.hpp" // for SPHObject, GetFieldType, FloatF...
+#include "Scalar.hpp" // for Vec3, VectorPair (ptr only)
+#include "Vec3.hpp"   // for Vec3, VectorPair (ptr only)
 
 #define ab(field) (field.a() - field.b())
 
 // Dynamically dispatches func based on its kind
 #define DISPATCH(obj, func, type_enum, ...)                                    \
     switch (type_enum) {                                                       \
-    case BoolFieldType:                                                  \
-        func<BoolField>(dynamic_cast<BoolField &>(*obj->get()), __VA_ARGS__); \
-        break;                                                          \
+    case BoolFieldType:                                                        \
+        func<BoolField>(dynamic_cast<BoolField &>(*obj->get()), __VA_ARGS__);  \
+        break;                                                                 \
     case IntFieldType:                                                         \
         func<IntField>(dynamic_cast<IntField &>(*obj->get()), __VA_ARGS__);    \
         break;                                                                 \
@@ -103,6 +103,18 @@ template <class T> class B {
     T &operator()() const { return f_; };
 };
 
+template <class T> class AB {
+private:
+    T &f_;
+
+public:
+    AB(T &f) : f_(f) {};
+
+    T &operator()() { return f_; };
+
+    T &operator()() const { return f_; };
+};
+
 template <class T> class Field : public T, public SPHObject {
 
   private:
@@ -146,6 +158,8 @@ template <class T> class Field : public T, public SPHObject {
     A<Field<T>> a() { return A(*this); }
 
     B<Field<T>> b() { return B(*this); }
+
+    AB<Field<T>> mark_ab() { return AB(*this); }
 
     // reoder the vector by the idx vector
     void reorder(const std::vector<size_t> &idx) {
@@ -210,6 +224,9 @@ struct is_field<A<Field<std::vector<T, Alloc>>>> : std::true_type {};
 
 template <typename T, typename Alloc>
 struct is_field<B<Field<std::vector<T, Alloc>>>> : std::true_type {};
+
+template <typename T, typename Alloc>
+struct is_field<AB<Field<std::vector<T, Alloc>>>> : std::true_type {};
 
 // template <>
 // struct is_field<Field<std::vector<Vec3>>> : std::true_type {};
@@ -307,6 +324,7 @@ using ScalarFieldAB = FieldAB<ScalarField>;
 using VectorFieldAB = FieldAB<Field<std::vector<Vec3>>>;
 using IntFieldAB = FieldAB<IntField>;
 using SizeTFieldAB = FieldAB<SizeTField>;
+using KernelField = FieldAB<ScalarField>;
 using KernelGradientField = FieldAB<VectorField>;
 using DoubleKernelGradientField = FieldAB<DoubleVectorField>;
 
