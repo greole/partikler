@@ -39,6 +39,13 @@ std::vector<Vec3> create_uniform_particle_cube(
 
     srand(time(NULL));
 
+    Scalar xpos = 0;
+    Scalar xlen = dimensions[0] - position[0];
+    Scalar ypos = 0;
+    Scalar ylen = dimensions[1] - position[1];
+    Scalar zpos = 0;
+    Scalar zlen = dimensions[2] - position[2];
+
     size_t nx {(size_t)((dimensions[0] - position[0]) / dx)};
     size_t ny {(size_t)((dimensions[1] - position[1]) / dx)};
     size_t nz {(size_t)((dimensions[2] - position[2]) / dx)};
@@ -48,27 +55,37 @@ std::vector<Vec3> create_uniform_particle_cube(
 
     std::vector<Vec3> points;
     points.reserve(ntot);
-    for (size_t k = 0; k < nz; k++) {
-        // on every second layer particles are moved dx/2 in x and y
-        if (k % 2 == 0)
-            dx_layer = 0.0;
+
+    // TODO this currently has fringes on its edges
+    size_t j = 0;
+    size_t k = 0;
+    while (zpos < zlen) {
+
+        if (j % 2 == 0)
+            ypos = position[1];
         else
-            dx_layer = dx / 2.0;
+            ypos = position[1] + dx / 2.0;
 
-        for (size_t j = 0; j < ny; j++) {
-            for (size_t i = 0; i < nx; i++) {
-                Scalar nx = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
-                Scalar ny = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
-                Scalar nz = ((Scalar)(rand() % 100)) / 50.0 - 1.0;
+        while (ypos < ylen) {
 
-                Scalar x = ((Scalar)i) * dx + nx * noise * dx + dx_layer;
-                Scalar y = ((Scalar)j) * dx + ny * noise * dx + dx_layer;
-                Scalar z = ((Scalar)k) * dx + nz * noise * dx;
+            if (k % 2 == 0)
+                xpos = position[0];
+            else
+                xpos = position[0] + dx / 2.0;
 
-                points.push_back(Vec3 {x, y, z});
+            while (xpos < xlen) {
+                points.push_back(Vec3 {xpos, ypos, zpos});
+                xpos += dx;
             }
+
+            ypos += dx/2.0;
+            k++;
         }
+        k = 0;
+        zpos += dx/2.0;
+        j++;
     }
+
     return points;
 }
 
