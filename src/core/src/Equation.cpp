@@ -18,3 +18,20 @@
 */
 
 #include "Equation.hpp"
+
+template<>
+template<>
+Vec3 FieldEquationBase<VectorField>::read_boundary(YAML::const_iterator it){
+    std::cout << "read vector val" << std::endl;
+     Vec3 ret {it->second["value"][0].as<Scalar>(),
+            it->second["value"][1].as<Scalar>(),
+            it->second["value"][2].as<Scalar>()};
+     std::cout << ret << std::endl;
+     return ret;
+}
+
+template<>
+template<>
+Scalar FieldEquationBase<ScalarField>::read_boundary(YAML::const_iterator it){
+    return it->second["value"].as<Scalar>();
+}

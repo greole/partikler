@@ -63,9 +63,12 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     IntField &id_;
 
+    // Sorting of particles compared to previous sorting
+    SizeTField &sid_;
+
     // mask to which particles the equation applies
     // this can be used to implement boundary conditions
-    BoolField& mask_;
+    BoolField &mask_;
 
     TimeGraph &time_;
 
@@ -99,14 +102,16 @@ template <class FieldType> class FieldEquationBase : public Model {
         : Model(field_name, parameter, objReg), f_(f),
           fo_(f.size(), zero<typename FieldType::value_type>::val),
           id_(objReg.get_object<IntField>("id")),
+          sid_(objReg.get_object<SizeTField>("sorting_idxs")),
           mask_(objReg.create_field<BoolField>(field_name + "mask", true)),
           time_(objReg.get_object<TimeGraph>("TimeGraph")),
           np_(objReg.get_object<NeighbourFieldAB>("neighbour_pairs")),
           h_(objReg.get_object<Generic<Scalar>>("h")()), objReg_(objReg),
           estimate_(false) {
         init_boundary();
-
     }
+
+    template <class T> T read_boundary(YAML::const_iterator it);
 
     void init_boundary() {
         // check parameter for exclude list
@@ -118,15 +123,27 @@ template <class FieldType> class FieldEquationBase : public Model {
             for (auto el : parameter_["fixed_value"]) {
                 YAML::const_iterator it = el.begin();
                 auto boundary_name = it->first.as<std::string>();
-                Vec3 val {it->second["value"][0].as<Scalar>(),
-                          it->second["value"][1].as<Scalar>(),
-                          it->second["value"][2].as<Scalar>()};
 
                 int fixID = fieldIdMap.getId(boundary_name);
+                if (it->second["value"]) {
+                    auto val =
+                        read_boundary<typename FieldType::value_type>(it);
 
-
-                for (size_t i = 0; i < id_.size(); i++) {
-                    if (id_[i] == fixID){ mask_[i] = false;}
+                    for (size_t i = 0; i < id_.size(); i++) {
+                        if (id_[i] == fixID) {
+                            mask_[i] = false;
+                            f_[i] = val;
+                            fo_[i] = val;
+                            std::cout << f_[i] << std::endl;
+                        }
+                    }
+                }
+                else {
+                    for (size_t i = 0; i < id_.size(); i++) {
+                        if (id_[i] == fixID) {
+                            mask_[i] = false;
+                        }
+                    }
                 }
             }
         }
@@ -140,10 +157,12 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     std::pair<bool, Scalar> timestep_limit() { return {false, 0}; }
 
-    Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_); }
+    Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_, sid_); }
 
     template <class Expr> void solve(Expr e) {
         this->log().info_begin() << "Solving for" << this->f_.get_name();
+        // TODO check if reordering is necessary
+        reorder_vector(mask_, sid_);
         decltype(auto) expr = boost::yap::as_expr(e);
         solve_impl(f_, mask_, expr);
         clamp_in_range();
@@ -186,6 +205,7 @@ template <class FieldType> class FieldEquationBase : public Model {
     }
 };
 
+
 template <class FieldGradientType, template <typename> class SumABdWType>
 class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
 
@@ -223,13 +243,11 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
           sum_AB_dW_s(SumABdWType<FieldGradientType>(
               this->f_, this->np_, dWdx_, dWdxn_)) {}
 
-    template <class RHS> void solve(RHS rhs, bool reset = true) {
+    template <class RHS> void solve(RHS rhs) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
+        reorder_vector(this->mask_, this->sid_);
 
-        if (reset)
-            solve_impl_res(this->f_, this->mask_, rhs);
-        else
-            solve_impl(this->f_, this->mask_, rhs);
+        solve_impl(this->f_, this->mask_, rhs);
 
         // Reset counter
         sum_AB_dW_s.a = 0;
@@ -249,7 +267,7 @@ template <
 class FieldValueEquation : public FieldEquationBase<FieldType> {
 
   protected:
-    ScalarField &W_;
+    KernelField &W_;
 
     KernelGradientField &dWdx_;
 
@@ -267,7 +285,7 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         FieldType &f,
         bool symmetric = true)
         : FieldEquationBase<FieldType>(eqn_base_name, parameter, objReg, f),
-          W_(objReg.get_object<ScalarField>("KernelW")),
+          W_(objReg.get_object<KernelField>("KernelW")),
           dWdx_(objReg.get_object<KernelGradientField>("KerneldWdx")),
           dWdxn_(objReg.get_object<KernelGradientField>("KerneldWdxNeighbour")),
           sum_AB_dW_s(
@@ -285,12 +303,10 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         return Sum_AB_dW_asym<FieldType>(this->f_, this->np_, dWdx_, dWdxn_);
     }
 
-    template <class RHS> void solve(RHS rhs, bool reset = true) {
+    template <class RHS> void solve(RHS rhs) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
-        if (reset)
-            solve_impl_res(this->f_, this->mask_, rhs);
-        else
-            solve_impl(this->f_, this->mask_, rhs);
+        reorder_vector(this->mask_, this->sid_);
+        solve_impl(this->f_, this->mask_, rhs);
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
         this->clamp_in_range();
