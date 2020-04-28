@@ -25,20 +25,49 @@
 ParticleMass::ParticleMass(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ScalarFieldEquation(
-          "Conti",
+          "ParticleMass",
           parameter,
           objReg,
           objReg.create_field<ScalarField>("mp", 0.0)) {
+
+
+    // get Kernel model and execute it to make sure the kernel is computed
+    auto &kernelModel = objReg_.get_object<Model>("KernelEqn");
+    auto &particleNeighbours = objReg_.get_object<Model>("ParticleNeighbours");
+    particleNeighbours.execute();
+    kernelModel.execute();
+
+    reorder_vector(this->id_, this->sid_);
+
+    ScalarField &sumABtwo =
+        objReg_.create_field<ScalarField>("SumKernel", 0.0, {"sumABtwo"});
+
+    ScalarField &W  = this->get_objReg().get_object<ScalarField>("KernelW");
+
+    // sum all Wab and divide rho by it
+    for (size_t ab = 0; ab < np_.size(); ab++) {
+        size_t i = np_[ab].ownId;
+        size_t j = np_[ab].neighId;
+
+        Scalar sumABtwores = W[ab];
+
+        sumABtwo[i] += sumABtwores;
+        sumABtwo[j] += sumABtwores;
+    }
+
 
     for (size_t i = 0; i < f_.size(); i++) {
         // get id
         auto &fieldIdMap(objReg.get_object<FieldIdMap>("FieldIdMap"));
         Material m = fieldIdMap.getMaterial(this->id_[i]);
-        f_[i] = m.getMp();
+        f_[i] = m.getRho() / sumABtwo[i];
     }
 }
 
-void ParticleMass::execute() {}
+void ParticleMass::execute() {
+    reorder_vector(f_, sid_);
+    reorder_vector(id_, sid_);
+}
 
 Conti::Conti(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -60,7 +89,7 @@ void Conti::execute() {
     auto sab = sum_AB();
     auto sum_AB_o = boost::yap::make_terminal(sab);
 
-    solve(mp_ * sum_AB_o(W_));
+    solve(mp_ * sum_AB_o(W_.mark_ab()));
 
     // set iteration
     iteration_ = time_.get_current_timestep();
@@ -96,7 +125,7 @@ void TransientConti::execute() {
     auto sum_AB_dW = boost::yap::make_terminal(sabdw);
 
     store_old_value();
-    auto ddts = ddt();
+    auto ddts = Ddt<ScalarField>(time_.get_deltaT(), fo_, sid_);
     auto ddto = boost::yap::make_terminal(ddts);
 
     solve(ddto(sum_AB_dW(-mp_ * (u_.b() - u_.a()))));
