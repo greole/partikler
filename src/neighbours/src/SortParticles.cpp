@@ -38,6 +38,7 @@ void CountingSortParticles::execute() {
     // pos.store_old();
 
     // TODO too much copying
+
     auto [sc, si, pos] = countingSortParticles(scd_(), pos_);
 
     sc_ = sc;
@@ -51,22 +52,22 @@ void CountingSortParticles::execute() {
 void CountingSortParticles::reorder_fields() {
     log().info_begin() << "Reordering particle fields ";
 
-    for (auto &f : get_objReg().get_objects()) {
-        if (f.second->get_name() == "Pos") continue;
-        if (f.second->get_name() == "KernelW") continue;
-        if (f.second->get_name() == "KerneldWdx") continue;
-        if (f.first == "KerneldWdxNeighbour") continue;
-        if (f.second->get_name() == "neighbour_pairs") continue;
-        if (f.second->get_name() == "surface_dist") continue;
-        if (f.second->get_name() == "search_cubes") continue;
-        if (f.second->get_name() == "sorting_idxs") continue;
-        if (f.second->get_name() == "idx") continue;
+    // for (auto &f : get_objReg().get_objects()) {
+    //     if (f.second->get_name() == "Pos") continue;
+    //     if (f.second->get_name() == "KernelW") continue;
+    //     if (f.second->get_name() == "KerneldWdx") continue;
+    //     if (f.first == "KerneldWdxNeighbour") continue;
+    //     if (f.second->get_name() == "neighbour_pairs") continue;
+    //     if (f.second->get_name() == "surface_dist") continue;
+    //     if (f.second->get_name() == "search_cubes") continue;
+    //     if (f.second->get_name() == "sorting_idxs") continue;
+    //     if (f.second->get_name() == "idx") continue;
 
-        auto type = f.second->get_type();
-        std::cout << "reordering " << f.second->get_name() << std::endl;
-        std::shared_ptr<SPHObject> *obj_ptr = &f.second;
-        DISPATCH(obj_ptr, reorder_vector, type, si_);
-    }
+    //     auto type = f.second->get_type();
+    //     std::cout << "reordering " << f.second->get_name() << std::endl;
+    //     std::shared_ptr<SPHObject> *obj_ptr = &f.second;
+    //     DISPATCH(obj_ptr, reorder_vector, type, si_);
+    // }
 
     log().info_end();
 }

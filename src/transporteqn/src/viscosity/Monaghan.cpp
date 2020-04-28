@@ -60,7 +60,7 @@ void Monaghan::execute() {
     solve(
     sum_AB(
         // fact / (rho.a() + rho.b()) * ((ab(u_) * dist)/(dist*dist))),true
-        mp_.b()*fact / (rho.a() + rho.b()) * ((dist*dW)/(dist*dist))*ab(u_)),true
+        mp_.b()*fact / (rho.a() + rho.b()) * ((dist*dW)/(dist*dist))*ab(u_))
         );
     // clang-format on
 

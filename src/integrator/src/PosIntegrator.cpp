@@ -40,7 +40,7 @@ void PosIntegrator::execute() {
     auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_);
     auto ddto = boost::yap::make_terminal(ddts);
 
-    solve(ddto(u_), false);
+    solve(ddto(u_));
 
     // f_ += dx;
 

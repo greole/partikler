@@ -27,5 +27,4 @@ using PointField = Field<std::vector<Point>>;
 
 PointField &operator+=(PointField &a, VectorField &b);
 
-
 #endif

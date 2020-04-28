@@ -67,9 +67,7 @@ void HDF5Writer::write_to_disk(const VectorField &data, h5_file_t &fh) {
 HDF5Writer::HDF5Writer(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : WriterBase(model_name, parameter, objReg),
-      export_name_(parameter["name"].as<std::string>()),
-      step_(0)
-{}
+      export_name_(parameter["name"].as<std::string>()), step_(0) {}
 
 void HDF5Writer::execute() {
 

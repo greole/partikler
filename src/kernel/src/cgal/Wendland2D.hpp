@@ -28,8 +28,8 @@
 #include "Field.hpp"       // for Field (ptr only), ScalarField, KernelGradi...
 #include "Models.hpp"      // for Model, ModelRegister (ptr only), REGISTER...
 #include "SearchCubes.hpp" // for NeighbourFieldAB
-#include "cgal/CGALHelper.hpp"
 #include "cgal/CGALField.hpp"
+#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;

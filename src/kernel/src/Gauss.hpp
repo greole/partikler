@@ -57,8 +57,8 @@ class Gauss : public Model {
 
     // Out
     // Kernel &kernel                               // Kernel field
-    ScalarField &W_;
-    Field<std::vector<Vec3>> &dWdx_;
+    KernelField &W_;
+    KernelGradientField &dWdx_;
 
   public:
     Gauss(

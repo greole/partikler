@@ -103,7 +103,7 @@ class TimeGraph : public Model {
 
     int &get_current_timestep() { return current_timestep_; }
 
-    void set_iteration(int iteration) { iterations_ = iteration;}
+    void set_iteration(int iteration) { iterations_ = iteration; }
 
     void set_current_timestep(int current_timestep) {
         current_timestep_ = current_timestep;

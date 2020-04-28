@@ -26,7 +26,7 @@
 #include "Equation.hpp"
 #include "Field.hpp" // for Field (ptr only), IntField, PointField
 #include "FieldOps.hpp"
-#include "Models.hpp"            // for Model, ModelRegister (ptr only)
+#include "Models.hpp" // for Model, ModelRegister (ptr only)
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;

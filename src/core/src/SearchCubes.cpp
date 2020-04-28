@@ -21,8 +21,8 @@
 
 #include "Logger.hpp" // for MSG, Logger
 #include "Scalar.hpp" // for MSG, Logger
-#include <math.h>     // for ceil
 #include <algorithm>  // std::min, std::max
+#include <math.h>     // for ceil
 
 SearchCubeDomain
 initSearchCubeDomain(const std::pair<Vec3, Vec3> &bound_box, Scalar dx) {
@@ -177,7 +177,8 @@ SubDivision id_to_i_j_k(const size_t id, const SubDivision sub) {
     const size_t nxny = nx * ny;
     const unsigned int k {(unsigned int)std::min(nz - 1, id / nxny)};
     const unsigned int j {(unsigned int)std::min(ny - 1, (id - k * nxny) / nx)};
-    const unsigned int i {(unsigned int)std::min(nx - 1, id - j * nx - k * nxny)};
+    const unsigned int i {
+        (unsigned int)std::min(nx - 1, id - j * nx - k * nxny)};
     // std::cout
     //           << [DEBUG ]
     //           << "id_to_i_j_k id " << id
@@ -339,6 +340,9 @@ SortedParticles countingSortParticles(
         //   << std::endl;
 
         const size_t oid = count[sid]; // next
+
+        // std::cout << " oid " << oid << " uid " << uid << " sid " << sid <<
+        // std::endl;
 
         rets.push_back(oid);
 

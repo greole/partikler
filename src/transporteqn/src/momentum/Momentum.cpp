@@ -41,10 +41,10 @@ void Momentum::execute() {
     auto &dp = dp_.get();
     auto &dtau = dtau_.get();
 
-    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_);
+    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_, sid_);
     auto ddto = boost::yap::make_terminal(ddts);
 
-    solve(ddto(dtau / rho - dp / rho + forces_.get()), false);
+    solve(ddto(dtau / rho - dp / rho + forces_.get()));
 
     log().info_end();
 

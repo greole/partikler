@@ -21,8 +21,8 @@
 #include "SelectMaterial.hpp"
 
 #include "Helper.hpp"
-#include "Scalar.hpp"
 #include "ReaderBase.hpp"
+#include "Scalar.hpp"
 
 SelectMaterial::SelectMaterial(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -34,10 +34,8 @@ SelectMaterial::SelectMaterial(
       fieldId_(fieldIdMap_.append(name_, material_)),
       pos_(objReg.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
       id_(objReg.create_field<IntField>("id")),
-      shape_(read_coeff<std::string>("shape")),
-      start_(read_vec3("start")),
-      end_(read_vec3("end"))
-{}
+      shape_(read_coeff<std::string>("shape")), start_(read_vec3("start")),
+      end_(read_vec3("end")) {}
 
 // check if pos is inside box
 bool is_inside_box(Vec3 &pos, std::pair<Vec3, Vec3> box) {
@@ -51,18 +49,15 @@ bool is_inside_box(Vec3 &pos, std::pair<Vec3, Vec3> box) {
 
 void SelectMaterial::execute() {
 
-
     // get existing particles
     // check if inside box
-    std::pair<Vec3, Vec3> bb {start_,end_};
-    for(size_t i=0; i<pos_.size(); i++) {
-        if ( is_inside_box(pos_[i], bb)) {
-                // change id and material
+    std::pair<Vec3, Vec3> bb {start_, end_};
+    for (size_t i = 0; i < pos_.size(); i++) {
+        if (is_inside_box(pos_[i], bb)) {
+            // change id and material
             id_[i] = fieldId_;
         }
-
     }
-
 }
 
 REGISTER_DEF_TYPE(FIELDS, SelectMaterial);

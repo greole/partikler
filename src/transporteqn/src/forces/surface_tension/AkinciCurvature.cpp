@@ -48,8 +48,8 @@ void AkinciCurvature::execute() {
     auto saba = sum_AB_a();
     auto sum_AB_e = boost::yap::make_terminal(saba);
 
-    solve(
-        sum_AB_e(2.0 * rho_0_ / (rho.a() + rho.b()) * (mp_.a() * gamma * ab(n_))));
+    solve(sum_AB_e(
+        2.0 * rho_0_ / (rho.a() + rho.b()) * (mp_.a() * gamma * ab(n_))));
 
     log().info_end();
 

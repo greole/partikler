@@ -24,7 +24,7 @@
 
 SPHParticleNeighbours::SPHParticleNeighbours(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg), dx_(read_coeff<Scalar>("dx")),
+    : Model("ParticleNeighbours", parameter, objReg), dx_(read_coeff<Scalar>("dx")),
       pos_(objReg.get_pos()),
       sc_(objReg.create_field<SearchCubeFieldAB>("search_cubes")),
       np_(objReg.create_field<NeighbourFieldAB>("neighbour_pairs")),

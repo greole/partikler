@@ -88,10 +88,11 @@ void Akinci::execute() {
     VectorFieldAB dist(this->np_.size(), {0, 0, 0});
     solve_inner_impl(this->np_, dist, ab(pos_));
 
-    Scalar c = 2.0 * rho_0_ *  gamma;
+    Scalar c = 2.0 * rho_0_ * gamma;
 
     solve(sum_AB_e(
-              mp_.a() * mp_.b() / (rho.a() + rho.b()) * (C(norm(dist)) * ab(pos_) / norm(dist))));
+        mp_.a() * mp_.b() / (rho.a() + rho.b()) *
+        (C(norm(dist)) * ab(pos_) / norm(dist))));
 
     log().info_end();
 

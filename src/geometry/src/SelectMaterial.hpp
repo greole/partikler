@@ -31,7 +31,6 @@ class SelectMaterial : public Model {
     REGISTER_DEC_TYPE(SelectMaterial);
 
   private:
-
     FieldIdMap &fieldIdMap_;
 
     MaterialMap &materialMap_;
@@ -42,7 +41,7 @@ class SelectMaterial : public Model {
 
     int fieldId_;
 
-    VectorField& pos_;
+    VectorField &pos_;
 
     IntField &id_;
 
@@ -51,7 +50,6 @@ class SelectMaterial : public Model {
     Vec3 start_;
 
     Vec3 end_;
-
 
   public:
     SelectMaterial(

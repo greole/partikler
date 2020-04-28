@@ -73,7 +73,7 @@ TEST(ScalarField, sumABdWFloatTest) {
 
     ScalarField b(4, 2.0);
 
-    KernelGradientField dW({{1,1,1}, {1,1,1}});
+    KernelGradientField dW({{1, 1, 1}, {1, 1, 1}});
 
     NeighbourFieldAB n({{0, 1}, {1, 2}});
 
@@ -86,11 +86,11 @@ TEST(ScalarField, sumABdWFloatTest) {
 
     solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
 
-    for (int i=0;i<3;i++) {
-        ASSERT_EQ(res[0][i],3.0);
-        ASSERT_EQ(res[1][i],0.0);
-        ASSERT_EQ(res[2][i],-3.0);
-        ASSERT_EQ(res[3][i],0.0);
+    for (int i = 0; i < 3; i++) {
+        ASSERT_EQ(res[0][i], 3.0);
+        ASSERT_EQ(res[1][i], 0.0);
+        ASSERT_EQ(res[2][i], -3.0);
+        ASSERT_EQ(res[3][i], 0.0);
     }
 }
 
@@ -100,7 +100,7 @@ TEST(ScalarField, sumABdWMaskFloatTest) {
 
     ScalarField b(4, 2.0);
 
-    KernelGradientField dW({{1,1,1}, {1,1,1}});
+    KernelGradientField dW({{1, 1, 1}, {1, 1, 1}});
 
     NeighbourFieldAB n({{0, 1}, {1, 2}});
 
@@ -110,21 +110,18 @@ TEST(ScalarField, sumABdWMaskFloatTest) {
 
     mask[1] = false;
 
-
     auto sum_AB_i = Sum_AB_dW_asym<VectorField>(res, n, dW, dW);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
     solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
 
-
-    for (int i=0;i<3;i++) {
-        ASSERT_EQ(res[0][i],3.0);
-        ASSERT_EQ(res[1][i],0.0);
-        ASSERT_EQ(res[2][i],-3.0);
-        ASSERT_EQ(res[3][i],0.0);
+    for (int i = 0; i < 3; i++) {
+        ASSERT_EQ(res[0][i], 3.0);
+        ASSERT_EQ(res[1][i], 0.0);
+        ASSERT_EQ(res[2][i], -3.0);
+        ASSERT_EQ(res[3][i], 0.0);
     }
 }
-
 
 TEST(ScalarField, sumABFloatTestOuter) {
 
@@ -184,9 +181,11 @@ TEST(ScalarField, ddtTest) {
 
     ScalarField u(4, 0.0);
 
+    SizeTField sid({1, 2, 3, 4});
+
     std::vector<bool> mask(4, true);
 
-    auto ddts = Ddt<ScalarField>(1.0, u);
+    auto ddts = Ddt<ScalarField>(1.0, u, sid);
     auto ddt = boost::yap::make_terminal(ddts);
 
     solve_impl(u, mask, ddt(f * du));
@@ -209,12 +208,14 @@ TEST(ScalarField, ddtsumABFloatTestOuterII) {
 
     NeighbourFieldAB n({{0, 1}, {1, 2}, {1, 3}});
 
+    SizeTField sid({1, 2, 3, 4});
+
     ScalarField res(4, 0.0);
 
     auto sum_AB_i = Sum_AB_sym<ScalarField>(res, n);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
-    auto ddts = Ddt<ScalarField>(0.1, res);
+    auto ddts = Ddt<ScalarField>(0.1, res, sid);
     auto ddt = boost::yap::make_terminal(ddts);
 
     solve_impl(res, mask, ddt(o * sum_AB_e(a.a() + b.b())));

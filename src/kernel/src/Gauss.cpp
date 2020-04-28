@@ -34,7 +34,7 @@ Gauss::Gauss(
       alpha_(hfact / (h_ * h_)), pos_(objReg.get_pos()),
       np_(objReg.get_object<Field<std::vector<NeighbourPair>>>(
           "neighbour_pairs")),
-      W_(objReg.create_field<ScalarField>("KernelW")),
+      W_(objReg.create_field<KernelField>("KernelW")),
       dWdx_(objReg.create_field<KernelGradientField>("KerneldWdx")) {
     objReg.create_generic<Scalar>("h", h_);
     objReg.reference_clone("KerneldWdx", "KerneldWdxNeighbour");

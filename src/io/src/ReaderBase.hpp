@@ -56,11 +56,9 @@ struct h5_prop_file {     // file property
     int flush;                   // flush iteration after writing dataset
 };
 
-
 class ReaderBase : public Model {
 
   protected:
-
     bool read_;
 
     // store reference to current TimeGraph instance
@@ -74,19 +72,19 @@ class ReaderBase : public Model {
 
     TimeGraph &get_timeGraph() { return time_graph_; }
 
-    bool read() {return read_;};
+    bool read() { return read_; };
 };
 
 class HDF5Reader : public ReaderBase {
 
     REGISTER_DEC_TYPE(HDF5Reader);
 
-private:
+  private:
     std::string file_name_;
 
     int write_freq_;
 
-public:
+  public:
     HDF5Reader(
         const std::string &model_name,
         YAML::Node parameter,

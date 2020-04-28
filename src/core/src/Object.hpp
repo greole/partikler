@@ -25,8 +25,8 @@
 #include <vector>  // for vector
 
 #include "Logger.hpp" // for Logger
-#include "Vec3.hpp"
 #include "Scalar.hpp"
+#include "Vec3.hpp"
 
 enum SPHObjectType {
     GenericType,

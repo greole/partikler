@@ -65,7 +65,7 @@ void Szewc::execute() {
     sum_AB(
         mp_.b()*fact * rho.a() * (dW* dist)
         / ( ( rho.a() + rho.b() ) * ( normSqr(dist ) ))
-        *ab(u_) ),true
+        *ab(u_) )
         );
     // clang-format on
 

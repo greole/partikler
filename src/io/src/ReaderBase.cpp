@@ -19,19 +19,16 @@
 
 #include "ReaderBase.hpp"
 
-
 ReaderBase::ReaderBase(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      read_(false),
+    : Model(model_name, parameter, objReg), read_(false),
       time_graph_(objReg.get_object<TimeGraph>("TimeGraph")) {}
 
 HDF5Reader::HDF5Reader(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
     : ReaderBase("Reader", parameter, objReg),
       file_name_(parameter["name"].as<std::string>()),
-      write_freq_(parameter["freq"].as<int>())
-{}
+      write_freq_(parameter["freq"].as<int>()) {}
 
 void HDF5Reader::execute() {
 
@@ -49,16 +46,17 @@ void HDF5Reader::execute() {
     h5_file_t file = H5OpenFile(fname.c_str(), H5_O_RDONLY, prop);
     h5_int64_t start, end;
 
-    h5_int64_t step_num = H5GetNumSteps (file);
+    h5_int64_t step_num = H5GetNumSteps(file);
 
-    std::cout << " Reading file: " << file_name_ << " Timestep: " << step_num  << std::endl;
+    std::cout << " Reading file: " << file_name_ << " Timestep: " << step_num
+              << std::endl;
     H5SetStep(file, 0);
-    h5_int64_t n_datasets = H5PartGetNumDatasets (file);
+    h5_int64_t n_datasets = H5PartGetNumDatasets(file);
     std::cout << " Number  of datasets " << n_datasets << std::endl;
-    h5_int64_t num_particles = H5PartGetNumParticles (file);
+    h5_int64_t num_particles = H5PartGetNumParticles(file);
 
-    std::cout << " Reading file: " << file_name_ << " Timestep: " << step_num <<
-        " Number of particles: " << num_particles << std::endl;
+    std::cout << " Reading file: " << file_name_ << " Timestep: " << step_num
+              << " Number of particles: " << num_particles << std::endl;
 
     char name[H5_MAX_NAME_LEN];
     h5_int64_t type;
@@ -71,39 +69,39 @@ void HDF5Reader::execute() {
     // Start with position
     for (h5_int64_t i = 0; i < n_datasets; i++) {
         H5PartGetDatasetInfo(file, i, name, sizeof(name), &type, &dim);
-        std::cout << " Reading " << name << " " << type << " dim " << dim << std::endl;
-
+        std::cout << " Reading " << name << " " << type << " dim " << dim
+                  << std::endl;
     }
 
     // NOTE latest time step is number of steps - 1
-    H5SetStep(file, step_num-1);
+    H5SetStep(file, step_num - 1);
 
+    std::vector<Scalar> X(num_particles);
+    std::vector<Scalar> Y(num_particles);
+    std::vector<Scalar> Z(num_particles);
+    std::vector<int> id(num_particles);
 
-    std::vector<Scalar> X (num_particles);
-    std::vector<Scalar> Y (num_particles);
-    std::vector<Scalar> Z (num_particles);
-    std::vector<int> id (num_particles);
+    H5PartReadDataFloat32(file, "X", &X[0]);
+    H5PartReadDataFloat32(file, "Y", &Y[0]);
+    H5PartReadDataFloat32(file, "Z", &Z[0]);
 
-    H5PartReadDataFloat32 (file, "X", &X[0]);
-    H5PartReadDataFloat32 (file, "Y", &Y[0]);
-    H5PartReadDataFloat32 (file, "Z", &Z[0]);
+    H5PartReadDataInt32(file, "id", &id[0]);
 
-    H5PartReadDataInt32 (file, "id", &id[0]);
-
-    auto& posf = get_objReg().create_field<VectorField>("Pos", {}, {"X", "Y", "Z"});
-    auto& idf = get_objReg().create_field<IntField>("id");
+    auto &posf =
+        get_objReg().create_field<VectorField>("Pos", {}, {"X", "Y", "Z"});
+    auto &idf = get_objReg().create_field<IntField>("id");
 
     posf.reserve(posf.size());
     idf.reserve(posf.size());
 
-    for (h5_int64_t iter=0; iter< num_particles; iter++) {
+    for (h5_int64_t iter = 0; iter < num_particles; iter++) {
         posf.push_back({X[iter], Y[iter], Z[iter]});
         idf.push_back(id[iter]);
     }
 
     get_objReg().update_n_particles();
 
-    time_graph_.set_current_timestep(step_num*write_freq_);
+    time_graph_.set_current_timestep(step_num * write_freq_);
 
     H5CloseFile(file);
 
@@ -114,6 +112,5 @@ void HDF5Reader::execute() {
     free((char *)(prop_ptr->prefix_iteration_name));
     free((h5_prop_t *)prop);
 }
-
 
 REGISTER_DEF_TYPE(IMPORT, HDF5Reader);

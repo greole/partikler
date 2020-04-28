@@ -17,7 +17,7 @@
     contact: go@hpsim.de
 */
 #include "Time.hpp"
-#include <algorithm>  // std::min, std::max
+#include <algorithm> // std::min, std::max
 
 TimeGraph::TimeGraph(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
@@ -47,7 +47,8 @@ void TimeGraph::execute_main() {
     // TODO register some kind of call back
     while (current_timestep_ < iterations_) {
 
-        log().info_begin() << "Start Timestep " << current_timestep_ << " deltaT " << get_deltaT();
+        log().info_begin() << "Start Timestep " << current_timestep_
+                           << " deltaT " << get_deltaT();
 
         main_.execute();
         log().info_end() << "Timestep " << current_timestep_;
@@ -57,7 +58,6 @@ void TimeGraph::execute_main() {
     };
 }
 
-
 Scalar TimeGraph::get_deltaT() {
     Scalar dt = std::numeric_limits<Scalar>::max();
     for (auto &el : model_timestep_restrictions_) {
@@ -66,7 +66,5 @@ Scalar TimeGraph::get_deltaT() {
     set_deltaT(std::max(min_deltaT_, dt));
     return deltaT_;
 }
-
-
 
 REGISTER_DEF_TYPE(CORE, TimeGraph);
