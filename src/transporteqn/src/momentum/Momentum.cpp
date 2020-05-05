@@ -41,7 +41,11 @@ void Momentum::execute() {
     auto &dp = dp_.get();
     auto &dtau = dtau_.get();
 
-    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_, sid_);
+    reorder_vector(fo_, sid_);
+    // needs reordering since masked values are not overwriten
+    reorder_vector(f_, sid_);
+
+    auto ddts = Ddt<VectorField>(time_.get_deltaT(), fo_);
     auto ddto = boost::yap::make_terminal(ddts);
 
     solve(ddto(dtau / rho - dp / rho + forces_.get()));
