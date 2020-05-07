@@ -181,7 +181,7 @@ TEST(ScalarField, ddtTest) {
 
     ScalarField u(4, 0.0);
 
-    SizeTField sid({1, 2, 3, 4});
+    SizeTField sid({0, 1, 2, 3});
 
     std::vector<bool> mask(4, true);
 
