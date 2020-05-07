@@ -208,7 +208,7 @@ TEST(ScalarField, ddtsumABFloatTestOuterII) {
 
     NeighbourFieldAB n({{0, 1}, {1, 2}, {1, 3}});
 
-    SizeTField sid({1, 2, 3, 4});
+    SizeTField sid({0, 1, 2, 3});
 
     ScalarField res(4, 0.0);
 
