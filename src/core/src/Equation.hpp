@@ -115,7 +115,7 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     void init_boundary() {
         // check parameter for exclude list
-        auto &fieldIdMap(get_objReg().get_object<FieldIdMap>("FieldIdMap"));
+        auto &fieldIdMap(get_objReg().template get_object<FieldIdMap>("FieldIdMap"));
 
         // TODO avoid looping through id several times
         // collect all fixIDs first
@@ -133,8 +133,7 @@ template <class FieldType> class FieldEquationBase : public Model {
                         if (id_[i] == fixID) {
                             mask_[i] = false;
                             f_[i] = val;
-                            fo_[i] = val;
-                            std::cout << f_[i] << std::endl;
+                            std::cout << f_[i] <<  mask_[i] << std::endl;
                         }
                     }
                 }
@@ -142,6 +141,7 @@ template <class FieldType> class FieldEquationBase : public Model {
                     for (size_t i = 0; i < id_.size(); i++) {
                         if (id_[i] == fixID) {
                             mask_[i] = false;
+                            std::cout << "Fixing  " << f_[i] << mask_[i] << std::endl;
                         }
                     }
                 }
@@ -159,10 +159,10 @@ template <class FieldType> class FieldEquationBase : public Model {
 
     Ddt<FieldType> ddt() { return Ddt(time_.get_deltaT(), fo_, sid_); }
 
-    template <class Expr> void solve(Expr e) {
+    template <class Expr> void solve(Expr e, bool reorder=true) {
         this->log().info_begin() << "Solving for" << this->f_.get_name();
         // TODO check if reordering is necessary
-        reorder_vector(mask_, sid_);
+        if (reorder) reorder_vector(mask_, sid_);
         decltype(auto) expr = boost::yap::as_expr(e);
         solve_impl(f_, mask_, expr);
         clamp_in_range();
@@ -243,9 +243,9 @@ class FieldGradientEquation : public FieldEquationBase<FieldGradientType> {
           sum_AB_dW_s(SumABdWType<FieldGradientType>(
               this->f_, this->np_, dWdx_, dWdxn_)) {}
 
-    template <class RHS> void solve(RHS rhs) {
+    template <class RHS> void solve(RHS rhs, bool reorder=true) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
-        reorder_vector(this->mask_, this->sid_);
+        if(reorder) reorder_vector(this->mask_, this->sid_);
 
         solve_impl(this->f_, this->mask_, rhs);
 
@@ -303,9 +303,9 @@ class FieldValueEquation : public FieldEquationBase<FieldType> {
         return Sum_AB_dW_asym<FieldType>(this->f_, this->np_, dWdx_, dWdxn_);
     }
 
-    template <class RHS> void solve(RHS rhs) {
+    template <class RHS> void solve(RHS rhs, bool reorder=true) {
         this->log().info_begin() << "Solving for " << this->f_.get_name();
-        reorder_vector(this->mask_, this->sid_);
+        if(reorder) reorder_vector(this->mask_, this->sid_);
         solve_impl(this->f_, this->mask_, rhs);
         sum_AB_dW_s.a = 0;
         sum_AB_dW_s.ab = 0;
