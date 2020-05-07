@@ -81,7 +81,7 @@ TEST(ScalarField, sumABdWFloatTest) {
 
     VectorField res(4, {0.0, 0.0, 0.0});
 
-    auto sum_AB_i = Sum_AB_dW_asym<VectorField>(res, n, dW, dW);
+    auto sum_AB_i = Sum_AB_dW_sym<VectorField>(res, n, dW, dW);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
     solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
@@ -110,7 +110,7 @@ TEST(ScalarField, sumABdWMaskFloatTest) {
 
     mask[1] = false;
 
-    auto sum_AB_i = Sum_AB_dW_asym<VectorField>(res, n, dW, dW);
+    auto sum_AB_i = Sum_AB_dW_sym<VectorField>(res, n, dW, dW);
     auto sum_AB_e = boost::yap::make_terminal(sum_AB_i);
 
     solve_impl(res, mask, sum_AB_e(a.a() + b.b()));
