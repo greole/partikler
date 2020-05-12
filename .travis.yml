@@ -5,8 +5,9 @@ compiler:
  - gcc
 
 dist: bionic
-os: - linux
-    - osx
+os:
+  - linux
+  - osx
 
 env:
     - BUILD_TYPE=Debug CGAL=OFF
