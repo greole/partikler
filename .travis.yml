@@ -9,6 +9,10 @@ os:
   - linux
   - osx
 
+jobs:
+  allow_failures:
+    - os: osx
+
 env:
     - BUILD_TYPE=Debug CGAL=OFF
     - BUILD_TYPE=Release CGAL=OFF
