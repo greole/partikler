@@ -24,7 +24,8 @@
 #include <string> // for string
 
 #include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
-#include "cgal/CGALHelper.hpp"
+#include "Scalar.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
+#include "Vec3.hpp"   // for Model, ModelRegister (ptr only), REGISTER_DEC_...
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;
@@ -37,8 +38,9 @@ class FixedValue : public Model {
     REGISTER_DEC_TYPE(FixedValue);
 
   private:
-    // maps boundary id to fixed uniform values
-    std::map<std::string, std::map<std::string, float>> float_fields_ {};
+    // maps field and boundary name to fixed uniform values
+    std::map<std::string, std::map<std::string, Scalar>> float_fields_ {};
+    std::map<std::string, std::map<std::string, Vec3>> vec_fields_ {};
 
   public:
     FixedValue(

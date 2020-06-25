@@ -29,7 +29,6 @@
 #include "Field.hpp"
 #include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "WriterBase.hpp" // for WriterBase
-#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
 
 class ObjectRegistry;

@@ -5,11 +5,18 @@ compiler:
  - gcc
 
 dist: bionic
-os: linux
+os:
+  - linux
+  - osx
+
+jobs:
+  allow_failures:
+    - os: osx
 
 env:
-    - BUILD_TYPE=Debug
-    - BUILD_TYPE=Release
+    - BUILD_TYPE=Debug CGAL=OFF
+    - BUILD_TYPE=Release CGAL=OFF
+    - BUILD_TYPE=Release CGAL=ON
 
 addons:
   apt:
@@ -45,12 +52,23 @@ install:
   # don't forget to switch back to the main build directory once you are done
   - cd ${TRAVIS_BUILD_DIR}
 
-script:
+before_script:
   - cmake --version
   - mkdir build
   - cd build
-  - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DBUILD_CGAL=ON -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake -DBUILD_GOOGLE_TEST=ON  -DCOVERALLS=ON -DCGAL_SUPPORT=$CGAL -DBUILD_HDF5=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - make -j4
+
+script:
   - ctest -VV -R "Partikler_Test"
-  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=../example/SPH.yaml
+
+after_script:
+  if [ "$CGAL" -eq "ON"  ]
+  then
+    export CONFIG="../example/generate_boundaries/SPH.yaml"
+  else
+    export CONFIG="../example/droplet_formation/SPH.yaml"
+  fi
+
+  - ASAN_OPTIONS=detect_odr_violation=0 ./partikler --config=$CONFIG
 

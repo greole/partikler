@@ -20,29 +20,27 @@
 #ifndef SPHOBJECT_H
 #define SPHOBJECT_H
 
-#include <iostream>
-#include <memory>
 #include <stdio.h> // for size_t
 #include <string>  // for string
 #include <vector>  // for vector
 
 #include "Logger.hpp" // for Logger
+#include "Scalar.hpp"
 #include "Vec3.hpp"
-#include "cgal/CGALTYPEDEFS.hpp" // for Point
-
-struct Vec3;
 
 enum SPHObjectType {
     GenericType,
     FieldType,
+    BoolFieldType,
     IntFieldType,
     SizeTFieldType,
-    FloatFieldType,
+    ScalarFieldType,
     VectorFieldType,
     PointFieldType,
     KernelGradientFieldType,
     EquationType,
     ModelType,
+    MaterialType
 };
 
 // Template meta function to get SPHObjectType from std::vector<T>
@@ -50,8 +48,12 @@ template <class T> struct GetFieldType {
     constexpr static SPHObjectType value = GenericType;
 };
 
-template <> struct GetFieldType<std::vector<float>> {
-    constexpr static SPHObjectType value = FloatFieldType;
+template <> struct GetFieldType<std::vector<bool>> {
+    constexpr static SPHObjectType value = BoolFieldType;
+};
+
+template <> struct GetFieldType<std::vector<Scalar>> {
+    constexpr static SPHObjectType value = ScalarFieldType;
 };
 
 template <> struct GetFieldType<std::vector<int>> {
@@ -64,10 +66,6 @@ template <> struct GetFieldType<std::vector<size_t>> {
 
 template <> struct GetFieldType<std::vector<Vec3>> {
     constexpr static SPHObjectType value = VectorFieldType;
-};
-
-template <> struct GetFieldType<std::vector<Point>> {
-    constexpr static SPHObjectType value = PointFieldType;
 };
 
 std::string sphObjectType_to_string(SPHObjectType t);
@@ -96,10 +94,6 @@ class SPHObject {
     SPHObjectType get_type() const { return type_; };
 
     std::string get_type_str() const { return sphObjectType_to_string(type_); };
-
-    // reorder after particle sorting
-    // TODO remove and replace by dispatched version
-    virtual void reorder(const std::vector<size_t>) {};
 };
 
 template <class T> class Generic : public SPHObject {

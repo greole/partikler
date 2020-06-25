@@ -23,9 +23,7 @@
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp"  // for PointField
 #include "Models.hpp" // for Model, ModelRegister (ptr only), REGISTER_DEC_...
-#include "cgal/CGALHelper.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -37,7 +35,6 @@ class InitFields : public Model {
     REGISTER_DEC_TYPE(InitFields);
 
   private:
-
     std::vector<std::string> float_fields_ {};
 
     std::vector<std::string> vec_fields_ {};

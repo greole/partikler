@@ -1,0 +1,106 @@
+PROJECT:
+    name: ExampleProject
+    path: /home/go/data/partikler_projects
+    debug: False
+    iterations: 100000
+    write_frequency: 2
+    deltaT: 0.000025
+    max_deltaT: 10.0e-05
+    min_deltaT: 10.0e-05
+    mp: 1.94e-07
+
+    PARAMETERSTUDY:
+        model: GenerateBoundaryParticles
+        parameter: dx
+        values: [0.1, 0.5, 1.0]
+
+    PRE:
+
+        - FIELDS:
+            model: InitShape
+            shape: Cubiod
+            name: FluidCube
+            dimensions: [0.01, 0.01, 0.01] # x y z
+            translate: [0.0,0.0,0.01]
+            dx: 0.0005
+
+        # - FIELDS:
+        #     model: InitShape
+        #     shape: Cubiod
+        #     name: Bottom
+        #     dimensions: [0.02, 0.02, 0.0025] # x y z
+        #     translate: [-0.005,-0.005,0.0]
+        #     dx: 0.0005
+
+        - EXPORT:
+            model: SuperSPHWriter
+            name: Boundary
+
+
+    MAIN:
+
+      - PARTICLENEIGHBOURS:
+          model: SPHParticleNeighbours
+          dx: 0.001
+
+      - KERNEL:
+          model: Gauss3D
+          h: 0.0005
+
+      - TRANSPORTEQN:
+          model: TransientConti
+          rho_0: 1000.0
+
+      - SURFACETENSION:
+          model: SurfaceNormal
+
+      - FORCES:
+          model: ForcesList
+          submodel:
+              # - TRANSPORTEQN:
+              #     model: Gravity
+              #     g:  [0.0, 0.0, -9.81]
+
+              - SURFACETENSION:
+                  model: Akinci
+                  h: 0.0005
+                  rho_0: 1000.0
+                  gamma: 400000.00
+
+              - SURFACETENSION:
+                  model: AkinciCurvature
+                  gamma: 400000.00
+
+      - PRESSURE:
+          model: Bonet
+          rho_0: 1000.0
+          p_0: 4.0e5
+          c: 1000.0
+          gamma: 4.4
+
+      - PRESSURE:
+          model: BonetGradient
+
+      - VISCOSITY:
+          model: Szewc
+          nu: 0.01
+
+      - TRANSPORTEQN:
+          model: Momentum
+
+      - TRANSPORTEQN:
+          model: MomentumDamping
+          nu: 0.999
+
+      - TRANSPORTEQN:
+          model: PosIntegrator
+
+      - EXPORT:
+          model: SuperSPHWriter
+          name: weakly
+          writeout: 20
+
+      - EXPORT:
+         model: HDF5Writer
+         name: weakly
+

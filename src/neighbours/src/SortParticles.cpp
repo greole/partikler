@@ -19,10 +19,11 @@
 
 #include "SortParticles.hpp"
 
+#include "ObjectRegistry.hpp"
+
 CountingSortParticles::CountingSortParticles(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg),
-      pos_(objReg.get_points()),
+    : Model(model_name, parameter, objReg), pos_(objReg.get_pos()),
       sc_(objReg.get_object<Field<std::vector<SearchCube>>>("search_cubes")),
       si_(objReg.create_field<SizeTField>("sorting_idxs")),
       scd_(objReg.get_object<Generic<SearchCubeDomain>>("search_cube_domain")) {
@@ -37,6 +38,7 @@ void CountingSortParticles::execute() {
     // pos.store_old();
 
     // TODO too much copying
+
     auto [sc, si, pos] = countingSortParticles(scd_(), pos_);
 
     sc_ = sc;
@@ -50,17 +52,22 @@ void CountingSortParticles::execute() {
 void CountingSortParticles::reorder_fields() {
     log().info_begin() << "Reordering particle fields ";
 
-    for (auto &f : get_objReg().get_objects()) {
-        f->get_type();
-        if (f->get_name() == "Pos") continue;
-        if (f->get_name() == "KernelW") continue;
-        if (f->get_name() == "KerneldWdx") continue;
-        if (f->get_name() == "neighbour_pairs") continue;
-        if (f->get_name() == "surface_dist") continue;
-        if (f->get_name() == "search_cubes") continue;
-        if (f->get_name() == "sorting_idxs") continue;
-        f->reorder(si_);
-    }
+    // for (auto &f : get_objReg().get_objects()) {
+    //     if (f.second->get_name() == "Pos") continue;
+    //     if (f.second->get_name() == "KernelW") continue;
+    //     if (f.second->get_name() == "KerneldWdx") continue;
+    //     if (f.first == "KerneldWdxNeighbour") continue;
+    //     if (f.second->get_name() == "neighbour_pairs") continue;
+    //     if (f.second->get_name() == "surface_dist") continue;
+    //     if (f.second->get_name() == "search_cubes") continue;
+    //     if (f.second->get_name() == "sorting_idxs") continue;
+    //     if (f.second->get_name() == "idx") continue;
+
+    //     auto type = f.second->get_type();
+    //     std::cout << "reordering " << f.second->get_name() << std::endl;
+    //     std::shared_ptr<SPHObject> *obj_ptr = &f.second;
+    //     DISPATCH(obj_ptr, reorder_vector, type, si_);
+    // }
 
     log().info_end();
 }

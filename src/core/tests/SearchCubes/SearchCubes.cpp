@@ -1,12 +1,11 @@
 #include "SearchCubes.hpp"
 #include "Helper.hpp"
-#include "cgal/CGALTYPEDEFS.hpp"
 #include "gtest/gtest.h"
 
 #include <vector>
 
 bool found_particle_pair(
-    size_t i, size_t j, size_t k, std::vector<STLUnsortedNeighbour> &ret) {
+    size_t i, size_t j, size_t k, std::vector<UnsortedNeighbour> &ret) {
     bool found_i = (ret[k].ids.ownId == i);
     bool found_j = (ret[k].ids.neighId == j);
     return (found_i and found_j);
@@ -16,18 +15,15 @@ bool found_particle_pair(
 TEST(OwnerCubeSearch, FindsNeighbours) {
     // number of particles in each direction
     const size_t n_particles = 3;
-    std::vector<Point> points = create_uniform_particle_cube(n_particles);
+    std::vector<Vec3> points =
+        create_uniform_particle_cube(n_particles); // evtl andere  funktion
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
-    std::vector<STLUnsortedNeighbour> ret {};
+    std::vector<UnsortedNeighbour> ret {};
     ret.reserve(tot_n_particles * points.size() / 2);
 
-    // Assume all particles on same facet
-    const std::vector<Facet_handle> facets(points.size(), NULL);
-
-    // TODO needs facets, create facets with test data
-    owner_cube_search(points, 0, tot_n_particles, 5.0, facets, ret);
+    owner_cube_search(points, 0, tot_n_particles, 5.0, ret);
 
     // Should find at least some neighbours
     ASSERT_GT(ret.size(), 0);
@@ -74,14 +70,15 @@ TEST(OwnerCubeSearch, FindsNeighbours) {
 TEST(NeighbourCubeSearch, FindsNeighbours) {
     // number of particles in each direction
     const size_t n_particles = 3;
-    std::vector<Point> points = create_uniform_particle_cube(n_particles);
-    std::vector<Point> neighbour_points =
+    std::vector<Vec3> points = create_uniform_particle_cube(n_particles);
+    std::vector<Vec3> neighbour_points =
         create_uniform_particle_cube(n_particles);
 
     // shift neighbour particles x-position by 1
     for (size_t i = 0; i < neighbour_points.size(); i++) {
         auto point = neighbour_points[i];
-        neighbour_points[i] = Point(point.x() + 1.0, point.y(), point.z());
+        neighbour_points[i] =
+            Vec3 {(Scalar)(point[0] + 1.0), point[1], point[2]};
     }
 
     // append neighbour points to owner points
@@ -91,11 +88,8 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
-    std::vector<STLUnsortedNeighbour> ret {};
+    std::vector<UnsortedNeighbour> ret {};
     ret.reserve(tot_n_particles * points.size() / 2);
-
-    // Assume all particles on same facet
-    const std::vector<Facet_handle> facets(points.size(), NULL);
 
     neighbour_cube_search(
         points,
@@ -104,7 +98,6 @@ TEST(NeighbourCubeSearch, FindsNeighbours) {
         tot_n_particles,
         2 * tot_n_particles,
         10.0,
-        facets,
         ret);
 
     // Should find at least some neighbours
@@ -151,7 +144,7 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
 
     // number of particles in each direction
     const size_t n_particles = 12;
-    std::vector<Point> points = create_uniform_particle_cube(n_particles);
+    std::vector<Vec3> points = create_uniform_particle_cube(n_particles);
 
     const size_t tot_n_particles = n_particles * n_particles * n_particles;
 
@@ -159,18 +152,15 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
     const size_t tot_n_particles_search_cube = tot_n_particles / 64;
     float cube_dx = 1.0 / ((float)n_particles);
 
-    const SearchCubeDomain scd = initSearchCubeDomain(points, 0.25);
+    auto bb = bounding_box(points);
+    const SearchCubeDomain scd = initSearchCubeDomain(bb, 0.25);
 
     SortedParticles sp = countingSortParticles(scd, points);
-
-    // Assume all particles on same facet
-    const std::vector<Facet_handle> facets(points.size(), NULL);
 
     // TODO searchCubes are created by counting sort
     std::vector<SearchCube> searchCubes(1, {0, points.size()});
 
-    STLSortedNeighbours ret =
-        createSTLNeighbours(scd, sp.particles, sp.searchCubes, facets);
+    SortedNeighbours ret = createNeighbours(scd, sp.particles, sp.searchCubes);
 
     // Should find at least some neighbours
     ASSERT_GT(ret.ids.size(), 0);
@@ -204,13 +194,13 @@ TEST(ParticleNeighbourSearch, createNeighbours) {
 
 struct SearchCubesTestData {
     float cube_dx;
-    std::vector<Point> points;
+    std::vector<Vec3> points;
     size_t expected_n_cubes;
     std::vector<size_t> expected_neighbour_ids;
 
     SearchCubesTestData(
         float cube_dx,
-        std::vector<Point> points,
+        std::vector<Vec3> points,
         size_t expected_n_cubes,
         std::vector<size_t> expected_neighbour_ids)
         : cube_dx(cube_dx), points(points), expected_n_cubes(expected_n_cubes),

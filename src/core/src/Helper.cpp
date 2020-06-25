@@ -20,69 +20,100 @@
 #include "Helper.hpp"
 // #include <stdlib.h>     /* abort, NULL */
 
-std::vector<Point> create_uniform_particle_plane(size_t n_particles) {
-    std::vector<Point> points;
+std::vector<Vec3> create_uniform_particle_plane(size_t n_particles) {
+    std::vector<Vec3> points;
     points.reserve(n_particles);
     for (size_t j = 0; j < n_particles; j++) {
         for (size_t i = 0; i < n_particles; i++) {
-            float x = ((float)i) / ((float)n_particles);
-            float y = ((float)j) / ((float)n_particles);
-            float z = 0.0;
-            points.push_back(Point(x, y, z));
+            Scalar x = ((Scalar)i) / ((Scalar)n_particles);
+            Scalar y = ((Scalar)j) / ((Scalar)n_particles);
+            Scalar z = 0.0;
+            points.push_back(Vec3 {x, y, z});
         }
     }
     return points;
 }
 
-std::vector<Point>
-create_uniform_particle_cube(Vec3 dimensions, Vec3 position, float dx) {
+std::vector<Vec3> create_uniform_particle_cube(
+    Vec3 dimensions, Vec3 position, Scalar dx, Scalar noise) {
 
-    size_t nx {(size_t)((dimensions[0]-position[0])/dx)};
-    size_t ny {(size_t)((dimensions[1]-position[1])/dx)};
-    size_t nz {(size_t)((dimensions[2]-position[2])/dx)};
+    srand(time(NULL));
 
-    size_t ntot = nx*ny*nz;
+    Scalar xpos = 0;
+    Scalar xlen = dimensions[0] - position[0];
+    Scalar ypos = 0;
+    Scalar ylen = dimensions[1] - position[1];
+    Scalar zpos = 0;
+    Scalar zlen = dimensions[2] - position[2];
 
-    std::vector<Point> points;
+    size_t nx {(size_t)((dimensions[0] - position[0]) / dx)};
+    size_t ny {(size_t)((dimensions[1] - position[1]) / dx)};
+    size_t nz {(size_t)((dimensions[2] - position[2]) / dx)};
+
+    size_t ntot = nx * ny * nz;
+    Scalar dx_layer = 0;
+
+    std::vector<Vec3> points;
     points.reserve(ntot);
-    for (size_t k = 0; k < nz; k++) {
-        for (size_t j = 0; j < ny; j++) {
-            for (size_t i = 0; i < nx; i++) {
-                float x = ((float)i) * dx;
-                float y = ((float)j) * dx;
-                float z = ((float)k) * dx;
-                points.push_back(Point(x, y, z));
+
+    // TODO this currently has fringes on its edges
+    size_t j = 0;
+    size_t k = 0;
+    while (zpos < zlen) {
+
+        if (j % 2 == 0)
+            ypos = position[1];
+        else
+            ypos = position[1] + dx / 2.0;
+
+        while (ypos < ylen) {
+
+            if (k % 2 == 0)
+                xpos = position[0];
+            else
+                xpos = position[0] + dx / 2.0;
+
+            while (xpos < xlen) {
+                points.push_back(Vec3 {xpos, ypos, zpos});
+                xpos += dx;
             }
+
+            ypos += dx/2.0;
+            k++;
         }
+        k = 0;
+        zpos += dx/2.0;
+        j++;
     }
+
     return points;
 }
 
-std::vector<Point> create_uniform_particle_cube(size_t n_particles) {
-    std::vector<Point> points;
+std::vector<Vec3> create_uniform_particle_cube(size_t n_particles) {
+    std::vector<Vec3> points;
     points.reserve(n_particles);
     for (size_t k = 0; k < n_particles; k++) {
         for (size_t j = 0; j < n_particles; j++) {
             for (size_t i = 0; i < n_particles; i++) {
-                float x = ((float)i) / ((float)n_particles);
-                float y = ((float)j) / ((float)n_particles);
-                float z = ((float)k) / ((float)n_particles);
-                points.push_back(Point(x, y, z));
+                Scalar x = ((Scalar)i) / ((Scalar)n_particles);
+                Scalar y = ((Scalar)j) / ((Scalar)n_particles);
+                Scalar z = ((Scalar)k) / ((Scalar)n_particles);
+                points.push_back(Vec3 {x, y, z});
             }
         }
     }
     return points;
 }
 
-float rand01() { return ((float)rand() / (RAND_MAX)); }
+Scalar rand01() { return ((Scalar)rand() / (RAND_MAX)); }
 
-std::vector<Point> disperse_particles(std::vector<Point> &points, float dx) {
+std::vector<Vec3> disperse_particles(std::vector<Vec3> &points, Scalar dx) {
     for (size_t piter = 0; piter < points.size(); piter++) {
 
-        float x = points[piter].x() + rand01() * dx;
-        float y = points[piter].x() + rand01() * dx;
-        float z = points[piter].x() + rand01() * dx;
-        points[piter] = Point(x, y, z);
+        Scalar x = points[piter][0] + rand01() * dx;
+        Scalar y = points[piter][1] + rand01() * dx;
+        Scalar z = points[piter][2] + rand01() * dx;
+        points[piter] = Vec3 {x, y, z};
     }
     return points;
 }

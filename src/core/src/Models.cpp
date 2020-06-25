@@ -19,6 +19,8 @@
 
 #include "Models.hpp"
 
+#include "ObjectRegistry.hpp" // for ObjectRegistry
+
 Model::Model(
     const std::string name, YAML::Node parameter, ObjectRegistry &objReg)
     : SPHObject(name, ModelType), parameter_(parameter), objReg_(objReg),
@@ -55,7 +57,6 @@ std::shared_ptr<Model> ModelFactory::createInstance(
     const std::string, //&objReg_name,
     YAML::Node parameter,
     ObjectRegistry &objReg) {
-    std::cout << "createInstance" << model_name << std::endl;
     const std::string delim = "::";
     map_type::iterator it = getMap()->find(model_type + delim + model_name);
     if (it == getMap()->end()) {
@@ -85,30 +86,4 @@ void ModelFactory::print_models(const std::string &model_type) {
     }
 }
 
-ParticleGeneratorBase::ParticleGeneratorBase(
-    const std::string &model_name,
-    YAML::Node parameter,
-    ObjectRegistry &objReg):
-    Model(model_name, parameter, objReg),
-    fieldIdMap_(objReg.get_object<FieldIdMap>("FieldIdMap")),
-    local_objReg_(ObjectRegistry()),
-    points_(local_objReg_.create_field<PointField>("Points", {}, {"X", "Y", "Z"})),
-    pos_(local_objReg_.create_field<VectorField>("Pos", {}, {"X", "Y", "Z"})),
-    id_(local_objReg_.create_field<IntField>("id")),
-    name_(read_coeff<std::string>("name")),
-    fieldId_(fieldIdMap_.append(name_)),
-    dx_(read_coeff<float>("dx")),
-    translation_vector_(read_vector(parameter, "translate"))
-{}
-
-Vec3
-ParticleGeneratorBase::read_vector(YAML::Node parameter, std::string coeff) {
-
-    if (!parameter[coeff]) return {0, 0, 0};
-
-    auto p = parameter[coeff];
-    return {p[0].as<float>(), p[1].as<float>(), p[2].as<float>()};
-}
-
 REGISTER_DEF_TYPE(CORE, ModelGraph);
-REGISTER_DEF_TYPE(CORE, TimeGraph);

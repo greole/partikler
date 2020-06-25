@@ -19,12 +19,14 @@
 
 #include "CreateFields.hpp"
 
+#include "Field.hpp" // for PointField
+#include "ObjectRegistry.hpp"
+
 InitFields::InitFields(
     const std::string &model_name, YAML::Node parameter, ObjectRegistry &objReg)
-    : Model(model_name, parameter, objReg)
-{
-    if (parameter["FloatFields"]) {
-        for (auto p : parameter["FloatFields"])
+    : Model(model_name, parameter, objReg) {
+    if (parameter["ScalarFields"]) {
+        for (auto p : parameter["ScalarFields"])
             float_fields_.push_back(p.as<std::string>());
     }
 
@@ -37,7 +39,7 @@ InitFields::InitFields(
 void InitFields::execute() {
     for (auto f : float_fields_) {
         std::cout << "creating field " << f << std::endl;
-        get_objReg().create_field<FloatField>(f, 0.0);
+        get_objReg().create_field<ScalarField>(f, 0.0);
     }
 }
 

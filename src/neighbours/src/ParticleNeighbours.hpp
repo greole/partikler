@@ -17,17 +17,17 @@
     contact: go@hpsim.de
 */
 
-#ifndef PARTICLENEIGHBOURS_H
-#define PARTICLENEIGHBOURS_H
+#ifndef PARTIKLER_PARTICLENEIGHBOURS_INCLUDED
+#define PARTIKLER_PARTICLENEIGHBOURS_INCLUDED
 
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp"             // for FieldAB, Field (ptr only), PointField
-#include "Models.hpp"            // for Model, ModelRegister (ptr only)
-#include "SearchCubes.hpp"       // for SearchCube, NeighbourFieldAB, Searc...
-#include "cgal/CGALHelper.hpp"   // for STLSurfaceDist
-#include "cgal/CGALTYPEDEFS.hpp" // for Facet_handle
+#include "Field.hpp"       // for FieldAB, Field (ptr only), PointField
+#include "Models.hpp"      // for Model, ModelRegister (ptr only)
+#include "SearchCubes.hpp" // for SearchCube, NeighbourFieldAB, Searc...
+
+#include "Vec3.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -35,28 +35,26 @@ class Node;
 } // namespace YAML
 template <class T> class Generic;
 
-class SPHSTLParticleNeighbours : public Model {
+class SPHParticleNeighbours : public Model {
 
-    REGISTER_DEC_TYPE(SPHSTLParticleNeighbours);
+    REGISTER_DEC_TYPE(SPHParticleNeighbours);
 
     using SearchCubeFieldAB = FieldAB<Field<std::vector<SearchCube>>>;
-    using STLSurfaceDistAB = FieldAB<Field<std::vector<STLSurfaceDist>>>;
+    using DistAB = FieldAB<Field<std::vector<Vec3>>>;
 
   private:
     // Coeffs
     float dx_;
 
     // In
-    PointField &points_;
-
-    Field<std::vector<Facet_handle>> &facets_;
+    VectorField &pos_;
 
     SearchCubeFieldAB &sc_;
 
     // Out
     NeighbourFieldAB &np_;
 
-    STLSurfaceDistAB &sd_;
+    DistAB &sd_;
 
     // Regular data member
     Generic<SearchCubeDomain> &scd_;
@@ -64,7 +62,7 @@ class SPHSTLParticleNeighbours : public Model {
     float search_cube_size_ = 1.0;
 
   public:
-    SPHSTLParticleNeighbours(
+    SPHParticleNeighbours(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);

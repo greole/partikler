@@ -22,31 +22,30 @@
 #define PARTIKLER_INITSHAPE_INCLUDED_H
 
 #include "Field.hpp"
-#include "Models.hpp"     // for ModelRegister (ptr only), REGISTER_DEC_TYPE
-#include "cgal/CGALHelper.hpp"
+#include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
+#include "ParticleGeneratorBase.hpp"
 #include "yaml-cpp/yaml.h"
 
 class InitShape : public ParticleGeneratorBase {
 
     REGISTER_DEC_TYPE(InitShape);
 
-private:
-
+  private:
     std::string shape_;
 
     Vec3 dimensions_;
 
     Vec3 position_;
 
-public:
+    Scalar noise_;
 
+  public:
     InitShape(
         const std::string &model_name,
         YAML::Node parameter,
         ObjectRegistry &objReg);
 
     void execute();
-
 };
 
 #endif

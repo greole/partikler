@@ -41,7 +41,7 @@ class CountingSortParticles : public Model {
 
   private:
     // In
-    PointField &pos_;
+    VectorField &pos_;
 
     Field<std::vector<SearchCube>> &sc_;
 

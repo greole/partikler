@@ -51,25 +51,19 @@ IF(WITH_H5HUT)
     add_dependencies(H5HUT HDF5-download)
 ENDIF()
 
-# # FOR CMAKE 3.10
-# link_directories(
-#   "${CMAKE_CURRENT_BINARY_DIR}/lib"
-#   )
-
 add_library(IO SHARED)
 
-#TODO In CMAKE > 3.10 header path can be simplified
 target_sources(IO
   PRIVATE
-  "src/ParticleGenerator.cpp"
-  "src/WriterBase.cpp"
-  "src/SuperSPHWriter.cpp"
-  "src/HDF5Writer.cpp"
+  src/WriterBase.cpp
+  src/ReaderBase.cpp
+  src/SuperSPHWriter.cpp
+  src/HDF5Writer.cpp
   PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ParticleGenerator.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/WriterBase.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/SuperSPHWriter.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/HDF5Writer.hpp"
+  src/WriterBase.hpp
+  src/ReaderBase.hpp
+  src/SuperSPHWriter.hpp
+  src/HDF5Writer.hpp
   )
 
 MESSAGE("CMAKE CURRENT SOURCE ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -85,7 +79,6 @@ target_link_libraries(IO
     H5hut
   )
 
-# FOR CMAKE > 3.10
 target_link_directories(IO
   PUBLIC
   "${CMAKE_CURRENT_BINARY_DIR}/lib"
@@ -98,5 +91,8 @@ target_include_directories(IO
   "${CMAKE_CURRENT_BINARY_DIR}/include"
   )
 
+IF(CGAL_SUPPORT)
+  add_subdirectory(src/cgal)
+ENDIF()
 
 #add_subdirectory(tests/SPHCore)

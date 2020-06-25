@@ -20,11 +20,12 @@
 #ifndef PARTIKLER_VEC3_INCLUDED
 #define PARTIKLER_VEC3_INCLUDED
 
+#include "Scalar.hpp"
 #include <array>
 #include <iostream>
 #include <vector>
 
-struct Vec3 : std::array<float, 3> {
+struct Vec3 : std::array<Scalar, 3> {
 
     Vec3 &operator=(const Vec3 &x);
 
@@ -42,15 +43,14 @@ struct Vec3 : std::array<float, 3> {
 // inner type for the lazy field functions
 
 // scalar multiplication
-Vec3 operator*(float a, const Vec3 &x);
-Vec3 operator*(Vec3& x, float a);
+Vec3 operator*(Scalar const a, Vec3 const &x);
+Vec3 operator*(Vec3 const &x, Scalar const a);
 
 // scalar division
-Vec3 operator/(const Vec3 &x, float a);
+Vec3 operator/(const Vec3 &x, Scalar a);
 
 // dot product
 float operator*(const Vec3 &x, const Vec3 &y);
-
 
 // addition
 Vec3 operator+(const Vec3 &x, const Vec3 &y);
@@ -65,11 +65,14 @@ struct VectorPair {
     Vec3 no;
 };
 
-void translatePoints (std::vector<Vec3>& points, Vec3 translate);
+Scalar squared_length(Vec3 v);
 
-void scalePoints (std::vector<Vec3>& points, Vec3 scale);
+void translatePoints(std::vector<Vec3> &points, Vec3 translate);
 
-void scalePoints (std::vector<Vec3>& points, float scale);
+void scalePoints(std::vector<Vec3> &points, Vec3 scale);
 
+void scalePoints(std::vector<Vec3> &points, Scalar scale);
+
+Scalar mag(Vec3 v);
 
 #endif

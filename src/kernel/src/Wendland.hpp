@@ -23,11 +23,13 @@
 #include <string> // for string
 #include <vector> // for vector
 
-#include "Field.hpp"  // for Field (ptr only), FloatField, PointField
+#include "Field.hpp"  // for Field (ptr only), ScalarField, PointField
 #include "Models.hpp" // for ModelRegister (ptr only), REGISTER_DEC_TYPE
 #include "SearchCubes.hpp"
-#include "cgal/CGALHelper.hpp"
 #include "yaml-cpp/yaml.h"
+
+#include "Equation.hpp"
+#include "Scalar.hpp"
 
 class ObjectRegistry;
 namespace YAML {
@@ -36,12 +38,12 @@ class Node;
 struct NeighbourPair;
 struct Vec3;
 
-class Wendland : public Model {
+class Wendland : public ScalarFieldEquation {
 
   private:
     // Coeffs
-    const float h_;  // Smoothing length
-    const float ih_; // Inverse Smoothing length
+    const Scalar h_;  // Smoothing length
+    const Scalar ih_; // Inverse Smoothing length
     // // 3d
     // const float W_fak2 = 21. / (256. * M_PI * h * h * h);
     // const float dW_fak2 = 21. / (256. * M_PI * h * h * h * h);
@@ -50,14 +52,14 @@ class Wendland : public Model {
     const float dW_fak2_; // = 7. / (64. * M_PI * h * h * h);
 
     // In
-    const PointField &pos_; // Particle positions
+    const VectorField &pos_; // Particle positions
 
     const Field<std::vector<NeighbourPair>> &np_;
     // const Field<STLSurfaceDist> &sd_;
 
     // Out
     // Kernel &kernel                               // Kernel field
-    FloatField &W_;
+    ScalarField &W_;
     Field<std::vector<Vec3>> &dWdx_;
 
   public:

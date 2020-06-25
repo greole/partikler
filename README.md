@@ -16,6 +16,17 @@
   <img src="https://raw.githubusercontent.com/greole/partikler/master/doc/Screenshot.png"><br>
 </div>
 
+# Models
+
+## Kernel
+ - Gaussian
+ - Wendland
+
+## Surface Tension
+ - Akinci
+
+
+
 
 
 # Build Instructions

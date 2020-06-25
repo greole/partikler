@@ -12,8 +12,20 @@ set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "${default_build_type}")
 endif()
+MESSAGE("Build type: ${CMAKE_BUILD_TYPE}")
 
-MESSAGE("BUILD TYPE ${CMAKE_BUILD_TYPE}")
+set(PRECISION "SINGLEPRECISION" CACHE STRING "Set the precision")
+MESSAGE("Precision: ${PRECISION}")
+
+if(${PRECISION} STREQUAL "DOUBLEPRECISION")
+  set(SINGLEPRESIONVAL 0)
+  set(DOUBLEPRESINVAL 1)
+else ()
+  set(SINGLEPRESIONVAL 1)
+  set(DOUBLEPRESINVAL 0)
+endif()
+
+set(default_build_type "Release")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,6 +61,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
       --coverage\
       -fprofile-arcs \
       -fsanitize=address \
+      -ggdb3 \
       -ftest-coverage"
 )
 
@@ -56,7 +69,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         -ffast-math \
         -march=native  \
         -ftree-vectorize \
-        -g -rdynamic \
+        -rdynamic \
         "
         # -fopt-info-vec-missed"
         )
@@ -83,12 +96,12 @@ include(ExternalProject)
 
 include(cmake/build_3rd_party.cmake)
 
-OPTION(BUILD_CGAL "Building CGAL" OFF)
-IF(BUILD_CGAL)
+OPTION(CGAL_SUPPORT "WITH CGAL SUPPORT" ON)
+IF(CGAL_SUPPORT)
     BUILD(CGAL)
+    find_package(CGAL CONFIG REQUIRED)
 ENDIF()
 
-find_package(CGAL CONFIG REQUIRED)
 
 OPTION(BUILD_GOOGLE_TEST "Building google test" OFF)
 
@@ -174,9 +187,15 @@ OPTION(BUILD_H5HUT "Build H5Part data-Format" ON)
 
 
 ########################
+# TOOLING              #
+########################
+
+
+########################
 # gcov                 #
 ########################
 
+IF ("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
 IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 include (cmake/CodeCoverage.cmake)
 
@@ -192,6 +211,7 @@ setup_target_for_coverage_lcov(
 # setup_target_for_coverage(${PROJECT_NAME}_coverage ${PROJECT_TEST_NAME} coverage)
 # target_link_libraries(${PROJECT_TEST_NAME} gcov)
 
+ENDIF()
 ENDIF()
 ########################
 # ctags                #
@@ -210,6 +230,16 @@ ELSE()
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
 ENDIF()
+
+########################
+# clang-format         #
+########################
+
+add_custom_target(
+        autoformat
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/autoformat.sh ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 
 ########################
 # own Libraries        #
